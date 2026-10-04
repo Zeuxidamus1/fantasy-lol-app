@@ -368,6 +368,19 @@
     </section>
   </template>
 
+  <div class="transaction-modal" id="transactionModal" hidden>
+    <div class="transaction-backdrop" data-close-transaction></div>
+    <section class="transaction-sheet" role="dialog" aria-modal="true" aria-labelledby="transactionTitle">
+      <div class="section-head">
+        <div><div class="eyebrow">ROSTER FULL</div><h3 id="transactionTitle">Choose a player to drop</h3></div>
+        <button class="icon-btn small-icon" data-close-transaction aria-label="Close">×</button>
+      </div>
+      <p class="transaction-copy" id="transactionCopy"></p>
+      <div id="transactionDropList" class="stack tight"></div>
+      <button class="secondary-btn transaction-cancel" data-close-transaction>Cancel</button>
+    </section>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="esports-data.js"></script>
   <script src="app.js"></script>
