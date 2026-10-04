@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>Rift Fantasy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">FANTASY LEAGUE OF LEGENDS</div>
+        <h1>Rift Fantasy</h1>
+      </div>
+      <button class="icon-btn" id="notificationBtn" aria-label="Notifications">🔔</button>
+    </header>
+
+    <main id="app"></main>
+
+    <nav class="bottom-nav" aria-label="Primary navigation">
+      <button class="nav-item active" data-view="home"><span>⌂</span><small>Home</small></button>
+      <button class="nav-item" data-view="team"><span>♟</span><small>My Team</small></button>
+      <button class="nav-item" data-view="matchup"><span>⚔</span><small>Matchup</small></button>
+      <button class="nav-item" data-view="players"><span>⌕</span><small>Players</small></button>
+      <button class="nav-item" data-view="league"><span>🏆</span><small>League</small></button>
+    </nav>
+  </div>
+
+  <template id="home-template">
+    <section class="stack">
+      <div class="hero card">
+        <div>
+          <div class="eyebrow accent">WEEK 3</div>
+          <h2>You're projected to win</h2>
+          <p class="muted">Live scoring updates during pro matches.</p>
+        </div>
+        <div class="projection">61%</div>
+      </div>
+
+      <section class="card">
+        <div class="section-head">
+          <div><div class="eyebrow">YOUR MATCHUP</div><h3>Summoner's Cup</h3></div>
+          <button class="text-btn" data-jump="matchup">View matchup</button>
+        </div>
+        <div class="scoreboard">
+          <div class="manager">
+            <div class="avatar">Z</div>
+            <strong>Zeuxidamus</strong>
+            <span class="big-score">87.4</span>
+            <small>Proj. 128.6</small>
+          </div>
+          <div class="versus">VS</div>
+          <div class="manager">
+            <div class="avatar rival">R</div>
+            <strong>Rift Raiders</strong>
+            <span class="big-score">72.1</span>
+            <small>Proj. 119.2</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-head"><div><div class="eyebrow">UP NEXT</div><h3>Your starters</h3></div><button class="text-btn" data-jump="team">Manage</button></div>
+        <div id="starterPreview" class="player-list"></div>
+      </section>
+
+      <section class="grid-two">
+        <button class="action-card" data-jump="players"><span class="action-icon">＋</span><strong>Add Players</strong><small>Browse free agents</small></button>
+        <button class="action-card" id="draftBtn"><span class="action-icon">◎</span><strong>Mock Draft</strong><small>Practice a draft</small></button>
+      </section>
+    </section>
+  </template>
+
+  <template id="team-template">
+    <section class="stack">
+      <div class="section-title">
+        <div><div class="eyebrow">WEEK 3 LINEUP</div><h2>My Team</h2></div>
+        <div class="record">2-0</div>
+      </div>
+      <div class="card compact"><div class="stat-row"><span>Projected</span><strong>128.6</strong></div><div class="stat-row"><span>League rank</span><strong>#2</strong></div></div>
+      <div id="rosterList" class="roster"></div>
+    </section>
+  </template>
+
+  <template id="matchup-template">
+    <section class="stack">
+      <div class="section-title"><div><div class="eyebrow">HEAD TO HEAD</div><h2>Week 3 Matchup</h2></div><span class="live-pill">LIVE</span></div>
+      <div class="card matchup-card">
+        <div class="match-score"><div><span class="avatar">Z</span><strong>Zeuxidamus</strong><b>87.4</b></div><span>VS</span><div><span class="avatar rival">R</span><strong>Rift Raiders</strong><b>72.1</b></div></div>
+        <div class="progress"><span style="width:55%"></span></div>
+        <div class="projection-row"><span>128.6 projected</span><span>119.2 projected</span></div>
+      </div>
+      <h3>Position battles</h3>
+      <div id="battleList" class="stack tight"></div>
+    </section>
+  </template>
+
+  <template id="players-template">
+    <section class="stack">
+      <div class="section-title"><div><div class="eyebrow">FREE AGENTS</div><h2>Players</h2></div></div>
+      <label class="search"><span>⌕</span><input id="playerSearch" placeholder="Search players, teams or roles" /></label>
+      <div class="filter-row">
+        <button class="chip active" data-role="ALL">All</button>
+        <button class="chip" data-role="TOP">Top</button>
+        <button class="chip" data-role="JNG">Jungle</button>
+        <button class="chip" data-role="MID">Mid</button>
+        <button class="chip" data-role="ADC">ADC</button>
+        <button class="chip" data-role="SUP">Support</button>
+      </div>
+      <div id="freeAgentList" class="player-list"></div>
+    </section>
+  </template>
+
+  <template id="league-template">
+    <section class="stack">
+      <div class="section-title"><div><div class="eyebrow">SUMMONER'S CUP</div><h2>League</h2></div><button class="secondary-btn" id="rulesBtn">Scoring</button></div>
+      <div class="card">
+        <div class="section-head"><div><div class="eyebrow">STANDINGS</div><h3>Regular Season</h3></div></div>
+        <div id="standings"></div>
+      </div>
+      <div class="card">
+        <div class="section-head"><div><div class="eyebrow">LEAGUE SETTINGS</div><h3>Prototype format</h3></div></div>
+        <div class="settings-list">
+          <div><span>Teams</span><strong>8</strong></div>
+          <div><span>Starting roster</span><strong>TOP · JNG · MID · ADC · SUP</strong></div>
+          <div><span>Bench</span><strong>3</strong></div>
+          <div><span>Waivers</span><strong>Daily rolling</strong></div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
