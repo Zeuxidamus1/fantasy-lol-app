@@ -183,6 +183,50 @@ function saveUserRoster(players){
   localStorage.setItem("riftUserRoster",JSON.stringify(players));
 }
 
+function getTransactionHistory(){
+  try{return JSON.parse(localStorage.getItem("riftTransactionHistory")||"[]");}catch{return [];}
+}
+function saveTransactionHistory(items){
+  localStorage.setItem("riftTransactionHistory",JSON.stringify(items.slice(0,100)));
+}
+function logTransaction(type,player,extra={}){
+  const items=getTransactionHistory();
+  items.unshift({
+    id:Date.now()+"-"+Math.random().toString(36).slice(2,7),
+    type,
+    player:player?.name||"Unknown",
+    playerId:playerKey(player||{}),
+    team:player?.team||"",
+    role:player?.position||player?.role||"",
+    time:new Date().toISOString(),
+    ...extra
+  });
+  saveTransactionHistory(items);
+}
+function getWaiverClaims(){
+  try{return JSON.parse(localStorage.getItem("riftWaiverClaims")||"[]");}catch{return [];}
+}
+function saveWaiverClaims(items){
+  localStorage.setItem("riftWaiverClaims",JSON.stringify(items));
+}
+function createWaiverClaim(player){
+  if(isOwned(player)){showToast(`${player.name} is already on your team.`);return;}
+  const claims=getWaiverClaims();
+  if(claims.some(c=>c.playerId===playerKey(player))){showToast("You already have a claim on this player.");return;}
+  claims.push({
+    id:Date.now()+"-"+Math.random().toString(36).slice(2,7),
+    playerId:playerKey(player),
+    player:player.name,
+    team:player.team||"",
+    role:player.role||"",
+    createdAt:new Date().toISOString(),
+    priority:claims.length+1,
+    status:"pending"
+  });
+  saveWaiverClaims(claims);
+  showToast(`Waiver claim submitted for ${player.name}`);
+}
+
 function arrangeUserRoster(players){
   const starterRoles=["TOP","JNG","MID","ADC","SUP"];
   const used=new Set();
@@ -216,6 +260,7 @@ function addPlayerToRoster(player){
   if(current.length<rosterLimit()){
     current.push({...player,id:playerKey(player),position:player.position||player.role,slot:"BN"});
     saveUserRoster(arrangeUserRoster(current));
+    logTransaction("add",player);
     showToast(`${player.name} added to your team`);
     return;
   }
@@ -236,6 +281,8 @@ function openDropChooser(incoming){
     const next=current.filter(p=>playerKey(p)!==dropId);
     next.push({...incoming,id:playerKey(incoming),position:incoming.position||incoming.role,slot:"BN"});
     saveUserRoster(arrangeUserRoster(next));
+    if(dropped) logTransaction("drop",dropped,{pairedWith:incoming.name});
+    logTransaction("add",incoming,{pairedWith:dropped?.name||null});
     closeTransactionModal();
     showToast(`Added ${incoming.name} · Dropped ${dropped?.name||"player"}`);
     if(document.querySelector("#profileName")) render("player");
@@ -324,6 +371,7 @@ function render(view="home"){
       if(!player)return;
       if(!window.confirm(`Drop ${player.name} from your roster?`))return;
       saveUserRoster(arrangeUserRoster(currentNow.filter(p=>playerKey(p)!==btn.dataset.dropRoster)));
+      logTransaction("drop",player);
       showToast(`${player.name} dropped`);
       render("team");
     });
@@ -389,6 +437,7 @@ function render(view="home"){
       addBtn.textContent=getUserRoster().length>=rosterLimit()?"Add / Choose Drop":"Add Player";
       addBtn.onclick=()=>addPlayerToRoster(p);
     }
+    document.querySelector("#profileWaiverBtn").onclick=()=>createWaiverClaim(p);
     document.querySelector("#profileTradeBtn").onclick=()=>showToast("Trade proposals are coming in the next transaction update.");
     document.querySelector("#playerBackBtn").onclick=()=>render("players");
   }
@@ -446,6 +495,63 @@ function render(view="home"){
     search.oninput=draw;
     document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{role=c.dataset.role;document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));c.classList.add("active");draw();});
     draw();
+  }
+  if(view==="transactions"){
+    let tab="pending";
+    const content=document.querySelector("#transactionContent");
+    const count=document.querySelector("#pendingClaimCount");
+    const formatTime=(iso)=>{
+      const d=new Date(iso);
+      if(Number.isNaN(d.getTime()))return "";
+      return d.toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+    };
+    const demoActivity=[
+      {manager:"Baron Bandits",type:"add",player:"Knight",time:new Date(Date.now()-38*60000).toISOString()},
+      {manager:"Rift Raiders",type:"drop",player:"Noah",time:new Date(Date.now()-92*60000).toISOString()},
+      {manager:"Pentakill Club",type:"claim",player:"Razork",time:new Date(Date.now()-4*3600000).toISOString()}
+    ];
+
+    const drawTransactions=()=>{
+      const claims=getWaiverClaims();
+      const history=getTransactionHistory();
+      count.textContent=claims.length;
+      if(tab==="pending"){
+        content.innerHTML=claims.length?claims.map((c,i)=>`<div class="transaction-item">
+          <span class="transaction-icon claim">W</span>
+          <div class="transaction-info"><strong>#${i+1} ${c.player}<span class="status-pill pending">PENDING</span></strong><small>${c.team} · ${c.role} · Your claim order #${i+1}</small><div class="claim-actions"><button class="claim-btn" data-move-up="${c.id}" ${i===0?"disabled":""}>Move up</button><button class="claim-btn cancel" data-cancel-claim="${c.id}">Cancel</button></div></div>
+          <span class="transaction-time">${formatTime(c.createdAt)}</span>
+        </div>`).join(""):'<div class="empty-state"><strong>No pending waiver claims</strong><small>Open a player profile and tap Waiver Claim to add one.</small></div>';
+        content.querySelectorAll("[data-cancel-claim]").forEach(btn=>btn.onclick=()=>{
+          saveWaiverClaims(getWaiverClaims().filter(c=>c.id!==btn.dataset.cancelClaim));
+          showToast("Waiver claim canceled");
+          drawTransactions();
+        });
+        content.querySelectorAll("[data-move-up]").forEach(btn=>btn.onclick=()=>{
+          const items=getWaiverClaims();
+          const idx=items.findIndex(c=>c.id===btn.dataset.moveUp);
+          if(idx>0){[items[idx-1],items[idx]]=[items[idx],items[idx-1]];saveWaiverClaims(items);drawTransactions();}
+        });
+      }else if(tab==="history"){
+        content.innerHTML=history.length?history.map(t=>`<div class="transaction-item">
+          <span class="transaction-icon ${t.type==="drop"?"drop":""}">${t.type==="add"?"+":"−"}</span>
+          <div class="transaction-info"><strong>${t.type==="add"?"Added":"Dropped"} ${t.player}<span class="status-pill success">COMPLETE</span></strong><small>${t.team} · ${t.role}${t.pairedWith?" · paired with "+t.pairedWith:""}</small></div>
+          <span class="transaction-time">${formatTime(t.time)}</span>
+        </div>`).join(""):'<div class="empty-state"><strong>No transaction history yet</strong><small>Your completed adds and drops will appear here automatically.</small></div>';
+      }else{
+        content.innerHTML=demoActivity.map(t=>`<div class="transaction-item">
+          <span class="transaction-icon ${t.type==="drop"?"drop":t.type==="claim"?"claim":""}">${t.type==="add"?"+":t.type==="drop"?"−":"W"}</span>
+          <div class="transaction-info"><strong><span class="activity-manager">${t.manager}</span> ${t.type==="add"?"added":t.type==="drop"?"dropped":"claimed"} ${t.player}</strong><small>League activity · prototype feed</small></div>
+          <span class="transaction-time">${formatTime(t.time)}</span>
+        </div>`).join("");
+      }
+    };
+
+    document.querySelectorAll("[data-transaction-tab]").forEach(btn=>btn.onclick=()=>{
+      tab=btn.dataset.transactionTab;
+      document.querySelectorAll("[data-transaction-tab]").forEach(x=>x.classList.toggle("active",x===btn));
+      drawTransactions();
+    });
+    drawTransactions();
   }
   if(view==="league"){
     const settings=getLeagueSettings();
