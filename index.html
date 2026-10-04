@@ -26,6 +26,7 @@
       <button class="nav-item active" data-view="home"><span>⌂</span><small>Home</small></button>
       <button class="nav-item" data-view="team"><span>♟</span><small>My Team</small></button>
       <button class="nav-item" data-view="matchup"><span>⚔</span><small>Matchup</small></button>
+      <button class="nav-item" data-view="schedule"><span>▣</span><small>Schedule</small></button>
       <button class="nav-item" data-view="players"><span>⌕</span><small>Players</small></button>
       <button class="nav-item" data-view="league"><span>🏆</span><small>League</small></button>
     </nav>
@@ -97,6 +98,26 @@
       </div>
       <h3>Position battles</h3>
       <div id="battleList" class="stack tight"></div>
+    </section>
+  </template>
+
+  <template id="schedule-template">
+    <section class="stack">
+      <div class="section-title">
+        <div><div class="eyebrow">PRO MATCHES</div><h2>Schedule</h2></div>
+        <span class="schedule-zone">LOCAL TIME</span>
+      </div>
+      <div class="filter-row schedule-filters">
+        <button class="chip active" data-day="all">All</button>
+        <button class="chip" data-day="today">Today</button>
+        <button class="chip" data-day="tomorrow">Tomorrow</button>
+        <button class="chip" data-day="upcoming">Upcoming</button>
+      </div>
+      <div class="card schedule-note">
+        <strong>Prototype schedule</strong>
+        <small>Match data is sample data for now. We can connect this to live esports schedules next.</small>
+      </div>
+      <div id="scheduleList" class="stack tight"></div>
     </section>
   </template>
 
