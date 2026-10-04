@@ -231,6 +231,25 @@
     </section>
   </template>
 
+  <template id="transactions-template">
+    <section class="stack">
+      <div class="section-title"><div><div class="eyebrow">ROSTER MOVES</div><h2>Waivers & Transactions</h2></div><button class="secondary-btn" data-jump="team">My Team</button></div>
+      <div class="transaction-summary">
+        <div class="card mini-summary"><small>Waiver priority</small><strong>#3</strong></div>
+        <div class="card mini-summary"><small>Pending claims</small><strong id="pendingClaimCount">0</strong></div>
+        <div class="card mini-summary"><small>Processing</small><strong>Daily</strong></div>
+      </div>
+      <div class="filter-row transaction-tabs">
+        <button class="chip active" data-transaction-tab="pending">Pending</button>
+        <button class="chip" data-transaction-tab="history">My History</button>
+        <button class="chip" data-transaction-tab="activity">League Activity</button>
+      </div>
+      <section class="card waiver-info"><div class="section-head"><div><div class="eyebrow">HOW WAIVERS WORK</div><h3>Daily rolling priority</h3></div></div><p>Claims stay pending until the next waiver run. Higher waiver priority wins when multiple managers claim the same player.</p></section>
+      <div id="transactionContent" class="stack tight"></div>
+      <button class="wide-link-btn" data-jump="players">Browse available players →</button>
+    </section>
+  </template>
+
   <template id="draft-template">
     <section class="stack draft-screen">
       <div class="section-title">
