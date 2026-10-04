@@ -192,6 +192,41 @@ function saveTransactionHistory(items){
 function logTransaction(type,player,extra={}){
   const items=getTransactionHistory();
   items.unshift({
+    id:Date.now()+"-"+String(items.length+1),
+    type,
+    player:player?.name||"Unknown",
+    playerId:playerKey(player||{}),
+    team:player?.team||"",
+    role:player?.position||player?.role||"",
+    time:new Date().toISOString(),
+    ...extra
+  });
+  saveTransactionHistory(items);
+}
+function getWaiverClaims(){
+  try{return JSON.parse(localStorage.getItem("riftWaiverClaims")||"[]");}catch{return [];}
+}
+function saveWaiverClaims(items){
+  localStorage.setItem("riftWaiverClaims",JSON.stringify(items));
+}
+function createWaiverClaim(player){
+  if(isOwned(player)){showToast(`${player.name} is already on your team.`);return;}
+  const claims=getWaiverClaims();
+  if(claims.some(c=>c.playerId===playerKey(player))){showToast("You already have a claim on this player.");return;}
+  claims.push({id:String(Date.now()),playerId:playerKey(player),player:player.name,team:player.team||"",role:player.role||"",createdAt:new Date().toISOString(),status:"pending"});
+  saveWaiverClaims(claims);
+  showToast(`Waiver claim submitted for ${player.name}`);
+}
+
+function getTransactionHistory(){
+  try{return JSON.parse(localStorage.getItem("riftTransactionHistory")||"[]");}catch{return [];}
+}
+function saveTransactionHistory(items){
+  localStorage.setItem("riftTransactionHistory",JSON.stringify(items.slice(0,100)));
+}
+function logTransaction(type,player,extra={}){
+  const items=getTransactionHistory();
+  items.unshift({
     id:Date.now()+"-"+Math.random().toString(36).slice(2,7),
     type,
     player:player?.name||"Unknown",
