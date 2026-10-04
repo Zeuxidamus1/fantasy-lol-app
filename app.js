@@ -38,6 +38,17 @@ const standings = [
   ["8","Iron V","0-2","194.5"]
 ];
 
+
+
+const proSchedule = [
+  {day:"today",label:"TODAY · OCT 4",time:"6:00 PM",league:"LCK",a:"Gen.G",aCode:"GEN",b:"Hanwha Life",bCode:"HLE",status:"UPCOMING"},
+  {day:"today",label:"TODAY · OCT 4",time:"8:30 PM",league:"LPL",a:"Bilibili Gaming",aCode:"BLG",b:"Top Esports",bCode:"TES",status:"UPCOMING"},
+  {day:"tomorrow",label:"TOMORROW · OCT 5",time:"5:00 PM",league:"LEC",a:"G2 Esports",aCode:"G2",b:"Fnatic",bCode:"FNC",status:"UPCOMING"},
+  {day:"tomorrow",label:"TOMORROW · OCT 5",time:"7:30 PM",league:"LTA",a:"FlyQuest",aCode:"FLY",b:"Team Liquid",bCode:"TL",status:"UPCOMING"},
+  {day:"upcoming",label:"OCT 6",time:"6:00 PM",league:"International",a:"T1",aCode:"T1",b:"Bilibili Gaming",bCode:"BLG",status:"UPCOMING"},
+  {day:"upcoming",label:"OCT 7",time:"6:00 PM",league:"International",a:"Gen.G",aCode:"GEN",b:"G2 Esports",bCode:"G2",status:"UPCOMING"}
+];
+
 const app = document.querySelector("#app");
 const toast = document.querySelector("#toast");
 
@@ -83,6 +94,25 @@ function render(view="home"){
       <span class="battle-score">${p.fp.toFixed(1)} - ${opponents[i].score.toFixed(1)}</span>
       <div class="battle-side right"><div class="player-info"><strong>${opponents[i].name}</strong><small>Opponent</small></div></div>
     </div>`).join("");
+  }
+  if(view==="schedule"){
+    const list=document.querySelector("#scheduleList");
+    let day="all";
+    const drawSchedule=()=>{
+      const filtered=proSchedule.filter(g=>day==="all"||g.day===day||(day==="upcoming"&&g.day==="upcoming"));
+      let lastLabel="";
+      list.innerHTML=filtered.map(g=>{
+        const heading=g.label!==lastLabel ? `<div class="schedule-day">${g.label}</div>` : "";
+        lastLabel=g.label;
+        return heading+`<div class="game-card">
+          <div class="game-team"><span class="team-mark">${g.aCode}</span><div><strong>${g.a}</strong><small>Team 1</small></div></div>
+          <div class="game-meta"><span class="game-time">${g.time}</span><span class="game-league">${g.league}</span><span class="game-status">${g.status}</span></div>
+          <div class="game-team right"><div><strong>${g.b}</strong><small>Team 2</small></div><span class="team-mark">${g.bCode}</span></div>
+        </div>`;
+      }).join("");
+    };
+    document.querySelectorAll("[data-day]").forEach(c=>c.onclick=()=>{day=c.dataset.day;document.querySelectorAll("[data-day]").forEach(x=>x.classList.remove("active"));c.classList.add("active");drawSchedule();});
+    drawSchedule();
   }
   if(view==="players"){
     const list=document.querySelector("#freeAgentList");
