@@ -49,6 +49,25 @@ const proSchedule = [
   {day:"upcoming",label:"OCT 7",time:"6:00 PM",league:"International",a:"Gen.G",aCode:"GEN",b:"G2 Esports",bCode:"G2",status:"UPCOMING"}
 ];
 
+const defaultLeagueSettings = {
+  name:"Summoner's Cup",
+  managers:"8",
+  bench:"3",
+  draftType:"Snake",
+  scoringFormat:"Head-to-head",
+  competition:"Worlds",
+  teamSlot:false,
+  scoring:{kills:3,deaths:-1,assists:2,cs:0.02,win:5,firstBlood:2}
+};
+
+function getLeagueSettings(){
+  try{
+    return {...defaultLeagueSettings,...JSON.parse(localStorage.getItem("riftLeagueSettings")||"{}")};
+  }catch{
+    return {...defaultLeagueSettings};
+  }
+}
+
 const app = document.querySelector("#app");
 const toast = document.querySelector("#toast");
 
@@ -129,8 +148,63 @@ function render(view="home"){
     draw();
   }
   if(view==="league"){
+    const settings=getLeagueSettings();
     document.querySelector("#standings").innerHTML=standings.map(s=>`<div class="standing-row"><span class="rank">${s[0]}</span><strong>${s[1]}</strong><span>${s[2]}</span><span class="pts">${s[3]}</span></div>`).join("");
-    document.querySelector("#rulesBtn").onclick=()=>showToast("Scoring: K +3 · D -1 · A +2 · CS +0.02 · Win +5");
+    document.querySelector("#leagueSettingsSummary").innerHTML=`
+      <div><span>Teams</span><strong>${settings.managers}</strong></div>
+      <div><span>Draft</span><strong>${settings.draftType}</strong></div>
+      <div><span>Scoring</span><strong>${settings.scoringFormat}</strong></div>
+      <div><span>Competition</span><strong>${settings.competition}</strong></div>
+      <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP${settings.teamSlot?" · TEAM":""}</strong></div>`;
+    document.querySelector("#rulesBtn").onclick=()=>showToast(`Scoring: K +${settings.scoring.kills} · D ${settings.scoring.deaths} · A +${settings.scoring.assists} · CS +${settings.scoring.cs} · Win +${settings.scoring.win}`);
+  }
+  if(view==="setup"){
+    const settings=getLeagueSettings();
+    document.querySelector("#leagueName").value=settings.name;
+    document.querySelector("#managerCount").value=settings.managers;
+    document.querySelector("#benchCount").value=settings.bench;
+    document.querySelector("#competition").value=settings.competition;
+    document.querySelector("#teamSlot").checked=settings.teamSlot;
+    document.querySelector("#scoreKills").value=settings.scoring.kills;
+    document.querySelector("#scoreDeaths").value=settings.scoring.deaths;
+    document.querySelector("#scoreAssists").value=settings.scoring.assists;
+    document.querySelector("#scoreCs").value=settings.scoring.cs;
+    document.querySelector("#scoreWin").value=settings.scoring.win;
+    document.querySelector("#scoreFb").value=settings.scoring.firstBlood;
+
+    document.querySelectorAll('[data-choice-group="draftType"] .choice').forEach(b=>b.classList.toggle("active",b.dataset.value===settings.draftType));
+    document.querySelectorAll('[data-choice-group="scoringFormat"] .choice').forEach(b=>b.classList.toggle("active",b.dataset.value===settings.scoringFormat));
+
+    document.querySelectorAll(".choice").forEach(btn=>btn.onclick=()=>{
+      const group=btn.parentElement;
+      group.querySelectorAll(".choice").forEach(x=>x.classList.remove("active"));
+      btn.classList.add("active");
+    });
+
+    document.querySelector("#saveLeagueBtn").onclick=()=>{
+      const draftType=document.querySelector('[data-choice-group="draftType"] .choice.active').dataset.value;
+      const scoringFormat=document.querySelector('[data-choice-group="scoringFormat"] .choice.active').dataset.value;
+      const next={
+        name:document.querySelector("#leagueName").value.trim()||"Summoner's Cup",
+        managers:document.querySelector("#managerCount").value,
+        bench:document.querySelector("#benchCount").value,
+        draftType,
+        scoringFormat,
+        competition:document.querySelector("#competition").value,
+        teamSlot:document.querySelector("#teamSlot").checked,
+        scoring:{
+          kills:Number(document.querySelector("#scoreKills").value),
+          deaths:Number(document.querySelector("#scoreDeaths").value),
+          assists:Number(document.querySelector("#scoreAssists").value),
+          cs:Number(document.querySelector("#scoreCs").value),
+          win:Number(document.querySelector("#scoreWin").value),
+          firstBlood:Number(document.querySelector("#scoreFb").value)
+        }
+      };
+      localStorage.setItem("riftLeagueSettings",JSON.stringify(next));
+      showToast("League settings saved");
+      setTimeout(()=>render("league"),550);
+    };
   }
   document.querySelectorAll("[data-jump]").forEach(b=>b.onclick=()=>render(b.dataset.jump));
 }
