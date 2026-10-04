@@ -190,6 +190,10 @@ function render(view="home"){
   if(view==="home"){
     document.querySelector("#starterPreview").innerHTML = roster.slice(0,3).map(p=>playerRow(p)).join("");
     document.querySelector("#draftBtn").onclick=()=>render("draft");
+    const onboarding=document.querySelector("#onboardingCard");
+    if(localStorage.getItem("riftOnboardingDismissed")==="1" && onboarding) onboarding.remove();
+    const dismiss=document.querySelector("#dismissOnboarding");
+    if(dismiss) dismiss.onclick=()=>{localStorage.setItem("riftOnboardingDismissed","1");onboarding?.remove();};
   }
   if(view==="team"){
     document.querySelector("#rosterList").innerHTML = roster.map(rosterRow).join("");
@@ -207,7 +211,7 @@ function render(view="home"){
     const drawSchedule=()=>{
       const filtered=proSchedule.filter(g=>day==="all"||g.day===day||(day==="upcoming"&&g.day==="upcoming"));
       let lastLabel="";
-      list.innerHTML=filtered.map(g=>{
+      list.innerHTML=filtered.length?filtered.map(g=>{
         const heading=g.label!==lastLabel ? `<div class="schedule-day">${g.label}</div>` : "";
         lastLabel=g.label;
         return heading+`<div class="game-card">
@@ -215,7 +219,7 @@ function render(view="home"){
           <div class="game-meta"><span class="game-time">${g.time}</span><span class="game-league">${g.league}</span><span class="game-stage">${g.stage||""}</span><span class="game-status">${g.status}</span></div>
           <div class="game-team right"><div><strong>${g.b}</strong><small>Team 2</small></div><span class="team-mark">${g.bCode}</span></div>
         </div>`;
-      }).join("");
+      }).join(""):'<div class="empty-state"><strong>No matches found</strong><small>Try another filter or check back after the next data refresh.</small></div>';
     };
     document.querySelectorAll("[data-day]").forEach(c=>c.onclick=()=>{day=c.dataset.day;document.querySelectorAll("[data-day]").forEach(x=>x.classList.remove("active"));c.classList.add("active");drawSchedule();});
     const dataText=document.querySelector("#dataUpdatedText");
@@ -338,10 +342,16 @@ function render(view="home"){
     };
 
     document.querySelector("#startDraftBtn").onclick=()=>{
+      const existing=getDraftState();
+      if(existing?.picks?.length && !existing.complete){
+        const ok=window.confirm("Reset this draft? Your current mock draft picks will be cleared.");
+        if(!ok)return;
+      }
       state=newDraftState();
       saveDraftState(state);
       runCpuPicks(state);
       drawDraft();
+      showToast("Mock draft started. You are drafting from slot #2.");
     };
     document.querySelector("#autoPickBtn").onclick=()=>{
       state=getDraftState();
