@@ -247,7 +247,48 @@
       </div>
       <section class="card waiver-info"><div class="section-head"><div><div class="eyebrow">HOW WAIVERS WORK</div><h3>Daily rolling priority</h3></div></div><p>Claims stay pending until the next waiver run. Higher waiver priority wins when multiple managers claim the same player.</p></section>
       <div id="transactionContent" class="stack tight"></div>
-      <button class="wide-link-btn" data-jump="players">Browse available players →</button>
+      <div class="grid-two">
+        <button class="wide-link-btn" data-jump="players">Browse players →</button>
+        <button class="wide-link-btn" data-jump="trade">Trade Center →</button>
+      </div>
+    </section>
+  </template>
+
+  <template id="trade-template">
+    <section class="stack">
+      <div class="section-title">
+        <div><div class="eyebrow">TRADE CENTER</div><h2>Trades</h2></div>
+        <button class="secondary-btn" data-jump="transactions">Transactions</button>
+      </div>
+
+      <section class="card trade-builder">
+        <div class="section-head"><div><div class="eyebrow">NEW OFFER</div><h3>Build a trade</h3></div></div>
+        <div class="form-group">
+          <label for="tradePartner">Trade with</label>
+          <select id="tradePartner" class="form-control"></select>
+        </div>
+        <div class="trade-columns">
+          <div>
+            <div class="trade-label">YOU SEND</div>
+            <div id="tradeMyPlayers" class="trade-player-list"></div>
+          </div>
+          <div>
+            <div class="trade-label">YOU RECEIVE</div>
+            <div id="tradeTheirPlayers" class="trade-player-list"></div>
+          </div>
+        </div>
+        <div class="trade-summary-box" id="tradeSummaryBox">
+          Select one player from each side to build an offer.
+        </div>
+        <button class="primary-btn" id="submitTradeBtn" disabled>Send Trade Offer</button>
+      </section>
+
+      <div class="filter-row">
+        <button class="chip active" data-trade-tab="offers">My Offers</button>
+        <button class="chip" data-trade-tab="incoming">Incoming</button>
+        <button class="chip" data-trade-tab="history">History</button>
+      </div>
+      <div id="tradeContent" class="stack tight"></div>
     </section>
   </template>
 
