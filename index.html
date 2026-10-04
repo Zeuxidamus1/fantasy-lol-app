@@ -113,9 +113,10 @@
         <button class="chip" data-day="tomorrow">Tomorrow</button>
         <button class="chip" data-day="upcoming">Upcoming</button>
       </div>
-      <div class="card schedule-note">
-        <strong>Prototype schedule</strong>
-        <small>Match data is sample data for now. We can connect this to live esports schedules next.</small>
+      <div class="card schedule-note verified-note">
+        <strong>Verified LoL Esports snapshot</strong>
+        <small id="dataUpdatedText">Official schedule data snapshot.</small>
+        <a class="source-link" href="https://lolesports.com/en-US" target="_blank" rel="noopener">Open LoL Esports ↗</a>
       </div>
       <div id="scheduleList" class="stack tight"></div>
     </section>
@@ -141,8 +142,12 @@
     <section class="stack">
       <div class="section-title"><div><div class="eyebrow">SUMMONER'S CUP</div><h2>League</h2></div><button class="secondary-btn" data-jump="setup">League Setup</button></div>
       <div class="card">
-        <div class="section-head"><div><div class="eyebrow">STANDINGS</div><h3>Regular Season</h3></div></div>
+        <div class="section-head"><div><div class="eyebrow">FANTASY STANDINGS</div><h3>Regular Season</h3></div></div>
         <div id="standings"></div>
+      </div>
+      <div class="card">
+        <div class="section-head"><div><div class="eyebrow">REAL-WORLD POWER RANKINGS</div><h3>LoL Esports GPR</h3></div><span class="verified-badge">VERIFIED</span></div>
+        <div id="powerRankings"></div>
       </div>
       <div class="grid-two">
         <button class="action-card" data-jump="draft"><span class="action-icon">◎</span><strong>Draft Room</strong><small>Run a mock snake draft</small></button>
@@ -300,6 +305,7 @@
   </template>
 
   <div class="toast" id="toast"></div>
+  <script src="esports-data.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
