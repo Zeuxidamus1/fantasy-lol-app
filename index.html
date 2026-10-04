@@ -25,7 +25,6 @@
     <nav class="bottom-nav" aria-label="Primary navigation">
       <button class="nav-item active" data-view="home"><span>⌂</span><small>Home</small></button>
       <button class="nav-item" data-view="team"><span>♟</span><small>My Team</small></button>
-      <button class="nav-item" data-view="matchup"><span>⚔</span><small>Matchup</small></button>
       <button class="nav-item" data-view="schedule"><span>▣</span><small>Schedule</small></button>
       <button class="nav-item" data-view="players"><span>⌕</span><small>Players</small></button>
       <button class="nav-item" data-view="league"><span>🏆</span><small>League</small></button>
@@ -34,6 +33,22 @@
 
   <template id="home-template">
     <section class="stack">
+      <section class="card onboarding" id="onboardingCard">
+        <div class="section-head">
+          <div><div class="eyebrow accent">NEW HERE?</div><h3>Fantasy LoL in 3 steps</h3></div>
+          <button class="icon-btn small-icon" id="dismissOnboarding" aria-label="Dismiss getting started">×</button>
+        </div>
+        <div class="onboarding-steps">
+          <div><b>1</b><span><strong>Set up your league</strong><small>Choose managers, scoring, and roster rules.</small></span></div>
+          <div><b>2</b><span><strong>Draft players</strong><small>Fill TOP, JNG, MID, ADC, SUP, then your bench.</small></span></div>
+          <div><b>3</b><span><strong>Follow matches</strong><small>Use Schedule and Matchup to track your fantasy results.</small></span></div>
+        </div>
+        <div class="onboarding-actions">
+          <button class="secondary-btn" data-jump="setup">League Setup</button>
+          <button class="primary-btn compact-btn" data-jump="draft">Try Mock Draft</button>
+        </div>
+      </section>
+
       <div class="hero card">
         <div>
           <div class="eyebrow accent">WEEK 3</div>
@@ -71,9 +86,10 @@
       </section>
 
       <section class="grid-two">
-        <button class="action-card" data-jump="players"><span class="action-icon">＋</span><strong>Add Players</strong><small>Browse free agents</small></button>
+        <button class="action-card" data-jump="schedule"><span class="action-icon">▣</span><strong>Pro Schedule</strong><small>See who plays next</small></button>
         <button class="action-card" id="draftBtn"><span class="action-icon">◎</span><strong>Mock Draft</strong><small>Practice a draft</small></button>
       </section>
+      <button class="wide-link-btn" data-jump="players">Browse players & free agents →</button>
     </section>
   </template>
 
@@ -304,7 +320,7 @@
     </section>
   </template>
 
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="esports-data.js"></script>
   <script src="app.js"></script>
 </body>
