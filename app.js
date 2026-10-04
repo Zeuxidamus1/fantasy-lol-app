@@ -41,6 +41,24 @@ const standings = [
 
 
 const proSchedule = (window.ESPORTS_DATA && window.ESPORTS_DATA.schedule) || [];
+
+function localScheduleRow(g){
+  if(!g.startTime) return g;
+  const d=new Date(g.startTime);
+  if(Number.isNaN(d.getTime())) return g;
+  const now=new Date();
+  const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const gameDay=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  const diff=Math.round((gameDay-today)/86400000);
+  const day=diff===0?"today":diff===1?"tomorrow":"upcoming";
+  const prefix=diff===0?"TODAY":diff===1?"TOMORROW":d.toLocaleDateString(undefined,{month:"short",day:"numeric"}).toUpperCase();
+  return {
+    ...g,
+    day,
+    label:`${prefix} · ${d.toLocaleDateString(undefined,{month:"short",day:"numeric"}).toUpperCase()}`,
+    time:d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})
+  };
+}
 const draftPool = ((window.ESPORTS_DATA && window.ESPORTS_DATA.players) || []).map(p=>({...p,fp:p.projection}));
 
 const draftManagerNames = ["Baron Bandits","Zeuxidamus","Rift Raiders","Pentakill Club","Nexus Breakers","Blue Buff Boys","Dragon Slayers","Iron V","Red Side","First Blood","Scuttle Club","Elder Enjoyers"];
@@ -201,7 +219,11 @@ function render(view="home"){
     };
     document.querySelectorAll("[data-day]").forEach(c=>c.onclick=()=>{day=c.dataset.day;document.querySelectorAll("[data-day]").forEach(x=>x.classList.remove("active"));c.classList.add("active");drawSchedule();});
     const dataText=document.querySelector("#dataUpdatedText");
-    if(dataText&&window.ESPORTS_DATA) dataText.textContent=`Updated ${window.ESPORTS_DATA.updatedAt} from LoL Esports. Times shown as published in the source snapshot.`;
+    if(dataText&&window.ESPORTS_DATA){
+      const stamp=new Date(window.ESPORTS_DATA.updatedAt);
+      const when=Number.isNaN(stamp.getTime())?window.ESPORTS_DATA.updatedAt:stamp.toLocaleString();
+      dataText.textContent=`${window.ESPORTS_DATA.autoUpdated?"Auto-refreshed":"Updated"} ${when} from LoL Esports. Match times are converted to your device's local time.`;
+    }
     drawSchedule();
   }
   if(view==="players"){
