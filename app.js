@@ -40,58 +40,8 @@ const standings = [
 
 
 
-const proSchedule = [
-  {day:"today",label:"TODAY · OCT 4",time:"6:00 PM",league:"LCK",a:"Gen.G",aCode:"GEN",b:"Hanwha Life",bCode:"HLE",status:"UPCOMING"},
-  {day:"today",label:"TODAY · OCT 4",time:"8:30 PM",league:"LPL",a:"Bilibili Gaming",aCode:"BLG",b:"Top Esports",bCode:"TES",status:"UPCOMING"},
-  {day:"tomorrow",label:"TOMORROW · OCT 5",time:"5:00 PM",league:"LEC",a:"G2 Esports",aCode:"G2",b:"Fnatic",bCode:"FNC",status:"UPCOMING"},
-  {day:"tomorrow",label:"TOMORROW · OCT 5",time:"7:30 PM",league:"LTA",a:"FlyQuest",aCode:"FLY",b:"Team Liquid",bCode:"TL",status:"UPCOMING"},
-  {day:"upcoming",label:"OCT 6",time:"6:00 PM",league:"International",a:"T1",aCode:"T1",b:"Bilibili Gaming",bCode:"BLG",status:"UPCOMING"},
-  {day:"upcoming",label:"OCT 7",time:"6:00 PM",league:"International",a:"Gen.G",aCode:"GEN",b:"G2 Esports",bCode:"G2",status:"UPCOMING"}
-];
-
-
-const draftPool = [
-  {id:"chovy",role:"MID",name:"Chovy",team:"Gen.G",rank:1,fp:36.7},
-  {id:"bin",role:"TOP",name:"Bin",team:"Bilibili Gaming",rank:2,fp:24.8},
-  {id:"canyon",role:"JNG",name:"Canyon",team:"Gen.G",rank:3,fp:31.2},
-  {id:"viper",role:"ADC",name:"Viper",team:"Hanwha Life",rank:4,fp:32.4},
-  {id:"keria",role:"SUP",name:"Keria",team:"T1",rank:5,fp:22.8},
-  {id:"faker",role:"MID",name:"Faker",team:"T1",rank:6,fp:28.6},
-  {id:"zeus",role:"TOP",name:"Zeus",team:"Hanwha Life",rank:7,fp:25.7},
-  {id:"oner",role:"JNG",name:"Oner",team:"T1",rank:8,fp:27.4},
-  {id:"gumayusi",role:"ADC",name:"Gumayusi",team:"T1",rank:9,fp:29.5},
-  {id:"delight",role:"SUP",name:"Delight",team:"Hanwha Life",rank:10,fp:20.8},
-  {id:"caps",role:"MID",name:"Caps",team:"G2 Esports",rank:11,fp:27.9},
-  {id:"369",role:"TOP",name:"369",team:"Top Esports",rank:12,fp:23.1},
-  {id:"kanavi",role:"JNG",name:"Kanavi",team:"JD Gaming",rank:13,fp:26.8},
-  {id:"ruler",role:"ADC",name:"Ruler",team:"Gen.G",rank:14,fp:30.1},
-  {id:"lehends",role:"SUP",name:"Lehends",team:"Nongshim",rank:15,fp:18.9},
-  {id:"humanoid",role:"MID",name:"Humanoid",team:"Fnatic",rank:16,fp:22.5},
-  {id:"brokenblade",role:"TOP",name:"BrokenBlade",team:"G2 Esports",rank:17,fp:22.1},
-  {id:"inspired",role:"JNG",name:"Inspired",team:"FlyQuest",rank:18,fp:25.1},
-  {id:"hanssama",role:"ADC",name:"Hans Sama",team:"G2 Esports",rank:19,fp:24.6},
-  {id:"mikyx",role:"SUP",name:"Mikyx",team:"G2 Esports",rank:20,fp:17.8},
-  {id:"zeka",role:"MID",name:"Zeka",team:"Hanwha Life",rank:21,fp:26.2},
-  {id:"kiin",role:"TOP",name:"Kiin",team:"Gen.G",rank:22,fp:23.9},
-  {id:"peanut",role:"JNG",name:"Peanut",team:"Hanwha Life",rank:23,fp:24.2},
-  {id:"massu",role:"ADC",name:"Massu",team:"FlyQuest",rank:24,fp:24.3},
-  {id:"corejj",role:"SUP",name:"CoreJJ",team:"Team Liquid",rank:25,fp:18.1},
-  {id:"apa",role:"MID",name:"APA",team:"Team Liquid",rank:26,fp:21.9},
-  {id:"impact",role:"TOP",name:"Impact",team:"Team Liquid",rank:27,fp:20.7},
-  {id:"razork",role:"JNG",name:"Razork",team:"Fnatic",rank:28,fp:23.7},
-  {id:"noah",role:"ADC",name:"Noah",team:"Fnatic",rank:29,fp:22.9},
-  {id:"jun",role:"SUP",name:"Jun",team:"Fnatic",rank:30,fp:17.2},
-  {id:"knight",role:"MID",name:"Knight",team:"Bilibili Gaming",rank:31,fp:30.7},
-  {id:"369b",role:"TOP",name:"Doran",team:"T1",rank:32,fp:21.8},
-  {id:"xun",role:"JNG",name:"Xun",team:"Bilibili Gaming",rank:33,fp:24.5},
-  {id:"elk",role:"ADC",name:"Elk",team:"Bilibili Gaming",rank:34,fp:28.2},
-  {id:"on",role:"SUP",name:"ON",team:"Bilibili Gaming",rank:35,fp:19.4},
-  {id:"quad",role:"MID",name:"Quad",team:"FlyQuest",rank:36,fp:23.3},
-  {id:"bwipo",role:"TOP",name:"Bwipo",team:"FlyQuest",rank:37,fp:20.9},
-  {id:"umti",role:"JNG",name:"UmTi",team:"Team Liquid",rank:38,fp:21.7},
-  {id:"yeon",role:"ADC",name:"Yeon",team:"Team Liquid",rank:39,fp:23.8},
-  {id:"busio",role:"SUP",name:"Busio",team:"FlyQuest",rank:40,fp:17.7}
-];
+const proSchedule = (window.ESPORTS_DATA && window.ESPORTS_DATA.schedule) || [];
+const draftPool = ((window.ESPORTS_DATA && window.ESPORTS_DATA.players) || []).map(p=>({...p,fp:p.projection}));
 
 const draftManagerNames = ["Baron Bandits","Zeuxidamus","Rift Raiders","Pentakill Club","Nexus Breakers","Blue Buff Boys","Dragon Slayers","Iron V","Red Side","First Blood","Scuttle Club","Elder Enjoyers"];
 let draftTimerId=null;
@@ -244,12 +194,14 @@ function render(view="home"){
         lastLabel=g.label;
         return heading+`<div class="game-card">
           <div class="game-team"><span class="team-mark">${g.aCode}</span><div><strong>${g.a}</strong><small>Team 1</small></div></div>
-          <div class="game-meta"><span class="game-time">${g.time}</span><span class="game-league">${g.league}</span><span class="game-status">${g.status}</span></div>
+          <div class="game-meta"><span class="game-time">${g.time}</span><span class="game-league">${g.league}</span><span class="game-stage">${g.stage||""}</span><span class="game-status">${g.status}</span></div>
           <div class="game-team right"><div><strong>${g.b}</strong><small>Team 2</small></div><span class="team-mark">${g.bCode}</span></div>
         </div>`;
       }).join("");
     };
     document.querySelectorAll("[data-day]").forEach(c=>c.onclick=()=>{day=c.dataset.day;document.querySelectorAll("[data-day]").forEach(x=>x.classList.remove("active"));c.classList.add("active");drawSchedule();});
+    const dataText=document.querySelector("#dataUpdatedText");
+    if(dataText&&window.ESPORTS_DATA) dataText.textContent=`Updated ${window.ESPORTS_DATA.updatedAt} from LoL Esports. Times shown as published in the source snapshot.`;
     drawSchedule();
   }
   if(view==="players"){
@@ -269,6 +221,9 @@ function render(view="home"){
   if(view==="league"){
     const settings=getLeagueSettings();
     document.querySelector("#standings").innerHTML=standings.map(s=>`<div class="standing-row"><span class="rank">${s[0]}</span><strong>${s[1]}</strong><span>${s[2]}</span><span class="pts">${s[3]}</span></div>`).join("");
+    const rankings=(window.ESPORTS_DATA&&window.ESPORTS_DATA.rankings)||[];
+    const power=document.querySelector("#powerRankings");
+    if(power) power.innerHTML=rankings.map(t=>`<div class="power-row"><span class="power-rank">#${t.rank}</span><div class="power-team"><strong>${t.code}</strong><small>${t.name} · ${t.league}</small></div><span class="power-score">${t.score}</span><span class="power-record">${t.record}</span></div>`).join("");
     document.querySelector("#leagueSettingsSummary").innerHTML=`
       <div><span>Teams</span><strong>${settings.managers}</strong></div>
       <div><span>Draft</span><strong>${settings.draftType}</strong></div>
@@ -334,7 +289,7 @@ function render(view="home"){
       const q=search.value.trim().toLowerCase();
       const isUserTurn=state&&state.started&&!state.complete&&draftOrderForPick(state.pickIndex,state.managerCount)===state.userIndex;
       const filtered=draftPool.filter(p=>!taken.has(p.id)&&(role==="ALL"||p.role===role)&&(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)));
-      list.innerHTML=filtered.map(p=>`<div class="player-row draft-player"><span class="role-badge">${p.role}</span><div class="player-info"><strong>#${p.rank} ${p.name}</strong><small>${p.team}</small></div><span class="fp">${p.fp.toFixed(1)}</span><button class="draft-btn" data-player-id="${p.id}" ${isUserTurn?"":"disabled"}>DRAFT</button></div>`).join("")||'<div class="card muted">No available players match this filter.</div>';
+      list.innerHTML=filtered.map(p=>`<div class="player-row draft-player"><span class="role-badge">${p.role}</span><div class="player-info"><strong>#${p.rank} ${p.name}${p.verified?'<span class="data-chip">ROSTER VERIFIED</span>':""}</strong><small>${p.team}</small></div><span class="fp">${p.fp.toFixed(1)}</span><button class="draft-btn" data-player-id="${p.id}" ${isUserTurn?"":"disabled"}>DRAFT</button></div>`).join("")||'<div class="card muted">No available players match this filter.</div>';
       list.querySelectorAll("[data-player-id]").forEach(btn=>btn.onclick=()=>{
         state=getDraftState();
         if(!state||state.complete||draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex)return;
