@@ -138,6 +138,54 @@
     </section>
   </template>
 
+  <template id="player-template">
+    <section class="stack player-profile">
+      <div class="section-title">
+        <button class="secondary-btn" id="playerBackBtn">← Players</button>
+        <button class="secondary-btn" id="watchPlayerBtn">☆ Watchlist</button>
+      </div>
+
+      <section class="card player-hero">
+        <div class="profile-badge" id="profileRole">MID</div>
+        <div class="profile-main">
+          <div class="eyebrow" id="profileTeam">TEAM</div>
+          <h2 id="profileName">Player</h2>
+          <div class="profile-meta">
+            <span id="profileRank">Fantasy rank #—</span>
+            <span id="profileStatus">Available</span>
+          </div>
+        </div>
+        <div class="profile-projection"><small>Projected</small><strong id="profileProjection">0.0</strong></div>
+      </section>
+
+      <div class="profile-actions">
+        <button class="primary-btn" id="profileAddBtn">Add Player</button>
+        <button class="secondary-btn" id="profileTradeBtn">Trade</button>
+      </div>
+
+      <section class="card">
+        <div class="section-head"><div><div class="eyebrow">FANTASY OUTLOOK</div><h3>Why this player is valuable</h3></div></div>
+        <p class="profile-copy" id="profileOutlook"></p>
+      </section>
+
+      <section class="card">
+        <div class="section-head"><div><div class="eyebrow">SCORING SNAPSHOT</div><h3>Projected contribution</h3></div></div>
+        <div class="profile-stats" id="profileStats"></div>
+        <p class="profile-disclaimer">Prototype projections for UX testing. These are not official Riot fantasy projections.</p>
+      </section>
+
+      <section class="card">
+        <div class="section-head"><div><div class="eyebrow">UPCOMING</div><h3>Next matches</h3></div></div>
+        <div id="profileMatches" class="stack tight"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-head"><div><div class="eyebrow">RECENT FORM</div><h3>Fantasy trend</h3></div></div>
+        <div id="profileTrend" class="trend-row"></div>
+      </section>
+    </section>
+  </template>
+
   <template id="players-template">
     <section class="stack">
       <div class="section-title"><div><div class="eyebrow">FREE AGENTS</div><h2>Players</h2></div></div>
