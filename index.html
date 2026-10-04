@@ -139,20 +139,105 @@
 
   <template id="league-template">
     <section class="stack">
-      <div class="section-title"><div><div class="eyebrow">SUMMONER'S CUP</div><h2>League</h2></div><button class="secondary-btn" id="rulesBtn">Scoring</button></div>
+      <div class="section-title"><div><div class="eyebrow">SUMMONER'S CUP</div><h2>League</h2></div><button class="secondary-btn" data-jump="setup">League Setup</button></div>
       <div class="card">
         <div class="section-head"><div><div class="eyebrow">STANDINGS</div><h3>Regular Season</h3></div></div>
         <div id="standings"></div>
       </div>
       <div class="card">
-        <div class="section-head"><div><div class="eyebrow">LEAGUE SETTINGS</div><h3>Prototype format</h3></div></div>
-        <div class="settings-list">
+        <div class="section-head"><div><div class="eyebrow">LEAGUE SETTINGS</div><h3>Current format</h3></div><button class="text-btn" id="rulesBtn">Scoring</button></div>
+        <div class="settings-list" id="leagueSettingsSummary">
           <div><span>Teams</span><strong>8</strong></div>
-          <div><span>Starting roster</span><strong>TOP · JNG · MID · ADC · SUP</strong></div>
-          <div><span>Bench</span><strong>3</strong></div>
-          <div><span>Waivers</span><strong>Daily rolling</strong></div>
+          <div><span>Draft</span><strong>Snake</strong></div>
+          <div><span>Scoring</span><strong>Head-to-head</strong></div>
+          <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP</strong></div>
         </div>
       </div>
+    </section>
+  </template>
+
+  <template id="setup-template">
+    <section class="stack">
+      <div class="section-title">
+        <div><div class="eyebrow">COMMISSIONER TOOLS</div><h2>League Setup</h2></div>
+        <button class="secondary-btn" data-jump="league">Back</button>
+      </div>
+
+      <div class="card setup-card">
+        <div class="form-group">
+          <label for="leagueName">League name</label>
+          <input id="leagueName" class="form-control" value="Summoner's Cup" maxlength="40" />
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="managerCount">Managers</label>
+            <select id="managerCount" class="form-control">
+              <option>4</option><option>6</option><option selected>8</option><option>10</option><option>12</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="benchCount">Bench spots</label>
+            <select id="benchCount" class="form-control">
+              <option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Draft type</label>
+          <div class="option-grid" data-choice-group="draftType">
+            <button class="choice active" data-value="Snake"><strong>Snake Draft</strong><small>Managers take turns drafting players.</small></button>
+            <button class="choice" data-value="Salary Cap"><strong>Salary Cap</strong><small>Build a roster within a budget.</small></button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Scoring format</label>
+          <div class="option-grid" data-choice-group="scoringFormat">
+            <button class="choice active" data-value="Head-to-head"><strong>Head-to-Head</strong><small>Face one manager each fantasy round.</small></button>
+            <button class="choice" data-value="Total Points"><strong>Total Points</strong><small>Highest season or tournament total wins.</small></button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="competition">Competition</label>
+          <select id="competition" class="form-control">
+            <option selected>Worlds</option>
+            <option>MSI</option>
+            <option>LCK</option>
+            <option>LPL</option>
+            <option>LEC</option>
+            <option>LTA</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Starting roster</label>
+          <div class="position-grid">
+            <span>TOP</span><span>JNG</span><span>MID</span><span>ADC</span><span>SUP</span><span class="optional">TEAM</span>
+          </div>
+          <label class="toggle-row">
+            <span><strong>Team slot</strong><small>Draft one pro team for objective-based scoring.</small></span>
+            <input id="teamSlot" type="checkbox" />
+          </label>
+        </div>
+      </div>
+
+      <div class="card setup-card">
+        <div class="section-head"><div><div class="eyebrow">PLAYER SCORING</div><h3>Default points</h3></div></div>
+        <div class="scoring-grid">
+          <label>Kills <input class="score-input" id="scoreKills" type="number" step="0.5" value="3"></label>
+          <label>Deaths <input class="score-input" id="scoreDeaths" type="number" step="0.5" value="-1"></label>
+          <label>Assists <input class="score-input" id="scoreAssists" type="number" step="0.5" value="2"></label>
+          <label>CS <input class="score-input" id="scoreCs" type="number" step="0.01" value="0.02"></label>
+          <label>Win <input class="score-input" id="scoreWin" type="number" step="0.5" value="5"></label>
+          <label>First Blood <input class="score-input" id="scoreFb" type="number" step="0.5" value="2"></label>
+        </div>
+      </div>
+
+      <button class="primary-btn" id="saveLeagueBtn">Save League Settings</button>
+      <p class="setup-footnote">Prototype only: these settings are stored on this device for now.</p>
     </section>
   </template>
 
