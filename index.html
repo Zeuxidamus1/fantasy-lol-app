@@ -144,6 +144,10 @@
         <div class="section-head"><div><div class="eyebrow">STANDINGS</div><h3>Regular Season</h3></div></div>
         <div id="standings"></div>
       </div>
+      <div class="grid-two">
+        <button class="action-card" data-jump="draft"><span class="action-icon">◎</span><strong>Draft Room</strong><small>Run a mock snake draft</small></button>
+        <button class="action-card" data-jump="setup"><span class="action-icon">⚙</span><strong>League Setup</strong><small>Edit format & scoring</small></button>
+      </div>
       <div class="card">
         <div class="section-head"><div><div class="eyebrow">LEAGUE SETTINGS</div><h3>Current format</h3></div><button class="text-btn" id="rulesBtn">Scoring</button></div>
         <div class="settings-list" id="leagueSettingsSummary">
@@ -152,6 +156,53 @@
           <div><span>Scoring</span><strong>Head-to-head</strong></div>
           <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP</strong></div>
         </div>
+      </div>
+    </section>
+  </template>
+
+  <template id="draft-template">
+    <section class="stack draft-screen">
+      <div class="section-title">
+        <div><div class="eyebrow">MOCK DRAFT</div><h2>Draft Room</h2></div>
+        <button class="secondary-btn" data-jump="league">Exit</button>
+      </div>
+
+      <div class="card draft-status">
+        <div>
+          <div class="eyebrow" id="draftRoundLabel">ROUND 1 · PICK 1</div>
+          <h3 id="draftTurnLabel">Draft ready</h3>
+          <small id="draftHint">Start the draft to begin.</small>
+        </div>
+        <div class="draft-clock" id="draftClock">0:30</div>
+      </div>
+
+      <div class="draft-actions">
+        <button class="primary-btn" id="startDraftBtn">Start / Reset Draft</button>
+        <button class="secondary-btn" id="autoPickBtn">Auto Pick My Turn</button>
+      </div>
+
+      <div class="card draft-board-card">
+        <div class="section-head">
+          <div><div class="eyebrow">DRAFT BOARD</div><h3>Recent picks</h3></div>
+          <span class="draft-progress" id="draftProgress">0 picks</span>
+        </div>
+        <div id="draftBoard" class="draft-board"></div>
+      </div>
+
+      <label class="search"><span>⌕</span><input id="draftSearch" placeholder="Search draft pool" /></label>
+      <div class="filter-row" id="draftFilters">
+        <button class="chip active" data-draft-role="ALL">All</button>
+        <button class="chip" data-draft-role="TOP">Top</button>
+        <button class="chip" data-draft-role="JNG">Jungle</button>
+        <button class="chip" data-draft-role="MID">Mid</button>
+        <button class="chip" data-draft-role="ADC">ADC</button>
+        <button class="chip" data-draft-role="SUP">Support</button>
+      </div>
+      <div id="draftPlayerList" class="player-list"></div>
+
+      <div class="card">
+        <div class="section-head"><div><div class="eyebrow">MY PICKS</div><h3>Zeuxidamus</h3></div></div>
+        <div id="myDraftRoster" class="draft-roster"></div>
       </div>
     </section>
   </template>
