@@ -4,9 +4,9 @@ const roster = [
   {role:"MID",name:"Chovy",team:"Gen.G",opp:"vs HLE",fp:36.7},
   {role:"ADC",name:"Gumayusi",team:"T1",opp:"vs BLG",fp:29.5},
   {role:"SUP",name:"Keria",team:"T1",opp:"vs BLG",fp:18.4},
-  {role:"BN",name:"Caps",team:"G2 Esports",opp:"vs FNC",fp:27.9},
-  {role:"BN",name:"Inspired",team:"FlyQuest",opp:"vs TL",fp:25.1},
-  {role:"BN",name:"Massu",team:"FlyQuest",opp:"vs TL",fp:24.3}
+  {role:"BN",position:"MID",name:"Caps",team:"G2 Esports",opp:"vs FNC",fp:27.9},
+  {role:"BN",position:"JNG",name:"Inspired",team:"FlyQuest",opp:"vs TL",fp:25.1},
+  {role:"BN",position:"ADC",name:"Massu",team:"FlyQuest",opp:"vs TL",fp:24.3}
 ];
 
 const freeAgents = [
@@ -157,6 +157,94 @@ function getLeagueSettings(){
 
 let selectedPlayerId=null;
 
+function playerKey(p){
+  return String(p.id || p.name || "").toLowerCase().replace(/[^a-z0-9]+/g,"-");
+}
+
+function defaultUserRoster(){
+  return roster.map(p=>({
+    ...p,
+    id:playerKey(p),
+    position:p.position || (p.role==="BN"?"MID":p.role),
+    slot:p.role
+  }));
+}
+
+function getUserRoster(){
+  try{
+    const saved=JSON.parse(localStorage.getItem("riftUserRoster")||"null");
+    return Array.isArray(saved)&&saved.length ? saved : defaultUserRoster();
+  }catch{
+    return defaultUserRoster();
+  }
+}
+
+function saveUserRoster(players){
+  localStorage.setItem("riftUserRoster",JSON.stringify(players));
+}
+
+function arrangeUserRoster(players){
+  const starterRoles=["TOP","JNG","MID","ADC","SUP"];
+  const used=new Set();
+  const arranged=[];
+  starterRoles.forEach(role=>{
+    const idx=players.findIndex((p,i)=>!used.has(i)&&(p.position||p.role)===role);
+    if(idx>=0){used.add(idx);arranged.push({...players[idx],slot:role,role});}
+  });
+  players.forEach((p,i)=>{if(!used.has(i))arranged.push({...p,slot:"BN",role:"BN"});});
+  return arranged;
+}
+
+function rosterLimit(){
+  const settings=getLeagueSettings();
+  return 5+Number(settings.bench||3);
+}
+
+function isOwned(player){
+  const key=playerKey(player);
+  return getUserRoster().some(p=>playerKey(p)===key);
+}
+
+function closeTransactionModal(){
+  const modal=document.querySelector("#transactionModal");
+  if(modal) modal.hidden=true;
+}
+
+function addPlayerToRoster(player){
+  if(isOwned(player)){showToast(`${player.name} is already on your team.`);return;}
+  let current=getUserRoster();
+  if(current.length<rosterLimit()){
+    current.push({...player,id:playerKey(player),position:player.position||player.role,slot:"BN"});
+    saveUserRoster(arrangeUserRoster(current));
+    showToast(`${player.name} added to your team`);
+    return;
+  }
+  openDropChooser(player);
+}
+
+function openDropChooser(incoming){
+  const modal=document.querySelector("#transactionModal");
+  const list=document.querySelector("#transactionDropList");
+  const copy=document.querySelector("#transactionCopy");
+  if(!modal||!list||!copy)return;
+  const current=getUserRoster();
+  copy.textContent=`Your roster is full. Choose who to drop for ${incoming.name}.`;
+  list.innerHTML=current.map(p=>`<button class="drop-option" data-drop-id="${playerKey(p)}"><span class="role-badge">${p.slot||p.role}</span><span><strong>${p.name}</strong><small>${p.team} · ${p.position||p.role}</small></span><span class="drop-action">DROP</span></button>`).join("");
+  list.querySelectorAll("[data-drop-id]").forEach(btn=>btn.onclick=()=>{
+    const dropId=btn.dataset.dropId;
+    const dropped=current.find(p=>playerKey(p)===dropId);
+    const next=current.filter(p=>playerKey(p)!==dropId);
+    next.push({...incoming,id:playerKey(incoming),position:incoming.position||incoming.role,slot:"BN"});
+    saveUserRoster(arrangeUserRoster(next));
+    closeTransactionModal();
+    showToast(`Added ${incoming.name} · Dropped ${dropped?.name||"player"}`);
+    if(document.querySelector("#profileName")) render("player");
+    else if(document.querySelector("#rosterList")) render("team");
+    else if(document.querySelector("#freeAgentList")) render("players");
+  });
+  modal.hidden=false;
+}
+
 function allFantasyPlayers(){
   const live=((window.ESPORTS_DATA&&window.ESPORTS_DATA.players)||[]).map(p=>({...p,fp:Number(p.projection??p.fp??20)}));
   return live.length?live:freeAgents;
@@ -198,11 +286,14 @@ function playerRow(p, add=false){
   </div>`;
 }
 
-function rosterRow(p){
-  return `<div class="roster-slot ${p.role==="BN"?"bench":""}">
-    <span class="slot-label">${p.role}</span>
-    <div class="player-info"><strong>${p.name}</strong><small>${p.team} · ${p.opp}</small></div>
-    <span class="fp">${p.fp.toFixed(1)}</span>
+function rosterRow(p, manage=false){
+  const slot=p.slot||p.role;
+  const fp=Number(p.fp??p.projection??0);
+  return `<div class="roster-slot ${slot==="BN"?"bench":""}">
+    <span class="slot-label">${slot}</span>
+    <div class="player-info"><strong>${p.name}</strong><small>${p.team} · ${p.position||p.role}${p.opp?" · "+p.opp:""}</small></div>
+    <span class="fp">${fp.toFixed(1)}</span>
+    ${manage?'<div class="team-actions"><button class="mini-btn danger" data-drop-roster="'+playerKey(p)+'">DROP</button></div>':""}
   </div>`;
 }
 
@@ -213,7 +304,8 @@ function render(view="home"){
   document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
 
   if(view==="home"){
-    document.querySelector("#starterPreview").innerHTML = roster.slice(0,3).map(p=>playerRow(p)).join("");
+    const currentRoster=getUserRoster();
+    document.querySelector("#starterPreview").innerHTML = currentRoster.filter(p=>(p.slot||p.role)!=="BN").slice(0,3).map(p=>playerRow({...p,role:p.position||p.role})).join("");
     document.querySelector("#draftBtn").onclick=()=>render("draft");
     const onboarding=document.querySelector("#onboardingCard");
     if(localStorage.getItem("riftOnboardingDismissed")==="1" && onboarding) onboarding.remove();
@@ -221,7 +313,20 @@ function render(view="home"){
     if(dismiss) dismiss.onclick=()=>{localStorage.setItem("riftOnboardingDismissed","1");onboarding?.remove();};
   }
   if(view==="team"){
-    document.querySelector("#rosterList").innerHTML = roster.map(rosterRow).join("");
+    const current=getUserRoster();
+    const projected=current.filter(p=>(p.slot||p.role)!=="BN").reduce((sum,p)=>sum+Number(p.fp??p.projection??0),0);
+    const compact=document.querySelector(".card.compact");
+    if(compact) compact.innerHTML=`<div class="stat-row"><span>Projected starters</span><strong>${projected.toFixed(1)}</strong></div><div class="stat-row"><span>Roster</span><strong>${current.length}/${rosterLimit()}</strong></div>`;
+    document.querySelector("#rosterList").innerHTML = current.map(p=>rosterRow(p,true)).join("");
+    document.querySelectorAll("[data-drop-roster]").forEach(btn=>btn.onclick=()=>{
+      const currentNow=getUserRoster();
+      const player=currentNow.find(p=>playerKey(p)===btn.dataset.dropRoster);
+      if(!player)return;
+      if(!window.confirm(`Drop ${player.name} from your roster?`))return;
+      saveUserRoster(arrangeUserRoster(currentNow.filter(p=>playerKey(p)!==btn.dataset.dropRoster)));
+      showToast(`${player.name} dropped`);
+      render("team");
+    });
   }
   if(view==="player"){
     const p=playerById(selectedPlayerId) || allFantasyPlayers()[0];
@@ -231,7 +336,8 @@ function render(view="home"){
     document.querySelector("#profileTeam").textContent=p.team||"Unknown team";
     document.querySelector("#profileName").textContent=p.name||"Player";
     document.querySelector("#profileRank").textContent=`Fantasy rank #${p.rank||"—"}`;
-    document.querySelector("#profileStatus").textContent="Available";
+    const owned=isOwned(p);
+    document.querySelector("#profileStatus").textContent=owned?"On your roster":"Available";
     document.querySelector("#profileProjection").textContent=Number(p.fp??p.projection??0).toFixed(1);
 
     const outlookByRole={
@@ -274,7 +380,15 @@ function render(view="home"){
     const syncWatch=()=>{const active=watch.has(String(p.id));watchBtn.classList.toggle("watching",active);watchBtn.textContent=active?"★ Watching":"☆ Watchlist";};
     syncWatch();
     watchBtn.onclick=()=>{const id=String(p.id);watch.has(id)?watch.delete(id):watch.add(id);setWatchlist(watch);syncWatch();showToast(watch.has(id)?"Added to watchlist":"Removed from watchlist");};
-    document.querySelector("#profileAddBtn").onclick=()=>showToast(`${p.name} added to waiver queue`);
+    const addBtn=document.querySelector("#profileAddBtn");
+    if(owned){
+      addBtn.textContent="On My Team";
+      addBtn.classList.add("owned");
+      addBtn.disabled=true;
+    }else{
+      addBtn.textContent=getUserRoster().length>=rosterLimit()?"Add / Choose Drop":"Add Player";
+      addBtn.onclick=()=>addPlayerToRoster(p);
+    }
     document.querySelector("#profileTradeBtn").onclick=()=>showToast("Trade proposals are coming in the next transaction update.");
     document.querySelector("#playerBackBtn").onclick=()=>render("players");
   }
@@ -319,7 +433,11 @@ function render(view="home"){
       const source=allFantasyPlayers();
       const filtered=source.filter(p=>(role==="ALL"||p.role===role)&&(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)));
       list.innerHTML=filtered.map(p=>playerRow(p,true)).join("") || '<div class="empty-state"><strong>No players found</strong><small>Try a different name, team, or role.</small></div>';
-      list.querySelectorAll(".add-btn").forEach((b,i)=>b.onclick=(e)=>{e.stopPropagation();showToast(`${filtered[i].name} added to waiver queue`);});
+      list.querySelectorAll(".add-btn").forEach((b,i)=>{
+        const p=filtered[i];
+        if(isOwned(p)){b.textContent="OWNED";b.classList.add("owned");b.disabled=true;}
+        else b.onclick=(e)=>{e.stopPropagation();addPlayerToRoster(p);draw();};
+      });
       list.querySelectorAll("[data-open-player]").forEach(row=>{
         row.onclick=(e)=>{if(e.target.closest(".add-btn"))return;openPlayer(row.dataset.openPlayer);};
         row.onkeydown=(e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openPlayer(row.dataset.openPlayer);}};
@@ -518,5 +636,6 @@ function render(view="home"){
 }
 
 document.querySelectorAll(".nav-item").forEach(b=>b.addEventListener("click",()=>render(b.dataset.view)));
+document.querySelectorAll("[data-close-transaction]").forEach(el=>el.addEventListener("click",closeTransactionModal));
 document.querySelector("#notificationBtn").onclick=()=>showToast("No new league notifications.");
 render("home");
