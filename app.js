@@ -116,9 +116,35 @@ function newDraftState(){
   return {started:true,managerCount,userIndex:Math.min(1,managerCount-1),pickIndex:0,picks:[],seconds:30,complete:false};
 }
 
-function bestAvailableDraftPlayer(state){
+function managerPicks(state,managerIndex){
+  return state.picks.filter(p=>p.managerIndex===managerIndex);
+}
+
+function rosterNeedsForManager(state,managerIndex){
+  const picks=managerPicks(state,managerIndex);
+  const starterRoles=["TOP","JNG","MID","ADC","SUP"];
+  const counts=Object.fromEntries(starterRoles.map(r=>[r,picks.filter(p=>p.role===r).length]));
+  return starterRoles.filter(r=>counts[r]===0);
+}
+
+function canDraftPlayer(state,managerIndex,player){
+  const settings=getLeagueSettings();
+  const picks=managerPicks(state,managerIndex);
+  const maxRoster=5+Number(settings.bench||3);
+  if(picks.length>=maxRoster)return false;
+  const needs=rosterNeedsForManager(state,managerIndex);
+  const benchSpots=Number(settings.bench||3);
+  const startersFilled=5-needs.length;
+  const benchUsed=Math.max(0,picks.length-startersFilled);
+  if(needs.length>0 && benchUsed>=benchSpots && !needs.includes(player.role)) return false;
+  return true;
+}
+
+function bestAvailableDraftPlayer(state,managerIndex=draftOrderForPick(state.pickIndex,state.managerCount)){
   const taken=new Set(state.picks.map(p=>p.playerId));
-  return draftPool.find(p=>!taken.has(p.id));
+  const needs=rosterNeedsForManager(state,managerIndex);
+  return draftPool.find(p=>!taken.has(p.id)&&canDraftPlayer(state,managerIndex,p)&&(needs.length===0||needs.includes(p.role)))
+      || draftPool.find(p=>!taken.has(p.id)&&canDraftPlayer(state,managerIndex,p));
 }
 
 function makeDraftPick(state,player,managerIndex){
@@ -134,7 +160,7 @@ function makeDraftPick(state,player,managerIndex){
 function runCpuPicks(state){
   let guard=0;
   while(state.started&&!state.complete&&draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex&&guard<20){
-    const p=bestAvailableDraftPlayer(state);
+    const p=bestAvailableDraftPlayer(state,draftOrderForPick(state.pickIndex,state.managerCount));
     if(!p){state.complete=true;break;}
     makeDraftPick(state,p,draftOrderForPick(state.pickIndex,state.managerCount));
     guard++;
@@ -259,6 +285,7 @@ function render(view="home"){
     const list=document.querySelector("#draftPlayerList");
     const board=document.querySelector("#draftBoard");
     const rosterEl=document.querySelector("#myDraftRoster");
+    const fullBoard=document.querySelector("#fullDraftBoard");
 
     const drawDraft=()=>{
       state=getDraftState();
@@ -282,6 +309,27 @@ function render(view="home"){
         board.innerHTML=recent.length?recent.map(p=>`<div class="draft-pick ${p.managerIndex===state.userIndex?"mine":""}"><small>#${p.pick} · R${p.round}</small><strong>${p.name}</strong><span>${p.role} · ${p.manager}</span></div>`).join(""):'<div class="muted">No picks yet.</div>';
       }
 
+      const boardState=state||{managerCount:Number(getLeagueSettings().managers)||8,picks:[],pickIndex:0,userIndex:1,started:false,complete:false};
+      const settings=getLeagueSettings();
+      const totalRounds=5+Number(settings.bench||3);
+      const cols=boardState.managerCount;
+      const headers=Array.from({length:cols},(_,i)=>`<div class="board-head">${draftManagerNames[i]||("Manager "+(i+1))}</div>`).join("");
+      let cells="";
+      for(let r=0;r<totalRounds;r++){
+        for(let c=0;c<cols;c++){
+          const managerIndex=r%2===0?c:cols-1-c;
+          const overall=r*cols+c;
+          const pick=(boardState.picks||[]).find(p=>p.pick===overall+1);
+          const onClock=boardState.started&&!boardState.complete&&overall===boardState.pickIndex;
+          cells+=`<div class="board-cell ${managerIndex===boardState.userIndex?"mine":""} ${onClock?"on-clock":""}">
+            <small>R${r+1} · #${overall+1}</small>
+            <strong>${pick?pick.name:"—"}</strong>
+            <span>${pick?pick.role:(draftManagerNames[managerIndex]||"")}</span>
+          </div>`;
+        }
+      }
+      fullBoard.innerHTML=`<div class="full-board-grid" style="grid-template-columns:repeat(${cols},minmax(92px,1fr))">${headers}${cells}</div>`;
+
       const taken=new Set((state?.picks||[]).map(p=>p.playerId));
       const q=search.value.trim().toLowerCase();
       const isUserTurn=state&&state.started&&!state.complete&&draftOrderForPick(state.pickIndex,state.managerCount)===state.userIndex;
@@ -292,18 +340,24 @@ function render(view="home"){
         if(!state||state.complete||draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex)return;
         const player=draftPool.find(p=>p.id===btn.dataset.playerId);
         if(!player)return;
+        if(!canDraftPlayer(state,state.userIndex,player)){showToast("That pick would exceed your roster limits.");return;}
         makeDraftPick(state,player,state.userIndex);
         runCpuPicks(state);
         drawDraft();
       });
 
       const mine=(state?.picks||[]).filter(p=>p.managerIndex===state.userIndex);
-      const settings=getLeagueSettings();
-      const slots=["TOP","JNG","MID","ADC","SUP",...Array(Number(settings.bench||3)).fill("BN")];
-      rosterEl.innerHTML=slots.map((slot,i)=>{
-        const p=mine[i];
-        return `<div class="draft-roster-slot"><small>${slot}</small><strong class="${p?"":"empty-slot"}">${p?p.name:"Empty"}</strong></div>`;
-      }).join("");
+      const starterRoles=["TOP","JNG","MID","ADC","SUP"];
+      const used=new Set();
+      const slotPlayers=[];
+      starterRoles.forEach(roleName=>{
+        const idx=mine.findIndex((p,i)=>!used.has(i)&&p.role===roleName);
+        if(idx>=0){used.add(idx);slotPlayers.push({slot:roleName,p:mine[idx],starter:true});}
+        else slotPlayers.push({slot:roleName,p:null,starter:true});
+      });
+      mine.forEach((p,i)=>{if(!used.has(i))slotPlayers.push({slot:"BN",p,starter:false});});
+      while(slotPlayers.length<5+Number(settings.bench||3))slotPlayers.push({slot:"BN",p:null,starter:false});
+      rosterEl.innerHTML=slotPlayers.map(x=>`<div class="draft-roster-slot ${x.p?(x.starter?"filled-start":"filled-bench"):""}"><small>${x.slot}</small><strong class="${x.p?"":"empty-slot"}">${x.p?x.p.name:"Empty"}</strong></div>`).join("");
     };
 
     document.querySelector("#startDraftBtn").onclick=()=>{
@@ -315,7 +369,7 @@ function render(view="home"){
     document.querySelector("#autoPickBtn").onclick=()=>{
       state=getDraftState();
       if(!state||state.complete||draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex){showToast("It is not your turn.");return;}
-      const p=bestAvailableDraftPlayer(state);
+      const p=bestAvailableDraftPlayer(state,state.userIndex);
       if(p){makeDraftPick(state,p,state.userIndex);runCpuPicks(state);drawDraft();}
     };
     search.oninput=drawDraft;
