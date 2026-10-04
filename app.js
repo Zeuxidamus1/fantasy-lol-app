@@ -49,6 +49,99 @@ const proSchedule = [
   {day:"upcoming",label:"OCT 7",time:"6:00 PM",league:"International",a:"Gen.G",aCode:"GEN",b:"G2 Esports",bCode:"G2",status:"UPCOMING"}
 ];
 
+
+const draftPool = [
+  {id:"chovy",role:"MID",name:"Chovy",team:"Gen.G",rank:1,fp:36.7},
+  {id:"bin",role:"TOP",name:"Bin",team:"Bilibili Gaming",rank:2,fp:24.8},
+  {id:"canyon",role:"JNG",name:"Canyon",team:"Gen.G",rank:3,fp:31.2},
+  {id:"viper",role:"ADC",name:"Viper",team:"Hanwha Life",rank:4,fp:32.4},
+  {id:"keria",role:"SUP",name:"Keria",team:"T1",rank:5,fp:22.8},
+  {id:"faker",role:"MID",name:"Faker",team:"T1",rank:6,fp:28.6},
+  {id:"zeus",role:"TOP",name:"Zeus",team:"Hanwha Life",rank:7,fp:25.7},
+  {id:"oner",role:"JNG",name:"Oner",team:"T1",rank:8,fp:27.4},
+  {id:"gumayusi",role:"ADC",name:"Gumayusi",team:"T1",rank:9,fp:29.5},
+  {id:"delight",role:"SUP",name:"Delight",team:"Hanwha Life",rank:10,fp:20.8},
+  {id:"caps",role:"MID",name:"Caps",team:"G2 Esports",rank:11,fp:27.9},
+  {id:"369",role:"TOP",name:"369",team:"Top Esports",rank:12,fp:23.1},
+  {id:"kanavi",role:"JNG",name:"Kanavi",team:"JD Gaming",rank:13,fp:26.8},
+  {id:"ruler",role:"ADC",name:"Ruler",team:"Gen.G",rank:14,fp:30.1},
+  {id:"lehends",role:"SUP",name:"Lehends",team:"Nongshim",rank:15,fp:18.9},
+  {id:"humanoid",role:"MID",name:"Humanoid",team:"Fnatic",rank:16,fp:22.5},
+  {id:"brokenblade",role:"TOP",name:"BrokenBlade",team:"G2 Esports",rank:17,fp:22.1},
+  {id:"inspired",role:"JNG",name:"Inspired",team:"FlyQuest",rank:18,fp:25.1},
+  {id:"hanssama",role:"ADC",name:"Hans Sama",team:"G2 Esports",rank:19,fp:24.6},
+  {id:"mikyx",role:"SUP",name:"Mikyx",team:"G2 Esports",rank:20,fp:17.8},
+  {id:"zeka",role:"MID",name:"Zeka",team:"Hanwha Life",rank:21,fp:26.2},
+  {id:"kiin",role:"TOP",name:"Kiin",team:"Gen.G",rank:22,fp:23.9},
+  {id:"peanut",role:"JNG",name:"Peanut",team:"Hanwha Life",rank:23,fp:24.2},
+  {id:"massu",role:"ADC",name:"Massu",team:"FlyQuest",rank:24,fp:24.3},
+  {id:"corejj",role:"SUP",name:"CoreJJ",team:"Team Liquid",rank:25,fp:18.1},
+  {id:"apa",role:"MID",name:"APA",team:"Team Liquid",rank:26,fp:21.9},
+  {id:"impact",role:"TOP",name:"Impact",team:"Team Liquid",rank:27,fp:20.7},
+  {id:"razork",role:"JNG",name:"Razork",team:"Fnatic",rank:28,fp:23.7},
+  {id:"noah",role:"ADC",name:"Noah",team:"Fnatic",rank:29,fp:22.9},
+  {id:"jun",role:"SUP",name:"Jun",team:"Fnatic",rank:30,fp:17.2},
+  {id:"knight",role:"MID",name:"Knight",team:"Bilibili Gaming",rank:31,fp:30.7},
+  {id:"369b",role:"TOP",name:"Doran",team:"T1",rank:32,fp:21.8},
+  {id:"xun",role:"JNG",name:"Xun",team:"Bilibili Gaming",rank:33,fp:24.5},
+  {id:"elk",role:"ADC",name:"Elk",team:"Bilibili Gaming",rank:34,fp:28.2},
+  {id:"on",role:"SUP",name:"ON",team:"Bilibili Gaming",rank:35,fp:19.4},
+  {id:"quad",role:"MID",name:"Quad",team:"FlyQuest",rank:36,fp:23.3},
+  {id:"bwipo",role:"TOP",name:"Bwipo",team:"FlyQuest",rank:37,fp:20.9},
+  {id:"umti",role:"JNG",name:"UmTi",team:"Team Liquid",rank:38,fp:21.7},
+  {id:"yeon",role:"ADC",name:"Yeon",team:"Team Liquid",rank:39,fp:23.8},
+  {id:"busio",role:"SUP",name:"Busio",team:"FlyQuest",rank:40,fp:17.7}
+];
+
+const draftManagerNames = ["Baron Bandits","Zeuxidamus","Rift Raiders","Pentakill Club","Nexus Breakers","Blue Buff Boys","Dragon Slayers","Iron V","Red Side","First Blood","Scuttle Club","Elder Enjoyers"];
+let draftTimerId=null;
+
+function draftOrderForPick(pickIndex,managerCount){
+  const round=Math.floor(pickIndex/managerCount);
+  const within=pickIndex%managerCount;
+  return round%2===0 ? within : managerCount-1-within;
+}
+
+function getDraftState(){
+  try{return JSON.parse(localStorage.getItem("riftDraftState")||"null");}catch{return null;}
+}
+
+function saveDraftState(state){
+  localStorage.setItem("riftDraftState",JSON.stringify(state));
+}
+
+function newDraftState(){
+  const settings=getLeagueSettings();
+  const managerCount=Number(settings.managers)||8;
+  return {started:true,managerCount,userIndex:Math.min(1,managerCount-1),pickIndex:0,picks:[],seconds:30,complete:false};
+}
+
+function bestAvailableDraftPlayer(state){
+  const taken=new Set(state.picks.map(p=>p.playerId));
+  return draftPool.find(p=>!taken.has(p.id));
+}
+
+function makeDraftPick(state,player,managerIndex){
+  state.picks.push({pick:state.pickIndex+1,round:Math.floor(state.pickIndex/state.managerCount)+1,managerIndex,manager:draftManagerNames[managerIndex]||("Manager "+(managerIndex+1)),playerId:player.id,name:player.name,role:player.role,team:player.team});
+  state.pickIndex++;
+  state.seconds=30;
+  const settings=getLeagueSettings();
+  const rounds=5+Number(settings.bench||3)+(settings.teamSlot?1:0);
+  state.complete=state.pickIndex>=Math.min(rounds*state.managerCount,draftPool.length);
+  saveDraftState(state);
+}
+
+function runCpuPicks(state){
+  let guard=0;
+  while(state.started&&!state.complete&&draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex&&guard<20){
+    const p=bestAvailableDraftPlayer(state);
+    if(!p){state.complete=true;break;}
+    makeDraftPick(state,p,draftOrderForPick(state.pickIndex,state.managerCount));
+    guard++;
+  }
+  saveDraftState(state);
+}
+
 const defaultLeagueSettings = {
   name:"Summoner's Cup",
   managers:"8",
@@ -102,7 +195,7 @@ function render(view="home"){
 
   if(view==="home"){
     document.querySelector("#starterPreview").innerHTML = roster.slice(0,3).map(p=>playerRow(p)).join("");
-    document.querySelector("#draftBtn").onclick=()=>showToast("Mock Draft screen is next on the roadmap.");
+    document.querySelector("#draftBtn").onclick=()=>render("draft");
   }
   if(view==="team"){
     document.querySelector("#rosterList").innerHTML = roster.map(rosterRow).join("");
@@ -157,6 +250,89 @@ function render(view="home"){
       <div><span>Competition</span><strong>${settings.competition}</strong></div>
       <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP${settings.teamSlot?" · TEAM":""}</strong></div>`;
     document.querySelector("#rulesBtn").onclick=()=>showToast(`Scoring: K +${settings.scoring.kills} · D ${settings.scoring.deaths} · A +${settings.scoring.assists} · CS +${settings.scoring.cs} · Win +${settings.scoring.win}`);
+  }
+  if(view==="draft"){
+    if(draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
+    let state=getDraftState();
+    let role="ALL";
+    const search=document.querySelector("#draftSearch");
+    const list=document.querySelector("#draftPlayerList");
+    const board=document.querySelector("#draftBoard");
+    const rosterEl=document.querySelector("#myDraftRoster");
+
+    const drawDraft=()=>{
+      state=getDraftState();
+      if(!state||!state.started){
+        document.querySelector("#draftRoundLabel").textContent="MOCK SNAKE DRAFT";
+        document.querySelector("#draftTurnLabel").textContent="Draft ready";
+        document.querySelector("#draftHint").textContent="You will draft from slot #2.";
+        document.querySelector("#draftClock").textContent="0:30";
+        document.querySelector("#draftProgress").textContent="0 picks";
+        board.innerHTML='<div class="muted">No picks yet.</div>';
+      }else{
+        const managerIndex=draftOrderForPick(state.pickIndex,state.managerCount);
+        const round=Math.floor(state.pickIndex/state.managerCount)+1;
+        const within=state.pickIndex%state.managerCount+1;
+        document.querySelector("#draftRoundLabel").textContent=state.complete?"DRAFT COMPLETE":`ROUND ${round} · PICK ${within}`;
+        document.querySelector("#draftTurnLabel").textContent=state.complete?"Mock draft complete":managerIndex===state.userIndex?"You're on the clock":`${draftManagerNames[managerIndex]||"CPU Manager"} is picking`;
+        document.querySelector("#draftHint").textContent=state.complete?"Reset to draft again.":managerIndex===state.userIndex?"Choose any available player below.":"CPU picks are automatic.";
+        document.querySelector("#draftClock").textContent=`0:${String(state.seconds??30).padStart(2,"0")}`;
+        document.querySelector("#draftProgress").textContent=`${state.picks.length} picks`;
+        const recent=state.picks.slice(-10).reverse();
+        board.innerHTML=recent.length?recent.map(p=>`<div class="draft-pick ${p.managerIndex===state.userIndex?"mine":""}"><small>#${p.pick} · R${p.round}</small><strong>${p.name}</strong><span>${p.role} · ${p.manager}</span></div>`).join(""):'<div class="muted">No picks yet.</div>';
+      }
+
+      const taken=new Set((state?.picks||[]).map(p=>p.playerId));
+      const q=search.value.trim().toLowerCase();
+      const isUserTurn=state&&state.started&&!state.complete&&draftOrderForPick(state.pickIndex,state.managerCount)===state.userIndex;
+      const filtered=draftPool.filter(p=>!taken.has(p.id)&&(role==="ALL"||p.role===role)&&(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)));
+      list.innerHTML=filtered.map(p=>`<div class="player-row draft-player"><span class="role-badge">${p.role}</span><div class="player-info"><strong>#${p.rank} ${p.name}</strong><small>${p.team}</small></div><span class="fp">${p.fp.toFixed(1)}</span><button class="draft-btn" data-player-id="${p.id}" ${isUserTurn?"":"disabled"}>DRAFT</button></div>`).join("")||'<div class="card muted">No available players match this filter.</div>';
+      list.querySelectorAll("[data-player-id]").forEach(btn=>btn.onclick=()=>{
+        state=getDraftState();
+        if(!state||state.complete||draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex)return;
+        const player=draftPool.find(p=>p.id===btn.dataset.playerId);
+        if(!player)return;
+        makeDraftPick(state,player,state.userIndex);
+        runCpuPicks(state);
+        drawDraft();
+      });
+
+      const mine=(state?.picks||[]).filter(p=>p.managerIndex===state.userIndex);
+      const settings=getLeagueSettings();
+      const slots=["TOP","JNG","MID","ADC","SUP",...Array(Number(settings.bench||3)).fill("BN")];
+      rosterEl.innerHTML=slots.map((slot,i)=>{
+        const p=mine[i];
+        return `<div class="draft-roster-slot"><small>${slot}</small><strong class="${p?"":"empty-slot"}">${p?p.name:"Empty"}</strong></div>`;
+      }).join("");
+    };
+
+    document.querySelector("#startDraftBtn").onclick=()=>{
+      state=newDraftState();
+      saveDraftState(state);
+      runCpuPicks(state);
+      drawDraft();
+    };
+    document.querySelector("#autoPickBtn").onclick=()=>{
+      state=getDraftState();
+      if(!state||state.complete||draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex){showToast("It is not your turn.");return;}
+      const p=bestAvailableDraftPlayer(state);
+      if(p){makeDraftPick(state,p,state.userIndex);runCpuPicks(state);drawDraft();}
+    };
+    search.oninput=drawDraft;
+    document.querySelectorAll("[data-draft-role]").forEach(c=>c.onclick=()=>{role=c.dataset.draftRole;document.querySelectorAll("[data-draft-role]").forEach(x=>x.classList.remove("active"));c.classList.add("active");drawDraft();});
+    drawDraft();
+
+    draftTimerId=setInterval(()=>{
+      state=getDraftState();
+      if(!state||!state.started||state.complete)return;
+      if(draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex)return;
+      state.seconds=Math.max(0,(state.seconds??30)-1);
+      if(state.seconds===0){
+        const p=bestAvailableDraftPlayer(state);
+        if(p){makeDraftPick(state,p,state.userIndex);runCpuPicks(state);}
+      }else saveDraftState(state);
+      drawDraft();
+    },1000);
   }
   if(view==="setup"){
     const settings=getLeagueSettings();
