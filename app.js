@@ -155,6 +155,30 @@ function getLeagueSettings(){
   }
 }
 
+let selectedPlayerId=null;
+
+function allFantasyPlayers(){
+  const live=((window.ESPORTS_DATA&&window.ESPORTS_DATA.players)||[]).map(p=>({...p,fp:Number(p.projection??p.fp??20)}));
+  return live.length?live:freeAgents;
+}
+
+function watchlistIds(){
+  try{return new Set(JSON.parse(localStorage.getItem("riftWatchlist")||"[]"));}catch{return new Set();}
+}
+
+function setWatchlist(ids){
+  localStorage.setItem("riftWatchlist",JSON.stringify([...ids]));
+}
+
+function playerById(id){
+  return allFantasyPlayers().find(p=>String(p.id)===String(id));
+}
+
+function openPlayer(id){
+  selectedPlayerId=id;
+  render("player");
+}
+
 const app = document.querySelector("#app");
 const toast = document.querySelector("#toast");
 
@@ -165,7 +189,8 @@ function showToast(message){
 }
 
 function playerRow(p, add=false){
-  return `<div class="player-row">
+  const pid=p.id||String(p.name).toLowerCase().replace(/[^a-z0-9]+/g,"-");
+  return `<div class="player-row clickable" data-open-player="${pid}" tabindex="0" role="button" aria-label="Open ${p.name} profile">
     <span class="role-badge">${p.role}</span>
     <div class="player-info"><strong>${p.name}</strong><small>${p.team} · ${p.opp || p.trend || ""}</small></div>
     <span class="fp">${p.fp.toFixed(1)}</span>
@@ -197,6 +222,61 @@ function render(view="home"){
   }
   if(view==="team"){
     document.querySelector("#rosterList").innerHTML = roster.map(rosterRow).join("");
+  }
+  if(view==="player"){
+    const p=playerById(selectedPlayerId) || allFantasyPlayers()[0];
+    if(!p){ render("players"); return; }
+    selectedPlayerId=p.id||selectedPlayerId;
+    document.querySelector("#profileRole").textContent=p.role||"—";
+    document.querySelector("#profileTeam").textContent=p.team||"Unknown team";
+    document.querySelector("#profileName").textContent=p.name||"Player";
+    document.querySelector("#profileRank").textContent=`Fantasy rank #${p.rank||"—"}`;
+    document.querySelector("#profileStatus").textContent="Available";
+    document.querySelector("#profileProjection").textContent=Number(p.fp??p.projection??0).toFixed(1);
+
+    const outlookByRole={
+      TOP:"Top laners gain value through steady scoring, matchup stability, and strong team win equity.",
+      JNG:"Junglers can create fantasy spikes through kills, assists, objectives, and high map involvement.",
+      MID:"Mid laners often combine strong kill participation with reliable farm, giving them a high fantasy ceiling.",
+      ADC:"AD carries can produce some of the biggest fantasy totals when their team plays through late-game damage and kills.",
+      SUP:"Supports usually rely on assists, vision, and team success, making them valuable when attached to winning teams."
+    };
+    document.querySelector("#profileOutlook").textContent=`${p.name} projects as a ${p.role} option for ${p.team}. ${outlookByRole[p.role]||"Their fantasy value depends on role, team performance, and match volume."}`;
+
+    const base=Number(p.fp??p.projection??20);
+    const stats=[
+      ["Projection",base.toFixed(1)],
+      ["Upside",Math.max(base+5,base*1.16).toFixed(1)],
+      ["Floor",Math.max(8,base-6).toFixed(1)],
+      ["Role",p.role||"—"],
+      ["Team",p.teamCode||String(p.team||"").slice(0,4).toUpperCase()],
+      ["Rank",p.rank?"#"+p.rank:"—"]
+    ];
+    document.querySelector("#profileStats").innerHTML=stats.map(s=>`<div class="profile-stat"><small>${s[0]}</small><strong>${s[1]}</strong></div>`).join("");
+
+    const teamName=String(p.team||"").toLowerCase();
+    const teamCode=String(p.teamCode||"").toLowerCase();
+    const matches=proSchedule.map(localScheduleRow).filter(g=>{
+      const a=`${g.a||""} ${g.aCode||""}`.toLowerCase();
+      const b=`${g.b||""} ${g.bCode||""}`.toLowerCase();
+      return (teamName&&((a.includes(teamName)||b.includes(teamName)))) || (teamCode&&((a.includes(teamCode)||b.includes(teamCode))));
+    }).slice(0,3);
+    document.querySelector("#profileMatches").innerHTML=matches.length?matches.map(g=>{
+      const opponent=(String(g.a||"").toLowerCase().includes(teamName)||String(g.aCode||"").toLowerCase()===teamCode)?g.b:g.a;
+      return `<div class="profile-match"><div><strong>vs ${opponent}</strong><small>${g.league||""} · ${g.stage||""}</small></div><div><strong>${g.time||"TBD"}</strong><small>${g.label||""}</small></div></div>`;
+    }).join(""):'<div class="empty-state"><strong>No upcoming match found</strong><small>The schedule will populate automatically when a matching event is available.</small></div>';
+
+    const trend=[-2.5,1.8,-0.9,3.1,0.6].map((d,i)=>Math.max(0,base+d+(i-2)*.4));
+    document.querySelector("#profileTrend").innerHTML=trend.map((v,i)=>`<div class="trend-game"><small>G${i+1}</small><strong>${v.toFixed(1)}</strong></div>`).join("");
+
+    const watch=watchlistIds();
+    const watchBtn=document.querySelector("#watchPlayerBtn");
+    const syncWatch=()=>{const active=watch.has(String(p.id));watchBtn.classList.toggle("watching",active);watchBtn.textContent=active?"★ Watching":"☆ Watchlist";};
+    syncWatch();
+    watchBtn.onclick=()=>{const id=String(p.id);watch.has(id)?watch.delete(id):watch.add(id);setWatchlist(watch);syncWatch();showToast(watch.has(id)?"Added to watchlist":"Removed from watchlist");};
+    document.querySelector("#profileAddBtn").onclick=()=>showToast(`${p.name} added to waiver queue`);
+    document.querySelector("#profileTradeBtn").onclick=()=>showToast("Trade proposals are coming in the next transaction update.");
+    document.querySelector("#playerBackBtn").onclick=()=>render("players");
   }
   if(view==="matchup"){
     document.querySelector("#battleList").innerHTML = roster.slice(0,5).map((p,i)=>`<div class="battle-row">
@@ -236,9 +316,14 @@ function render(view="home"){
     let role="ALL";
     const draw=()=>{
       const q=search.value.trim().toLowerCase();
-      const filtered=freeAgents.filter(p=>(role==="ALL"||p.role===role)&&(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)));
-      list.innerHTML=filtered.map(p=>playerRow(p,true)).join("") || '<div class="card muted">No players found.</div>';
-      list.querySelectorAll(".add-btn").forEach((b,i)=>b.onclick=()=>showToast(`${filtered[i].name} added to waiver queue`));
+      const source=allFantasyPlayers();
+      const filtered=source.filter(p=>(role==="ALL"||p.role===role)&&(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)));
+      list.innerHTML=filtered.map(p=>playerRow(p,true)).join("") || '<div class="empty-state"><strong>No players found</strong><small>Try a different name, team, or role.</small></div>';
+      list.querySelectorAll(".add-btn").forEach((b,i)=>b.onclick=(e)=>{e.stopPropagation();showToast(`${filtered[i].name} added to waiver queue`);});
+      list.querySelectorAll("[data-open-player]").forEach(row=>{
+        row.onclick=(e)=>{if(e.target.closest(".add-btn"))return;openPlayer(row.dataset.openPlayer);};
+        row.onkeydown=(e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openPlayer(row.dataset.openPlayer);}};
+      });
     };
     search.oninput=draw;
     document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{role=c.dataset.role;document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));c.classList.add("active");draw();});
@@ -423,6 +508,12 @@ function render(view="home"){
       setTimeout(()=>render("league"),550);
     };
   }
+  document.querySelectorAll("[data-open-player]").forEach(row=>{
+    if(row.dataset.profileBound)return;
+    row.dataset.profileBound="1";
+    row.addEventListener("click",(e)=>{if(e.target.closest(".add-btn,.draft-btn"))return;openPlayer(row.dataset.openPlayer);});
+    row.addEventListener("keydown",(e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openPlayer(row.dataset.openPlayer);}});
+  });
   document.querySelectorAll("[data-jump]").forEach(b=>b.onclick=()=>render(b.dataset.jump));
 }
 
