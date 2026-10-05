@@ -60,8 +60,33 @@
     }
   }
 
+  function publicAppUrl(){
+    return location.origin + location.pathname;
+  }
+
+  function captureAuthCallback(){
+    const raw=location.hash.startsWith("#")?location.hash.slice(1):"";
+    if(!raw.includes("access_token="))return false;
+    const params=new URLSearchParams(raw);
+    const access_token=params.get("access_token");
+    const refresh_token=params.get("refresh_token");
+    const expires_in=Number(params.get("expires_in")||3600);
+    const token_type=params.get("token_type")||"bearer";
+    if(!access_token||!refresh_token)return false;
+    writeSession({
+      access_token,
+      refresh_token,
+      token_type,
+      expires_in,
+      expires_at:Math.floor(Date.now()/1000)+expires_in
+    });
+    history.replaceState({view:"account",depth:0},"",location.pathname+"#account");
+    return true;
+  }
+
   async function signUp(email,password){
-    const payload=await request("/auth/v1/signup",{method:"POST",body:{email,password},session:null});
+    const redirect=encodeURIComponent(publicAppUrl());
+    const payload=await request("/auth/v1/signup?redirect_to="+redirect,{method:"POST",body:{email,password},session:null});
     if(payload?.access_token)writeSession(payload);
     return payload;
   }
@@ -198,6 +223,8 @@
     if(!current)throw new Error("Sign in before accepting a trade.");
     return request("/rest/v1/rpc/accept_trade",{method:"POST",body:{p_trade_id:id},session:current});
   }
+
+  captureAuthCallback();
 
   window.RiftBackend=Object.freeze({
     isConfigured,
