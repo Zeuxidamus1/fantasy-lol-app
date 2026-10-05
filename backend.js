@@ -191,6 +191,12 @@
     return request("/rest/v1/rpc/update_league_settings",{method:"POST",body:{p_league_id:leagueId,p_name:name,p_settings:settings},session:current});
   }
 
+  async function updateTeamName(leagueId,teamName){
+    const current=await session();
+    if(!current)throw new Error("Sign in before changing your team name.");
+    return request("/rest/v1/rpc/update_team_name",{method:"POST",body:{p_league_id:leagueId,p_team_name:String(teamName||"").trim()},session:current});
+  }
+
   async function getLeagueDraft(leagueId){
     const current=await session();
     if(!current)return null;
@@ -296,7 +302,7 @@
     readSession,
     onSessionChange(fn){listeners.add(fn);return()=>listeners.delete(fn);},
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
-    listLeagues,createLeague,joinLeague,updateLeagueSettings,listLeagueMembers,
+    listLeagues,createLeague,joinLeague,updateLeagueSettings,updateTeamName,listLeagueMembers,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,
     listRosters,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
