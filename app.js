@@ -1176,6 +1176,20 @@ function render(view="home",options={}){
   if(view==="schedule"){
     const list=document.querySelector("#scheduleList");
     let day="all";
+    let rosterPlayers=getUserRoster();
+
+    const normalizeTeam=value=>String(value||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+    const rosterMatchForTeam=(teamName,teamCode)=>{
+      const nameKey=normalizeTeam(teamName);
+      const codeKey=normalizeTeam(teamCode);
+      return rosterPlayers.filter(p=>{
+        const pName=normalizeTeam(p.team);
+        const pCode=normalizeTeam(p.teamCode);
+        return (nameKey&&(pName===nameKey||pCode===nameKey)) ||
+               (codeKey&&(pName===codeKey||pCode===codeKey));
+      });
+    };
+
     const drawSchedule=()=>{
       const rows=proSchedule.map(localScheduleRow).sort((a,b)=>{
         const ta=Date.parse(a.startTime||"");
@@ -1188,13 +1202,20 @@ function render(view="home",options={}){
       list.innerHTML=filtered.length?filtered.map(g=>{
         const heading=g.label!==lastLabel ? `<div class="schedule-day">${h(g.label||"Upcoming")}</div>` : "";
         lastLabel=g.label;
-        return heading+`<div class="game-card">
-          <div class="game-team"><span class="team-mark">${h(g.aCode||"TBD")}</span><div><strong>${h(g.a||"TBD")}</strong><small>Team 1</small></div></div>
+        const aRoster=rosterMatchForTeam(g.a,g.aCode);
+        const bRoster=rosterMatchForTeam(g.b,g.bCode);
+        const aOwned=aRoster.length>0;
+        const bOwned=bRoster.length>0;
+        const aNote=aOwned?`${aRoster.length} roster player${aRoster.length===1?"":"s"}`:"Team 1";
+        const bNote=bOwned?`${bRoster.length} roster player${bRoster.length===1?"":"s"}`:"Team 2";
+        return heading+`<div class="game-card ${aOwned||bOwned?"roster-match":""}">
+          <div class="game-team ${aOwned?"my-roster-team":""}"><span class="team-mark">${h(g.aCode||"TBD")}</span><div><strong>${h(g.a||"TBD")}</strong><small>${h(aNote)}</small></div></div>
           <div class="game-meta"><span class="game-time">${h(g.time||"TBD")}</span><span class="game-league">${h(g.league||"LoL Esports")}</span><span class="game-stage">${h(g.stage||"")}</span><span class="game-status ${String(g.status||"").toUpperCase().includes("PROGRESS")?"live":""}">${h(g.status||"UPCOMING")}</span></div>
-          <div class="game-team right"><div><strong>${h(g.b||"TBD")}</strong><small>Team 2</small></div><span class="team-mark">${h(g.bCode||"TBD")}</span></div>
+          <div class="game-team right ${bOwned?"my-roster-team":""}"><div><strong>${h(g.b||"TBD")}</strong><small>${h(bNote)}</small></div><span class="team-mark">${h(g.bCode||"TBD")}</span></div>
         </div>`;
       }).join(""):'<div class="empty-state"><strong>No matches found</strong><small>Try another filter or check back after the next data refresh.</small></div>';
     };
+
     document.querySelectorAll("[data-day]").forEach(c=>c.onclick=()=>{day=c.dataset.day;document.querySelectorAll("[data-day]").forEach(x=>x.classList.remove("active"));c.classList.add("active");drawSchedule();});
     const dataText=document.querySelector("#dataUpdatedText");
     const dataTitle=document.querySelector("#dataStatusTitle");
@@ -1213,7 +1234,17 @@ function render(view="home",options={}){
       if(dataTitle)dataTitle.textContent="Schedule data unavailable";
       dataText.textContent="The external data file could not be loaded. The rest of the app remains available.";
     }
-    drawSchedule();
+
+    (async()=>{
+      const leagueId=getActiveLeagueId();
+      if(leagueId&&cloudReady()){
+        try{
+          await loadRosterFromCloud(leagueId);
+          rosterPlayers=getUserRoster();
+        }catch{}
+      }
+      drawSchedule();
+    })();
   }
   if(view==="players"){
     const list=document.querySelector("#freeAgentList");
