@@ -8,7 +8,7 @@ const fail=[];
 const pass=[];
 const check=(ok,msg)=>{(ok?pass:fail).push(msg);};
 
-const required=["index.html","styles.css","app.js","esports-data.js","package.json","scripts/update-esports-data.mjs","scripts/browser-smoke.sh","scripts/browser-interactions.mjs",".github/workflows/validate-app.yml",".github/workflows/update-esports-data.yml"];
+const required=["index.html","styles.css","app.js","esports-data.js","backend-config.js","backend.js","supabase/schema.sql","package.json","scripts/update-esports-data.mjs","scripts/browser-smoke.sh","scripts/browser-interactions.mjs",".github/workflows/validate-app.yml",".github/workflows/update-esports-data.yml"];
 for(const file of required) check(fs.existsSync(path.join(root,file)),`required file: ${file}`);
 
 const html=read("index.html");
@@ -16,9 +16,14 @@ const css=read("styles.css");
 const app=read("app.js");
 const dataText=read("esports-data.js");
 const updater=read("scripts/update-esports-data.mjs");
+const backend=read("backend.js");
+const backendConfig=read("backend-config.js");
+const schema=read("supabase/schema.sql");
 
 try{new Function(app);pass.push("app.js parses");}catch(err){fail.push("app.js syntax: "+err.message);}
 try{new Function(dataText);pass.push("esports-data.js parses");}catch(err){fail.push("esports-data.js syntax: "+err.message);}
+try{new Function(backendConfig);pass.push("backend-config.js parses");}catch(err){fail.push("backend-config.js syntax: "+err.message);}
+try{new Function(backend);pass.push("backend.js parses");}catch(err){fail.push("backend.js syntax: "+err.message);}
 
 const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
 const idCounts=new Map();
@@ -56,6 +61,9 @@ try{
 
 check(!/LOL_ESPORTS_API_KEY\s*\|\|\s*["']/.test(updater),"no hard-coded API-key fallback");
 check(!/[A-Za-z0-9_-]{30,}\s*["'];?\s*\/\/\s*api key/i.test(updater),"no obvious inline API key");
+check(!/service[_-]?role/i.test(backendConfig),"frontend config does not contain service-role credentials");
+check(schema.includes("enable row level security"),"Supabase schema enables RLS");
+check(schema.includes("create policy"),"Supabase schema defines access policies");
 
 const openBraces=(css.match(/{/g)||[]).length;
 const closeBraces=(css.match(/}/g)||[]).length;
