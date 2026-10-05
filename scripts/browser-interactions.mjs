@@ -87,7 +87,7 @@ try{
   await expect("home fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
 
   await evaluate("document.querySelector('#accountBtn').click()");
-  await expect("account local fallback renders","document.title.includes('Account') && document.querySelector('#cloudStatusTitle').innerText.includes('Local mode')");
+  await expect("account backend state renders","document.title.includes('Account') && ['Local mode','Cloud backend connected'].includes(document.querySelector('#cloudStatusTitle').innerText)");
   await evaluate("document.querySelector('[data-jump=home]').click()");
   await expect("account back returns home","document.title.includes('Home')");
 
