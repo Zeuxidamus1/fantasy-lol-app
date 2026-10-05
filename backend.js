@@ -130,6 +130,18 @@
     return request("/rest/v1/rpc/join_league",{method:"POST",body:{p_invite_code:String(inviteCode||"").trim().toUpperCase(),p_team_name:String(teamName||"").trim()},session:current});
   }
 
+  async function listLeagueMembers(leagueId){
+    const current=await session();
+    if(!current)return [];
+    return request("/rest/v1/league_members?league_id=eq."+encodeURIComponent(leagueId)+"&select=league_id,user_id,role,team_name,joined_at&order=joined_at",{session:current});
+  }
+
+  async function listRosters(leagueId){
+    const current=await session();
+    if(!current)return [];
+    return request("/rest/v1/rosters?league_id=eq."+encodeURIComponent(leagueId)+"&select=league_id,user_id,player_id,slot,created_at",{session:current});
+  }
+
   async function saveRoster(leagueId,players){
     const current=await session();
     const userId=current?.user?.id;
@@ -145,10 +157,55 @@
     return request("/rest/v1/rosters",{method:"POST",body:normalized,session:current,headers:{"Prefer":"return=representation"}});
   }
 
+  async function listWaivers(leagueId){
+    const current=await session();
+    if(!current)return [];
+    return request("/rest/v1/waiver_claims?league_id=eq."+encodeURIComponent(leagueId)+"&select=*&order=priority.asc,created_at.asc",{session:current});
+  }
+
+  async function createWaiver(leagueId,playerId,priority=1){
+    const current=await session();
+    const userId=current?.user?.id;
+    if(!current||!userId)throw new Error("Sign in before creating a waiver claim.");
+    return request("/rest/v1/waiver_claims",{method:"POST",body:{league_id:leagueId,user_id:userId,player_id:String(playerId),priority:Number(priority)||1,status:"pending"},session:current,headers:{"Prefer":"return=representation"}});
+  }
+
+  async function cancelWaiver(id){
+    const current=await session();
+    if(!current)throw new Error("Sign in before changing a waiver claim.");
+    return request("/rest/v1/waiver_claims?id=eq."+encodeURIComponent(id),{method:"PATCH",body:{status:"canceled"},session:current,headers:{"Prefer":"return=representation"}});
+  }
+
+  async function listTrades(leagueId){
+    const current=await session();
+    if(!current)return [];
+    return request("/rest/v1/trades?league_id=eq."+encodeURIComponent(leagueId)+"&select=*&order=created_at.desc",{session:current});
+  }
+
+  async function createTrade(leagueId,toUser,offer){
+    const current=await session();
+    const userId=current?.user?.id;
+    if(!current||!userId)throw new Error("Sign in before creating a trade.");
+    return request("/rest/v1/trades",{method:"POST",body:{league_id:leagueId,from_user:userId,to_user:toUser,offer,status:"pending"},session:current,headers:{"Prefer":"return=representation"}});
+  }
+
+  async function updateTrade(id,status){
+    const allowed=new Set(["accepted","declined","canceled"]);
+    if(!allowed.has(status))throw new Error("Invalid trade status.");
+    const current=await session();
+    if(!current)throw new Error("Sign in before updating a trade.");
+    return request("/rest/v1/trades?id=eq."+encodeURIComponent(id),{method:"PATCH",body:{status,resolved_at:new Date().toISOString()},session:current,headers:{"Prefer":"return=representation"}});
+  }
+
   window.RiftBackend=Object.freeze({
     isConfigured,
     readSession,
     onSessionChange(fn){listeners.add(fn);return()=>listeners.delete(fn);},
-    signUp,signIn,signOut,currentUser,listLeagues,createLeague,joinLeague,saveRoster,request
+    signUp,signIn,signOut,currentUser,
+    listLeagues,createLeague,joinLeague,listLeagueMembers,
+    listRosters,saveRoster,
+    listWaivers,createWaiver,cancelWaiver,
+    listTrades,createTrade,updateTrade,
+    request
   });
 })();
