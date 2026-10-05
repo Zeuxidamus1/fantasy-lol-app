@@ -1143,3 +1143,81 @@ begin
   return result;
 end;
 $$;
+
+
+-- Combine one-for-one roster changes into a single notification
+alter table public.notifications drop constraint if exists notifications_kind_check;
+alter table public.notifications
+  add constraint notifications_kind_check
+  check (kind in ('trade_offer','trade_activity','trade_accepted','trade_declined','trade_canceled','roster_add','roster_drop','roster_swap'));
+
+create or replace function public.replace_roster(p_league_id uuid,p_players jsonb)
+returns setof public.rosters
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  item jsonb;
+  roster_limit integer;
+  dropped_ids text[] := '{}';
+  added_ids text[] := '{}';
+  pid text;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if not public.is_league_member(p_league_id) then raise exception 'League membership required'; end if;
+  if not exists(select 1 from public.leagues where id=p_league_id and status='active') then raise exception 'Roster moves are only available after the draft is complete'; end if;
+  if jsonb_typeof(coalesce(p_players,'[]'::jsonb)) <> 'array' then raise exception 'Players must be an array'; end if;
+  select 5+coalesce(nullif(settings->>'bench','')::integer,1) into roster_limit from public.leagues where id=p_league_id;
+  if jsonb_array_length(coalesce(p_players,'[]'::jsonb)) > roster_limit then raise exception 'Roster exceeds league limit of %',roster_limit; end if;
+  if exists (select 1 from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x where coalesce(x->>'slot','BN') not in ('TOP','JNG','MID','ADC','SUP','BN')) then raise exception 'Invalid roster slot'; end if;
+  if exists (select 1 from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x where coalesce(x->>'slot','BN')<>'BN' group by x->>'slot' having count(*)>1) then raise exception 'Only one starter is allowed per role'; end if;
+
+  perform 1 from public.leagues where id=p_league_id for update;
+  if exists (select 1 from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x group by x->>'player_id' having count(*) > 1) then raise exception 'Duplicate player in roster'; end if;
+  if exists (
+    select 1 from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x
+    join public.rosters r on r.league_id=p_league_id and r.player_id=x->>'player_id' and r.user_id<>auth.uid()
+  ) then raise exception 'A submitted player is already rostered by another manager'; end if;
+
+  select coalesce(array_agg(r.player_id),'{}'::text[]) into dropped_ids
+    from public.rosters r
+   where r.league_id=p_league_id and r.user_id=auth.uid()
+     and not exists (select 1 from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x where x->>'player_id'=r.player_id);
+
+  select coalesce(array_agg(x->>'player_id'),'{}'::text[]) into added_ids
+    from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x
+   where nullif(x->>'player_id','') is not null
+     and not exists (select 1 from public.rosters r where r.league_id=p_league_id and r.user_id=auth.uid() and r.player_id=x->>'player_id');
+
+  foreach pid in array dropped_ids loop
+    insert into public.roster_transactions(league_id,user_id,action,player_id) values(p_league_id,auth.uid(),'drop',pid);
+  end loop;
+  foreach pid in array added_ids loop
+    insert into public.roster_transactions(league_id,user_id,action,player_id) values(p_league_id,auth.uid(),'add',pid);
+  end loop;
+
+  if cardinality(dropped_ids)=1 and cardinality(added_ids)=1 then
+    perform public.notify_league_members(
+      p_league_id,auth.uid(),'roster_swap',
+      jsonb_build_object('user_id',auth.uid(),'dropped_player_id',dropped_ids[1],'added_player_id',added_ids[1]),null
+    );
+  else
+    foreach pid in array dropped_ids loop
+      perform public.notify_league_members(p_league_id,auth.uid(),'roster_drop',jsonb_build_object('user_id',auth.uid(),'player_id',pid),null);
+    end loop;
+    foreach pid in array added_ids loop
+      perform public.notify_league_members(p_league_id,auth.uid(),'roster_add',jsonb_build_object('user_id',auth.uid(),'player_id',pid),null);
+    end loop;
+  end if;
+
+  delete from public.rosters where league_id=p_league_id and user_id=auth.uid();
+  for item in select * from jsonb_array_elements(coalesce(p_players,'[]'::jsonb))
+  loop
+    insert into public.rosters(league_id,user_id,player_id,slot)
+    values(p_league_id,auth.uid(),left(coalesce(item->>'player_id',''),100),left(coalesce(item->>'slot','BN'),10));
+  end loop;
+
+  return query select * from public.rosters where league_id=p_league_id and user_id=auth.uid() order by created_at;
+end;
+$$;
