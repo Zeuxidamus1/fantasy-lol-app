@@ -655,3 +655,87 @@ revoke all on function public.make_draft_pick(uuid,text,text) from public,anon;
 grant execute on function public.update_league_settings(uuid,text,jsonb) to authenticated;
 grant execute on function public.start_league_draft(uuid) to authenticated;
 grant execute on function public.make_draft_pick(uuid,text,text) to authenticated;
+
+
+-- Shared roster transaction history
+create table if not exists public.roster_transactions (
+  id uuid primary key default gen_random_uuid(),
+  league_id uuid not null references public.leagues(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  action text not null check (action in ('add','drop')),
+  player_id text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.roster_transactions enable row level security;
+drop policy if exists "members read roster transactions" on public.roster_transactions;
+create policy "members read roster transactions" on public.roster_transactions
+  for select to authenticated using (public.is_league_member(league_id));
+
+create index if not exists roster_transactions_league_id_idx on public.roster_transactions(league_id);
+create index if not exists roster_transactions_user_id_idx on public.roster_transactions(user_id);
+
+create or replace function public.replace_roster(p_league_id uuid,p_players jsonb)
+returns setof public.rosters
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  item jsonb;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if not public.is_league_member(p_league_id) then raise exception 'League membership required'; end if;
+  if not exists(select 1 from public.leagues where id=p_league_id and status='active') then
+    raise exception 'Roster moves are only available after the draft is complete';
+  end if;
+  if jsonb_typeof(coalesce(p_players,'[]'::jsonb)) <> 'array' then raise exception 'Players must be an array'; end if;
+  if jsonb_array_length(coalesce(p_players,'[]'::jsonb)) > 12 then raise exception 'Roster is too large'; end if;
+
+  perform 1 from public.leagues where id=p_league_id for update;
+
+  if exists (
+    select 1 from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x
+    group by x->>'player_id' having count(*) > 1
+  ) then raise exception 'Duplicate player in roster'; end if;
+
+  if exists (
+    select 1
+    from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x
+    join public.rosters r on r.league_id=p_league_id
+      and r.player_id=x->>'player_id'
+      and r.user_id<>auth.uid()
+  ) then raise exception 'A submitted player is already rostered by another manager'; end if;
+
+  insert into public.roster_transactions(league_id,user_id,action,player_id)
+  select p_league_id,auth.uid(),'drop',r.player_id
+    from public.rosters r
+   where r.league_id=p_league_id and r.user_id=auth.uid()
+     and not exists (
+       select 1 from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x
+       where x->>'player_id'=r.player_id
+     );
+
+  insert into public.roster_transactions(league_id,user_id,action,player_id)
+  select p_league_id,auth.uid(),'add',x->>'player_id'
+    from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x
+   where nullif(x->>'player_id','') is not null
+     and not exists (
+       select 1 from public.rosters r
+       where r.league_id=p_league_id and r.user_id=auth.uid() and r.player_id=x->>'player_id'
+     );
+
+  delete from public.rosters where league_id=p_league_id and user_id=auth.uid();
+
+  for item in select * from jsonb_array_elements(coalesce(p_players,'[]'::jsonb))
+  loop
+    insert into public.rosters(league_id,user_id,player_id,slot)
+    values(p_league_id,auth.uid(),left(coalesce(item->>'player_id',''),100),left(coalesce(item->>'slot','BN'),10));
+  end loop;
+
+  return query
+  select * from public.rosters
+  where league_id=p_league_id and user_id=auth.uid()
+  order by created_at;
+end;
+$$;
