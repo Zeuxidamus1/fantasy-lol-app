@@ -1083,9 +1083,7 @@ function render(view="home",options={}){
     document.querySelector("#profileStatus").textContent=owned?"On your roster":"Available";
     const chain=chainPlayerStats(p);
     const scoring=getLeagueSettings()?.scoring||defaultLeagueSettings.scoring;
-    const recentFantasy=(chain?.recent||[]).map(g=>fantasyPointsForGame(g,scoring)).filter(Number.isFinite);
-    const fantasyAvg=recentFantasy.length?recentFantasy.reduce((a,b)=>a+b,0)/recentFantasy.length:null;
-    document.querySelector("#profileProjection").textContent=Number.isFinite(fantasyAvg)?fantasyAvg.toFixed(1):"—";
+    document.querySelector("#profileProjection").textContent=Number.isFinite(Number(chain?.kda))?Number(chain.kda).toFixed(2):"—";
 
     const outlookByRole={
       TOP:"Top laners gain value through steady scoring, matchup stability, and strong team win equity.",
@@ -1094,7 +1092,7 @@ function render(view="home",options={}){
       ADC:"AD carries can produce some of the biggest fantasy totals when their team plays through late-game damage and kills.",
       SUP:"Supports usually rely on assists, vision, and team success, making them valuable when attached to winning teams."
     };
-    const formText=chain?.games?` Over the last ${chain.games} recorded games: ${chain.wins} wins, ${chain.winRate}% win rate, and a ${chain.kda??"—"} KDA.`:"";
+    const formText=chain?.games?` ChainCC tracks ${chain.games} games this season at a ${chain.winRate}% win rate with a ${chain.kda??"—"} KDA.`:"";
     document.querySelector("#profileOutlook").textContent=`${p.name} is a ${p.role} for ${p.team}. ${outlookByRole[p.role]||"Fantasy value depends on role, team performance, and match volume."}${formText}`;
 
     const statValue=(value,suffix="")=>Number.isFinite(Number(value))?`${Number(value).toFixed(Number(value)%1?1:0)}${suffix}`:"—";
@@ -1102,9 +1100,9 @@ function render(view="home",options={}){
       ["Games",chain.games??"—"],
       ["Win rate",statValue(chain.winRate,"%")],
       ["KDA",chain.kda??"—"],
-      ["Avg K / D / A",`${chain.avgKills??"—"} / ${chain.avgDeaths??"—"} / ${chain.avgAssists??"—"}`],
       ["CS / min",chain.avgCspm??"—"],
-      ["Damage / min",chain.avgDpm??"—"]
+      ["Damage / min",chain.avgDpm??"—"],
+      ["Kill participation",Number.isFinite(Number(chain.avgKp))?`${chain.avgKp}%`:"—"]
     ]:[
       ["Role",p.role||"—"],
       ["Team",p.teamCode||String(p.team||"").slice(0,4).toUpperCase()],
@@ -1112,7 +1110,7 @@ function render(view="home",options={}){
     ];
     document.querySelector("#profileStats").innerHTML=stats.map(s=>`<div class="profile-stat"><small>${h(s[0])}</small><strong>${h(s[1])}</strong></div>`).join("");
     const note=document.querySelector("#profileDataNote");
-    if(note)note.textContent=chain?`Based on ${chain.games} most recent 2026 ChainCC game records available for this player. Fantasy points use this league's scoring settings.`:"No ChainCC match history matched this player yet.";
+    if(note)note.textContent=chain?`2026 professional match summary from ChainCC. Recent match history is shown below when available.`:"No ChainCC profile data matched this player yet.";
 
     const teamName=String(p.team||"").toLowerCase();
     const teamCode=String(p.teamCode||"").toLowerCase();
@@ -1132,8 +1130,9 @@ function render(view="home",options={}){
       const result=g.win===true?"W":g.win===false?"L":"—";
       const date=g.date?new Date(g.date+"T12:00:00Z"):null;
       const dateText=date&&!Number.isNaN(date.getTime())?date.toLocaleDateString([], {month:"short",day:"numeric"}):"";
-      const kda=[g.kills,g.deaths,g.assists].every(Number.isFinite)?`${g.kills}/${g.deaths}/${g.assists}`:"KDA —";
-      return `<div class="recent-game-row"><span class="recent-result ${result==="W"?"win":result==="L"?"loss":""}">${result}</span><div class="recent-game-main"><strong>${h(g.champion||"Match")} · ${h(kda)}</strong><small>${h(g.opponent?"vs "+g.opponent:(g.league||"Pro match"))}${dateText?" · "+h(dateText):""}</small></div><div class="recent-fp"><strong>${Number.isFinite(fp)?h(fp.toFixed(1)):"—"}</strong><small>FP</small></div></div>`;
+      const hasKda=[g.kills,g.deaths,g.assists].every(Number.isFinite);
+      const kda=hasKda?`${g.kills}/${g.deaths}/${g.assists}`:"";
+      return `<div class="recent-game-row"><span class="recent-result ${result==="W"?"win":result==="L"?"loss":""}">${result}</span><div class="recent-game-main"><strong>${h(g.champion||"Match")}${kda?" · "+h(kda):""}</strong><small>${h(g.opponent?"vs "+g.opponent:(g.league||"Pro match"))}${dateText?" · "+h(dateText):""}</small></div>${Number.isFinite(fp)?`<div class="recent-fp"><strong>${h(fp.toFixed(1))}</strong><small>FP</small></div>`:""}</div>`;
     }).join(""):'<div class="empty-state"><strong>No recent ChainCC matches found</strong><small>This player may not have a matching 2026 game record yet.</small></div>';
 
     const watch=watchlistIds();
