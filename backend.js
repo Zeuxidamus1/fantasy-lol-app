@@ -257,6 +257,12 @@
     return request("/rest/v1/rpc/cancel_waiver",{method:"POST",body:{p_claim_id:id},session:current});
   }
 
+  async function listTransactions(leagueId){
+    const current=await session();
+    if(!current)return [];
+    return request("/rest/v1/roster_transactions?league_id=eq."+encodeURIComponent(leagueId)+"&select=id,league_id,user_id,action,player_id,created_at&order=created_at.desc",{session:current});
+  }
+
   async function listTrades(leagueId){
     const current=await session();
     if(!current)return [];
@@ -292,7 +298,7 @@
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
     listLeagues,createLeague,joinLeague,updateLeagueSettings,listLeagueMembers,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,
-    listRosters,saveRoster,
+    listRosters,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
     listTrades,createTrade,updateTrade,acceptTrade,
     request
