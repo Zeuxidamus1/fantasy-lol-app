@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - "scripts/update-esports-data.mjs"
+      - "scripts/update-player-stats.mjs"
       - ".github/workflows/update-esports-data.yml"
 
 permissions:
@@ -47,15 +48,17 @@ jobs:
         env:
           LOL_ESPORTS_API_KEY: ${{ secrets.LOL_ESPORTS_API_KEY }}
 
+      - name: Fetch ChainCC player statistics
+        run: node scripts/update-player-stats.mjs
+
       - name: Commit refreshed data
-        if: steps.api.outputs.available == 'true'
         run: |
-          if git diff --quiet -- esports-data.js; then
+          if git diff --quiet -- esports-data.js player-stats.js; then
             echo "No esports data changes."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add esports-data.js
-          git commit -m "Auto-refresh LoL Esports data"
+          git add esports-data.js player-stats.js
+          git commit -m "Auto-refresh LoL esports and player stats"
           git push
