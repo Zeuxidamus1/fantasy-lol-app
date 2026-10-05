@@ -43,9 +43,10 @@ const standings = [
 const proSchedule = (window.ESPORTS_DATA && window.ESPORTS_DATA.schedule) || [];
 
 function localScheduleRow(g){
-  if(!g.startTime) return g;
-  const d=new Date(g.startTime);
-  if(Number.isNaN(d.getTime())) return g;
+  const timestamp=g.startTime||null;
+  const dateOnly=!timestamp&&g.date?String(g.date):null;
+  const d=timestamp?new Date(timestamp):(dateOnly?new Date(dateOnly+"T12:00:00"):null);
+  if(!d||Number.isNaN(d.getTime())) return {...g,day:g.day||"upcoming"};
   const now=new Date();
   const todayKey=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate());
   const gameKey=Date.UTC(d.getFullYear(),d.getMonth(),d.getDate());
@@ -56,7 +57,7 @@ function localScheduleRow(g){
     ...g,
     day,
     label:`${prefix} · ${d.toLocaleDateString(undefined,{month:"short",day:"numeric"}).toUpperCase()}`,
-    time:d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})
+    time:timestamp?d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}):(g.time||"TBD")
   };
 }
 const draftPool = ((window.ESPORTS_DATA && window.ESPORTS_DATA.players) || []).map(p=>{
