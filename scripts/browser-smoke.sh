@@ -43,7 +43,7 @@ smoke_route() {
 }
 
 smoke_route "home" "Fantasy scoring preview"
-smoke_route "account" "Rift Account"
+smoke_route "account" "RIFT ACCOUNT"
 smoke_route "team" "My Team"
 smoke_route "schedule" "Schedule"
 smoke_route "players" "Players"
