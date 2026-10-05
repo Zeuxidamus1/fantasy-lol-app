@@ -47,10 +47,10 @@ function localScheduleRow(g){
   const d=new Date(g.startTime);
   if(Number.isNaN(d.getTime())) return g;
   const now=new Date();
-  const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-  const gameDay=new Date(d.getFullYear(),d.getMonth(),d.getDate());
-  const diff=Math.round((gameDay-today)/86400000);
-  const day=diff===0?"today":diff===1?"tomorrow":"upcoming";
+  const todayKey=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate());
+  const gameKey=Date.UTC(d.getFullYear(),d.getMonth(),d.getDate());
+  const diff=Math.round((gameKey-todayKey)/86400000);
+  const day=diff<0?"past":diff===0?"today":diff===1?"tomorrow":"upcoming";
   const prefix=diff===0?"TODAY":diff===1?"TOMORROW":d.toLocaleDateString(undefined,{month:"short",day:"numeric"}).toUpperCase();
   return {
     ...g,
@@ -439,6 +439,8 @@ function render(view="home",options={}){
   currentView=view;
   app.innerHTML="";
   app.appendChild(template.content.cloneNode(true));
+  const titles={home:"Home",team:"My Team",matchup:"Matchup",schedule:"Schedule",players:"Players",player:"Player",league:"League",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup"};
+  document.title=`${titles[view]||"Rift Fantasy"} · Rift Fantasy`;
   document.querySelectorAll(".nav-item").forEach(b=>{
     const active=b.dataset.view===view;
     b.classList.toggle("active",active);
@@ -532,7 +534,9 @@ function render(view="home",options={}){
       addBtn.textContent=getUserRoster().length>=rosterLimit()?"Add / Choose Drop":"Add Player";
       addBtn.onclick=()=>addPlayerToRoster(p);
     }
-    document.querySelector("#profileWaiverBtn").onclick=()=>createWaiverClaim(p);
+    const waiverBtn=document.querySelector("#profileWaiverBtn");
+    if(owned){waiverBtn.textContent="Already Owned";waiverBtn.disabled=true;}
+    else waiverBtn.onclick=()=>createWaiverClaim(p);
     document.querySelector("#profileTradeBtn").onclick=()=>{selectedPlayerId=p.id;render("trade");};
     document.querySelector("#playerBackBtn").onclick=()=>render("players");
   }
@@ -561,19 +565,24 @@ function render(view="home",options={}){
         lastLabel=g.label;
         return heading+`<div class="game-card">
           <div class="game-team"><span class="team-mark">${h(g.aCode||"TBD")}</span><div><strong>${h(g.a||"TBD")}</strong><small>Team 1</small></div></div>
-          <div class="game-meta"><span class="game-time">${h(g.time||"TBD")}</span><span class="game-league">${h(g.league||"LoL Esports")}</span><span class="game-stage">${h(g.stage||"")}</span><span class="game-status">${h(g.status||"UPCOMING")}</span></div>
+          <div class="game-meta"><span class="game-time">${h(g.time||"TBD")}</span><span class="game-league">${h(g.league||"LoL Esports")}</span><span class="game-stage">${h(g.stage||"")}</span><span class="game-status ${String(g.status||"").toUpperCase().includes("PROGRESS")?"live":""}">${h(g.status||"UPCOMING")}</span></div>
           <div class="game-team right"><div><strong>${h(g.b||"TBD")}</strong><small>Team 2</small></div><span class="team-mark">${h(g.bCode||"TBD")}</span></div>
         </div>`;
       }).join(""):'<div class="empty-state"><strong>No matches found</strong><small>Try another filter or check back after the next data refresh.</small></div>';
     };
     document.querySelectorAll("[data-day]").forEach(c=>c.onclick=()=>{day=c.dataset.day;document.querySelectorAll("[data-day]").forEach(x=>x.classList.remove("active"));c.classList.add("active");drawSchedule();});
     const dataText=document.querySelector("#dataUpdatedText");
+    const dataTitle=document.querySelector("#dataStatusTitle");
     if(dataText&&window.ESPORTS_DATA){
       const stamp=new Date(window.ESPORTS_DATA.updatedAt);
       const when=Number.isNaN(stamp.getTime())?window.ESPORTS_DATA.updatedAt:stamp.toLocaleString();
       const ageHours=(Date.now()-stamp.getTime())/3600000;
       const freshness=Number.isFinite(ageHours)&&ageHours>24?"Data may be stale. ":"";
+      if(dataTitle)dataTitle.textContent=window.ESPORTS_DATA.autoUpdated?"LoL Esports data refreshed":"LoL Esports data snapshot";
       dataText.textContent=`${freshness}${window.ESPORTS_DATA.autoUpdated?"Auto-refreshed":"Snapshot updated"} ${when}. Timestamped matches use your device's local time.`;
+    }else if(dataText){
+      if(dataTitle)dataTitle.textContent="Schedule data unavailable";
+      dataText.textContent="The external data file could not be loaded. The rest of the app remains available.";
     }
     drawSchedule();
   }
@@ -612,7 +621,7 @@ function render(view="home",options={}){
     const content=document.querySelector("#tradeContent");
 
     const managers=leagueManagers();
-    partnerSelect.innerHTML=managers.map(m=>`<option value="${m}">${m}</option>`).join("");
+    partnerSelect.innerHTML=managers.map(m=>`<option value="${h(m)}">${h(m)}</option>`).join("");
 
     const fmt=(iso)=>{const d=new Date(iso);return Number.isNaN(d.getTime())?"":d.toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});};
 
@@ -621,8 +630,8 @@ function render(view="home",options={}){
       const theirs=simulatedRosterForManager(partnerSelect.value);
       if(selectedTheirs && !theirs.some(p=>playerKey(p)===String(selectedTheirs))) selectedTheirs=null;
 
-      myList.innerHTML=mine.map(p=>`<button class="trade-option ${selectedMine===playerKey(p)?"selected":""}" data-trade-mine="${playerKey(p)}"><strong>${p.name}</strong><small>${p.position||p.role} · ${p.team}</small></button>`).join("");
-      theirList.innerHTML=theirs.map(p=>`<button class="trade-option ${String(selectedTheirs)===playerKey(p)?"selected":""}" data-trade-theirs="${playerKey(p)}"><strong>${p.name}</strong><small>${p.role} · ${p.team}</small></button>`).join("");
+      myList.innerHTML=mine.length?mine.map(p=>`<button class="trade-option ${selectedMine===playerKey(p)?"selected":""}" data-trade-mine="${playerKey(p)}"><strong>${h(p.name)}</strong><small>${h(p.position||p.role)} · ${h(p.team)}</small></button>`).join(""):'<div class="empty-state"><strong>No rostered players</strong><small>Add a player before building a trade.</small></div>';
+      theirList.innerHTML=theirs.length?theirs.map(p=>`<button class="trade-option ${String(selectedTheirs)===playerKey(p)?"selected":""}" data-trade-theirs="${playerKey(p)}"><strong>${h(p.name)}</strong><small>${h(p.role)} · ${h(p.team)}</small></button>`).join(""):'<div class="empty-state"><strong>No simulated roster available</strong><small>More verified player data is needed for this trade partner.</small></div>';
 
       const myP=mine.find(p=>playerKey(p)===selectedMine);
       const theirP=theirs.find(p=>playerKey(p)===String(selectedTheirs));
@@ -694,12 +703,6 @@ function render(view="home",options={}){
       if(Number.isNaN(d.getTime()))return "";
       return d.toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
     };
-    const demoActivity=[
-      {manager:"Baron Bandits",type:"add",player:"Knight",time:new Date(Date.now()-38*60000).toISOString()},
-      {manager:"Rift Raiders",type:"drop",player:"Noah",time:new Date(Date.now()-92*60000).toISOString()},
-      {manager:"Pentakill Club",type:"claim",player:"Razork",time:new Date(Date.now()-4*3600000).toISOString()}
-    ];
-
     const drawTransactions=()=>{
       const claims=getWaiverClaims();
       const history=getTransactionHistory();
@@ -727,11 +730,7 @@ function render(view="home",options={}){
           <span class="transaction-time">${formatTime(t.time)}</span>
         </div>`).join(""):'<div class="empty-state"><strong>No transaction history yet</strong><small>Your completed adds and drops will appear here automatically.</small></div>';
       }else{
-        content.innerHTML=demoActivity.map(t=>`<div class="transaction-item">
-          <span class="transaction-icon ${t.type==="drop"?"drop":t.type==="claim"?"claim":""}">${t.type==="add"?"+":t.type==="drop"?"−":"W"}</span>
-          <div class="transaction-info"><strong><span class="activity-manager">${t.manager}</span> ${t.type==="add"?"added":t.type==="drop"?"dropped":"claimed"} ${t.player}</strong><small>League activity · prototype feed</small></div>
-          <span class="transaction-time">${formatTime(t.time)}</span>
-        </div>`).join("");
+        content.innerHTML='<div class="empty-state"><strong>League-wide activity is not connected yet</strong><small>This requires the future shared league backend. Your own completed adds and drops remain available under My History.</small></div>';
       }
     };
 
@@ -839,7 +838,13 @@ function render(view="home",options={}){
       rosterEl.innerHTML=slotPlayers.map(x=>`<div class="draft-roster-slot ${x.p?(x.starter?"filled-start":"filled-bench"):""}"><small>${x.slot}</small><strong class="${x.p?"":"empty-slot"}">${x.p?x.p.name:"Empty"}</strong></div>`).join("");
     };
 
-    document.querySelector("#startDraftBtn").onclick=()=>{
+    const startDraftBtn=document.querySelector("#startDraftBtn");
+    const requiredStarters=(Number(getLeagueSettings().managers)||4)*5;
+    if((!state||!state.started)&&draftPool.length<requiredStarters){
+      startDraftBtn.disabled=true;
+      document.querySelector("#draftHint").textContent=`Need at least ${requiredStarters} verified players for this league size. Reduce managers in League Setup or wait for a data refresh.`;
+    }
+    startDraftBtn.onclick=()=>{
       const existing=getDraftState();
       if(existing?.picks?.length && !existing.complete){
         const ok=window.confirm("Reset this draft? Your current mock draft picks will be cleared.");
