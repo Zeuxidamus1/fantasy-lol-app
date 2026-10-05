@@ -24,12 +24,26 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Check API credential
+        id: api
+        env:
+          LOL_ESPORTS_API_KEY: ${{ secrets.LOL_ESPORTS_API_KEY }}
+        run: |
+          if [ -n "$LOL_ESPORTS_API_KEY" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::LOL_ESPORTS_API_KEY is not configured. Keeping the last known-good data snapshot."
+          fi
+
       - name: Fetch current LoL Esports schedule and rosters
+        if: steps.api.outputs.available == 'true'
         run: node scripts/update-esports-data.mjs
         env:
           LOL_ESPORTS_API_KEY: ${{ secrets.LOL_ESPORTS_API_KEY }}
 
       - name: Commit refreshed data
+        if: steps.api.outputs.available == 'true'
         run: |
           if git diff --quiet -- esports-data.js; then
             echo "No esports data changes."
