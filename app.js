@@ -1518,16 +1518,33 @@ function render(view="home",options={}){
         }
       };
       await drawCloudLeagues();
-      document.querySelector("#createCloudLeagueBtn").onclick=async()=>{
-        const btn=document.querySelector("#createCloudLeagueBtn");btn.disabled=true;
+      const createName=document.querySelector("#newLeagueName");
+      const createTeam=document.querySelector("#newLeagueTeamName");
+      const createBtn=document.querySelector("#createCloudLeagueBtn");
+      const updateCreateState=()=>{createBtn.disabled=!(createName.value.trim()&&createTeam.value.trim());};
+      createName.addEventListener("input",updateCreateState);
+      createTeam.addEventListener("input",updateCreateState);
+      updateCreateState();
+      createBtn.onclick=async()=>{
+        const name=createName.value.trim();
+        const teamName=createTeam.value.trim();
+        if(!name||!teamName)return showToast("Enter a league name and team name.");
+        createBtn.disabled=true;
         try{
-          const created=await b.createLeague(settings.name,settings);
+          const nextSettings={...settings,name};
+          const created=await b.createLeague(name,nextSettings);
           const league=Array.isArray(created)?created[0]:created;
-          if(league?.id)setActiveLeagueId(league.id);
-          showToast("Online league created"+(league?.invite_code?": "+league.invite_code:""));
+          if(league?.id){
+            setActiveLeagueId(league.id);
+            await b.updateTeamName(league.id,teamName);
+          }
+          storageSet("riftLeagueSettings",JSON.stringify(nextSettings));
+          showToast("League created"+(league?.invite_code?": "+league.invite_code:""));
+          createName.value="";
+          createTeam.value="";
           await drawCloudLeagues();
         }catch(err){showToast(err.message||"Could not create league");}
-        finally{btn.disabled=false;}
+        finally{updateCreateState();}
       };
       const joinCode=document.querySelector("#joinCode");
       const joinTeamName=document.querySelector("#joinTeamName");
