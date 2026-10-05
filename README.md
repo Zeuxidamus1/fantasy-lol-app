@@ -45,3 +45,16 @@ The public anon key is designed for browser use when protected by Row Level Secu
 ## Project status
 
 The frontend and cloud integration layer are ready for backend provisioning. Until a Supabase project is connected and the schema is applied, the app safely remains in local prototype mode. Live fantasy scoring still requires a separate trusted ingestion/scoring service before production launch.
+
+
+## Cloud deployment workflow
+
+Once a Supabase project exists, the repository can finish the backend setup without manual SQL copy/paste.
+
+Configure these GitHub repository settings:
+
+- Secret: `SUPABASE_DB_URL` — the PostgreSQL connection string for the Supabase project.
+- Variable: `SUPABASE_URL` — the public project URL, such as `https://<project-ref>.supabase.co`.
+- Variable: `SUPABASE_ANON_KEY` — the browser-safe public anon key. Never use the service-role key here.
+
+Then run **Actions → Deploy Cloud Backend → Run workflow**. The workflow applies `supabase/schema.sql`, generates the browser-safe `backend-config.js`, commits that public configuration, and lets GitHub Pages redeploy automatically.
