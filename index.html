@@ -364,7 +364,7 @@
 
   <template id="league-template">
     <section class="stack">
-      <div class="section-title"><div><div class="eyebrow" id="leagueNameLabel">SUMMONER'S CUP</div><h2>League</h2></div><button class="secondary-btn" data-jump="setup">League Setup</button></div>
+      <div class="section-title"><div><div class="eyebrow" id="leagueNameLabel">SUMMONER'S CUP</div><h2>League</h2></div><button class="secondary-btn commissioner-only" id="leagueSetupBtn" data-jump="setup" hidden>League Setup</button></div>
       <section class="card cloud-league-card" id="cloudLeagueCard">
         <div class="section-head"><div><div class="eyebrow">ONLINE LEAGUE</div><h3 id="cloudLeagueTitle">Local prototype mode</h3></div></div>
         <p class="profile-copy" id="cloudLeagueCopy">Sign in after cloud setup is connected to create or join a shared league.</p>
@@ -373,7 +373,7 @@
           <div class="join-league-row">
             <input class="form-control" id="joinCode" maxlength="12" placeholder="Invite code" aria-label="League invite code" />
             <input class="form-control" id="joinTeamName" maxlength="40" placeholder="Team name" aria-label="Fantasy team name" />
-            <button class="secondary-btn" id="joinCloudLeagueBtn">Join</button>
+            <button class="secondary-btn" id="joinCloudLeagueBtn" disabled>Join</button>
           </div>
         </div>
         <div id="cloudLeagueList" class="stack tight"></div>
@@ -386,7 +386,7 @@
         <button class="action-card" data-jump="draft"><span class="action-icon">◎</span><strong>Draft Room</strong><small>Run a mock snake draft</small></button>
         <button class="action-card" data-jump="transactions"><span class="action-icon">↕</span><strong>Transactions</strong><small>Waivers, adds & drops</small></button>
       </div>
-      <button class="wide-link-btn" data-jump="setup">League Setup & Scoring →</button>
+      <button class="wide-link-btn commissioner-only" id="leagueSetupLink" data-jump="setup" hidden>League Setup & Scoring →</button>
       <div class="card">
         <div class="section-head"><div><div class="eyebrow">LEAGUE SETTINGS</div><h3>Current format</h3></div><button class="text-btn" id="rulesBtn">Scoring</button></div>
         <div class="settings-list" id="leagueSettingsSummary">
@@ -515,7 +515,7 @@
   </template>
 
   <template id="setup-template">
-    <section class="stack">
+    <section class="stack" id="setupScreen">
       <div class="section-title">
         <div><div class="eyebrow">COMMISSIONER TOOLS</div><h2>League Setup</h2></div>
         <button class="secondary-btn" data-jump="league">Back</button>
