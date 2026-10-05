@@ -958,16 +958,21 @@ function render(view="home",options={}){
     const starterCount=document.querySelector("#teamStarterCount");
     const rosterCards=document.querySelectorAll(".team-roster-card,.team-summary-card");
 
+    let rosterMovesEnabled=false;
     const bindDrops=()=>{
-      document.querySelectorAll("[data-drop-roster]").forEach(btn=>btn.onclick=()=>{
+      document.querySelectorAll("[data-drop-roster]").forEach(btn=>btn.onclick=async()=>{
+        if(!rosterMovesEnabled)return showToast("Roster moves unlock after the draft.");
         const currentNow=getUserRoster();
         const player=currentNow.find(p=>playerKey(p)===btn.dataset.dropRoster);
         if(!player)return;
         if(!window.confirm(`Drop ${player.name} from your roster?`))return;
-        saveUserRoster(arrangeUserRoster(currentNow.filter(p=>playerKey(p)!==btn.dataset.dropRoster)));
-        logTransaction("drop",player);
-        showToast(`${player.name} dropped`);
-        render("team",{replace:true});
+        btn.disabled=true;
+        try{
+          await saveUserRoster(currentNow.filter(p=>playerKey(p)!==btn.dataset.dropRoster));
+          logTransaction("drop",player);
+          showToast(`${player.name} dropped`);
+          render("team",{replace:true});
+        }catch(err){showToast(err.message||"Could not drop player");btn.disabled=false;}
       });
     };
 
@@ -978,10 +983,10 @@ function render(view="home",options={}){
       rosterCount.textContent=`${current.length}/${rosterLimit()}`;
       starterCount.textContent=`${starters.length}/5`;
       starterList.innerHTML=starters.length
-        ?starters.map(p=>rosterRow(p,true)).join("")
+        ?starters.map(p=>rosterRow(p,rosterMovesEnabled)).join("")
         :'<div class="empty-state"><strong>No starters yet</strong><small>Add players from the Players tab to build your lineup.</small></div>';
       benchList.innerHTML=bench.length
-        ?bench.map(p=>rosterRow(p,true)).join("")
+        ?bench.map(p=>rosterRow(p,rosterMovesEnabled)).join("")
         :'<div class="empty-state"><strong>Bench is empty</strong><small>Bench players will appear here.</small></div>';
       bindDrops();
     };
@@ -1011,8 +1016,16 @@ function render(view="home",options={}){
 
           leagueNameEl.textContent=String(activeLeague?.name||"Active League").toUpperCase();
           teamNameEl.textContent=membership.team_name||"My Team";
-          badge.textContent="SYNCED";
+          badge.textContent=String(activeLeague?.status||"pre_draft").replace("_"," ").toUpperCase();
           badge.hidden=false;
+          rosterMovesEnabled=activeLeague?.status==="active";
+
+          document.querySelectorAll('.team-screen [data-jump="players"],.team-screen [data-jump="transactions"]').forEach(el=>{
+            if(el.dataset.jump==="players"){
+              el.disabled=!rosterMovesEnabled;
+              el.title=rosterMovesEnabled?"":"Players can be added after the league draft.";
+            }
+          });
 
           await loadRosterFromCloud(leagueId);
           drawRoster();
@@ -1090,14 +1103,6 @@ function render(view="home",options={}){
     else waiverBtn.onclick=async()=>{waiverBtn.disabled=true;await createWaiverClaim(p);waiverBtn.disabled=false;};
     document.querySelector("#profileTradeBtn").onclick=()=>{tradePrefill={id:playerKey(p),side:owned?"mine":"theirs"};render("trade");};
     document.querySelector("#playerBackBtn").onclick=()=>goBack("players");
-  }
-  if(view==="matchup"){
-    const matchupRoster=getUserRoster().filter(p=>(p.slot||p.role)!=="BN").slice(0,5);
-    document.querySelector("#battleList").innerHTML = matchupRoster.length?matchupRoster.map((p,i)=>`<div class="battle-row">
-      <div class="battle-side"><span class="role-badge">${p.role}</span><div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)}</small></div></div>
-      <span class="battle-score">${Number(p.fp??p.projection??0).toFixed(1)} - ${Number(opponents[i]?.score??0).toFixed(1)}</span>
-      <div class="battle-side right"><div class="player-info"><strong>${h(opponents[i]?.name||"Opponent")}</strong><small>Demo opponent</small></div></div>
-    </div>`).join(""):'<div class="empty-state"><strong>No starters set</strong><small>Add players to your roster to populate this demo matchup.</small></div>';
   }
   if(view==="schedule"){
     const list=document.querySelector("#scheduleList");
@@ -1267,6 +1272,7 @@ function render(view="home",options={}){
     let user=null,claims=[],moves=[],members=[],leagues=[];
     const fmt=iso=>{const d=new Date(iso);return Number.isNaN(d.getTime())?"":d.toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});};
     const memberName=id=>members.find(m=>String(m.user_id)===String(id))?.team_name||"Manager";
+    const playerFromId=id=>playerById(id)||{id,name:id,team:"",role:""};
 
     const draw=()=>{
       const mineClaims=claims.filter(c=>String(c.user_id)===String(user?.id)&&c.status==="pending");
