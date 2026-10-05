@@ -858,16 +858,82 @@ function render(view="home",options={}){
     document.querySelector("#signOutBtn").onclick=async()=>{await b?.signOut?.();showToast("Signed out");render("login",{replace:true});};
   }
   if(view==="home"){
-    const leagueName=document.querySelector("#homeLeagueName");
-    if(leagueName)leagueName.textContent=getLeagueSettings().name;
-    const currentRoster=getUserRoster();
-    const starters=currentRoster.filter(p=>(p.slot||p.role)!=="BN").slice(0,3);
-    document.querySelector("#starterPreview").innerHTML = starters.length?starters.map(p=>playerRow({...p,role:p.position||p.role})).join(""):'<div class="empty-state"><strong>Your roster is empty</strong><small>Browse Players to add your first fantasy player.</small></div>';
-    document.querySelector("#draftBtn").onclick=()=>render("draft");
-    const onboarding=document.querySelector("#onboardingCard");
-    if(storageGet("riftOnboardingDismissed")==="1" && onboarding) onboarding.remove();
-    const dismiss=document.querySelector("#dismissOnboarding");
-    if(dismiss) dismiss.onclick=()=>{storageSet("riftOnboardingDismissed","1");onboarding?.remove();};
+    const noLeague=document.querySelector("#homeNoLeague");
+    const leagueCard=document.querySelector("#homeLeagueCard");
+    const nextCard=document.querySelector("#homeNextCard");
+    const rosterCard=document.querySelector("#homeRosterCard");
+    const phase=document.querySelector("#homeLeaguePhase");
+    const activeId=getActiveLeagueId();
+
+    (async()=>{
+      if(!cloudReady()){
+        noLeague.hidden=false;
+        return;
+      }
+      try{
+        const b=backend();
+        const user=await b.currentUser().catch(()=>null);
+        if(!user){render("login",{replace:true});return;}
+        const leagues=await b.listLeagues();
+        let leagueId=activeId;
+        if(leagueId&&!leagues.some(l=>String(l.id)===String(leagueId)))leagueId=null;
+        if(!leagueId&&leagues.length===1){leagueId=String(leagues[0].id);setActiveLeagueId(leagueId);}
+        const league=leagues.find(l=>String(l.id)===String(leagueId));
+        if(!league){noLeague.hidden=false;return;}
+
+        const members=await b.listLeagueMembers(league.id);
+        const mine=members.find(m=>String(m.user_id)===String(user.id));
+        storageSet("riftLeagueSettings",JSON.stringify({...defaultLeagueSettings,...(league.settings||{}),name:league.name,scoring:{...defaultLeagueSettings.scoring,...(league.settings?.scoring||{})}}));
+        await loadRosterFromCloud(league.id);
+        const current=getUserRoster();
+        const settings=getLeagueSettings();
+        const expected=Number(settings.managers)||members.length;
+
+        noLeague.hidden=true;
+        leagueCard.hidden=false;
+        nextCard.hidden=false;
+        rosterCard.hidden=false;
+        phase.hidden=false;
+        phase.textContent=String(league.status||"pre_draft").replace("_"," ").toUpperCase();
+        document.querySelector("#homeLeagueEyebrow").textContent=league.name.toUpperCase();
+        document.querySelector("#homeTitle").textContent=mine?.team_name||"My Team";
+        document.querySelector("#homeLeagueName").textContent=league.name;
+        document.querySelector("#homeTeamName").textContent=mine?.team_name||"My Team";
+        document.querySelector("#homeManagerCount").textContent=`${members.length}/${expected}`;
+        document.querySelector("#homeRosterCount").textContent=`${current.length}/${rosterLimit()}`;
+
+        const starters=current.filter(p=>(p.slot||p.role)!=="BN").slice(0,5);
+        document.querySelector("#starterPreview").innerHTML=starters.length
+          ?starters.map(p=>playerRow({...p,role:p.position||p.role})).join("")
+          :'<div class="empty-state"><strong>Your roster is empty</strong><small>Your drafted players will appear here.</small></div>';
+
+        const action=document.querySelector("#homeNextAction");
+        const title=document.querySelector("#homeNextTitle");
+        const copy=document.querySelector("#homeNextCopy");
+        const status=league.status||"pre_draft";
+        if(status==="pre_draft"){
+          title.textContent=members.length<expected?"Waiting for managers":"Ready to draft";
+          copy.textContent=members.length<expected
+            ?`Share the invite code with ${expected-members.length} more manager${expected-members.length===1?"":"s"}.`
+            :"Your league is full. The commissioner can start the live snake draft.";
+          action.textContent=members.length<expected?"View League":"Open Draft Room";
+          action.onclick=()=>render(members.length<expected?"league":"draft");
+        }else if(status==="drafting"){
+          title.textContent="Draft in progress";
+          copy.textContent="The live league draft is underway. Open the Draft Room to see the board and make your picks.";
+          action.textContent="Open Draft Room";
+          action.onclick=()=>render("draft");
+        }else{
+          title.textContent="League active";
+          copy.textContent="Your draft is complete. Manage your roster, transactions, and upcoming match schedule.";
+          action.textContent="Manage My Team";
+          action.onclick=()=>render("team");
+        }
+      }catch(err){
+        noLeague.hidden=false;
+        noLeague.querySelector("small").textContent=err.message||"Could not load your active league.";
+      }
+    })();
   }
   if(view==="team"){
     const leagueId=getActiveLeagueId();
@@ -1354,208 +1420,230 @@ function render(view="home",options={}){
   }
   if(view==="draft"){
     if(draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
-    let state=getDraftState();
-    let role="ALL";
+    const leagueId=getActiveLeagueId();
     const search=document.querySelector("#draftSearch");
     const list=document.querySelector("#draftPlayerList");
     const board=document.querySelector("#draftBoard");
-    const rosterEl=document.querySelector("#myDraftRoster");
     const fullBoard=document.querySelector("#fullDraftBoard");
+    const rosterEl=document.querySelector("#myDraftRoster");
+    const startBtn=document.querySelector("#startDraftBtn");
+    const refreshBtn=document.querySelector("#refreshDraftBtn");
+    let role="ALL";
+    let currentUser=null;
+    let members=[];
+    let memberById=new Map();
+    let draft=null;
+    let picks=[];
 
-    const drawDraft=()=>{
-      state=getDraftState();
-      if(!state||!state.started){
-        document.querySelector("#draftRoundLabel").textContent="MOCK SNAKE DRAFT";
-        document.querySelector("#draftTurnLabel").textContent="Draft ready";
-        document.querySelector("#draftHint").textContent="You will draft from slot #2.";
-        document.querySelector("#draftClock").textContent="0:30";
-        document.querySelector("#draftProgress").textContent="0 picks";
-        board.innerHTML='<div class="muted">No picks yet.</div>';
-      }else{
-        const managerIndex=draftOrderForPick(state.pickIndex,state.managerCount);
-        const round=Math.floor(state.pickIndex/state.managerCount)+1;
-        const within=state.pickIndex%state.managerCount+1;
-        document.querySelector("#draftRoundLabel").textContent=state.complete?"DRAFT COMPLETE":`ROUND ${round} · PICK ${within}`;
-        document.querySelector("#draftTurnLabel").textContent=state.complete?"Mock draft complete":managerIndex===state.userIndex?"You're on the clock":`${draftManagerNames[managerIndex]||"CPU Manager"} is picking`;
-        document.querySelector("#draftHint").textContent=state.complete?"Reset to draft again.":managerIndex===state.userIndex?"Choose any available player below.":"CPU picks are automatic.";
-        document.querySelector("#draftClock").textContent=`0:${String(state.seconds??30).padStart(2,"0")}`;
-        document.querySelector("#draftProgress").textContent=`${state.picks.length} picks`;
-        const recent=state.picks.slice(-10).reverse();
-        board.innerHTML=recent.length?recent.map(p=>`<div class="draft-pick ${p.managerIndex===state.userIndex?"mine":""}"><small>#${h(p.pick)} · R${h(p.round)}</small><strong>${h(p.name)}</strong><span>${h(p.role)} · ${h(p.manager)}</span></div>`).join(""):'<div class="muted">No picks yet.</div>';
+    const managerForPick=(pickIndex,order)=>{
+      const count=order.length;
+      if(!count)return null;
+      const round=Math.floor(pickIndex/count);
+      const within=pickIndex%count;
+      const pos=round%2===0?within:count-1-within;
+      return order[pos]||null;
+    };
+
+    const refresh=async()=>{
+      if(!leagueId||!cloudReady()){
+        document.querySelector("#draftTurnLabel").textContent="Join a league first";
+        document.querySelector("#draftHint").textContent="The live Draft Room belongs to your active online league.";
+        startBtn.hidden=true;
+        list.innerHTML='<div class="empty-state"><strong>No active league</strong><small>Go to League to create or join one.</small></div>';
+        return;
       }
+      try{
+        const b=backend();
+        currentUser=currentUser||await b.currentUser();
+        const leagues=await b.listLeagues();
+        const league=leagues.find(l=>String(l.id)===String(leagueId));
+        members=await b.listLeagueMembers(leagueId);
+        memberById=new Map(members.map(m=>[String(m.user_id),m]));
+        draft=await b.getLeagueDraft(leagueId);
+        picks=await b.listDraftPicks(leagueId);
+        const me=memberById.get(String(currentUser.id));
+        document.querySelector("#draftMyTeamName").textContent=me?.team_name||"My Team";
 
-      const boardState=state||{managerCount:Number(getLeagueSettings().managers)||8,picks:[],pickIndex:0,userIndex:1,started:false,complete:false};
-      const settings=getLeagueSettings();
-      const totalRounds=5+Number(settings.bench||3);
-      const cols=boardState.managerCount;
-      const headers=Array.from({length:cols},(_,i)=>`<div class="board-head">${h(draftManagerNames[i]||("Manager "+(i+1)))}</div>`).join("");
-      let cells="";
-      for(let r=0;r<totalRounds;r++){
-        for(let c=0;c<cols;c++){
-          const managerIndex=r%2===0?c:cols-1-c;
-          const overall=r*cols+c;
-          const pick=(boardState.picks||[]).find(p=>p.pick===overall+1);
-          const onClock=boardState.started&&!boardState.complete&&overall===boardState.pickIndex;
-          cells+=`<div class="board-cell ${managerIndex===boardState.userIndex?"mine":""} ${onClock?"on-clock":""}">
-            <small>R${r+1} · #${overall+1}</small>
-            <strong>${pick?h(pick.name):"—"}</strong>
-            <span>${pick?h(pick.role):h(draftManagerNames[managerIndex]||"")}</span>
-          </div>`;
+        const owner=me?.role==="owner";
+        const expected=Number(league?.settings?.managers)||members.length;
+        startBtn.hidden=!(owner && (!draft||draft.status!=="drafting") && league?.status==="pre_draft");
+        startBtn.disabled=members.length!==expected;
+        startBtn.textContent=members.length===expected?"Start Draft":`Waiting for ${expected-members.length} Manager${expected-members.length===1?"":"s"}`;
+
+        if(!draft){
+          document.querySelector("#draftRoundLabel").textContent="PRE-DRAFT";
+          document.querySelector("#draftTurnLabel").textContent=members.length===expected?"League is ready":"Waiting for managers";
+          document.querySelector("#draftHint").textContent=owner
+            ?"Start the draft once every manager has joined."
+            :"The commissioner will start the draft when the league is ready.";
+          document.querySelector("#draftClock").textContent="—";
+          document.querySelector("#draftProgress").textContent="0 picks";
+        }else{
+          const order=draft.manager_order||[];
+          const currentManager=managerForPick(Number(draft.current_pick)||0,order);
+          const currentMember=memberById.get(String(currentManager));
+          const round=Math.floor((Number(draft.current_pick)||0)/Math.max(1,order.length))+1;
+          document.querySelector("#draftRoundLabel").textContent=draft.status==="complete"?"DRAFT COMPLETE":`ROUND ${round} · PICK ${Number(draft.current_pick||0)+1}`;
+          document.querySelector("#draftTurnLabel").textContent=draft.status==="complete"
+            ?"Draft complete"
+            :String(currentManager)===String(currentUser.id)?"You're on the clock":`${currentMember?.team_name||"Another manager"} is on the clock`;
+          document.querySelector("#draftHint").textContent=draft.status==="complete"
+            ?"Rosters have been created automatically from the final board."
+            :"Picks sync across every manager's device.";
+          document.querySelector("#draftClock").textContent=draft.status==="drafting"?"LIVE":"DONE";
+          document.querySelector("#draftProgress").textContent=`${picks.length}/${(draft.manager_order?.length||0)*(draft.total_rounds||0)} picks`;
         }
+
+        const taken=new Set(picks.map(p=>String(p.player_id)));
+        const q=search.value.trim().toLowerCase();
+        const myTurn=draft?.status==="drafting"&&String(managerForPick(Number(draft.current_pick)||0,draft.manager_order||[]))===String(currentUser.id);
+        const filtered=draftPool.filter(p=>!taken.has(String(p.id))&&(role==="ALL"||p.role===role)&&(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)));
+        list.innerHTML=filtered.map(p=>`<div class="player-row draft-player"><span class="role-badge">${h(p.role)}</span><div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)}</small></div><button class="draft-btn" data-player-id="${h(p.id)}" ${myTurn?"":"disabled"}>DRAFT</button></div>`).join("")||'<div class="empty-state"><strong>No available players</strong><small>Try another role or search.</small></div>';
+        list.querySelectorAll("[data-player-id]").forEach(btn=>btn.onclick=async()=>{
+          const player=draftPool.find(p=>String(p.id)===String(btn.dataset.playerId));
+          if(!player)return;
+          btn.disabled=true;
+          try{
+            await b.makeDraftPick(leagueId,player.id,player.role);
+            await refresh();
+          }catch(err){showToast(err.message||"Could not make draft pick");await refresh();}
+        });
+
+        board.innerHTML=picks.length?picks.slice(-10).reverse().map(p=>{
+          const player=draftPool.find(x=>String(x.id)===String(p.player_id));
+          const manager=memberById.get(String(p.user_id));
+          return `<div class="draft-pick ${String(p.user_id)===String(currentUser.id)?"mine":""}"><small>#${p.pick_number} · R${p.round_number}</small><strong>${h(player?.name||p.player_id)}</strong><span>${h(p.role)} · ${h(manager?.team_name||"Manager")}</span></div>`;
+        }).join(""):'<div class="muted">No picks yet.</div>';
+
+        if(draft?.manager_order?.length){
+          const headers=draft.manager_order.map(uid=>`<div class="board-head">${h(memberById.get(String(uid))?.team_name||"Manager")}</div>`).join("");
+          let cells="";
+          const total=(draft.total_rounds||0)*draft.manager_order.length;
+          for(let i=0;i<total;i++){
+            const uid=managerForPick(i,draft.manager_order);
+            const pick=picks.find(p=>Number(p.pick_number)===i+1);
+            const player=pick?draftPool.find(x=>String(x.id)===String(pick.player_id)):null;
+            cells+=`<div class="board-cell ${String(uid)===String(currentUser.id)?"mine":""} ${draft.status==="drafting"&&i===Number(draft.current_pick)?"on-clock":""}"><small>R${Math.floor(i/draft.manager_order.length)+1} · #${i+1}</small><strong>${h(player?.name||"—")}</strong><span>${h(memberById.get(String(uid))?.team_name||"")}</span></div>`;
+          }
+          fullBoard.innerHTML=`<div class="full-board-grid" style="grid-template-columns:repeat(${draft.manager_order.length},minmax(92px,1fr))">${headers}${cells}</div>`;
+        }else fullBoard.innerHTML='<div class="muted">The draft board will appear when the commissioner starts the draft.</div>';
+
+        const mine=picks.filter(p=>String(p.user_id)===String(currentUser.id));
+        rosterEl.innerHTML=mine.length?mine.map(p=>{
+          const player=draftPool.find(x=>String(x.id)===String(p.player_id));
+          return `<div class="draft-roster-slot filled-start"><small>${h(p.role)}</small><strong>${h(player?.name||p.player_id)}</strong></div>`;
+        }).join(""):'<div class="muted">Your picks will appear here.</div>';
+
+        if(draft?.status==="complete")await loadRosterFromCloud(leagueId);
+      }catch(err){
+        document.querySelector("#draftTurnLabel").textContent="Draft unavailable";
+        document.querySelector("#draftHint").textContent=err.message||"Could not load the draft.";
       }
-      fullBoard.innerHTML=`<div class="full-board-grid" style="grid-template-columns:repeat(${cols},minmax(92px,1fr))">${headers}${cells}</div>`;
-
-      const taken=new Set((state?.picks||[]).map(p=>p.playerId));
-      const q=search.value.trim().toLowerCase();
-      const isUserTurn=state&&state.started&&!state.complete&&draftOrderForPick(state.pickIndex,state.managerCount)===state.userIndex;
-      const filtered=draftPool.filter(p=>!taken.has(p.id)&&(role==="ALL"||p.role===role)&&(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)));
-      list.innerHTML=filtered.map(p=>`<div class="player-row draft-player"><span class="role-badge">${h(p.role)}</span><div class="player-info"><strong>${h(p.name)}${p.verified?'<span class="data-chip">ROSTER SNAPSHOT</span>':""}</strong><small>${h(p.team)}</small></div><span class="fp">${Number(p.fp??0).toFixed(1)}</span><button class="draft-btn" data-player-id="${playerKey(p)}" ${isUserTurn?"":"disabled"}>DRAFT</button></div>`).join("")||'<div class="card muted">No available players match this filter.</div>';
-      list.querySelectorAll("[data-player-id]").forEach(btn=>btn.onclick=()=>{
-        state=getDraftState();
-        if(!state||state.complete||draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex)return;
-        const player=draftPool.find(p=>playerKey(p)===btn.dataset.playerId);
-        if(!player)return;
-        if(!canDraftPlayer(state,state.userIndex,player)){showToast("That pick would exceed your roster limits.");return;}
-        makeDraftPick(state,player,state.userIndex);
-        runCpuPicks(state);
-        drawDraft();
-      });
-
-      const mine=(state?.picks||[]).filter(p=>p.managerIndex===state.userIndex);
-      const starterRoles=["TOP","JNG","MID","ADC","SUP"];
-      const used=new Set();
-      const slotPlayers=[];
-      starterRoles.forEach(roleName=>{
-        const idx=mine.findIndex((p,i)=>!used.has(i)&&p.role===roleName);
-        if(idx>=0){used.add(idx);slotPlayers.push({slot:roleName,p:mine[idx],starter:true});}
-        else slotPlayers.push({slot:roleName,p:null,starter:true});
-      });
-      mine.forEach((p,i)=>{if(!used.has(i))slotPlayers.push({slot:"BN",p,starter:false});});
-      while(slotPlayers.length<5+Number(settings.bench||3))slotPlayers.push({slot:"BN",p:null,starter:false});
-      rosterEl.innerHTML=slotPlayers.map(x=>`<div class="draft-roster-slot ${x.p?(x.starter?"filled-start":"filled-bench"):""}"><small>${h(x.slot)}</small><strong class="${x.p?"":"empty-slot"}">${x.p?h(x.p.name):"Empty"}</strong></div>`).join("");
     };
 
-    const startDraftBtn=document.querySelector("#startDraftBtn");
-    const requiredStarters=(Number(getLeagueSettings().managers)||4)*5;
-    if((!state||!state.started)&&draftPool.length<requiredStarters){
-      startDraftBtn.disabled=true;
-      document.querySelector("#draftHint").textContent=`Need at least ${requiredStarters} verified players for this league size. Reduce managers in League Setup or wait for a data refresh.`;
-    }
-    startDraftBtn.onclick=()=>{
-      const existing=getDraftState();
-      if(existing?.picks?.length && !existing.complete){
-        const ok=window.confirm("Reset this draft? Your current mock draft picks will be cleared.");
-        if(!ok)return;
-      }
-      state=newDraftState();
-      saveDraftState(state);
-      runCpuPicks(state);
-      drawDraft();
-      showToast("Mock draft started. You are drafting from slot #2.");
+    startBtn.onclick=async()=>{
+      startBtn.disabled=true;
+      try{await backend().startLeagueDraft(leagueId);showToast("Live draft started");await refresh();}
+      catch(err){showToast(err.message||"Could not start draft");await refresh();}
     };
-    document.querySelector("#autoPickBtn").onclick=()=>{
-      state=getDraftState();
-      if(!state||state.complete||draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex){showToast("It is not your turn.");return;}
-      const p=bestAvailableDraftPlayer(state,state.userIndex);
-      if(p){makeDraftPick(state,p,state.userIndex);runCpuPicks(state);drawDraft();}
-    };
-    search.oninput=drawDraft;
-    document.querySelectorAll("[data-draft-role]").forEach(c=>c.onclick=()=>{role=c.dataset.draftRole;document.querySelectorAll("[data-draft-role]").forEach(x=>x.classList.remove("active"));c.classList.add("active");drawDraft();});
-    drawDraft();
-
-    draftTimerId=setInterval(()=>{
-      state=getDraftState();
-      if(!state||!state.started||state.complete)return;
-      if(draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex)return;
-      state.seconds=Math.max(0,(state.seconds??30)-1);
-      if(state.seconds===0){
-        const p=bestAvailableDraftPlayer(state);
-        if(p){makeDraftPick(state,p,state.userIndex);runCpuPicks(state);}
-      }else saveDraftState(state);
-      drawDraft();
-    },1000);
+    refreshBtn.onclick=refresh;
+    search.oninput=refresh;
+    document.querySelectorAll("[data-draft-role]").forEach(c=>c.onclick=()=>{
+      role=c.dataset.draftRole;
+      document.querySelectorAll("[data-draft-role]").forEach(x=>x.classList.toggle("active",x===c));
+      refresh();
+    });
+    void refresh();
+    draftTimerId=setInterval(refresh,3000);
   }
   if(view==="setup"){
     const setupScreen=document.querySelector("#setupScreen");
     const activeLeagueId=getActiveLeagueId();
-    if(cloudReady()&&activeLeagueId){
-      setupScreen.hidden=true;
-      (async()=>{
+
+    const populate=(settings)=>{
+      document.querySelector("#leagueName").value=settings.name;
+      const managerSelect=document.querySelector("#managerCount");
+      const maxManagers=Math.max(2,Math.floor(draftPool.length/5));
+      [...managerSelect.options].forEach(option=>{
+        const unsupported=Number(option.value)>maxManagers;
+        option.disabled=unsupported;
+        if(unsupported)option.title=`Needs at least ${Number(option.value)*5} verified players`;
+      });
+      if([...managerSelect.options].some(o=>o.value===String(settings.managers)&&!o.disabled))managerSelect.value=settings.managers;
+      else managerSelect.value=[...managerSelect.options].find(o=>!o.disabled)?.value||"4";
+      document.querySelector("#benchCount").value=settings.bench;
+      document.querySelector("#competition").value=settings.competition;
+      document.querySelector("#teamSlot").checked=false;
+      document.querySelector("#scoreKills").value=settings.scoring.kills;
+      document.querySelector("#scoreDeaths").value=settings.scoring.deaths;
+      document.querySelector("#scoreAssists").value=settings.scoring.assists;
+      document.querySelector("#scoreCs").value=settings.scoring.cs;
+      document.querySelector("#scoreWin").value=settings.scoring.win;
+      document.querySelector("#scoreFb").value=settings.scoring.firstBlood;
+    };
+
+    (async()=>{
+      let settings=getLeagueSettings();
+      let league=null;
+      if(cloudReady()&&activeLeagueId){
+        setupScreen.hidden=true;
         try{
           const b=backend();
-          const user=await b.currentUser().catch(()=>null);
-          const members=user?await b.listLeagueMembers(activeLeagueId):[];
+          const user=await b.currentUser();
+          const [members,leagues]=await Promise.all([b.listLeagueMembers(activeLeagueId),b.listLeagues()]);
           const mine=members.find(m=>String(m.user_id)===String(user?.id));
+          league=leagues.find(l=>String(l.id)===String(activeLeagueId));
           if(mine?.role!=="owner"){
             showToast("Only the league commissioner can change league settings.");
             render("league",{replace:true});
             return;
           }
+          if(league?.status!=="pre_draft"){
+            showToast("League settings are locked after the draft starts.");
+            render("league",{replace:true});
+            return;
+          }
+          settings={...defaultLeagueSettings,...(league?.settings||{}),name:league?.name||settings.name,scoring:{...defaultLeagueSettings.scoring,...(league?.settings?.scoring||{})}};
+          storageSet("riftLeagueSettings",JSON.stringify(settings));
           setupScreen.hidden=false;
-        }catch{
-          showToast("Could not verify commissioner permissions.");
+        }catch(err){
+          showToast(err.message||"Could not load league settings.");
           render("league",{replace:true});
+          return;
         }
-      })();
-    }
-    const settings=getLeagueSettings();
-    document.querySelector("#leagueName").value=settings.name;
-    const managerSelect=document.querySelector("#managerCount");
-    const maxManagers=Math.max(2,Math.floor(draftPool.length/5));
-    [...managerSelect.options].forEach(option=>{
-      const unsupported=Number(option.value)>maxManagers;
-      option.disabled=unsupported;
-      if(unsupported)option.title=`Needs at least ${Number(option.value)*5} verified players`;
-    });
-    if([...managerSelect.options].some(o=>o.value===String(settings.managers)&&!o.disabled)) managerSelect.value=settings.managers;
-    else managerSelect.value=[...managerSelect.options].find(o=>!o.disabled)?.value||"4";
-    document.querySelector("#benchCount").value=settings.bench;
-    document.querySelector("#competition").value=settings.competition;
-    document.querySelector("#teamSlot").checked=settings.teamSlot;
-    document.querySelector("#scoreKills").value=settings.scoring.kills;
-    document.querySelector("#scoreDeaths").value=settings.scoring.deaths;
-    document.querySelector("#scoreAssists").value=settings.scoring.assists;
-    document.querySelector("#scoreCs").value=settings.scoring.cs;
-    document.querySelector("#scoreWin").value=settings.scoring.win;
-    document.querySelector("#scoreFb").value=settings.scoring.firstBlood;
+      }
+      populate(settings);
 
-    document.querySelectorAll('[data-choice-group="draftType"] .choice').forEach(b=>b.classList.toggle("active",b.dataset.value===settings.draftType));
-    document.querySelectorAll('[data-choice-group="scoringFormat"] .choice').forEach(b=>b.classList.toggle("active",b.dataset.value===settings.scoringFormat));
-
-    document.querySelectorAll(".choice").forEach(btn=>btn.onclick=()=>{
-      const group=btn.parentElement;
-      group.querySelectorAll(".choice").forEach(x=>x.classList.remove("active"));
-      btn.classList.add("active");
-    });
-
-    document.querySelector("#saveLeagueBtn").onclick=()=>{
-      const numberOr=(id,fallback)=>{
-        const n=Number(document.querySelector(id).value);
-        return Number.isFinite(n)?n:fallback;
+      document.querySelector("#saveLeagueBtn").onclick=async()=>{
+        const numberOr=(id,fallback)=>{const n=Number(document.querySelector(id).value);return Number.isFinite(n)?n:fallback;};
+        const next={
+          name:document.querySelector("#leagueName").value.trim()||"Summoner's Cup",
+          managers:document.querySelector("#managerCount").value,
+          bench:document.querySelector("#benchCount").value,
+          draftType:"Snake",
+          scoringFormat:"Head-to-head",
+          competition:document.querySelector("#competition").value,
+          teamSlot:false,
+          scoring:{
+            kills:numberOr("#scoreKills",defaultLeagueSettings.scoring.kills),
+            deaths:numberOr("#scoreDeaths",defaultLeagueSettings.scoring.deaths),
+            assists:numberOr("#scoreAssists",defaultLeagueSettings.scoring.assists),
+            cs:numberOr("#scoreCs",defaultLeagueSettings.scoring.cs),
+            win:numberOr("#scoreWin",defaultLeagueSettings.scoring.win),
+            firstBlood:numberOr("#scoreFb",defaultLeagueSettings.scoring.firstBlood)
+          }
+        };
+        const btn=document.querySelector("#saveLeagueBtn");btn.disabled=true;
+        try{
+          if(cloudReady()&&activeLeagueId)await backend().updateLeagueSettings(activeLeagueId,next.name,next);
+          storageSet("riftLeagueSettings",JSON.stringify(next));
+          storageRemove("riftDraftState");
+          showToast("League settings saved for everyone");
+          render("league",{replace:true});
+        }catch(err){showToast(err.message||"Could not save league settings");}
+        finally{btn.disabled=false;}
       };
-      const next={
-        name:document.querySelector("#leagueName").value.trim()||"Summoner's Cup",
-        managers:managerSelect.value,
-        bench:document.querySelector("#benchCount").value,
-        draftType:"Snake",
-        scoringFormat:"Head-to-head",
-        competition:document.querySelector("#competition").value,
-        teamSlot:false,
-        scoring:{
-          kills:numberOr("#scoreKills",defaultLeagueSettings.scoring.kills),
-          deaths:numberOr("#scoreDeaths",defaultLeagueSettings.scoring.deaths),
-          assists:numberOr("#scoreAssists",defaultLeagueSettings.scoring.assists),
-          cs:numberOr("#scoreCs",defaultLeagueSettings.scoring.cs),
-          win:numberOr("#scoreWin",defaultLeagueSettings.scoring.win),
-          firstBlood:numberOr("#scoreFb",defaultLeagueSettings.scoring.firstBlood)
-        }
-      };
-      const prior=getLeagueSettings();
-      storageSet("riftLeagueSettings",JSON.stringify(next));
-      if(prior.managers!==next.managers||prior.bench!==next.bench)storageRemove("riftDraftState");
-      showToast("League settings saved");
-      render("league");
-    };
+    })();
   }
   document.querySelectorAll("[data-open-player]").forEach(row=>{
     if(row.dataset.profileBound)return;
