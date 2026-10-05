@@ -593,7 +593,7 @@ function render(view="home",options={}){
   if(view==="matchup"){
     const matchupRoster=getUserRoster().filter(p=>(p.slot||p.role)!=="BN").slice(0,5);
     document.querySelector("#battleList").innerHTML = matchupRoster.length?matchupRoster.map((p,i)=>`<div class="battle-row">
-      <div class="battle-side"><span class="role-badge">${p.role}</span><div class="player-info"><strong>${p.name}</strong><small>${p.team}</small></div></div>
+      <div class="battle-side"><span class="role-badge">${p.role}</span><div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)}</small></div></div>
       <span class="battle-score">${Number(p.fp??p.projection??0).toFixed(1)} - ${Number(opponents[i]?.score??0).toFixed(1)}</span>
       <div class="battle-side right"><div class="player-info"><strong>${h(opponents[i]?.name||"Opponent")}</strong><small>Demo opponent</small></div></div>
     </div>`).join(""):'<div class="empty-state"><strong>No starters set</strong><small>Add players to your roster to populate this demo matchup.</small></div>';
@@ -691,7 +691,7 @@ function render(view="home",options={}){
       const myP=mine.find(p=>playerKey(p)===selectedMine);
       const theirP=theirs.find(p=>playerKey(p)===String(selectedTheirs));
       if(myP&&theirP){
-        summary.innerHTML=`You send <strong>${myP.name}</strong> to ${partnerSelect.value} and receive <strong>${theirP.name}</strong>.`;
+        summary.innerHTML=`You send <strong>${h(myP.name)}</strong> to ${h(partnerSelect.value)} and receive <strong>${h(theirP.name)}</strong>.`;
         submit.disabled=false;
       }else{
         summary.textContent="Select one player from each side to build an offer.";
@@ -707,11 +707,11 @@ function render(view="home",options={}){
       const history=getTradeHistory();
       if(tab==="offers"){
         const mine=offers.filter(o=>o.direction==="outgoing");
-        content.innerHTML=mine.length?mine.map(o=>`<div class="trade-card"><div class="trade-card-head"><div><h4>${o.partner}</h4><small>Sent ${fmt(o.createdAt)}</small></div><span class="trade-status pending">PENDING</span></div><div class="trade-swap"><div class="trade-side"><span>YOU SEND</span><strong>${o.userPlayer}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>YOU RECEIVE</span><strong>${o.theirPlayer}</strong></div></div><div class="trade-card-actions"><button class="secondary-btn" data-cancel-trade="${o.id}">Cancel Offer</button></div></div>`).join(""):'<div class="empty-state"><strong>No outgoing offers</strong><small>Build a trade above and send it to another manager.</small></div>';
+        content.innerHTML=mine.length?mine.map(o=>`<div class="trade-card"><div class="trade-card-head"><div><h4>${h(o.partner)}</h4><small>Sent ${fmt(o.createdAt)}</small></div><span class="trade-status pending">PENDING</span></div><div class="trade-swap"><div class="trade-side"><span>YOU SEND</span><strong>${h(o.userPlayer)}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>YOU RECEIVE</span><strong>${h(o.theirPlayer)}</strong></div></div><div class="trade-card-actions"><button class="secondary-btn" data-cancel-trade="${o.id}">Cancel Offer</button></div></div>`).join(""):'<div class="empty-state"><strong>No outgoing offers</strong><small>Build a trade above and send it to another manager.</small></div>';
         content.querySelectorAll("[data-cancel-trade]").forEach(b=>b.onclick=()=>{saveTradeOffers(getTradeOffers().filter(o=>o.id!==b.dataset.cancelTrade));showToast("Trade offer canceled");renderTradeTabs();});
       }else if(tab==="incoming"){
         const incoming=offers.filter(o=>o.direction==="incoming");
-        content.innerHTML=incoming.length?incoming.map(o=>`<div class="trade-card"><div class="trade-card-head"><div><h4>Offer from ${o.partner}</h4><small>${fmt(o.createdAt)}</small></div><span class="trade-status pending">PENDING</span></div><div class="trade-swap"><div class="trade-side"><span>YOU SEND</span><strong>${o.userPlayer}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>YOU RECEIVE</span><strong>${o.theirPlayer}</strong></div></div><div class="trade-card-actions"><button class="primary-btn" data-accept-trade="${o.id}">Accept</button><button class="secondary-btn" data-decline-trade="${o.id}">Decline</button></div></div>`).join(""):'<div class="empty-state"><strong>No incoming offers</strong><small>Trade offers from other managers will appear here.</small></div>';
+        content.innerHTML=incoming.length?incoming.map(o=>`<div class="trade-card"><div class="trade-card-head"><div><h4>Offer from ${h(o.partner)}</h4><small>${fmt(o.createdAt)}</small></div><span class="trade-status pending">PENDING</span></div><div class="trade-swap"><div class="trade-side"><span>YOU SEND</span><strong>${h(o.userPlayer)}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>YOU RECEIVE</span><strong>${h(o.theirPlayer)}</strong></div></div><div class="trade-card-actions"><button class="primary-btn" data-accept-trade="${o.id}">Accept</button><button class="secondary-btn" data-decline-trade="${o.id}">Decline</button></div></div>`).join(""):'<div class="empty-state"><strong>No incoming offers</strong><small>Trade offers from other managers will appear here.</small></div>';
         content.querySelectorAll("[data-accept-trade]").forEach(b=>b.onclick=()=>{
           const id=b.dataset.acceptTrade;
           const offer=getTradeOffers().find(o=>o.id===id);
@@ -725,7 +725,7 @@ function render(view="home",options={}){
           completeIncomingTrade(offer,false); renderTradeTabs();
         });
       }else{
-        content.innerHTML=history.length?history.map(o=>`<div class="trade-card"><div class="trade-card-head"><div><h4>${o.partner}</h4><small>${fmt(o.resolvedAt||o.createdAt)}</small></div><span class="trade-status ${o.status}">${String(o.status).toUpperCase()}</span></div><div class="trade-swap"><div class="trade-side"><span>YOU SENT</span><strong>${o.userPlayer}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>YOU RECEIVED</span><strong>${o.theirPlayer}</strong></div></div></div>`).join(""):'<div class="empty-state"><strong>No trade history</strong><small>Completed or declined trades will show here.</small></div>';
+        content.innerHTML=history.length?history.map(o=>`<div class="trade-card"><div class="trade-card-head"><div><h4>${h(o.partner)}</h4><small>${fmt(o.resolvedAt||o.createdAt)}</small></div><span class="trade-status ${o.status}">${String(o.status).toUpperCase()}</span></div><div class="trade-swap"><div class="trade-side"><span>YOU SENT</span><strong>${h(o.userPlayer)}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>YOU RECEIVED</span><strong>${h(o.theirPlayer)}</strong></div></div></div>`).join(""):'<div class="empty-state"><strong>No trade history</strong><small>Completed or declined trades will show here.</small></div>';
       }
     };
 
@@ -765,7 +765,7 @@ function render(view="home",options={}){
       if(tab==="pending"){
         content.innerHTML=claims.length?claims.map((c,i)=>`<div class="transaction-item">
           <span class="transaction-icon claim">W</span>
-          <div class="transaction-info"><strong>#${i+1} ${c.player}<span class="status-pill pending">PENDING</span></strong><small>${c.team} · ${c.role} · Your claim order #${i+1}</small><div class="claim-actions"><button class="claim-btn" data-move-up="${c.id}" ${i===0?"disabled":""}>Move up</button><button class="claim-btn cancel" data-cancel-claim="${c.id}">Cancel</button></div></div>
+          <div class="transaction-info"><strong>#${i+1} ${h(c.player)}<span class="status-pill pending">PENDING</span></strong><small>${h(c.team)} · ${h(c.role)} · Your claim order #${i+1}</small><div class="claim-actions"><button class="claim-btn" data-move-up="${c.id}" ${i===0?"disabled":""}>Move up</button><button class="claim-btn cancel" data-cancel-claim="${c.id}">Cancel</button></div></div>
           <span class="transaction-time">${formatTime(c.createdAt)}</span>
         </div>`).join(""):'<div class="empty-state"><strong>No pending waiver claims</strong><small>Open a player profile and tap Waiver Claim to add one.</small></div>';
         content.querySelectorAll("[data-cancel-claim]").forEach(btn=>btn.onclick=()=>{
@@ -781,7 +781,7 @@ function render(view="home",options={}){
       }else if(tab==="history"){
         content.innerHTML=history.length?history.map(t=>`<div class="transaction-item">
           <span class="transaction-icon ${t.type==="drop"?"drop":""}">${t.type==="add"?"+":"−"}</span>
-          <div class="transaction-info"><strong>${t.type==="add"?"Added":"Dropped"} ${t.player}<span class="status-pill success">COMPLETE</span></strong><small>${t.team} · ${t.role}${t.pairedWith?" · paired with "+t.pairedWith:""}</small></div>
+          <div class="transaction-info"><strong>${t.type==="add"?"Added":"Dropped"} ${h(t.player)}<span class="status-pill success">COMPLETE</span></strong><small>${h(t.team)} · ${h(t.role)}${t.pairedWith?" · paired with "+t.pairedWith:""}</small></div>
           <span class="transaction-time">${formatTime(t.time)}</span>
         </div>`).join(""):'<div class="empty-state"><strong>No transaction history yet</strong><small>Your completed adds and drops will appear here automatically.</small></div>';
       }else{
