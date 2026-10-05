@@ -467,6 +467,22 @@ function playerById(id){
   return allFantasyPlayers().find(p=>playerKey(p)===String(id)||String(p.id||"")===String(id));
 }
 
+function chainPlayerStats(player){
+  const key=String(player?.name||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+  return window.PLAYER_STATS?.players?.[key]||null;
+}
+
+function fantasyPointsForGame(game,scoring=getLeagueSettings()?.scoring||defaultLeagueSettings.scoring){
+  if(!game)return null;
+  const kills=Number(game.kills),deaths=Number(game.deaths),assists=Number(game.assists),cs=Number(game.cs);
+  if(![kills,deaths,assists].every(Number.isFinite))return null;
+  let total=kills*Number(scoring.kills||0)+deaths*Number(scoring.deaths||0)+assists*Number(scoring.assists||0);
+  if(Number.isFinite(cs))total+=cs*Number(scoring.cs||0);
+  if(game.win===true)total+=Number(scoring.win||0);
+  if(game.firstBlood===true)total+=Number(scoring.firstBlood||0);
+  return Number(total.toFixed(1));
+}
+
 function openPlayer(id){
   selectedPlayerId=id;
   render("player");
@@ -1065,7 +1081,11 @@ function render(view="home",options={}){
     document.querySelector("#profileRank").textContent=p.rank?`Player pool rank #${p.rank}`:"Player profile";
     const owned=isOwned(p);
     document.querySelector("#profileStatus").textContent=owned?"On your roster":"Available";
-    document.querySelector("#profileProjection").textContent="—";
+    const chain=chainPlayerStats(p);
+    const scoring=getLeagueSettings()?.scoring||defaultLeagueSettings.scoring;
+    const recentFantasy=(chain?.recent||[]).map(g=>fantasyPointsForGame(g,scoring)).filter(Number.isFinite);
+    const fantasyAvg=recentFantasy.length?recentFantasy.reduce((a,b)=>a+b,0)/recentFantasy.length:null;
+    document.querySelector("#profileProjection").textContent=Number.isFinite(fantasyAvg)?fantasyAvg.toFixed(1):"—";
 
     const outlookByRole={
       TOP:"Top laners gain value through steady scoring, matchup stability, and strong team win equity.",
@@ -1074,14 +1094,25 @@ function render(view="home",options={}){
       ADC:"AD carries can produce some of the biggest fantasy totals when their team plays through late-game damage and kills.",
       SUP:"Supports usually rely on assists, vision, and team success, making them valuable when attached to winning teams."
     };
-    document.querySelector("#profileOutlook").textContent=`${p.name} projects as a ${p.role} option for ${p.team}. ${outlookByRole[p.role]||"Their fantasy value depends on role, team performance, and match volume."}`;
+    const formText=chain?.games?` Over the last ${chain.games} recorded games: ${chain.wins} wins, ${chain.winRate}% win rate, and a ${chain.kda??"—"} KDA.`:"";
+    document.querySelector("#profileOutlook").textContent=`${p.name} is a ${p.role} for ${p.team}. ${outlookByRole[p.role]||"Fantasy value depends on role, team performance, and match volume."}${formText}`;
 
-    const stats=[
+    const statValue=(value,suffix="")=>Number.isFinite(Number(value))?`${Number(value).toFixed(Number(value)%1?1:0)}${suffix}`:"—";
+    const stats=chain?[
+      ["Games",chain.games??"—"],
+      ["Win rate",statValue(chain.winRate,"%")],
+      ["KDA",chain.kda??"—"],
+      ["Avg K / D / A",`${chain.avgKills??"—"} / ${chain.avgDeaths??"—"} / ${chain.avgAssists??"—"}`],
+      ["CS / min",chain.avgCspm??"—"],
+      ["Damage / min",chain.avgDpm??"—"]
+    ]:[
       ["Role",p.role||"—"],
       ["Team",p.teamCode||String(p.team||"").slice(0,4).toUpperCase()],
       ["Player pool",p.rank?"#"+p.rank:"—"]
     ];
     document.querySelector("#profileStats").innerHTML=stats.map(s=>`<div class="profile-stat"><small>${h(s[0])}</small><strong>${h(s[1])}</strong></div>`).join("");
+    const note=document.querySelector("#profileDataNote");
+    if(note)note.textContent=chain?`Based on ${chain.games} most recent 2026 ChainCC game records available for this player. Fantasy points use this league's scoring settings.`:"No ChainCC match history matched this player yet.";
 
     const teamName=String(p.team||"").toLowerCase();
     const teamCode=String(p.teamCode||"").toLowerCase();
@@ -1095,7 +1126,15 @@ function render(view="home",options={}){
       return `<div class="profile-match"><div><strong>vs ${h(opponent||"TBD")}</strong><small>${h(g.league||"")} · ${h(g.stage||"")}</small></div><div><strong>${h(g.time||"TBD")}</strong><small>${h(g.label||"")}</small></div></div>`;
     }).join(""):'<div class="empty-state"><strong>No upcoming match found</strong><small>The schedule will populate automatically when a matching event is available.</small></div>';
 
-    document.querySelector("#profileTrend").innerHTML='<div class="empty-state"><strong>Game logs not connected yet</strong><small>Recent fantasy results will appear here once live scoring and historical statistics are connected.</small></div>';
+    const recentGames=(chain?.recent||[]).slice(0,5);
+    document.querySelector("#profileTrend").innerHTML=recentGames.length?recentGames.map(g=>{
+      const fp=fantasyPointsForGame(g,scoring);
+      const result=g.win===true?"W":g.win===false?"L":"—";
+      const date=g.date?new Date(g.date+"T12:00:00Z"):null;
+      const dateText=date&&!Number.isNaN(date.getTime())?date.toLocaleDateString([], {month:"short",day:"numeric"}):"";
+      const kda=[g.kills,g.deaths,g.assists].every(Number.isFinite)?`${g.kills}/${g.deaths}/${g.assists}`:"KDA —";
+      return `<div class="recent-game-row"><span class="recent-result ${result==="W"?"win":result==="L"?"loss":""}">${result}</span><div class="recent-game-main"><strong>${h(g.champion||"Match")} · ${h(kda)}</strong><small>${h(g.opponent?"vs "+g.opponent:(g.league||"Pro match"))}${dateText?" · "+h(dateText):""}</small></div><div class="recent-fp"><strong>${Number.isFinite(fp)?h(fp.toFixed(1)):"—"}</strong><small>FP</small></div></div>`;
+    }).join(""):'<div class="empty-state"><strong>No recent ChainCC matches found</strong><small>This player may not have a matching 2026 game record yet.</small></div>';
 
     const watch=watchlistIds();
     const watchBtn=document.querySelector("#watchPlayerBtn");
