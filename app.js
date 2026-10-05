@@ -365,7 +365,7 @@ function openDropChooser(incoming){
   if(!modal||!list||!copy)return;
   const current=getUserRoster();
   copy.textContent=`Your roster is full. Choose who to drop for ${incoming.name}.`;
-  list.innerHTML=current.map(p=>`<button class="drop-option" data-drop-id="${playerKey(p)}"><span class="role-badge">${p.slot||p.role}</span><span><strong>${p.name}</strong><small>${p.team} · ${p.position||p.role}</small></span><span class="drop-action">DROP</span></button>`).join("");
+  list.innerHTML=current.map(p=>`<button class="drop-option" data-drop-id="${playerKey(p)}"><span class="role-badge">${h(p.slot||p.role)}</span><span><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.position||p.role)}</small></span><span class="drop-action">DROP</span></button>`).join("");
   list.querySelectorAll("[data-drop-id]").forEach(btn=>btn.onclick=()=>{
     const dropId=btn.dataset.dropId;
     const dropped=current.find(p=>playerKey(p)===dropId);
@@ -536,7 +536,7 @@ function render(view="home",options={}){
       ["Team",p.teamCode||String(p.team||"").slice(0,4).toUpperCase()],
       ["Rank",p.rank?"#"+p.rank:"—"]
     ];
-    document.querySelector("#profileStats").innerHTML=stats.map(s=>`<div class="profile-stat"><small>${s[0]}</small><strong>${s[1]}</strong></div>`).join("");
+    document.querySelector("#profileStats").innerHTML=stats.map(s=>`<div class="profile-stat"><small>${h(s[0])}</small><strong>${h(s[1])}</strong></div>`).join("");
 
     const teamName=String(p.team||"").toLowerCase();
     const teamCode=String(p.teamCode||"").toLowerCase();
@@ -822,14 +822,14 @@ function render(view="home",options={}){
         document.querySelector("#draftClock").textContent=`0:${String(state.seconds??30).padStart(2,"0")}`;
         document.querySelector("#draftProgress").textContent=`${state.picks.length} picks`;
         const recent=state.picks.slice(-10).reverse();
-        board.innerHTML=recent.length?recent.map(p=>`<div class="draft-pick ${p.managerIndex===state.userIndex?"mine":""}"><small>#${p.pick} · R${p.round}</small><strong>${p.name}</strong><span>${p.role} · ${p.manager}</span></div>`).join(""):'<div class="muted">No picks yet.</div>';
+        board.innerHTML=recent.length?recent.map(p=>`<div class="draft-pick ${p.managerIndex===state.userIndex?"mine":""}"><small>#${h(p.pick)} · R${h(p.round)}</small><strong>${h(p.name)}</strong><span>${h(p.role)} · ${h(p.manager)}</span></div>`).join(""):'<div class="muted">No picks yet.</div>';
       }
 
       const boardState=state||{managerCount:Number(getLeagueSettings().managers)||8,picks:[],pickIndex:0,userIndex:1,started:false,complete:false};
       const settings=getLeagueSettings();
       const totalRounds=5+Number(settings.bench||3);
       const cols=boardState.managerCount;
-      const headers=Array.from({length:cols},(_,i)=>`<div class="board-head">${draftManagerNames[i]||("Manager "+(i+1))}</div>`).join("");
+      const headers=Array.from({length:cols},(_,i)=>`<div class="board-head">${h(draftManagerNames[i]||("Manager "+(i+1)))}</div>`).join("");
       let cells="";
       for(let r=0;r<totalRounds;r++){
         for(let c=0;c<cols;c++){
@@ -839,8 +839,8 @@ function render(view="home",options={}){
           const onClock=boardState.started&&!boardState.complete&&overall===boardState.pickIndex;
           cells+=`<div class="board-cell ${managerIndex===boardState.userIndex?"mine":""} ${onClock?"on-clock":""}">
             <small>R${r+1} · #${overall+1}</small>
-            <strong>${pick?pick.name:"—"}</strong>
-            <span>${pick?pick.role:(draftManagerNames[managerIndex]||"")}</span>
+            <strong>${pick?h(pick.name):"—"}</strong>
+            <span>${pick?h(pick.role):h(draftManagerNames[managerIndex]||"")}</span>
           </div>`;
         }
       }
@@ -850,11 +850,11 @@ function render(view="home",options={}){
       const q=search.value.trim().toLowerCase();
       const isUserTurn=state&&state.started&&!state.complete&&draftOrderForPick(state.pickIndex,state.managerCount)===state.userIndex;
       const filtered=draftPool.filter(p=>!taken.has(p.id)&&(role==="ALL"||p.role===role)&&(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)));
-      list.innerHTML=filtered.map(p=>`<div class="player-row draft-player"><span class="role-badge">${p.role}</span><div class="player-info"><strong>#${p.rank} ${p.name}${p.verified?'<span class="data-chip">ROSTER VERIFIED</span>':""}</strong><small>${p.team}</small></div><span class="fp">${p.fp.toFixed(1)}</span><button class="draft-btn" data-player-id="${p.id}" ${isUserTurn?"":"disabled"}>DRAFT</button></div>`).join("")||'<div class="card muted">No available players match this filter.</div>';
+      list.innerHTML=filtered.map(p=>`<div class="player-row draft-player"><span class="role-badge">${h(p.role)}</span><div class="player-info"><strong>#${h(p.rank)} ${h(p.name)}${p.verified?'<span class="data-chip">ROSTER VERIFIED</span>':""}</strong><small>${h(p.team)}</small></div><span class="fp">${Number(p.fp??0).toFixed(1)}</span><button class="draft-btn" data-player-id="${playerKey(p)}" ${isUserTurn?"":"disabled"}>DRAFT</button></div>`).join("")||'<div class="card muted">No available players match this filter.</div>';
       list.querySelectorAll("[data-player-id]").forEach(btn=>btn.onclick=()=>{
         state=getDraftState();
         if(!state||state.complete||draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex)return;
-        const player=draftPool.find(p=>p.id===btn.dataset.playerId);
+        const player=draftPool.find(p=>playerKey(p)===btn.dataset.playerId);
         if(!player)return;
         if(!canDraftPlayer(state,state.userIndex,player)){showToast("That pick would exceed your roster limits.");return;}
         makeDraftPick(state,player,state.userIndex);
@@ -873,7 +873,7 @@ function render(view="home",options={}){
       });
       mine.forEach((p,i)=>{if(!used.has(i))slotPlayers.push({slot:"BN",p,starter:false});});
       while(slotPlayers.length<5+Number(settings.bench||3))slotPlayers.push({slot:"BN",p:null,starter:false});
-      rosterEl.innerHTML=slotPlayers.map(x=>`<div class="draft-roster-slot ${x.p?(x.starter?"filled-start":"filled-bench"):""}"><small>${x.slot}</small><strong class="${x.p?"":"empty-slot"}">${x.p?x.p.name:"Empty"}</strong></div>`).join("");
+      rosterEl.innerHTML=slotPlayers.map(x=>`<div class="draft-roster-slot ${x.p?(x.starter?"filled-start":"filled-bench"):""}"><small>${h(x.slot)}</small><strong class="${x.p?"":"empty-slot"}">${x.p?h(x.p.name):"Empty"}</strong></div>`).join("");
     };
 
     const startDraftBtn=document.querySelector("#startDraftBtn");
