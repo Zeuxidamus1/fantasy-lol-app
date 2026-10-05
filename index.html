@@ -248,14 +248,47 @@
   </template>
 
   <template id="team-template">
-    <section class="stack">
+    <section class="stack team-screen">
       <div class="section-title">
-        <div><div class="eyebrow">FANTASY LINEUP</div><h2>My Team</h2></div>
-        <div class="record demo-pill">LOCAL</div>
+        <div>
+          <div class="eyebrow" id="teamLeagueName">ACTIVE LEAGUE</div>
+          <h2 id="myTeamName">My Team</h2>
+        </div>
+        <span class="verified-badge" id="teamSyncBadge">SYNCED</span>
       </div>
-      <button class="wide-link-btn" data-jump="transactions">Waivers & Transactions →</button>
-      <div class="card compact"><div class="stat-row"><span>Prototype projection</span><strong>128.6</strong></div><div class="stat-row"><span>Sync</span><strong id="teamSyncState">Local</strong></div></div>
-      <div id="rosterList" class="roster"></div>
+
+      <section class="card compact team-summary-card">
+        <div class="stat-row"><span>Roster</span><strong id="teamRosterCount">0/0</strong></div>
+        <div class="stat-row"><span>Starting lineup</span><strong id="teamStarterCount">0/5</strong></div>
+      </section>
+
+      <section class="card team-roster-card">
+        <div class="section-head">
+          <div><div class="eyebrow">STARTERS</div><h3>Starting lineup</h3></div>
+          <button class="text-btn" data-jump="players">Add Players</button>
+        </div>
+        <div id="starterRosterList" class="roster"></div>
+      </section>
+
+      <section class="card team-roster-card">
+        <div class="section-head">
+          <div><div class="eyebrow">BENCH</div><h3>Bench</h3></div>
+        </div>
+        <div id="benchRosterList" class="roster"></div>
+      </section>
+
+      <div class="grid-two">
+        <button class="action-card" data-jump="players"><span class="action-icon">＋</span><strong>Players</strong><small>Add or review players</small></button>
+        <button class="action-card" data-jump="transactions"><span class="action-icon">↕</span><strong>Transactions</strong><small>Waivers, adds & drops</small></button>
+      </div>
+
+      <section class="card team-no-league" id="teamNoLeague" hidden>
+        <div class="empty-state">
+          <strong>No active league</strong>
+          <small>Join or create a league before building your team.</small>
+          <button class="primary-btn" data-jump="league">Go to League</button>
+        </div>
+      </section>
     </section>
   </template>
 
