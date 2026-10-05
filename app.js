@@ -231,6 +231,28 @@ function setActiveLeagueId(id){
   if(id)storageSet("riftActiveLeagueId",String(id));
   else storageRemove("riftActiveLeagueId");
 }
+async function loadRosterFromCloud(leagueId){
+  if(!leagueId||!cloudReady())return false;
+  const b=backend();
+  const user=await b.currentUser().catch(()=>null);
+  if(!user)return false;
+  try{
+    const rows=await b.listRosters(leagueId);
+    const mine=rows.filter(r=>String(r.user_id)===String(user.id));
+    if(!mine.length)return false;
+    const source=allFantasyPlayers();
+    const loaded=mine.map(row=>{
+      const p=source.find(x=>playerKey(x)===String(row.player_id)||String(x.id||"")===String(row.player_id));
+      return p?{...p,id:playerKey(p),position:p.role,slot:row.slot||"BN",role:row.slot==="BN"?"BN":p.role}:null;
+    }).filter(Boolean);
+    if(!loaded.length)return false;
+    storageSet("riftUserRoster",JSON.stringify(arrangeUserRoster(loaded)));
+    return true;
+  }catch(err){
+    console.warn("Cloud roster load failed:",err);
+    return false;
+  }
+}
 async function syncRosterToCloud(players){
   const leagueId=getActiveLeagueId();
   if(!leagueId||!cloudReady())return;
@@ -916,11 +938,13 @@ function render(view="home",options={}){
       const drawCloudLeagues=async()=>{
         try{
           const leagues=await b.listLeagues();
-          const activeId=getActiveLeagueId();
+          let activeId=getActiveLeagueId();
+          if(activeId&&!leagues.some(l=>String(l.id)===String(activeId))){setActiveLeagueId(null);activeId=null;}
           cloudList.innerHTML=leagues.length?leagues.map(l=>'<div class="cloud-league-item '+(String(activeId)===String(l.id)?"active-cloud-league":"")+'"><div><strong>'+h(l.name)+'</strong><small>Invite: '+h(l.invite_code||"—")+'</small></div><button class="secondary-btn cloud-select-btn" data-cloud-league="'+h(l.id)+'">'+(String(activeId)===String(l.id)?"Active":"Use League")+'</button></div>').join(""):'<div class="empty-state"><strong>No online leagues yet</strong><small>Create one or join with an invite code.</small></div>';
           cloudList.querySelectorAll("[data-cloud-league]").forEach(btn=>btn.onclick=async()=>{
             setActiveLeagueId(btn.dataset.cloudLeague);
-            showToast("Online league selected");
+            const loaded=await loadRosterFromCloud(btn.dataset.cloudLeague);
+            showToast(loaded?"Online league selected · roster loaded":"Online league selected");
             await drawCloudLeagues();
           });
         }catch(err){
