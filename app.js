@@ -140,8 +140,8 @@ function runCpuPicks(state){
 
 const defaultLeagueSettings = {
   name:"Summoner's Cup",
-  managers:"8",
-  bench:"3",
+  managers:"4",
+  bench:"1",
   draftType:"Snake",
   scoringFormat:"Head-to-head",
   competition:"Worlds",
@@ -171,12 +171,23 @@ function playerKey(p){
 }
 
 function defaultUserRoster(){
-  return roster.map(p=>({
-    ...p,
-    id:playerKey(p),
-    position:p.position || (p.role==="BN"?"MID":p.role),
-    slot:p.role
-  }));
+  const limit=5+Number(getLeagueSettings().bench||1);
+  const live=((window.ESPORTS_DATA&&window.ESPORTS_DATA.players)||[]).map(p=>({...p,fp:Number(p.projection??p.fp??20)}));
+  if(live.length>=5){
+    const roles=["TOP","JNG","MID","ADC","SUP"];
+    const chosen=[];
+    for(const role of roles){
+      const p=live.find(x=>x.role===role&&!chosen.some(c=>playerKey(c)===playerKey(x)));
+      if(p) chosen.push({...p,id:playerKey(p),position:p.role,slot:p.role,role:p.role});
+    }
+    for(const p of live){
+      if(chosen.length>=limit)break;
+      if(chosen.some(c=>playerKey(c)===playerKey(p)))continue;
+      chosen.push({...p,id:playerKey(p),position:p.role,slot:"BN",role:"BN"});
+    }
+    if(chosen.length>=5)return chosen.slice(0,limit);
+  }
+  return roster.slice(0,limit).map(p=>({...p,id:playerKey(p),position:p.position||(p.role==="BN"?"MID":p.role),slot:p.role}));
 }
 
 function getUserRoster(){
@@ -436,7 +447,8 @@ function render(view="home",options={}){
 
   if(view==="home"){
     const currentRoster=getUserRoster();
-    document.querySelector("#starterPreview").innerHTML = currentRoster.filter(p=>(p.slot||p.role)!=="BN").slice(0,3).map(p=>playerRow({...p,role:p.position||p.role})).join("");
+    const starters=currentRoster.filter(p=>(p.slot||p.role)!=="BN").slice(0,3);
+    document.querySelector("#starterPreview").innerHTML = starters.length?starters.map(p=>playerRow({...p,role:p.position||p.role})).join(""):'<div class="empty-state"><strong>Your roster is empty</strong><small>Browse Players to add your first fantasy player.</small></div>';
     document.querySelector("#draftBtn").onclick=()=>render("draft");
     const onboarding=document.querySelector("#onboardingCard");
     if(localStorage.getItem("riftOnboardingDismissed")==="1" && onboarding) onboarding.remove();
@@ -448,7 +460,7 @@ function render(view="home",options={}){
     const projected=current.filter(p=>(p.slot||p.role)!=="BN").reduce((sum,p)=>sum+Number(p.fp??p.projection??0),0);
     const compact=document.querySelector(".card.compact");
     if(compact) compact.innerHTML=`<div class="stat-row"><span>Projected starters</span><strong>${projected.toFixed(1)}</strong></div><div class="stat-row"><span>Roster</span><strong>${current.length}/${rosterLimit()}</strong></div>`;
-    document.querySelector("#rosterList").innerHTML = current.map(p=>rosterRow(p,true)).join("");
+    document.querySelector("#rosterList").innerHTML = current.length?current.map(p=>rosterRow(p,true)).join(""):'<div class="empty-state"><strong>No players on your roster</strong><small>Use the Players tab to add someone.</small></div>';
     document.querySelectorAll("[data-drop-roster]").forEach(btn=>btn.onclick=()=>{
       const currentNow=getUserRoster();
       const player=currentNow.find(p=>playerKey(p)===btn.dataset.dropRoster);
@@ -525,11 +537,12 @@ function render(view="home",options={}){
     document.querySelector("#playerBackBtn").onclick=()=>render("players");
   }
   if(view==="matchup"){
-    document.querySelector("#battleList").innerHTML = roster.slice(0,5).map((p,i)=>`<div class="battle-row">
+    const matchupRoster=getUserRoster().filter(p=>(p.slot||p.role)!=="BN").slice(0,5);
+    document.querySelector("#battleList").innerHTML = matchupRoster.length?matchupRoster.map((p,i)=>`<div class="battle-row">
       <div class="battle-side"><span class="role-badge">${p.role}</span><div class="player-info"><strong>${p.name}</strong><small>${p.team}</small></div></div>
-      <span class="battle-score">${p.fp.toFixed(1)} - ${opponents[i].score.toFixed(1)}</span>
-      <div class="battle-side right"><div class="player-info"><strong>${opponents[i].name}</strong><small>Opponent</small></div></div>
-    </div>`).join("");
+      <span class="battle-score">${Number(p.fp??p.projection??0).toFixed(1)} - ${Number(opponents[i]?.score??0).toFixed(1)}</span>
+      <div class="battle-side right"><div class="player-info"><strong>${h(opponents[i]?.name||"Opponent")}</strong><small>Demo opponent</small></div></div>
+    </div>`).join(""):'<div class="empty-state"><strong>No starters set</strong><small>Add players to your roster to populate this demo matchup.</small></div>';
   }
   if(view==="schedule"){
     const list=document.querySelector("#scheduleList");
@@ -731,7 +744,7 @@ function render(view="home",options={}){
   }
   if(view==="league"){
     const settings=getLeagueSettings();
-    document.querySelector("#standings").innerHTML=standings.map(s=>`<div class="standing-row"><span class="rank">${s[0]}</span><strong>${s[1]}</strong><span>${s[2]}</span><span class="pts">${s[3]}</span></div>`).join("");
+    document.querySelector("#standings").innerHTML=standings.slice(0,Number(settings.managers)||4).map(s=>`<div class="standing-row"><span class="rank">${s[0]}</span><strong>${s[1]}</strong><span>${s[2]}</span><span class="pts">${s[3]}</span></div>`).join("");
     const rankings=(window.ESPORTS_DATA&&window.ESPORTS_DATA.rankings)||[];
     const power=document.querySelector("#powerRankings");
     if(power) power.innerHTML=rankings.length?rankings.map(t=>`<div class="power-row"><span class="power-rank">#${h(t.rank)}</span><div class="power-team"><strong>${h(t.code)}</strong><small>${h(t.name)} · ${h(t.league)}</small></div><span class="power-score">${h(t.score)}</span><span class="power-record">${h(t.record)}</span></div>`).join(""):'<div class="empty-state"><strong>No rankings available</strong><small>The last data snapshot did not include power rankings.</small></div>';
