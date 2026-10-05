@@ -496,3 +496,162 @@ grant execute on function public.create_waiver(uuid,text,integer) to authenticat
 grant execute on function public.cancel_waiver(uuid) to authenticated;
 grant execute on function public.create_trade(uuid,uuid,jsonb) to authenticated;
 grant execute on function public.resolve_trade(uuid,text) to authenticated;
+
+
+-- Shared league settings, lifecycle, and live snake draft
+alter table public.leagues
+  add column if not exists status text not null default 'pre_draft'
+  check (status in ('pre_draft','drafting','active','completed'));
+
+create table if not exists public.league_drafts (
+  league_id uuid primary key references public.leagues(id) on delete cascade,
+  status text not null default 'waiting' check (status in ('waiting','drafting','complete')),
+  manager_order uuid[] not null default '{}',
+  current_pick integer not null default 0,
+  total_rounds integer not null default 6,
+  started_at timestamptz,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.draft_picks (
+  league_id uuid not null references public.leagues(id) on delete cascade,
+  pick_number integer not null,
+  round_number integer not null,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  player_id text not null,
+  role text not null,
+  created_at timestamptz not null default now(),
+  primary key (league_id,pick_number),
+  unique (league_id,player_id)
+);
+
+alter table public.league_drafts enable row level security;
+alter table public.draft_picks enable row level security;
+
+drop policy if exists "members read league drafts" on public.league_drafts;
+create policy "members read league drafts" on public.league_drafts
+  for select to authenticated using (public.is_league_member(league_id));
+
+drop policy if exists "members read draft picks" on public.draft_picks;
+create policy "members read draft picks" on public.draft_picks
+  for select to authenticated using (public.is_league_member(league_id));
+
+create or replace function public.update_league_settings(p_league_id uuid,p_name text,p_settings jsonb)
+returns public.leagues
+language plpgsql
+security definer
+set search_path=public
+as $$
+declare result public.leagues;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if not exists(select 1 from public.leagues where id=p_league_id and owner_id=auth.uid()) then
+    raise exception 'Only the commissioner can change league settings';
+  end if;
+  if exists(select 1 from public.leagues where id=p_league_id and status<>'pre_draft') then
+    raise exception 'League settings are locked after the draft starts';
+  end if;
+  update public.leagues
+     set name=left(coalesce(nullif(trim(p_name),''),name),40),
+         settings=coalesce(p_settings,'{}'::jsonb)
+   where id=p_league_id
+   returning * into result;
+  return result;
+end;
+$$;
+
+create or replace function public.start_league_draft(p_league_id uuid)
+returns public.league_drafts
+language plpgsql
+security definer
+set search_path=public
+as $$
+declare
+  result public.league_drafts;
+  expected_count integer;
+  actual_count integer;
+  rounds integer;
+  ordering uuid[];
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if not exists(select 1 from public.leagues where id=p_league_id and owner_id=auth.uid()) then
+    raise exception 'Only the commissioner can start the draft';
+  end if;
+  select coalesce(nullif(settings->>'managers','')::integer,4),
+         5 + coalesce(nullif(settings->>'bench','')::integer,1)
+    into expected_count,rounds from public.leagues where id=p_league_id;
+  select count(*),array_agg(user_id order by joined_at,user_id)
+    into actual_count,ordering from public.league_members where league_id=p_league_id;
+  if actual_count<>expected_count then
+    raise exception 'League needs % managers before drafting; currently has %',expected_count,actual_count;
+  end if;
+  delete from public.draft_picks where league_id=p_league_id;
+  insert into public.league_drafts(league_id,status,manager_order,current_pick,total_rounds,started_at,updated_at)
+  values(p_league_id,'drafting',ordering,0,rounds,now(),now())
+  on conflict (league_id) do update
+    set status='drafting',manager_order=excluded.manager_order,current_pick=0,total_rounds=excluded.total_rounds,started_at=now(),updated_at=now()
+  returning * into result;
+  update public.leagues set status='drafting' where id=p_league_id;
+  return result;
+end;
+$$;
+
+create or replace function public.make_draft_pick(p_league_id uuid,p_player_id text,p_role text)
+returns public.draft_picks
+language plpgsql
+security definer
+set search_path=public
+as $$
+declare
+  d public.league_drafts;
+  result public.draft_picks;
+  manager_count integer;
+  round_idx integer;
+  within_round integer;
+  manager_pos integer;
+  expected_user uuid;
+  next_pick integer;
+  total_picks integer;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if nullif(trim(p_player_id),'') is null then raise exception 'Player is required'; end if;
+  if p_role not in ('TOP','JNG','MID','ADC','SUP') then raise exception 'Invalid player role'; end if;
+  select * into d from public.league_drafts where league_id=p_league_id for update;
+  if d.league_id is null or d.status<>'drafting' then raise exception 'Draft is not active'; end if;
+  manager_count:=array_length(d.manager_order,1);
+  round_idx:=d.current_pick / manager_count;
+  within_round:=d.current_pick % manager_count;
+  manager_pos:=case when mod(round_idx,2)=0 then within_round+1 else manager_count-within_round end;
+  expected_user:=d.manager_order[manager_pos];
+  if expected_user<>auth.uid() then raise exception 'It is not your turn'; end if;
+  if exists(select 1 from public.draft_picks where league_id=p_league_id and player_id=p_player_id) then
+    raise exception 'Player has already been drafted';
+  end if;
+  next_pick:=d.current_pick+1;
+  insert into public.draft_picks(league_id,pick_number,round_number,user_id,player_id,role)
+  values(p_league_id,next_pick,round_idx+1,auth.uid(),left(trim(p_player_id),100),p_role)
+  returning * into result;
+  total_picks:=manager_count*d.total_rounds;
+  update public.league_drafts
+     set current_pick=next_pick,
+         status=case when next_pick>=total_picks then 'complete' else 'drafting' end,
+         updated_at=now()
+   where league_id=p_league_id;
+  if next_pick>=total_picks then
+    delete from public.rosters where league_id=p_league_id;
+    insert into public.rosters(league_id,user_id,player_id,slot)
+    select league_id,user_id,player_id,
+           case when row_number() over(partition by user_id,role order by pick_number)=1 then role else 'BN' end
+      from public.draft_picks where league_id=p_league_id;
+    update public.leagues set status='active' where id=p_league_id;
+  end if;
+  return result;
+end;
+$$;
+
+revoke all on function public.update_league_settings(uuid,text,jsonb) from public,anon;
+revoke all on function public.start_league_draft(uuid) from public,anon;
+revoke all on function public.make_draft_pick(uuid,text,text) from public,anon;
+grant execute on function public.update_league_settings(uuid,text,jsonb) to authenticated;
+grant execute on function public.start_league_draft(uuid) to authenticated;
+grant execute on function public.make_draft_pick(uuid,text,text) to authenticated;
