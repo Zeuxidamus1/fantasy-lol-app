@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "node scripts/validate.mjs",
-    "check": "node --check app.js && node --check esports-data.js && node --check scripts/update-esports-data.mjs && node scripts/validate.mjs"
+    "check": "node --check app.js && node --check esports-data.js && node --check scripts/update-esports-data.mjs && node scripts/validate.mjs",
+    "smoke": "bash scripts/browser-smoke.sh"
   },
   "engines": {
     "node": ">=24"
