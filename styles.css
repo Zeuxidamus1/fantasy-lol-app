@@ -60,3 +60,11 @@
 .team-no-league .empty-state{display:flex;flex-direction:column;align-items:center;gap:10px}
 .team-no-league .primary-btn{margin-top:6px}
 @media(max-width:390px){.team-summary-card{grid-template-columns:1fr}.team-summary-card .stat-row+ .stat-row{border-left:0;border-top:1px solid #1d3048}}
+
+.home-league-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.home-league-grid>div{border:1px solid #1d3148;background:#091626;border-radius:12px;padding:11px}
+.home-league-grid small{display:block;color:#7186a2;font-size:9px}
+.home-league-grid strong{display:block;margin-top:5px;font-size:12px}
+.league-phase-pill{border:1px solid #2a7f70;background:#123b35;color:#58e8ca;border-radius:999px;padding:6px 9px;font-size:9px;font-weight:900;letter-spacing:.7px}
+.home-empty-card .empty-state{display:flex;flex-direction:column;gap:10px;align-items:center}
+@media(max-width:390px){.home-league-grid{grid-template-columns:1fr}.home-league-grid>div{display:flex;justify-content:space-between;align-items:center}.home-league-grid strong{margin-top:0}}
