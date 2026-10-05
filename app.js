@@ -806,9 +806,6 @@ function render(view="home",options={}){
     const leagueLabel=document.querySelector("#leagueNameLabel");
     if(leagueLabel)leagueLabel.textContent=String(settings.name||"Fantasy League").toUpperCase();
     document.querySelector("#standings").innerHTML=standings.slice(0,Number(settings.managers)||4).map(s=>`<div class="standing-row"><span class="rank">${s[0]}</span><strong>${s[1]}</strong><span>${s[2]}</span><span class="pts">${s[3]}</span></div>`).join("");
-    const rankings=(window.ESPORTS_DATA&&window.ESPORTS_DATA.rankings)||[];
-    const power=document.querySelector("#powerRankings");
-    if(power) power.innerHTML=rankings.length?rankings.map(t=>`<div class="power-row"><span class="power-rank">#${h(t.rank)}</span><div class="power-team"><strong>${h(t.code)}</strong><small>${h(t.name)} · ${h(t.league)}</small></div><span class="power-score">${h(t.score)}</span><span class="power-record">${h(t.record)}</span></div>`).join(""):'<div class="empty-state"><strong>No rankings available</strong><small>The last data snapshot did not include power rankings.</small></div>';
     document.querySelector("#leagueSettingsSummary").innerHTML=`
       <div><span>Teams</span><strong>${settings.managers}</strong></div>
       <div><span>Draft</span><strong>${settings.draftType}</strong></div>
