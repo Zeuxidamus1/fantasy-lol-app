@@ -9,6 +9,6 @@
     "check": "node --check app.js && node --check esports-data.js && node --check scripts/update-esports-data.mjs && node scripts/validate.mjs"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   }
 }
