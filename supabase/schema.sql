@@ -989,3 +989,62 @@ begin
   return result;
 end;
 $$;
+
+
+-- League notifications
+create table if not exists public.notifications (
+  id uuid primary key default gen_random_uuid(),
+  league_id uuid not null references public.leagues(id) on delete cascade,
+  recipient_user uuid not null references auth.users(id) on delete cascade,
+  actor_user uuid references auth.users(id) on delete set null,
+  kind text not null check (kind in ('trade_offer','trade_activity','trade_accepted','trade_declined','trade_canceled','roster_add','roster_drop')),
+  payload jsonb not null default '{}'::jsonb,
+  read_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+alter table public.notifications enable row level security;
+drop policy if exists "users read own notifications" on public.notifications;
+create policy "users read own notifications" on public.notifications
+  for select to authenticated using (recipient_user=(select auth.uid()));
+
+create index if not exists notifications_recipient_created_idx on public.notifications(recipient_user,created_at desc);
+create index if not exists notifications_league_idx on public.notifications(league_id);
+
+create or replace function public.mark_notifications_read(p_ids uuid[] default null)
+returns integer
+language plpgsql
+security definer
+set search_path=public
+as $$
+declare changed integer;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  update public.notifications
+     set read_at=coalesce(read_at,now())
+   where recipient_user=auth.uid()
+     and read_at is null
+     and (p_ids is null or id=any(p_ids));
+  get diagnostics changed = row_count;
+  return changed;
+end;
+$$;
+
+create or replace function public.notify_league_members(p_league_id uuid,p_actor uuid,p_kind text,p_payload jsonb,p_only_user uuid default null)
+returns void
+language sql
+security definer
+set search_path=public
+as $$
+  insert into public.notifications(league_id,recipient_user,actor_user,kind,payload)
+  select p_league_id,lm.user_id,p_actor,p_kind,coalesce(p_payload,'{}'::jsonb)
+  from public.league_members lm
+  where lm.league_id=p_league_id
+    and lm.user_id<>p_actor
+    and (p_only_user is null or lm.user_id=p_only_user);
+$$;
+
+revoke all on function public.mark_notifications_read(uuid[]) from public,anon;
+revoke all on function public.notify_league_members(uuid,uuid,text,jsonb,uuid) from public,anon,authenticated;
+grant execute on function public.mark_notifications_read(uuid[]) to authenticated;
+
