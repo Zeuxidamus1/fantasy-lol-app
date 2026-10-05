@@ -88,6 +88,69 @@
     </section>
   </template>
 
+
+  <template id="signup-template">
+    <section class="login-screen signup-screen">
+      <div class="login-brand compact-brand" aria-label="Rift Fantasy">
+        <div class="login-mark" aria-hidden="true">RF</div>
+        <div class="login-kicker">RIFT FANTASY</div>
+        <h1>Create your account</h1>
+        <p>Start building your fantasy League of Legends leagues.</p>
+      </div>
+
+      <section class="login-card" aria-labelledby="signupTitle">
+        <div class="login-card-head">
+          <h2 id="signupTitle">Join Rift Fantasy</h2>
+          <p>Create one account for your leagues, rosters, and drafts.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="signupEmail">Email</label>
+          <input id="signupEmail" class="form-control login-control" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" />
+        </div>
+
+        <div class="form-group">
+          <label for="signupPassword">Password</label>
+          <div class="password-field">
+            <input id="signupPassword" class="form-control login-control" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" />
+            <button class="password-toggle" id="signupPasswordToggle" type="button" aria-label="Show password">Show</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="signupPasswordConfirm">Confirm password</label>
+          <input id="signupPasswordConfirm" class="form-control login-control" type="password" autocomplete="new-password" minlength="8" placeholder="Re-enter your password" />
+        </div>
+
+        <button class="primary-btn login-primary" id="signupSubmit">Create Account</button>
+        <button class="text-btn auth-back-btn" id="signupBack" type="button">Already have an account? Sign in</button>
+      </section>
+
+      <p class="login-legal">By creating an account, you agree to use Rift Fantasy responsibly. Riot Games is not affiliated with this project.</p>
+    </section>
+  </template>
+
+  <template id="verify-template">
+    <section class="login-screen verify-screen">
+      <div class="login-brand compact-brand">
+        <div class="login-mark verify-mark" aria-hidden="true">✓</div>
+        <div class="login-kicker">ONE MORE STEP</div>
+        <h1>Check your email</h1>
+        <p>We sent a verification link to <strong id="verifyEmailText">your email</strong>.</p>
+      </div>
+
+      <section class="login-card verify-card">
+        <div class="verify-copy">
+          <h2>Verify your account</h2>
+          <p>Open the email from Rift Fantasy and tap the verification link. Once verified, you’ll return to the app and be signed in.</p>
+        </div>
+        <button class="secondary-btn login-secondary" id="verifyBackToLogin" type="button">Back to Sign In</button>
+        <button class="inline-help-btn verify-resend-btn" id="verifyResendBtn" type="button" hidden>Resend verification email</button>
+        <p class="verify-wait" id="verifyWaitText">You can request another email in about 1 minute.</p>
+      </section>
+    </section>
+  </template>
+
   <template id="account-template">
     <section class="stack">
       <div class="section-title">
