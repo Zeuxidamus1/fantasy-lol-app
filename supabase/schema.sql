@@ -739,3 +739,5 @@ begin
   order by created_at;
 end;
 $$;
+
+create index if not exists draft_picks_user_id_idx on public.draft_picks(user_id);
