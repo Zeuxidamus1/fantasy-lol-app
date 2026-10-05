@@ -133,3 +133,9 @@ body.tournament-guide-open{overflow:hidden}
 .notification-swap .swap-drop{color:#ff7d88;font-weight:800}
 .notification-swap .swap-arrow{color:#7390ad;font-weight:900}
 .notification-swap .swap-add{color:#4ae2c1;font-weight:800}
+
+.tournament-guide-inline{border-color:#25435f;background:#0a1929}
+.tournament-guide-inline[hidden]{display:none!important}
+.tournament-guide-inline .section-head{margin-bottom:8px}
+.tournament-guide-inline .tournament-guide-intro{margin-top:0}
+.tournament-guide-btn{cursor:pointer}
