@@ -511,7 +511,7 @@ function render(view="home",options={}){
     const current=getUserRoster();
     const projected=current.filter(p=>(p.slot||p.role)!=="BN").reduce((sum,p)=>sum+Number(p.fp??p.projection??0),0);
     const compact=document.querySelector(".card.compact");
-    if(compact) compact.innerHTML=`<div class="stat-row"><span>Projected starters</span><strong>${projected.toFixed(1)}</strong></div><div class="stat-row"><span>Roster</span><strong>${current.length}/${rosterLimit()}</strong></div>`;
+    if(compact) compact.innerHTML=`<div class="stat-row"><span>Prototype projection</span><strong>${projected.toFixed(1)}</strong></div><div class="stat-row"><span>Roster</span><strong>${current.length}/${rosterLimit()}</strong></div>`;
     document.querySelector("#rosterList").innerHTML = current.length?current.map(p=>rosterRow(p,true)).join(""):'<div class="empty-state"><strong>No players on your roster</strong><small>Use the Players tab to add someone.</small></div>';
     document.querySelectorAll("[data-drop-roster]").forEach(btn=>btn.onclick=()=>{
       const currentNow=getUserRoster();
@@ -531,7 +531,7 @@ function render(view="home",options={}){
     document.querySelector("#profileRole").textContent=p.role||"—";
     document.querySelector("#profileTeam").textContent=p.team||"Unknown team";
     document.querySelector("#profileName").textContent=p.name||"Player";
-    document.querySelector("#profileRank").textContent=`Fantasy rank #${p.rank||"—"}`;
+    document.querySelector("#profileRank").textContent=`Prototype rank #${p.rank||"—"}`;
     const owned=isOwned(p);
     document.querySelector("#profileStatus").textContent=owned?"On your roster":"Available";
     document.querySelector("#profileProjection").textContent=Number(p.fp??p.projection??0).toFixed(1);
@@ -871,7 +871,7 @@ function render(view="home",options={}){
       const q=search.value.trim().toLowerCase();
       const isUserTurn=state&&state.started&&!state.complete&&draftOrderForPick(state.pickIndex,state.managerCount)===state.userIndex;
       const filtered=draftPool.filter(p=>!taken.has(p.id)&&(role==="ALL"||p.role===role)&&(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)));
-      list.innerHTML=filtered.map(p=>`<div class="player-row draft-player"><span class="role-badge">${h(p.role)}</span><div class="player-info"><strong>#${h(p.rank)} ${h(p.name)}${p.verified?'<span class="data-chip">ROSTER SNAPSHOT</span>':""}</strong><small>${h(p.team)}</small></div><span class="fp">${Number(p.fp??0).toFixed(1)}</span><button class="draft-btn" data-player-id="${playerKey(p)}" ${isUserTurn?"":"disabled"}>DRAFT</button></div>`).join("")||'<div class="card muted">No available players match this filter.</div>';
+      list.innerHTML=filtered.map(p=>`<div class="player-row draft-player"><span class="role-badge">${h(p.role)}</span><div class="player-info"><strong>${h(p.name)}${p.verified?'<span class="data-chip">ROSTER SNAPSHOT</span>':""}</strong><small>${h(p.team)}</small></div><span class="fp">${Number(p.fp??0).toFixed(1)}</span><button class="draft-btn" data-player-id="${playerKey(p)}" ${isUserTurn?"":"disabled"}>DRAFT</button></div>`).join("")||'<div class="card muted">No available players match this filter.</div>';
       list.querySelectorAll("[data-player-id]").forEach(btn=>btn.onclick=()=>{
         state=getDraftState();
         if(!state||state.complete||draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex)return;
