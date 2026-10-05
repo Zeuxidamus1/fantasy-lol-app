@@ -224,8 +224,25 @@ function getUserRoster(){
   }
 }
 
+function getActiveLeagueId(){
+  return storageGet("riftActiveLeagueId")||null;
+}
+function setActiveLeagueId(id){
+  if(id)storageSet("riftActiveLeagueId",String(id));
+  else storageRemove("riftActiveLeagueId");
+}
+async function syncRosterToCloud(players){
+  const leagueId=getActiveLeagueId();
+  if(!leagueId||!cloudReady())return;
+  const b=backend();
+  const user=await b.currentUser().catch(()=>null);
+  if(!user)return;
+  try{await b.saveRoster(leagueId,players);}
+  catch(err){console.warn("Cloud roster sync failed:",err);}
+}
 function saveUserRoster(players){
   storageSet("riftUserRoster",JSON.stringify(players));
+  void syncRosterToCloud(players);
 }
 
 function getTransactionHistory(){
@@ -577,6 +594,8 @@ function render(view="home",options={}){
   }
   if(view==="team"){
     const current=getUserRoster();
+    const syncState=document.querySelector("#teamSyncState");
+    if(syncState)syncState.textContent=getActiveLeagueId()&&cloudReady()?"Cloud + Local":"Local";
     const projected=current.filter(p=>(p.slot||p.role)!=="BN").reduce((sum,p)=>sum+Number(p.fp??p.projection??0),0);
     const compact=document.querySelector(".card.compact");
     if(compact) compact.innerHTML=`<div class="stat-row"><span>Prototype projection</span><strong>${projected.toFixed(1)}</strong></div><div class="stat-row"><span>Roster</span><strong>${current.length}/${rosterLimit()}</strong></div>`;
@@ -897,7 +916,13 @@ function render(view="home",options={}){
       const drawCloudLeagues=async()=>{
         try{
           const leagues=await b.listLeagues();
-          cloudList.innerHTML=leagues.length?leagues.map(l=>'<div class="cloud-league-item"><div><strong>'+h(l.name)+'</strong><small>Invite: '+h(l.invite_code||"—")+'</small></div><span class="verified-badge">ONLINE</span></div>').join(""):'<div class="empty-state"><strong>No online leagues yet</strong><small>Create one or join with an invite code.</small></div>';
+          const activeId=getActiveLeagueId();
+          cloudList.innerHTML=leagues.length?leagues.map(l=>'<div class="cloud-league-item '+(String(activeId)===String(l.id)?"active-cloud-league":"")+'"><div><strong>'+h(l.name)+'</strong><small>Invite: '+h(l.invite_code||"—")+'</small></div><button class="secondary-btn cloud-select-btn" data-cloud-league="'+h(l.id)+'">'+(String(activeId)===String(l.id)?"Active":"Use League")+'</button></div>').join(""):'<div class="empty-state"><strong>No online leagues yet</strong><small>Create one or join with an invite code.</small></div>';
+          cloudList.querySelectorAll("[data-cloud-league]").forEach(btn=>btn.onclick=async()=>{
+            setActiveLeagueId(btn.dataset.cloudLeague);
+            showToast("Online league selected");
+            await drawCloudLeagues();
+          });
         }catch(err){
           cloudList.innerHTML='<div class="empty-state cloud-error"><strong>Could not load leagues</strong><small>'+h(err.message||"Cloud request failed")+'</small></div>';
         }
@@ -908,6 +933,7 @@ function render(view="home",options={}){
         try{
           const created=await b.createLeague(settings.name,settings);
           const league=Array.isArray(created)?created[0]:created;
+          if(league?.id)setActiveLeagueId(league.id);
           showToast("Online league created"+(league?.invite_code?": "+league.invite_code:""));
           await drawCloudLeagues();
         }catch(err){showToast(err.message||"Could not create league");}
