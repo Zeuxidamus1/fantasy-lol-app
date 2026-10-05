@@ -186,64 +186,49 @@
   </template>
 
   <template id="home-template">
-    <section class="stack">
-      <section class="card onboarding" id="onboardingCard">
-        <div class="section-head">
-          <div><div class="eyebrow accent">NEW HERE?</div><h3>Fantasy LoL in 3 steps</h3></div>
-          <button class="icon-btn small-icon" id="dismissOnboarding" aria-label="Dismiss getting started">×</button>
-        </div>
-        <div class="onboarding-steps">
-          <div><b>1</b><span><strong>Set up your league</strong><small>Choose managers, scoring, and roster rules.</small></span></div>
-          <div><b>2</b><span><strong>Draft players</strong><small>Fill TOP, JNG, MID, ADC, SUP, then your bench.</small></span></div>
-          <div><b>3</b><span><strong>Follow matches</strong><small>Use Schedule and Matchup to track your fantasy results.</small></span></div>
-        </div>
-        <div class="onboarding-actions">
-          <button class="secondary-btn" data-jump="setup">League Setup</button>
-          <button class="primary-btn compact-btn" data-jump="draft">Try Mock Draft</button>
-        </div>
-      </section>
-
-      <div class="hero card">
-        <div>
-          <div class="eyebrow accent">DEMO MATCHUP</div>
-          <h2>Fantasy scoring preview</h2>
-          <p class="muted">Pro schedules can refresh automatically. Fantasy scoring is still prototype data.</p>
-        </div>
-        <div class="projection">61%</div>
+    <section class="stack home-dashboard">
+      <div class="section-title">
+        <div><div class="eyebrow" id="homeLeagueEyebrow">RIFT FANTASY</div><h2 id="homeTitle">Home</h2></div>
+        <span class="league-phase-pill" id="homeLeaguePhase" hidden>PRE-DRAFT</span>
       </div>
 
-      <section class="card">
+      <section class="card home-league-card" id="homeLeagueCard" hidden>
         <div class="section-head">
-          <div><div class="eyebrow">DEMO MATCHUP</div><h3 id="homeLeagueName">Summoner's Cup</h3></div>
-          <button class="text-btn" data-jump="matchup">View matchup</button>
+          <div><div class="eyebrow">ACTIVE LEAGUE</div><h3 id="homeLeagueName">League</h3></div>
+          <button class="text-btn" data-jump="league">League</button>
         </div>
-        <div class="scoreboard">
-          <div class="manager">
-            <div class="avatar">Z</div>
-            <strong>Zeuxidamus</strong>
-            <span class="big-score">87.4</span>
-            <small>Proj. 128.6</small>
-          </div>
-          <div class="versus">VS</div>
-          <div class="manager">
-            <div class="avatar rival">R</div>
-            <strong>Rift Raiders</strong>
-            <span class="big-score">72.1</span>
-            <small>Proj. 119.2</small>
-          </div>
+        <div class="home-league-grid">
+          <div><small>Your team</small><strong id="homeTeamName">My Team</strong></div>
+          <div><small>Managers</small><strong id="homeManagerCount">0/0</strong></div>
+          <div><small>Roster</small><strong id="homeRosterCount">0/0</strong></div>
         </div>
       </section>
 
-      <section class="card">
-        <div class="section-head"><div><div class="eyebrow">UP NEXT</div><h3>Your starters</h3></div><button class="text-btn" data-jump="team">Manage</button></div>
+      <section class="card" id="homeNextCard" hidden>
+        <div class="section-head">
+          <div><div class="eyebrow">NEXT STEP</div><h3 id="homeNextTitle">Get started</h3></div>
+        </div>
+        <p class="profile-copy" id="homeNextCopy"></p>
+        <button class="primary-btn" id="homeNextAction">Continue</button>
+      </section>
+
+      <section class="card" id="homeRosterCard" hidden>
+        <div class="section-head"><div><div class="eyebrow">YOUR TEAM</div><h3>Roster</h3></div><button class="text-btn" data-jump="team">Manage</button></div>
         <div id="starterPreview" class="player-list"></div>
       </section>
 
       <section class="grid-two">
-        <button class="action-card" data-jump="schedule"><span class="action-icon">▣</span><strong>Pro Schedule</strong><small>See who plays next</small></button>
-        <button class="action-card" id="draftBtn"><span class="action-icon">◎</span><strong>Mock Draft</strong><small>Practice a draft</small></button>
+        <button class="action-card" data-jump="schedule"><span class="action-icon">▣</span><strong>Schedule</strong><small>Upcoming pro matches</small></button>
+        <button class="action-card" data-jump="players"><span class="action-icon">⌕</span><strong>Players</strong><small>Browse the player pool</small></button>
       </section>
-      <button class="wide-link-btn" data-jump="players">Browse players & free agents →</button>
+
+      <section class="card home-empty-card" id="homeNoLeague">
+        <div class="empty-state">
+          <strong>Start your first league</strong>
+          <small>Create a league or join one with an invite code to begin.</small>
+          <button class="primary-btn" data-jump="league">Go to League</button>
+        </div>
+      </section>
     </section>
   </template>
 
@@ -491,7 +476,7 @@
   <template id="draft-template">
     <section class="stack draft-screen">
       <div class="section-title">
-        <div><div class="eyebrow">MOCK DRAFT</div><h2>Draft Room</h2></div>
+        <div><div class="eyebrow">LIVE LEAGUE DRAFT</div><h2>Draft Room</h2></div>
         <button class="secondary-btn" data-jump="league">Exit</button>
       </div>
 
@@ -505,8 +490,8 @@
       </div>
 
       <div class="draft-actions">
-        <button class="primary-btn" id="startDraftBtn">Start / Reset Draft</button>
-        <button class="secondary-btn" id="autoPickBtn">Auto Pick My Turn</button>
+        <button class="primary-btn" id="startDraftBtn" hidden>Start Draft</button>
+        <button class="secondary-btn" id="refreshDraftBtn">Refresh Draft</button>
       </div>
 
       <div class="card draft-board-card">
@@ -536,7 +521,7 @@
       <div id="draftPlayerList" class="player-list"></div>
 
       <div class="card">
-        <div class="section-head"><div><div class="eyebrow">MY PICKS</div><h3>Zeuxidamus</h3></div></div>
+        <div class="section-head"><div><div class="eyebrow">MY PICKS</div><h3 id="draftMyTeamName">My Team</h3></div></div>
         <div id="myDraftRoster" class="draft-roster"></div>
       </div>
     </section>
@@ -621,11 +606,11 @@
           <label>Win <input class="score-input" id="scoreWin" type="number" step="0.5" value="5"></label>
           <label>First Blood <input class="score-input" id="scoreFb" type="number" step="0.5" value="2"></label>
         </div>
-        <small class="field-help">Fantasy scoring is configurable here, but live game-stat scoring is not connected yet.</small>
+        <small class="field-help">These scoring rules are shared with every manager in this league. Live game-stat scoring will use them once the scoring feed is connected.</small>
       </div>
 
       <button class="primary-btn" id="saveLeagueBtn">Save League Settings</button>
-      <p class="setup-footnote">Local prototype: settings are stored only on this device. Multi-user accounts and league synchronization are not connected yet.</p>
+      <p class="setup-footnote">Commissioner changes are shared with every manager. Settings lock when the league draft begins.</p>
     </section>
   </template>
 
