@@ -239,14 +239,12 @@ async function loadRosterFromCloud(leagueId){
   try{
     const rows=await b.listRosters(leagueId);
     const mine=rows.filter(r=>String(r.user_id)===String(user.id));
-    if(!mine.length)return false;
     const source=allFantasyPlayers();
     const loaded=mine.map(row=>{
       const p=source.find(x=>playerKey(x)===String(row.player_id)||String(x.id||"")===String(row.player_id));
       return p?{...p,id:playerKey(p),position:p.role,slot:row.slot||"BN",role:row.slot==="BN"?"BN":p.role}:null;
     }).filter(Boolean);
-    if(!loaded.length)return false;
-    storageSet("riftUserRoster",JSON.stringify(arrangeUserRoster(loaded)));
+    storageSet("riftUserRoster",JSON.stringify(loaded.length?arrangeUserRoster(loaded):[]));
     return true;
   }catch(err){
     console.warn("Cloud roster load failed:",err);
@@ -872,23 +870,82 @@ function render(view="home",options={}){
     if(dismiss) dismiss.onclick=()=>{storageSet("riftOnboardingDismissed","1");onboarding?.remove();};
   }
   if(view==="team"){
-    const current=getUserRoster();
-    const syncState=document.querySelector("#teamSyncState");
-    if(syncState)syncState.textContent=getActiveLeagueId()&&cloudReady()?"Cloud + Local":"Local";
-    const projected=current.filter(p=>(p.slot||p.role)!=="BN").reduce((sum,p)=>sum+Number(p.fp??p.projection??0),0);
-    const compact=document.querySelector(".card.compact");
-    if(compact) compact.innerHTML=`<div class="stat-row"><span>Prototype projection</span><strong>${projected.toFixed(1)}</strong></div><div class="stat-row"><span>Roster</span><strong>${current.length}/${rosterLimit()}</strong></div>`;
-    document.querySelector("#rosterList").innerHTML = current.length?current.map(p=>rosterRow(p,true)).join(""):'<div class="empty-state"><strong>No players on your roster</strong><small>Use the Players tab to add someone.</small></div>';
-    document.querySelectorAll("[data-drop-roster]").forEach(btn=>btn.onclick=()=>{
-      const currentNow=getUserRoster();
-      const player=currentNow.find(p=>playerKey(p)===btn.dataset.dropRoster);
-      if(!player)return;
-      if(!window.confirm(`Drop ${player.name} from your roster?`))return;
-      saveUserRoster(arrangeUserRoster(currentNow.filter(p=>playerKey(p)!==btn.dataset.dropRoster)));
-      logTransaction("drop",player);
-      showToast(`${player.name} dropped`);
-      render("team");
-    });
+    const leagueId=getActiveLeagueId();
+    const leagueNameEl=document.querySelector("#teamLeagueName");
+    const teamNameEl=document.querySelector("#myTeamName");
+    const badge=document.querySelector("#teamSyncBadge");
+    const noLeague=document.querySelector("#teamNoLeague");
+    const starterList=document.querySelector("#starterRosterList");
+    const benchList=document.querySelector("#benchRosterList");
+    const rosterCount=document.querySelector("#teamRosterCount");
+    const starterCount=document.querySelector("#teamStarterCount");
+    const rosterCards=document.querySelectorAll(".team-roster-card,.team-summary-card");
+
+    const bindDrops=()=>{
+      document.querySelectorAll("[data-drop-roster]").forEach(btn=>btn.onclick=()=>{
+        const currentNow=getUserRoster();
+        const player=currentNow.find(p=>playerKey(p)===btn.dataset.dropRoster);
+        if(!player)return;
+        if(!window.confirm(`Drop ${player.name} from your roster?`))return;
+        saveUserRoster(arrangeUserRoster(currentNow.filter(p=>playerKey(p)!==btn.dataset.dropRoster)));
+        logTransaction("drop",player);
+        showToast(`${player.name} dropped`);
+        render("team",{replace:true});
+      });
+    };
+
+    const drawRoster=()=>{
+      const current=getUserRoster();
+      const starters=current.filter(p=>(p.slot||p.role)!=="BN");
+      const bench=current.filter(p=>(p.slot||p.role)==="BN");
+      rosterCount.textContent=`${current.length}/${rosterLimit()}`;
+      starterCount.textContent=`${starters.length}/5`;
+      starterList.innerHTML=starters.length
+        ?starters.map(p=>rosterRow(p,true)).join("")
+        :'<div class="empty-state"><strong>No starters yet</strong><small>Add players from the Players tab to build your lineup.</small></div>';
+      benchList.innerHTML=bench.length
+        ?bench.map(p=>rosterRow(p,true)).join("")
+        :'<div class="empty-state"><strong>Bench is empty</strong><small>Bench players will appear here.</small></div>';
+      bindDrops();
+    };
+
+    if(!leagueId||!cloudReady()){
+      rosterCards.forEach(el=>el.hidden=true);
+      badge.hidden=true;
+      noLeague.hidden=false;
+      leagueNameEl.textContent="MY TEAM";
+      teamNameEl.textContent="No active league";
+    }else{
+      noLeague.hidden=true;
+      starterList.innerHTML='<div class="empty-state"><strong>Loading roster…</strong><small>Syncing your active league.</small></div>';
+      benchList.innerHTML="";
+      (async()=>{
+        try{
+          const b=backend();
+          const [user,leagues]=await Promise.all([
+            b.currentUser(),
+            b.listLeagues()
+          ]);
+          if(!user)throw new Error("Sign in to view your team.");
+          const activeLeague=leagues.find(l=>String(l.id)===String(leagueId));
+          const members=await b.listLeagueMembers(leagueId);
+          const membership=members.find(m=>String(m.user_id)===String(user.id));
+          if(!membership)throw new Error("You are not a member of this league.");
+
+          leagueNameEl.textContent=String(activeLeague?.name||"Active League").toUpperCase();
+          teamNameEl.textContent=membership.team_name||"My Team";
+          badge.textContent="SYNCED";
+          badge.hidden=false;
+
+          await loadRosterFromCloud(leagueId);
+          drawRoster();
+        }catch(err){
+          badge.hidden=true;
+          starterList.innerHTML='<div class="empty-state cloud-error"><strong>Could not load your team</strong><small>'+h(err.message||"Please try again.")+'</small></div>';
+          benchList.innerHTML="";
+        }
+      })();
+    }
   }
   if(view==="player"){
     const p=playerById(selectedPlayerId) || allFantasyPlayers()[0];
