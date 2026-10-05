@@ -4,6 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1220" />
+  <meta name="description" content="Rift Fantasy is a mobile-first fantasy League of Legends esports prototype with drafts, rosters, schedules, waivers, and trades." />
+  <meta name="color-scheme" content="dark" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>" />
   <title>Rift Fantasy</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -51,16 +56,16 @@
 
       <div class="hero card">
         <div>
-          <div class="eyebrow accent">WEEK 3</div>
-          <h2>You're projected to win</h2>
-          <p class="muted">Live scoring updates during pro matches.</p>
+          <div class="eyebrow accent">DEMO MATCHUP</div>
+          <h2>Fantasy scoring preview</h2>
+          <p class="muted">Pro schedules can refresh automatically. Fantasy scoring is still prototype data.</p>
         </div>
         <div class="projection">61%</div>
       </div>
 
       <section class="card">
         <div class="section-head">
-          <div><div class="eyebrow">YOUR MATCHUP</div><h3>Summoner's Cup</h3></div>
+          <div><div class="eyebrow">DEMO MATCHUP</div><h3>Summoner's Cup</h3></div>
           <button class="text-btn" data-jump="matchup">View matchup</button>
         </div>
         <div class="scoreboard">
@@ -107,7 +112,7 @@
 
   <template id="matchup-template">
     <section class="stack">
-      <div class="section-title"><div><div class="eyebrow">HEAD TO HEAD</div><h2>Week 3 Matchup</h2></div><span class="live-pill">LIVE</span></div>
+      <div class="section-title"><div><div class="eyebrow">HEAD TO HEAD</div><h2>Demo Matchup</h2></div><span class="live-pill demo-pill">DEMO</span></div>
       <div class="card matchup-card">
         <div class="match-score"><div><span class="avatar">Z</span><strong>Zeuxidamus</strong><b>87.4</b></div><span>VS</span><div><span class="avatar rival">R</span><strong>Rift Raiders</strong><b>72.1</b></div></div>
         <div class="progress"><span style="width:55%"></span></div>
@@ -208,11 +213,11 @@
     <section class="stack">
       <div class="section-title"><div><div class="eyebrow">SUMMONER'S CUP</div><h2>League</h2></div><button class="secondary-btn" data-jump="setup">League Setup</button></div>
       <div class="card">
-        <div class="section-head"><div><div class="eyebrow">FANTASY STANDINGS</div><h3>Regular Season</h3></div></div>
+        <div class="section-head"><div><div class="eyebrow">FANTASY STANDINGS</div><h3>Demo standings</h3></div><span class="demo-badge">DEMO</span></div>
         <div id="standings"></div>
       </div>
       <div class="card">
-        <div class="section-head"><div><div class="eyebrow">REAL-WORLD POWER RANKINGS</div><h3>LoL Esports GPR</h3></div><span class="verified-badge">VERIFIED</span></div>
+        <div class="section-head"><div><div class="eyebrow">REAL-WORLD POWER RANKINGS</div><h3>LoL Esports GPR snapshot</h3></div><span class="verified-badge">SNAPSHOT</span></div>
         <div id="powerRankings"></div>
       </div>
       <div class="grid-two">
@@ -238,14 +243,14 @@
       <div class="transaction-summary">
         <div class="card mini-summary"><small>Waiver priority</small><strong>#3</strong></div>
         <div class="card mini-summary"><small>Pending claims</small><strong id="pendingClaimCount">0</strong></div>
-        <div class="card mini-summary"><small>Processing</small><strong>Daily</strong></div>
+        <div class="card mini-summary"><small>Processing</small><strong>Demo</strong></div>
       </div>
       <div class="filter-row transaction-tabs">
         <button class="chip active" data-transaction-tab="pending">Pending</button>
         <button class="chip" data-transaction-tab="history">My History</button>
         <button class="chip" data-transaction-tab="activity">League Activity</button>
       </div>
-      <section class="card waiver-info"><div class="section-head"><div><div class="eyebrow">HOW WAIVERS WORK</div><h3>Daily rolling priority</h3></div></div><p>Claims stay pending until the next waiver run. Higher waiver priority wins when multiple managers claim the same player.</p></section>
+      <section class="card waiver-info"><div class="section-head"><div><div class="eyebrow">WAIVER SIMULATOR</div><h3>Local prototype queue</h3></div><span class="demo-badge">DEMO</span></div><p>You can create, reorder, and cancel claims on this device. Automatic league-wide waiver processing requires the future multi-user backend.</p></section>
       <div id="transactionContent" class="stack tight"></div>
       <div class="grid-two">
         <button class="wide-link-btn" data-jump="players">Browse players →</button>
@@ -262,7 +267,8 @@
       </div>
 
       <section class="card trade-builder">
-        <div class="section-head"><div><div class="eyebrow">NEW OFFER</div><h3>Build a trade</h3></div></div>
+        <div class="section-head"><div><div class="eyebrow">TRADE SIMULATOR</div><h3>Build a local trade offer</h3></div><span class="demo-badge">DEMO</span></div>
+        <p class="prototype-note">Manager rosters and offers are simulated locally until account and league synchronization is connected.</p>
         <div class="form-group">
           <label for="tradePartner">Trade with</label>
           <select id="tradePartner" class="form-control"></select>
@@ -378,7 +384,7 @@
           <label>Draft type</label>
           <div class="option-grid" data-choice-group="draftType">
             <button class="choice active" data-value="Snake"><strong>Snake Draft</strong><small>Managers take turns drafting players.</small></button>
-            <button class="choice" data-value="Salary Cap"><strong>Salary Cap</strong><small>Build a roster within a budget.</small></button>
+            <button class="choice disabled-choice" data-value="Salary Cap" disabled aria-disabled="true"><strong>Salary Cap</strong><small>Coming soon. Snake draft is currently supported.</small></button>
           </div>
         </div>
 
@@ -408,8 +414,8 @@
             <span>TOP</span><span>JNG</span><span>MID</span><span>ADC</span><span>SUP</span><span class="optional">TEAM</span>
           </div>
           <label class="toggle-row">
-            <span><strong>Team slot</strong><small>Draft one pro team for objective-based scoring.</small></span>
-            <input id="teamSlot" type="checkbox" />
+            <span><strong>Team slot</strong><small>Coming soon. Team-objective scoring is not active yet.</small></span>
+            <input id="teamSlot" type="checkbox" disabled aria-disabled="true" />
           </label>
         </div>
       </div>
@@ -427,7 +433,7 @@
       </div>
 
       <button class="primary-btn" id="saveLeagueBtn">Save League Settings</button>
-      <p class="setup-footnote">Prototype only: these settings are stored on this device for now.</p>
+      <p class="setup-footnote">Local prototype: settings are stored only on this device. Multi-user accounts and league synchronization are not connected yet.</p>
     </section>
   </template>
 
