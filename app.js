@@ -127,10 +127,12 @@ function makeDraftPick(state,player,managerIndex){
 
 function runCpuPicks(state){
   let guard=0;
-  while(state.started&&!state.complete&&draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex&&guard<20){
-    const p=bestAvailableDraftPlayer(state,draftOrderForPick(state.pickIndex,state.managerCount));
+  const maxSteps=Math.max(50,draftPool.length+state.managerCount*2);
+  while(state.started&&!state.complete&&draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex&&guard<maxSteps){
+    const managerIndex=draftOrderForPick(state.pickIndex,state.managerCount);
+    const p=bestAvailableDraftPlayer(state,managerIndex);
     if(!p){state.complete=true;break;}
-    makeDraftPick(state,p,draftOrderForPick(state.pickIndex,state.managerCount));
+    makeDraftPick(state,p,managerIndex);
     guard++;
   }
   saveDraftState(state);
@@ -149,9 +151,16 @@ const defaultLeagueSettings = {
 
 function getLeagueSettings(){
   try{
-    return {...defaultLeagueSettings,...JSON.parse(localStorage.getItem("riftLeagueSettings")||"{}")};
+    const saved=JSON.parse(localStorage.getItem("riftLeagueSettings")||"{}")||{};
+    return {
+      ...defaultLeagueSettings,
+      ...saved,
+      draftType:"Snake",
+      teamSlot:false,
+      scoring:{...defaultLeagueSettings.scoring,...(saved.scoring||{})}
+    };
   }catch{
-    return {...defaultLeagueSettings};
+    return {...defaultLeagueSettings,scoring:{...defaultLeagueSettings.scoring}};
   }
 }
 
@@ -173,7 +182,7 @@ function defaultUserRoster(){
 function getUserRoster(){
   try{
     const saved=JSON.parse(localStorage.getItem("riftUserRoster")||"null");
-    return Array.isArray(saved)&&saved.length ? saved : defaultUserRoster();
+    return Array.isArray(saved) ? saved : defaultUserRoster();
   }catch{
     return defaultUserRoster();
   }
@@ -396,11 +405,30 @@ function rosterRow(p, manage=false){
   </div>`;
 }
 
-function render(view="home"){
-  const template = document.querySelector(`#${view}-template`);
-  app.innerHTML = "";
+let currentView=null;
+
+function render(view="home",options={}){
+  const requested=String(view||"home").replace(/[^a-z-]/g,"");
+  const template=document.querySelector(`#${requested}-template`);
+  if(!template){
+    if(requested!=="home") return render("home",{...options,replace:true});
+    return;
+  }
+  view=requested;
+  if(view!=="draft"&&draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
+  if(!options.fromHistory){
+    const hash="#"+view;
+    if(options.replace||currentView===null) history.replaceState({view},"",hash);
+    else if(currentView!==view) history.pushState({view},"",hash);
+  }
+  currentView=view;
+  app.innerHTML="";
   app.appendChild(template.content.cloneNode(true));
-  document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
+  document.querySelectorAll(".nav-item").forEach(b=>{
+    const active=b.dataset.view===view;
+    b.classList.toggle("active",active);
+    if(active)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");
+  });
 
   if(view==="home"){
     const currentRoster=getUserRoster();
@@ -472,8 +500,7 @@ function render(view="home"){
       return `<div class="profile-match"><div><strong>vs ${opponent}</strong><small>${g.league||""} · ${g.stage||""}</small></div><div><strong>${g.time||"TBD"}</strong><small>${g.label||""}</small></div></div>`;
     }).join(""):'<div class="empty-state"><strong>No upcoming match found</strong><small>The schedule will populate automatically when a matching event is available.</small></div>';
 
-    const trend=[-2.5,1.8,-0.9,3.1,0.6].map((d,i)=>Math.max(0,base+d+(i-2)*.4));
-    document.querySelector("#profileTrend").innerHTML=trend.map((v,i)=>`<div class="trend-game"><small>G${i+1}</small><strong>${v.toFixed(1)}</strong></div>`).join("");
+    document.querySelector("#profileTrend").innerHTML='<div class="empty-state"><strong>Game logs not connected yet</strong><small>Recent fantasy results will appear here once live scoring and historical statistics are connected.</small></div>';
 
     const watch=watchlistIds();
     const watchBtn=document.querySelector("#watchPlayerBtn");
@@ -504,7 +531,13 @@ function render(view="home"){
     const list=document.querySelector("#scheduleList");
     let day="all";
     const drawSchedule=()=>{
-      const filtered=proSchedule.filter(g=>day==="all"||g.day===day||(day==="upcoming"&&g.day==="upcoming"));
+      const rows=proSchedule.map(localScheduleRow).sort((a,b)=>{
+        const ta=Date.parse(a.startTime||"");
+        const tb=Date.parse(b.startTime||"");
+        if(Number.isFinite(ta)&&Number.isFinite(tb))return ta-tb;
+        return 0;
+      });
+      const filtered=rows.filter(g=>day==="all"||g.day===day||(day==="upcoming"&&g.day==="upcoming"));
       let lastLabel="";
       list.innerHTML=filtered.length?filtered.map(g=>{
         const heading=g.label!==lastLabel ? `<div class="schedule-day">${g.label}</div>` : "";
@@ -521,7 +554,9 @@ function render(view="home"){
     if(dataText&&window.ESPORTS_DATA){
       const stamp=new Date(window.ESPORTS_DATA.updatedAt);
       const when=Number.isNaN(stamp.getTime())?window.ESPORTS_DATA.updatedAt:stamp.toLocaleString();
-      dataText.textContent=`${window.ESPORTS_DATA.autoUpdated?"Auto-refreshed":"Updated"} ${when} from LoL Esports. Match times are converted to your device's local time.`;
+      const ageHours=(Date.now()-stamp.getTime())/3600000;
+      const freshness=Number.isFinite(ageHours)&&ageHours>24?"Data may be stale. ":"";
+      dataText.textContent=`${freshness}${window.ESPORTS_DATA.autoUpdated?"Auto-refreshed":"Snapshot updated"} ${when}. Timestamped matches use your device's local time.`;
     }
     drawSchedule();
   }
@@ -594,27 +629,18 @@ function render(view="home"){
         content.innerHTML=mine.length?mine.map(o=>`<div class="trade-card"><div class="trade-card-head"><div><h4>${o.partner}</h4><small>Sent ${fmt(o.createdAt)}</small></div><span class="trade-status pending">PENDING</span></div><div class="trade-swap"><div class="trade-side"><span>YOU SEND</span><strong>${o.userPlayer}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>YOU RECEIVE</span><strong>${o.theirPlayer}</strong></div></div><div class="trade-card-actions"><button class="secondary-btn" data-cancel-trade="${o.id}">Cancel Offer</button></div></div>`).join(""):'<div class="empty-state"><strong>No outgoing offers</strong><small>Build a trade above and send it to another manager.</small></div>';
         content.querySelectorAll("[data-cancel-trade]").forEach(b=>b.onclick=()=>{saveTradeOffers(getTradeOffers().filter(o=>o.id!==b.dataset.cancelTrade));showToast("Trade offer canceled");renderTradeTabs();});
       }else if(tab==="incoming"){
-        let incoming=offers.filter(o=>o.direction==="incoming");
-        if(!incoming.length){
-          const mine=getUserRoster()[0];
-          const manager=managers[0];
-          const their=simulatedRosterForManager(manager)[0];
-          if(mine&&their){
-            incoming=[{id:"demo-incoming",direction:"incoming",partner:manager,userPlayerId:playerKey(mine),userPlayer:mine.name,theirPlayerId:playerKey(their),theirPlayer:their.name,theirTeam:their.team,theirRole:their.role,theirFp:Number(their.fp??their.projection??20),createdAt:new Date().toISOString(),status:"pending",demo:true}];
-          }
-        }
+        const incoming=offers.filter(o=>o.direction==="incoming");
         content.innerHTML=incoming.length?incoming.map(o=>`<div class="trade-card"><div class="trade-card-head"><div><h4>Offer from ${o.partner}</h4><small>${fmt(o.createdAt)}</small></div><span class="trade-status pending">PENDING</span></div><div class="trade-swap"><div class="trade-side"><span>YOU SEND</span><strong>${o.userPlayer}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>YOU RECEIVE</span><strong>${o.theirPlayer}</strong></div></div><div class="trade-card-actions"><button class="primary-btn" data-accept-trade="${o.id}">Accept</button><button class="secondary-btn" data-decline-trade="${o.id}">Decline</button></div></div>`).join(""):'<div class="empty-state"><strong>No incoming offers</strong><small>Trade offers from other managers will appear here.</small></div>';
         content.querySelectorAll("[data-accept-trade]").forEach(b=>b.onclick=()=>{
           const id=b.dataset.acceptTrade;
-          let offer=getTradeOffers().find(o=>o.id===id);
-          if(!offer && id==="demo-incoming") offer=incoming.find(o=>o.id===id);
-          if(offer?.demo){ const saved=getTradeOffers(); saved.push({...offer,demo:false}); saveTradeOffers(saved); offer={...offer,demo:false}; }
+          const offer=getTradeOffers().find(o=>o.id===id);
+          if(!offer)return;
           completeIncomingTrade(offer,true); renderTradeTabs(); renderBuilder();
         });
         content.querySelectorAll("[data-decline-trade]").forEach(b=>b.onclick=()=>{
           const id=b.dataset.declineTrade;
-          let offer=getTradeOffers().find(o=>o.id===id);
-          if(!offer && id==="demo-incoming"){showToast("Trade declined."); content.innerHTML='<div class="empty-state"><strong>No incoming offers</strong><small>Trade offers from other managers will appear here.</small></div>';return;}
+          const offer=getTradeOffers().find(o=>o.id===id);
+          if(!offer)return;
           completeIncomingTrade(offer,false); renderTradeTabs();
         });
       }else{
@@ -860,10 +886,10 @@ function render(view="home"){
         name:document.querySelector("#leagueName").value.trim()||"Summoner's Cup",
         managers:document.querySelector("#managerCount").value,
         bench:document.querySelector("#benchCount").value,
-        draftType,
+        draftType:"Snake",
         scoringFormat,
         competition:document.querySelector("#competition").value,
-        teamSlot:document.querySelector("#teamSlot").checked,
+        teamSlot:false,
         scoring:{
           kills:Number(document.querySelector("#scoreKills").value),
           deaths:Number(document.querySelector("#scoreDeaths").value),
@@ -873,7 +899,9 @@ function render(view="home"){
           firstBlood:Number(document.querySelector("#scoreFb").value)
         }
       };
+      const prior=getLeagueSettings();
       localStorage.setItem("riftLeagueSettings",JSON.stringify(next));
+      if(prior.managers!==next.managers||prior.bench!==next.bench)localStorage.removeItem("riftDraftState");
       showToast("League settings saved");
       setTimeout(()=>render("league"),550);
     };
@@ -889,5 +917,7 @@ function render(view="home"){
 
 document.querySelectorAll(".nav-item").forEach(b=>b.addEventListener("click",()=>render(b.dataset.view)));
 document.querySelectorAll("[data-close-transaction]").forEach(el=>el.addEventListener("click",closeTransactionModal));
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeTransactionModal();});
+window.addEventListener("popstate",e=>render(e.state?.view||location.hash.slice(1)||"home",{fromHistory:true}));
 document.querySelector("#notificationBtn").onclick=()=>showToast("No new league notifications.");
-render("home");
+render(location.hash.slice(1)||"home",{replace:true});
