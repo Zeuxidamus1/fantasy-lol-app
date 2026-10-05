@@ -351,6 +351,8 @@ function closeTransactionModal(){
   if(modal){
     modal.hidden=true;
     document.body.classList.remove("modal-open");
+    const shell=document.querySelector(".app-shell");
+    if(shell)shell.inert=false;
   }
   if(modalReturnFocus&&document.contains(modalReturnFocus)){
     modalReturnFocus.focus();
@@ -396,6 +398,8 @@ function openDropChooser(incoming){
   modalReturnFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
   modal.hidden=false;
   document.body.classList.add("modal-open");
+  const shell=document.querySelector(".app-shell");
+  if(shell)shell.inert=true;
   queueMicrotask(()=>list.querySelector("[data-drop-id]")?.focus());
 }
 
