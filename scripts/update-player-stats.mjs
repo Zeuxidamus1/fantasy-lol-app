@@ -47,7 +47,10 @@ const response=await fetch(DATA_URL,{headers:{
   "accept-language":"en-US,en;q=0.9",
   "cache-control":"no-cache"
 }});
-if(!response.ok)throw new Error(`ChainCC download failed: ${response.status}`);
+if(!response.ok){
+  console.warn(`ChainCC download unavailable from this runner (${response.status}); preserving the current player-stats.js snapshot.`);
+  process.exit(0);
+}
 const csv=gunzipSync(Buffer.from(await response.arrayBuffer())).toString("utf8");
 const parsed=parseCsv(csv);
 if(parsed.length<2)throw new Error("ChainCC CSV was empty");
