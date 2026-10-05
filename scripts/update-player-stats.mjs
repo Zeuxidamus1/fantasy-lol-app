@@ -40,7 +40,13 @@ const first=(obj,names)=>{
   return null;
 };
 
-const response=await fetch(DATA_URL,{headers:{"user-agent":"RiftFantasy/0.1 (+https://zeuxidamus1.github.io/fantasy-lol-app/)"}});
+const response=await fetch(DATA_URL,{headers:{
+  "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+  "referer":"https://chaincc.lol/free/data",
+  "accept":"application/gzip, application/octet-stream;q=0.9, */*;q=0.8",
+  "accept-language":"en-US,en;q=0.9",
+  "cache-control":"no-cache"
+}});
 if(!response.ok)throw new Error(`ChainCC download failed: ${response.status}`);
 const csv=gunzipSync(Buffer.from(await response.arrayBuffer())).toString("utf8");
 const parsed=parseCsv(csv);
