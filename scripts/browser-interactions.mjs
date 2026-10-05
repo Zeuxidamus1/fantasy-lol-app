@@ -112,18 +112,10 @@ try{
   await expect("transaction modal closes","document.querySelector('#transactionModal').hidden === true");
 
   await evaluate("document.querySelector('[data-view=team]').click()");
-  await expect("team nav works","document.title.includes('My Team') && !!document.querySelector('#rosterList')");
-  const beforeDrop=await evaluate("JSON.parse(localStorage.getItem('riftUserRoster')||'[]').length || document.querySelectorAll('#rosterList .roster-slot').length");
-  await evaluate("window.confirm=()=>true; document.querySelector('[data-drop-roster]').click()");
-  await expect("drop updates roster",`JSON.parse(localStorage.getItem('riftUserRoster')||'[]').length === ${Math.max(0,Number(beforeDrop)-1)}`);
+  await expect("team nav works","document.title.includes('My Team') && !!document.querySelector('#teamNoLeague')");
+  await expect("team requires active league","document.querySelector('#teamNoLeague').hidden === false");
 
-  await evaluate("document.querySelector('[data-view=players]').click(); const b=document.querySelector('#freeAgentList .add-btn:not([disabled])'); if(b)b.click()");
-  await expect("add updates roster",`JSON.parse(localStorage.getItem('riftUserRoster')||'[]').length === ${Number(beforeDrop)}`);
-
-  await evaluate("document.querySelector('[data-view=team]').click(); document.querySelector('[data-jump=transactions]').click()");
-  await expect("transactions view opens","document.title.includes('Transactions') && !!document.querySelector('#transactionContent')");
-  await evaluate("document.querySelector('[data-transaction-tab=history]').click()");
-  await expect("transaction history records moves","document.querySelector('#transactionContent').innerText.includes('COMPLETE')");
+  await evaluate("document.querySelector('[data-view=players]').click()");
 
   await evaluate("document.querySelector('[data-view=players]').click(); const r=[...document.querySelectorAll('#freeAgentList .player-row')].find(x=>x.querySelector('.add-btn:not([disabled])')); if(r)r.querySelector('[data-open-player]').click()");
   await expect("available player profile opens","!!document.querySelector('#profileWaiverBtn') && !document.querySelector('#profileWaiverBtn').disabled");
