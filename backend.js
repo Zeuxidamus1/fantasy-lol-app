@@ -170,7 +170,7 @@
   async function listLeagues(){
     const current=await session();
     if(!current)return [];
-    return request("/rest/v1/leagues?select=id,name,invite_code,settings,created_at&order=created_at.desc",{session:current});
+    return request("/rest/v1/leagues?select=id,name,invite_code,settings,status,created_at&order=created_at.desc",{session:current});
   }
 
   async function createLeague(name,settings={}){
@@ -183,6 +183,37 @@
     const current=await session();
     if(!current)throw new Error("Sign in before joining a league.");
     return request("/rest/v1/rpc/join_league",{method:"POST",body:{p_invite_code:String(inviteCode||"").trim().toUpperCase(),p_team_name:String(teamName||"").trim()},session:current});
+  }
+
+  async function updateLeagueSettings(leagueId,name,settings){
+    const current=await session();
+    if(!current)throw new Error("Sign in before changing league settings.");
+    return request("/rest/v1/rpc/update_league_settings",{method:"POST",body:{p_league_id:leagueId,p_name:name,p_settings:settings},session:current});
+  }
+
+  async function getLeagueDraft(leagueId){
+    const current=await session();
+    if(!current)return null;
+    const rows=await request("/rest/v1/league_drafts?league_id=eq."+encodeURIComponent(leagueId)+"&select=league_id,status,manager_order,current_pick,total_rounds,started_at,updated_at",{session:current});
+    return Array.isArray(rows)?(rows[0]||null):rows;
+  }
+
+  async function listDraftPicks(leagueId){
+    const current=await session();
+    if(!current)return [];
+    return request("/rest/v1/draft_picks?league_id=eq."+encodeURIComponent(leagueId)+"&select=league_id,pick_number,round_number,user_id,player_id,role,created_at&order=pick_number.asc",{session:current});
+  }
+
+  async function startLeagueDraft(leagueId){
+    const current=await session();
+    if(!current)throw new Error("Sign in before starting the draft.");
+    return request("/rest/v1/rpc/start_league_draft",{method:"POST",body:{p_league_id:leagueId},session:current});
+  }
+
+  async function makeDraftPick(leagueId,playerId,role){
+    const current=await session();
+    if(!current)throw new Error("Sign in before drafting.");
+    return request("/rest/v1/rpc/make_draft_pick",{method:"POST",body:{p_league_id:leagueId,p_player_id:String(playerId),p_role:String(role)},session:current});
   }
 
   async function listLeagueMembers(leagueId){
@@ -259,7 +290,8 @@
     readSession,
     onSessionChange(fn){listeners.add(fn);return()=>listeners.delete(fn);},
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
-    listLeagues,createLeague,joinLeague,listLeagueMembers,
+    listLeagues,createLeague,joinLeague,updateLeagueSettings,listLeagueMembers,
+    getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,
     listRosters,saveRoster,
     listWaivers,createWaiver,cancelWaiver,
     listTrades,createTrade,updateTrade,acceptTrade,
