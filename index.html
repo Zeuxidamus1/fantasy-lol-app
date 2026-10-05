@@ -416,16 +416,16 @@
     <section class="stack">
       <div class="section-title"><div><div class="eyebrow">ROSTER MOVES</div><h2>Waivers & Transactions</h2></div><button class="secondary-btn" data-jump="team">My Team</button></div>
       <div class="transaction-summary">
-        <div class="card mini-summary"><small>League priority</small><strong>N/A</strong></div>
+        <div class="card mini-summary"><small>League</small><strong id="transactionLeagueName">—</strong></div>
         <div class="card mini-summary"><small>Pending claims</small><strong id="pendingClaimCount">0</strong></div>
-        <div class="card mini-summary"><small>Processing</small><strong>Demo</strong></div>
+        <div class="card mini-summary"><small>Roster moves</small><strong id="transactionMoveCount">0</strong></div>
       </div>
       <div class="filter-row transaction-tabs">
         <button class="chip active" data-transaction-tab="pending">Pending</button>
         <button class="chip" data-transaction-tab="history">My History</button>
         <button class="chip" data-transaction-tab="activity">League Activity</button>
       </div>
-      <section class="card waiver-info"><div class="section-head"><div><div class="eyebrow">WAIVER SIMULATOR</div><h3>Local prototype queue</h3></div><span class="demo-badge">DEMO</span></div><p>You can create, reorder, and cancel claims on this device. Automatic league-wide waiver processing requires the future multi-user backend.</p></section>
+      <section class="card waiver-info"><div class="section-head"><div><div class="eyebrow">WAIVERS</div><h3>League claims</h3></div></div><p>Claims are shared with your league. Automatic scheduled waiver processing is not enabled yet.</p></section>
       <div id="transactionContent" class="stack tight"></div>
       <div class="grid-two">
         <button class="wide-link-btn" data-jump="players">Browse players →</button>
@@ -442,8 +442,8 @@
       </div>
 
       <section class="card trade-builder">
-        <div class="section-head"><div><div class="eyebrow">TRADE SIMULATOR</div><h3>Build a local trade offer</h3></div><span class="demo-badge">DEMO</span></div>
-        <p class="prototype-note">Manager rosters and offers are simulated locally until account and league synchronization is connected.</p>
+        <div class="section-head"><div><div class="eyebrow">TRADE CENTER</div><h3>Build a trade offer</h3></div></div>
+        <p class="prototype-note">Offers use the actual rosters in your active league.</p>
         <div class="form-group">
           <label for="tradePartner">Trade with</label>
           <select id="tradePartner" class="form-control"></select>
