@@ -809,3 +809,25 @@ begin
   return result;
 end;
 $$;
+
+
+create or replace function public.update_team_name(p_league_id uuid,p_team_name text)
+returns public.league_members
+language plpgsql
+security definer
+set search_path=public
+as $$
+declare result public.league_members;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if nullif(trim(p_team_name),'') is null then raise exception 'Team name is required'; end if;
+  update public.league_members
+     set team_name=left(trim(p_team_name),40)
+   where league_id=p_league_id and user_id=auth.uid()
+   returning * into result;
+  if result.user_id is null then raise exception 'League membership required'; end if;
+  return result;
+end;
+$$;
+revoke all on function public.update_team_name(uuid,text) from public,anon;
+grant execute on function public.update_team_name(uuid,text) to authenticated;
