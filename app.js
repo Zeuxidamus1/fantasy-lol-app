@@ -1210,13 +1210,37 @@ function render(view="home",options={}){
         try{
           const leagues=await b.listLeagues();
           let activeId=getActiveLeagueId();
-          if(activeId&&!leagues.some(l=>String(l.id)===String(activeId))){setActiveLeagueId(null);activeId=null;}
-          cloudList.innerHTML=leagues.length?leagues.map(l=>'<div class="cloud-league-item '+(String(activeId)===String(l.id)?"active-cloud-league":"")+'"><div><strong>'+h(l.name)+'</strong><small>Invite: '+h(l.invite_code||"—")+'</small></div><button class="secondary-btn cloud-select-btn" data-cloud-league="'+h(l.id)+'">'+(String(activeId)===String(l.id)?"Active":"Use League")+'</button></div>').join(""):'<div class="empty-state"><strong>No online leagues yet</strong><small>Create one or join with an invite code.</small></div>';
+          if(activeId&&!leagues.some(l=>String(l.id)===String(activeId))){
+            setActiveLeagueId(null);
+            activeId=null;
+          }
+          if(!activeId&&leagues.length===1){
+            activeId=String(leagues[0].id);
+            setActiveLeagueId(activeId);
+            await loadRosterFromCloud(activeId);
+          }
+
+          const memberships=await Promise.all(leagues.map(async league=>{
+            try{
+              const members=await b.listLeagueMembers(league.id);
+              return members.find(m=>String(m.user_id)===String(user.id))||null;
+            }catch{return null;}
+          }));
+
+          cloudList.innerHTML=leagues.length?leagues.map((l,index)=>{
+            const active=String(activeId)===String(l.id);
+            const membership=memberships[index];
+            const teamName=membership?.team_name||"Your team";
+            const role=membership?.role==="owner"?"Commissioner":"Manager";
+            return '<button class="cloud-league-item league-choice '+(active?"active-cloud-league":"")+'" data-cloud-league="'+h(l.id)+'" aria-pressed="'+String(active)+'"><div><strong>'+h(l.name)+'</strong><small>'+h(teamName)+' · '+h(role)+' · Invite: '+h(l.invite_code||"—")+'</small></div><span class="league-choice-state">'+(active?"Active":"Select")+'</span></button>';
+          }).join(""):'<div class="empty-state"><strong>No online leagues yet</strong><small>Create one or join with an invite code.</small></div>';
+
           await applyLeaguePermissions(activeId);
-          cloudList.querySelectorAll("[data-cloud-league]").forEach(btn=>btn.onclick=async()=>{
-            setActiveLeagueId(btn.dataset.cloudLeague);
-            const loaded=await loadRosterFromCloud(btn.dataset.cloudLeague);
-            showToast(loaded?"Online league selected · roster loaded":"Online league selected");
+          cloudList.querySelectorAll("[data-cloud-league]").forEach(card=>card.onclick=async()=>{
+            if(String(getActiveLeagueId())===String(card.dataset.cloudLeague))return;
+            setActiveLeagueId(card.dataset.cloudLeague);
+            const loaded=await loadRosterFromCloud(card.dataset.cloudLeague);
+            showToast(loaded?"League selected · roster loaded":"League selected");
             await drawCloudLeagues();
           });
         }catch(err){
