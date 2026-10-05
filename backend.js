@@ -216,15 +216,14 @@
 
   async function createWaiver(leagueId,playerId,priority=1){
     const current=await session();
-    const userId=current?.user?.id;
-    if(!current||!userId)throw new Error("Sign in before creating a waiver claim.");
-    return request("/rest/v1/waiver_claims",{method:"POST",body:{league_id:leagueId,user_id:userId,player_id:String(playerId),priority:Number(priority)||1,status:"pending"},session:current,headers:{"Prefer":"return=representation"}});
+    if(!current)throw new Error("Sign in before creating a waiver claim.");
+    return request("/rest/v1/rpc/create_waiver",{method:"POST",body:{p_league_id:leagueId,p_player_id:String(playerId),p_priority:Number(priority)||1},session:current});
   }
 
   async function cancelWaiver(id){
     const current=await session();
     if(!current)throw new Error("Sign in before changing a waiver claim.");
-    return request("/rest/v1/waiver_claims?id=eq."+encodeURIComponent(id),{method:"PATCH",body:{status:"canceled"},session:current,headers:{"Prefer":"return=representation"}});
+    return request("/rest/v1/rpc/cancel_waiver",{method:"POST",body:{p_claim_id:id},session:current});
   }
 
   async function listTrades(leagueId){
@@ -235,9 +234,8 @@
 
   async function createTrade(leagueId,toUser,offer){
     const current=await session();
-    const userId=current?.user?.id;
-    if(!current||!userId)throw new Error("Sign in before creating a trade.");
-    return request("/rest/v1/trades",{method:"POST",body:{league_id:leagueId,from_user:userId,to_user:toUser,offer,status:"pending"},session:current,headers:{"Prefer":"return=representation"}});
+    if(!current)throw new Error("Sign in before creating a trade.");
+    return request("/rest/v1/rpc/create_trade",{method:"POST",body:{p_league_id:leagueId,p_to_user:toUser,p_offer:offer},session:current});
   }
 
   async function updateTrade(id,status){
@@ -245,7 +243,7 @@
     if(!allowed.has(status))throw new Error("Invalid trade status.");
     const current=await session();
     if(!current)throw new Error("Sign in before updating a trade.");
-    return request("/rest/v1/trades?id=eq."+encodeURIComponent(id),{method:"PATCH",body:{status,resolved_at:new Date().toISOString()},session:current,headers:{"Prefer":"return=representation"}});
+    return request("/rest/v1/rpc/resolve_trade",{method:"POST",body:{p_trade_id:id,p_status:status},session:current});
   }
 
   async function acceptTrade(id){
