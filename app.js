@@ -1092,9 +1092,64 @@ function render(view="home",options={}){
       addBtn.onclick=()=>addPlayerToRoster(p);
     }
     const waiverBtn=document.querySelector("#profileWaiverBtn");
-    if(owned){waiverBtn.textContent="Already Owned";waiverBtn.disabled=true;}
-    else waiverBtn.onclick=async()=>{waiverBtn.disabled=true;await createWaiverClaim(p);waiverBtn.disabled=false;};
-    document.querySelector("#profileTradeBtn").onclick=()=>{tradePrefill={id:playerKey(p),side:owned?"mine":"theirs"};render("trade");};
+    const tradeBtn=document.querySelector("#profileTradeBtn");
+    const configureLeagueActions=async()=>{
+      const leagueId=getActiveLeagueId();
+      if(!leagueId||!cloudReady()){
+        addBtn.disabled=true;
+        addBtn.textContent="Join a League";
+        waiverBtn.disabled=true;
+        tradeBtn.disabled=true;
+        return;
+      }
+      try{
+        const b=backend();
+        const [user,rosters,leagues]=await Promise.all([b.currentUser(),b.listRosters(leagueId),b.listLeagues()]);
+        const league=leagues.find(l=>String(l.id)===String(leagueId));
+        const ownership=rosters.find(r=>String(r.player_id)===playerKey(p));
+        const mine=ownership&&String(ownership.user_id)===String(user?.id);
+        const other=ownership&&!mine;
+
+        document.querySelector("#profileStatus").textContent=mine?"On your roster":other?"Rostered by another manager":"Available";
+
+        if(league?.status!=="active"){
+          addBtn.disabled=true;
+          addBtn.textContent=league?.status==="drafting"?"Draft In Progress":"Roster Locked";
+          waiverBtn.disabled=true;
+          tradeBtn.disabled=true;
+          return;
+        }
+
+        if(mine){
+          addBtn.textContent="On My Team";
+          addBtn.classList.add("owned");
+          addBtn.disabled=true;
+          waiverBtn.textContent="Already Owned";
+          waiverBtn.disabled=true;
+          tradeBtn.disabled=false;
+          tradeBtn.onclick=()=>{tradePrefill={id:playerKey(p),side:"mine"};render("trade");};
+        }else if(other){
+          addBtn.textContent="Rostered";
+          addBtn.disabled=true;
+          waiverBtn.textContent="Rostered";
+          waiverBtn.disabled=true;
+          tradeBtn.disabled=false;
+          tradeBtn.onclick=()=>{tradePrefill={id:playerKey(p),side:"theirs"};render("trade");};
+        }else{
+          addBtn.disabled=false;
+          addBtn.textContent=getUserRoster().length>=rosterLimit()?"Add / Choose Drop":"Add Player";
+          addBtn.onclick=()=>addPlayerToRoster(p);
+          waiverBtn.disabled=false;
+          waiverBtn.onclick=async()=>{waiverBtn.disabled=true;await createWaiverClaim(p);waiverBtn.disabled=false;};
+          tradeBtn.disabled=true;
+        }
+      }catch(err){
+        addBtn.disabled=true;
+        waiverBtn.disabled=true;
+        tradeBtn.disabled=true;
+      }
+    };
+    void configureLeagueActions();
     document.querySelector("#playerBackBtn").onclick=()=>goBack("players");
   }
   if(view==="schedule"){
@@ -1146,24 +1201,59 @@ function render(view="home",options={}){
     const notice=document.querySelector("#playerDataNotice");
     if(notice)notice.hidden=livePlayers.length>0;
     let role="ALL";
+    let leagueRosters=[];
+    let currentUser=null;
+    let leagueStatus=null;
+
     const draw=()=>{
       const q=search.value.trim().toLowerCase();
       const source=allFantasyPlayers();
       const filtered=source.filter(p=>(role==="ALL"||p.role===role)&&(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)));
       list.innerHTML=filtered.map(p=>playerRow(p,true)).join("") || '<div class="empty-state"><strong>No players found</strong><small>Try a different name, team, or role.</small></div>';
+
       list.querySelectorAll(".add-btn").forEach((b,i)=>{
         const p=filtered[i];
-        if(isOwned(p)){b.textContent="OWNED";b.classList.add("owned");b.disabled=true;}
-        else b.onclick=(e)=>{e.stopPropagation();addPlayerToRoster(p);draw();};
+        const pid=playerKey(p);
+        const ownership=leagueRosters.find(r=>String(r.player_id)===String(pid));
+        if(ownership){
+          if(String(ownership.user_id)===String(currentUser?.id)){b.textContent="OWNED";b.classList.add("owned");}
+          else b.textContent="ROSTERED";
+          b.disabled=true;
+        }else if(leagueStatus&&leagueStatus!=="active"){
+          b.textContent=leagueStatus==="drafting"?"DRAFTING":"LOCKED";
+          b.disabled=true;
+        }else if(!getActiveLeagueId()){
+          b.textContent="NO LEAGUE";
+          b.disabled=true;
+        }else{
+          b.onclick=async e=>{e.stopPropagation();b.disabled=true;await addPlayerToRoster(p);await refreshOwnership();};
+        }
       });
+
       list.querySelectorAll("[data-open-player]").forEach(row=>{
         row.onclick=(e)=>{if(e.target.closest(".add-btn"))return;openPlayer(row.dataset.openPlayer);};
         row.onkeydown=(e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openPlayer(row.dataset.openPlayer);}};
       });
     };
+
+    const refreshOwnership=async()=>{
+      const leagueId=getActiveLeagueId();
+      if(!leagueId||!cloudReady()){leagueRosters=[];leagueStatus=null;draw();return;}
+      try{
+        const b=backend();
+        const [user,rosters,leagues]=await Promise.all([b.currentUser(),b.listRosters(leagueId),b.listLeagues()]);
+        currentUser=user;
+        leagueRosters=rosters;
+        leagueStatus=leagues.find(l=>String(l.id)===String(leagueId))?.status||null;
+      }catch{
+        leagueRosters=[];
+      }
+      draw();
+    };
+
     search.oninput=draw;
     document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{role=c.dataset.role;document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));c.classList.add("active");draw();});
-    draw();
+    void refreshOwnership();
   }
   if(view==="trade"){
     const leagueId=getActiveLeagueId();
