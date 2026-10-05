@@ -72,6 +72,7 @@
     const refresh_token=params.get("refresh_token");
     const expires_in=Number(params.get("expires_in")||3600);
     const token_type=params.get("token_type")||"bearer";
+    const authType=params.get("type")||"";
     if(!access_token||!refresh_token)return false;
     writeSession({
       access_token,
@@ -80,6 +81,9 @@
       expires_in,
       expires_at:Math.floor(Date.now()/1000)+expires_in
     });
+    try{
+      if(authType==="recovery")sessionStorage.setItem("riftRecoveryMode","1");
+    }catch{}
     history.replaceState({view:"account",depth:0},"",location.pathname+"#account");
     return true;
   }
@@ -89,6 +93,28 @@
     const payload=await request("/auth/v1/signup?redirect_to="+redirect,{method:"POST",body:{email,password},session:null});
     if(payload?.access_token)writeSession(payload);
     return payload;
+  }
+
+  async function resendSignup(email){
+    const redirect=encodeURIComponent(publicAppUrl());
+    return request("/auth/v1/resend?redirect_to="+redirect,{method:"POST",body:{type:"signup",email},session:null});
+  }
+
+  async function requestPasswordReset(email){
+    const redirect=encodeURIComponent(publicAppUrl());
+    return request("/auth/v1/recover?redirect_to="+redirect,{method:"POST",body:{email},session:null});
+  }
+
+  async function updatePassword(password){
+    const current=await session();
+    if(!current)throw new Error("Open the password-reset email link before setting a new password.");
+    const payload=await request("/auth/v1/user",{method:"PUT",body:{password},session:current});
+    try{sessionStorage.removeItem("riftRecoveryMode");}catch{}
+    return payload;
+  }
+
+  function isRecoveryMode(){
+    try{return sessionStorage.getItem("riftRecoveryMode")==="1";}catch{return false;}
   }
 
   async function signIn(email,password){
@@ -230,7 +256,7 @@
     isConfigured,
     readSession,
     onSessionChange(fn){listeners.add(fn);return()=>listeners.delete(fn);},
-    signUp,signIn,signOut,currentUser,
+    signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
     listLeagues,createLeague,joinLeague,listLeagueMembers,
     listRosters,saveRoster,
     listWaivers,createWaiver,cancelWaiver,
