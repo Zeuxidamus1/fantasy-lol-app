@@ -21,14 +21,14 @@ window.ESPORTS_DATA = {
     {rank:7,code:"AL",name:"Anyone's Legend",league:"LPL",score:1409,record:"32-18"}
   ],
   schedule: [
-    {day:"today",label:"TODAY · OCT 4",time:"8:00 PM",league:"LCS",stage:"Finals · Bo5",a:"TBD",aCode:"TBD",b:"Team Liquid Alienware",bCode:"TLAW",status:"UPCOMING"},
-    {day:"tomorrow",label:"TOMORROW · OCT 5",time:"7:00 AM",league:"DCGI",stage:"Swiss · Bo3",a:"GAM Esports",aCode:"GAM",b:"Team Vitality",bCode:"VIT",status:"UPCOMING"},
-    {day:"tomorrow",label:"TOMORROW · OCT 5",time:"9:00 AM",league:"DCGI",stage:"Swiss · Bo3",a:"Natus Vincere",aCode:"NAVI",b:"FlyQuest",bCode:"FLY",status:"UPCOMING"},
-    {day:"tomorrow",label:"TOMORROW · OCT 5",time:"11:00 AM",league:"DCGI",stage:"Swiss · Bo3",a:"Shopify Rebellion",aCode:"SR",b:"Beijing JDG Esports",bCode:"JDG",status:"UPCOMING"},
-    {day:"tomorrow",label:"TOMORROW · OCT 5",time:"9:00 PM",league:"CBLOL Promotion",stage:"Regional Qualifier · Bo5",a:"KaBuM! Esports",aCode:"KBM",b:"9z Globant",bCode:"9ZG",status:"UPCOMING"},
-    {day:"tomorrow",label:"TOMORROW · OCT 5",time:"9:00 PM",league:"LCS Promotion",stage:"Regional Qualifier · Bo5",a:"Maryville University",aCode:"MU",b:"Zeu5 Esports",bCode:"Z5",status:"UPCOMING"},
-    {day:"upcoming",label:"OCT 6",time:"8:00 PM",league:"LCS Promotion",stage:"Regional Qualifier · Bo5",a:"Cupid Esports",aCode:"CPD",b:"FUEGO",bCode:"FUE",status:"UPCOMING"},
-    {day:"upcoming",label:"OCT 15",time:"TBD",league:"Worlds",stage:"Tournament begins",a:"Worlds 2026",aCode:"W26",b:"19 qualified teams",bCode:"19",status:"UPCOMING"}
+    {date:"2026-10-04",day:"today",label:"TODAY · OCT 4",time:"8:00 PM",league:"LCS",stage:"Finals · Bo5",a:"TBD",aCode:"TBD",b:"Team Liquid Alienware",bCode:"TLAW",status:"UPCOMING"},
+    {date:"2026-10-05",day:"tomorrow",label:"TOMORROW · OCT 5",time:"7:00 AM",league:"DCGI",stage:"Swiss · Bo3",a:"GAM Esports",aCode:"GAM",b:"Team Vitality",bCode:"VIT",status:"UPCOMING"},
+    {date:"2026-10-05",day:"tomorrow",label:"TOMORROW · OCT 5",time:"9:00 AM",league:"DCGI",stage:"Swiss · Bo3",a:"Natus Vincere",aCode:"NAVI",b:"FlyQuest",bCode:"FLY",status:"UPCOMING"},
+    {date:"2026-10-05",day:"tomorrow",label:"TOMORROW · OCT 5",time:"11:00 AM",league:"DCGI",stage:"Swiss · Bo3",a:"Shopify Rebellion",aCode:"SR",b:"Beijing JDG Esports",bCode:"JDG",status:"UPCOMING"},
+    {date:"2026-10-05",day:"tomorrow",label:"TOMORROW · OCT 5",time:"9:00 PM",league:"CBLOL Promotion",stage:"Regional Qualifier · Bo5",a:"KaBuM! Esports",aCode:"KBM",b:"9z Globant",bCode:"9ZG",status:"UPCOMING"},
+    {date:"2026-10-05",day:"tomorrow",label:"TOMORROW · OCT 5",time:"9:00 PM",league:"LCS Promotion",stage:"Regional Qualifier · Bo5",a:"Maryville University",aCode:"MU",b:"Zeu5 Esports",bCode:"Z5",status:"UPCOMING"},
+    {date:"2026-10-06",day:"upcoming",label:"OCT 6",time:"8:00 PM",league:"LCS Promotion",stage:"Regional Qualifier · Bo5",a:"Cupid Esports",aCode:"CPD",b:"FUEGO",bCode:"FUE",status:"UPCOMING"},
+    {date:"2026-10-15",day:"upcoming",label:"OCT 15",time:"TBD",league:"Worlds",stage:"Tournament begins",a:"Worlds 2026",aCode:"W26",b:"19 qualified teams",bCode:"19",status:"UPCOMING"}
   ],
   players: [
     {id:"doran",role:"TOP",name:"Doran",team:"T1",rank:1,projection:24.4,verified:true},
