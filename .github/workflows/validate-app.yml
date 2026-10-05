@@ -22,3 +22,5 @@ jobs:
         run: npm run check
       - name: Run browser route smoke tests
         run: bash scripts/browser-smoke.sh
+      - name: Run browser interaction tests
+        run: node scripts/browser-interactions.mjs
