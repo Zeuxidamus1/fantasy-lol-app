@@ -379,7 +379,7 @@
             <span id="profileStatus">Available</span>
           </div>
         </div>
-        <div class="profile-projection"><small>Fantasy scoring</small><strong id="profileProjection">—</strong></div>
+        <div class="profile-projection"><small>Recent fantasy avg</small><strong id="profileProjection">—</strong></div>
       </section>
 
       <div class="profile-actions three-actions">
@@ -394,9 +394,9 @@
       </section>
 
       <section class="card">
-        <div class="section-head"><div><div class="eyebrow">PLAYER DETAILS</div><h3>Fantasy profile</h3></div></div>
+        <div class="section-head"><div><div class="eyebrow">PLAYER DETAILS</div><h3>Recent performance</h3></div></div>
         <div class="profile-stats" id="profileStats"></div>
-        <p class="profile-disclaimer">Live fantasy scoring will appear after the official game-stat scoring feed is connected.</p>
+        <p class="profile-disclaimer" id="profileDataNote">Historical professional match statistics powered by ChainCC.</p>
       </section>
 
       <section class="card">
@@ -405,9 +405,10 @@
       </section>
 
       <section class="card">
-        <div class="section-head"><div><div class="eyebrow">RECENT FORM</div><h3>Fantasy trend</h3></div></div>
-        <div id="profileTrend" class="trend-row"></div>
+        <div class="section-head"><div><div class="eyebrow">RECENT FORM</div><h3>Last matches</h3></div></div>
+        <div id="profileTrend" class="stack tight"></div>
       </section>
+      <p class="profile-source" id="profileSource">Stats source: ChainCC · CC BY 4.0</p>
     </section>
   </template>
 
@@ -701,6 +702,7 @@
   <script src="esports-data.js"></script>
   <script src="backend-config.js"></script>
   <script src="backend.js"></script>
+  <script src="player-stats.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
