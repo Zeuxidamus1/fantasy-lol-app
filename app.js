@@ -63,6 +63,24 @@ const draftPool = ((window.ESPORTS_DATA && window.ESPORTS_DATA.players) || []).m
 
 const draftManagerNames = ["Baron Bandits","Zeuxidamus","Rift Raiders","Pentakill Club","Nexus Breakers","Blue Buff Boys","Dragon Slayers","Iron V","Red Side","First Blood","Scuttle Club","Elder Enjoyers"];
 let draftTimerId=null;
+const memoryStorage=new Map();
+function storageGet(key){
+  try{
+    const value=localStorage.getItem(key);
+    return value===null?(memoryStorage.get(key)??null):value;
+  }catch{
+    return memoryStorage.get(key)??null;
+  }
+}
+function storageSet(key,value){
+  const text=String(value);
+  memoryStorage.set(key,text);
+  try{localStorage.setItem(key,text);}catch{}
+}
+function storageRemove(key){
+  memoryStorage.delete(key);
+  try{localStorage.removeItem(key);}catch{}
+}
 
 function draftOrderForPick(pickIndex,managerCount){
   const round=Math.floor(pickIndex/managerCount);
@@ -71,11 +89,11 @@ function draftOrderForPick(pickIndex,managerCount){
 }
 
 function getDraftState(){
-  try{return JSON.parse(localStorage.getItem("riftDraftState")||"null");}catch{return null;}
+  try{return JSON.parse(storageGet("riftDraftState")||"null");}catch{return null;}
 }
 
 function saveDraftState(state){
-  localStorage.setItem("riftDraftState",JSON.stringify(state));
+  storageSet("riftDraftState",JSON.stringify(state));
 }
 
 function newDraftState(){
@@ -151,7 +169,7 @@ const defaultLeagueSettings = {
 
 function getLeagueSettings(){
   try{
-    const saved=JSON.parse(localStorage.getItem("riftLeagueSettings")||"{}")||{};
+    const saved=JSON.parse(storageGet("riftLeagueSettings")||"{}")||{};
     return {
       ...defaultLeagueSettings,
       ...saved,
@@ -192,7 +210,7 @@ function defaultUserRoster(){
 
 function getUserRoster(){
   try{
-    const saved=JSON.parse(localStorage.getItem("riftUserRoster")||"null");
+    const saved=JSON.parse(storageGet("riftUserRoster")||"null");
     return Array.isArray(saved) ? saved : defaultUserRoster();
   }catch{
     return defaultUserRoster();
@@ -200,14 +218,14 @@ function getUserRoster(){
 }
 
 function saveUserRoster(players){
-  localStorage.setItem("riftUserRoster",JSON.stringify(players));
+  storageSet("riftUserRoster",JSON.stringify(players));
 }
 
 function getTransactionHistory(){
-  try{return JSON.parse(localStorage.getItem("riftTransactionHistory")||"[]");}catch{return [];}
+  try{return JSON.parse(storageGet("riftTransactionHistory")||"[]");}catch{return [];}
 }
 function saveTransactionHistory(items){
-  localStorage.setItem("riftTransactionHistory",JSON.stringify(items.slice(0,100)));
+  storageSet("riftTransactionHistory",JSON.stringify(items.slice(0,100)));
 }
 function logTransaction(type,player,extra={}){
   const items=getTransactionHistory();
@@ -224,10 +242,10 @@ function logTransaction(type,player,extra={}){
   saveTransactionHistory(items);
 }
 function getWaiverClaims(){
-  try{return JSON.parse(localStorage.getItem("riftWaiverClaims")||"[]");}catch{return [];}
+  try{return JSON.parse(storageGet("riftWaiverClaims")||"[]");}catch{return [];}
 }
 function saveWaiverClaims(items){
-  localStorage.setItem("riftWaiverClaims",JSON.stringify(items));
+  storageSet("riftWaiverClaims",JSON.stringify(items));
 }
 function createWaiverClaim(player){
   if(isOwned(player)){showToast(`${player.name} is already on your team.`);return;}
@@ -247,16 +265,16 @@ function createWaiverClaim(player){
 }
 
 function getTradeOffers(){
-  try{return JSON.parse(localStorage.getItem("riftTradeOffers")||"[]");}catch{return [];}
+  try{return JSON.parse(storageGet("riftTradeOffers")||"[]");}catch{return [];}
 }
 function saveTradeOffers(items){
-  localStorage.setItem("riftTradeOffers",JSON.stringify(items.slice(0,100)));
+  storageSet("riftTradeOffers",JSON.stringify(items.slice(0,100)));
 }
 function getTradeHistory(){
-  try{return JSON.parse(localStorage.getItem("riftTradeHistory")||"[]");}catch{return [];}
+  try{return JSON.parse(storageGet("riftTradeHistory")||"[]");}catch{return [];}
 }
 function saveTradeHistory(items){
-  localStorage.setItem("riftTradeHistory",JSON.stringify(items.slice(0,100)));
+  storageSet("riftTradeHistory",JSON.stringify(items.slice(0,100)));
 }
 function leagueManagers(){
   const count=Number(getLeagueSettings().managers)||8;
@@ -370,11 +388,11 @@ function allFantasyPlayers(){
 }
 
 function watchlistIds(){
-  try{return new Set(JSON.parse(localStorage.getItem("riftWatchlist")||"[]"));}catch{return new Set();}
+  try{return new Set(JSON.parse(storageGet("riftWatchlist")||"[]"));}catch{return new Set();}
 }
 
 function setWatchlist(ids){
-  localStorage.setItem("riftWatchlist",JSON.stringify([...ids]));
+  storageSet("riftWatchlist",JSON.stringify([...ids]));
 }
 
 function playerById(id){
@@ -453,9 +471,9 @@ function render(view="home",options={}){
     document.querySelector("#starterPreview").innerHTML = starters.length?starters.map(p=>playerRow({...p,role:p.position||p.role})).join(""):'<div class="empty-state"><strong>Your roster is empty</strong><small>Browse Players to add your first fantasy player.</small></div>';
     document.querySelector("#draftBtn").onclick=()=>render("draft");
     const onboarding=document.querySelector("#onboardingCard");
-    if(localStorage.getItem("riftOnboardingDismissed")==="1" && onboarding) onboarding.remove();
+    if(storageGet("riftOnboardingDismissed")==="1" && onboarding) onboarding.remove();
     const dismiss=document.querySelector("#dismissOnboarding");
-    if(dismiss) dismiss.onclick=()=>{localStorage.setItem("riftOnboardingDismissed","1");onboarding?.remove();};
+    if(dismiss) dismiss.onclick=()=>{storageSet("riftOnboardingDismissed","1");onboarding?.remove();};
   }
   if(view==="team"){
     const current=getUserRoster();
@@ -922,8 +940,8 @@ function render(view="home",options={}){
         }
       };
       const prior=getLeagueSettings();
-      localStorage.setItem("riftLeagueSettings",JSON.stringify(next));
-      if(prior.managers!==next.managers||prior.bench!==next.bench)localStorage.removeItem("riftDraftState");
+      storageSet("riftLeagueSettings",JSON.stringify(next));
+      if(prior.managers!==next.managers||prior.bench!==next.bench)storageRemove("riftDraftState");
       showToast("League settings saved");
       setTimeout(()=>render("league"),550);
     };
