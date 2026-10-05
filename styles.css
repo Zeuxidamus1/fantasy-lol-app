@@ -139,3 +139,19 @@ body.tournament-guide-open{overflow:hidden}
 .tournament-guide-inline .section-head{margin-bottom:8px}
 .tournament-guide-inline .tournament-guide-intro{margin-top:0}
 .tournament-guide-btn{cursor:pointer}
+
+.tournament-guide-details{width:100%}
+.tournament-guide-details>summary{list-style:none;display:flex;align-items:center;justify-content:center;gap:8px}
+.tournament-guide-details>summary::-webkit-details-marker{display:none}
+.tournament-guide-details[open]>summary span{transform:rotate(180deg)}
+.tournament-guide-details>summary span{display:inline-block;transition:transform .18s ease}
+.tournament-guide-details .tournament-guide-inline{margin-top:10px}
+.tournament-term-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tournament-term-detail-card{border:1px solid #203a54;background:#091725;border-radius:13px;overflow:hidden}
+.tournament-term-detail-card>summary{list-style:none;display:flex;flex-direction:column;gap:2px;min-height:60px;padding:10px 12px;cursor:pointer}
+.tournament-term-detail-card>summary::-webkit-details-marker{display:none}
+.tournament-term-detail-card>summary strong{font-size:12px}
+.tournament-term-detail-card>summary small{font-size:9px;color:#7f98b4}
+.tournament-term-detail-card[open]{border-color:#2d8977;background:#10322f}
+.tournament-term-detail-card p{margin:0;padding:0 12px 12px;color:#9cb2c9;font-size:11px;line-height:1.5}
+@media(max-width:380px){.tournament-term-list{grid-template-columns:1fr}}
