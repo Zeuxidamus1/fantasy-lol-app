@@ -251,18 +251,17 @@ async function loadRosterFromCloud(leagueId){
     return false;
   }
 }
-async function syncRosterToCloud(players){
+async function saveUserRoster(players){
+  const normalized=arrangeUserRoster(players);
   const leagueId=getActiveLeagueId();
-  if(!leagueId||!cloudReady())return;
-  const b=backend();
-  const user=await b.currentUser().catch(()=>null);
-  if(!user)return;
-  try{await b.saveRoster(leagueId,players);}
-  catch(err){console.warn("Cloud roster sync failed:",err);}
-}
-function saveUserRoster(players){
-  storageSet("riftUserRoster",JSON.stringify(players));
-  void syncRosterToCloud(players);
+  if(leagueId&&cloudReady()){
+    const b=backend();
+    const user=await b.currentUser().catch(()=>null);
+    if(!user)throw new Error("Sign in before changing your roster.");
+    await b.saveRoster(leagueId,normalized);
+  }
+  storageSet("riftUserRoster",JSON.stringify(normalized));
+  return normalized;
 }
 
 function getTransactionHistory(){
@@ -291,19 +290,25 @@ function getWaiverClaims(){
 function saveWaiverClaims(items){
   storageSet("riftWaiverClaims",JSON.stringify(items));
 }
-function createWaiverClaim(player){
+async function createWaiverClaim(player){
   if(isOwned(player)){showToast(`${player.name} is already on your team.`);return;}
+  const leagueId=getActiveLeagueId();
+  if(leagueId&&cloudReady()){
+    try{
+      const existing=await backend().listWaivers(leagueId);
+      const user=await backend().currentUser();
+      if(existing.some(c=>String(c.user_id)===String(user?.id)&&c.status==="pending"&&String(c.player_id)===playerKey(player))){
+        showToast("You already have a claim on this player.");
+        return;
+      }
+      await backend().createWaiver(leagueId,playerKey(player),existing.filter(c=>String(c.user_id)===String(user?.id)&&c.status==="pending").length+1);
+      showToast(`Waiver claim submitted for ${player.name}`);
+      return;
+    }catch(err){showToast(err.message||"Could not submit waiver claim");return;}
+  }
   const claims=getWaiverClaims();
   if(claims.some(c=>c.playerId===playerKey(player))){showToast("You already have a claim on this player.");return;}
-  claims.push({
-    id:String(Date.now()),
-    playerId:playerKey(player),
-    player:player.name,
-    team:player.team||"",
-    role:player.role||"",
-    createdAt:new Date().toISOString(),
-    status:"pending"
-  });
+  claims.push({id:String(Date.now()),playerId:playerKey(player),player:player.name,team:player.team||"",role:player.role||"",createdAt:new Date().toISOString(),status:"pending"});
   saveWaiverClaims(claims);
   showToast(`Waiver claim submitted for ${player.name}`);
 }
@@ -397,14 +402,16 @@ function closeTransactionModal(){
   modalReturnFocus=null;
 }
 
-function addPlayerToRoster(player){
+async function addPlayerToRoster(player){
   if(isOwned(player)){showToast(`${player.name} is already on your team.`);return;}
   let current=getUserRoster();
   if(current.length<rosterLimit()){
     current.push({...player,id:playerKey(player),position:player.position||player.role,slot:"BN"});
-    saveUserRoster(arrangeUserRoster(current));
-    logTransaction("add",player);
-    showToast(`${player.name} added to your team`);
+    try{
+      await saveUserRoster(current);
+      logTransaction("add",player);
+      showToast(`${player.name} added to your team`);
+    }catch(err){showToast(err.message||"Could not add player");}
     return;
   }
   openDropChooser(player);
@@ -423,14 +430,18 @@ function openDropChooser(incoming){
     const dropped=current.find(p=>playerKey(p)===dropId);
     const next=current.filter(p=>playerKey(p)!==dropId);
     next.push({...incoming,id:playerKey(incoming),position:incoming.position||incoming.role,slot:"BN"});
-    saveUserRoster(arrangeUserRoster(next));
-    if(dropped) logTransaction("drop",dropped,{pairedWith:incoming.name});
+    void (async()=>{
+      try{
+        await saveUserRoster(next);
+        if(dropped) logTransaction("drop",dropped,{pairedWith:incoming.name});
     logTransaction("add",incoming,{pairedWith:dropped?.name||null});
     closeTransactionModal();
     showToast(`Added ${incoming.name} · Dropped ${dropped?.name||"player"}`);
-    if(document.querySelector("#profileName")) render("player");
-    else if(document.querySelector("#rosterList")) render("team");
-    else if(document.querySelector("#freeAgentList")) render("players");
+        if(document.querySelector("#profileName")) render("player");
+        else if(document.querySelector("#starterRosterList")) render("team");
+        else if(document.querySelector("#freeAgentList")) render("players");
+      }catch(err){showToast(err.message||"Could not update roster");}
+    })();
   });
   modalReturnFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
   modal.hidden=false;
@@ -1076,7 +1087,7 @@ function render(view="home",options={}){
     }
     const waiverBtn=document.querySelector("#profileWaiverBtn");
     if(owned){waiverBtn.textContent="Already Owned";waiverBtn.disabled=true;}
-    else waiverBtn.onclick=()=>createWaiverClaim(p);
+    else waiverBtn.onclick=async()=>{waiverBtn.disabled=true;await createWaiverClaim(p);waiverBtn.disabled=false;};
     document.querySelector("#profileTradeBtn").onclick=()=>{tradePrefill={id:playerKey(p),side:owned?"mine":"theirs"};render("trade");};
     document.querySelector("#playerBackBtn").onclick=()=>goBack("players");
   }
@@ -1157,141 +1168,135 @@ function render(view="home",options={}){
     draw();
   }
   if(view==="trade"){
-    let tab="offers";
-    let selectedMine=tradePrefill.side==="mine"?tradePrefill.id:null;
-    let selectedTheirs=tradePrefill.side==="theirs"?tradePrefill.id:null;
+    const leagueId=getActiveLeagueId();
     const partnerSelect=document.querySelector("#tradePartner");
     const myList=document.querySelector("#tradeMyPlayers");
     const theirList=document.querySelector("#tradeTheirPlayers");
     const summary=document.querySelector("#tradeSummaryBox");
     const submit=document.querySelector("#submitTradeBtn");
     const content=document.querySelector("#tradeContent");
-
-    const managers=leagueManagers();
-    partnerSelect.innerHTML=managers.map(m=>`<option value="${h(m)}">${h(m)}</option>`).join("");
-    if(selectedTheirs){
-      const preferred=managers.find(m=>simulatedRosterForManager(m).some(p=>playerKey(p)===String(selectedTheirs)));
-      if(preferred)partnerSelect.value=preferred;
-    }
+    let tab="offers";
+    let selectedMine=tradePrefill.side==="mine"?tradePrefill.id:null;
+    let selectedTheirs=tradePrefill.side==="theirs"?tradePrefill.id:null;
     tradePrefill={id:null,side:null};
+    let user=null,members=[],rosters=[],trades=[];
+    const playerFromId=id=>playerById(id)||{id,name:id,team:"",role:""};
 
-    const fmt=(iso)=>{const d=new Date(iso);return Number.isNaN(d.getTime())?"":d.toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});};
+    const refreshTradeData=async()=>{
+      if(!leagueId||!cloudReady())throw new Error("Select an online league before trading.");
+      const b=backend();
+      [user,members,rosters,trades]=await Promise.all([b.currentUser(),b.listLeagueMembers(leagueId),b.listRosters(leagueId),b.listTrades(leagueId)]);
+      if(!user)throw new Error("Sign in before trading.");
+    };
+
+    const partnerName=id=>members.find(m=>String(m.user_id)===String(id))?.team_name||"Manager";
+    const currentPartner=()=>partnerSelect.value;
+    const myRoster=()=>rosters.filter(r=>String(r.user_id)===String(user?.id));
+    const theirRoster=()=>rosters.filter(r=>String(r.user_id)===String(currentPartner()));
 
     const renderBuilder=()=>{
-      const mine=getUserRoster();
-      const theirs=simulatedRosterForManager(partnerSelect.value);
-      if(selectedTheirs && !theirs.some(p=>playerKey(p)===String(selectedTheirs))) selectedTheirs=null;
+      const partners=members.filter(m=>String(m.user_id)!==String(user?.id));
+      if(!partnerSelect.options.length){
+        partnerSelect.innerHTML=partners.map(m=>`<option value="${h(m.user_id)}">${h(m.team_name||"Manager")}</option>`).join("");
+      }
+      const mine=myRoster();
+      const theirs=theirRoster();
+      if(selectedMine&&!mine.some(r=>String(r.player_id)===String(selectedMine)))selectedMine=null;
+      if(selectedTheirs&&!theirs.some(r=>String(r.player_id)===String(selectedTheirs)))selectedTheirs=null;
 
-      myList.innerHTML=mine.length?mine.map(p=>`<button class="trade-option ${selectedMine===playerKey(p)?"selected":""}" data-trade-mine="${playerKey(p)}"><strong>${h(p.name)}</strong><small>${h(p.position||p.role)} · ${h(p.team)}</small></button>`).join(""):'<div class="empty-state"><strong>No rostered players</strong><small>Add a player before building a trade.</small></div>';
-      theirList.innerHTML=theirs.length?theirs.map(p=>`<button class="trade-option ${String(selectedTheirs)===playerKey(p)?"selected":""}" data-trade-theirs="${playerKey(p)}"><strong>${h(p.name)}</strong><small>${h(p.role)} · ${h(p.team)}</small></button>`).join(""):'<div class="empty-state"><strong>No simulated roster available</strong><small>More verified player data is needed for this trade partner.</small></div>';
+      myList.innerHTML=mine.length?mine.map(r=>{const p=playerFromId(r.player_id);return `<button class="trade-option ${String(selectedMine)===String(r.player_id)?"selected":""}" data-trade-mine="${h(r.player_id)}"><strong>${h(p.name)}</strong><small>${h(p.role||r.slot)} · ${h(p.team)}</small></button>`;}).join(""):'<div class="empty-state"><strong>No rostered players</strong><small>Your drafted roster will appear here.</small></div>';
+      theirList.innerHTML=theirs.length?theirs.map(r=>{const p=playerFromId(r.player_id);return `<button class="trade-option ${String(selectedTheirs)===String(r.player_id)?"selected":""}" data-trade-theirs="${h(r.player_id)}"><strong>${h(p.name)}</strong><small>${h(p.role||r.slot)} · ${h(p.team)}</small></button>`;}).join(""):'<div class="empty-state"><strong>No players to trade for</strong><small>This manager does not have a roster yet.</small></div>';
 
-      const myP=mine.find(p=>playerKey(p)===selectedMine);
-      const theirP=theirs.find(p=>playerKey(p)===String(selectedTheirs));
-      if(myP&&theirP){
-        summary.innerHTML=`You send <strong>${h(myP.name)}</strong> to ${h(partnerSelect.value)} and receive <strong>${h(theirP.name)}</strong>.`;
+      const mineP=mine.find(r=>String(r.player_id)===String(selectedMine));
+      const theirP=theirs.find(r=>String(r.player_id)===String(selectedTheirs));
+      if(mineP&&theirP){
+        summary.innerHTML=`You send <strong>${h(playerFromId(mineP.player_id).name)}</strong> to ${h(partnerName(currentPartner()))} and receive <strong>${h(playerFromId(theirP.player_id).name)}</strong>.`;
         submit.disabled=false;
       }else{
         summary.textContent="Select one player from each side to build an offer.";
         submit.disabled=true;
       }
-
-      myList.querySelectorAll("[data-trade-mine]").forEach(b=>b.onclick=()=>{selectedMine=b.dataset.tradeMine;renderBuilder();});
-      theirList.querySelectorAll("[data-trade-theirs]").forEach(b=>b.onclick=()=>{selectedTheirs=b.dataset.tradeTheirs;renderBuilder();});
+      myList.querySelectorAll("[data-trade-mine]").forEach(btn=>btn.onclick=()=>{selectedMine=btn.dataset.tradeMine;renderBuilder();});
+      theirList.querySelectorAll("[data-trade-theirs]").forEach(btn=>btn.onclick=()=>{selectedTheirs=btn.dataset.tradeTheirs;renderBuilder();});
     };
 
-    const renderTradeTabs=()=>{
-      const offers=getTradeOffers();
-      const history=getTradeHistory();
-      if(tab==="offers"){
-        const mine=offers.filter(o=>o.direction==="outgoing");
-        content.innerHTML=mine.length?mine.map(o=>`<div class="trade-card"><div class="trade-card-head"><div><h4>${h(o.partner)}</h4><small>Sent ${fmt(o.createdAt)}</small></div><span class="trade-status pending">PENDING</span></div><div class="trade-swap"><div class="trade-side"><span>YOU SEND</span><strong>${h(o.userPlayer)}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>YOU RECEIVE</span><strong>${h(o.theirPlayer)}</strong></div></div><div class="trade-card-actions"><button class="secondary-btn" data-cancel-trade="${o.id}">Cancel Offer</button></div></div>`).join(""):'<div class="empty-state"><strong>No outgoing offers</strong><small>Build a trade above and send it to another manager.</small></div>';
-        content.querySelectorAll("[data-cancel-trade]").forEach(b=>b.onclick=()=>{saveTradeOffers(getTradeOffers().filter(o=>o.id!==b.dataset.cancelTrade));showToast("Trade offer canceled");renderTradeTabs();});
-      }else if(tab==="incoming"){
-        const incoming=offers.filter(o=>o.direction==="incoming");
-        content.innerHTML=incoming.length?incoming.map(o=>`<div class="trade-card"><div class="trade-card-head"><div><h4>Offer from ${h(o.partner)}</h4><small>${fmt(o.createdAt)}</small></div><span class="trade-status pending">PENDING</span></div><div class="trade-swap"><div class="trade-side"><span>YOU SEND</span><strong>${h(o.userPlayer)}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>YOU RECEIVE</span><strong>${h(o.theirPlayer)}</strong></div></div><div class="trade-card-actions"><button class="primary-btn" data-accept-trade="${o.id}">Accept</button><button class="secondary-btn" data-decline-trade="${o.id}">Decline</button></div></div>`).join(""):'<div class="empty-state"><strong>No incoming offers</strong><small>Trade offers from other managers will appear here.</small></div>';
-        content.querySelectorAll("[data-accept-trade]").forEach(b=>b.onclick=()=>{
-          const id=b.dataset.acceptTrade;
-          const offer=getTradeOffers().find(o=>o.id===id);
-          if(!offer)return;
-          completeIncomingTrade(offer,true); renderTradeTabs(); renderBuilder();
-        });
-        content.querySelectorAll("[data-decline-trade]").forEach(b=>b.onclick=()=>{
-          const id=b.dataset.declineTrade;
-          const offer=getTradeOffers().find(o=>o.id===id);
-          if(!offer)return;
-          completeIncomingTrade(offer,false); renderTradeTabs();
-        });
-      }else{
-        content.innerHTML=history.length?history.map(o=>`<div class="trade-card"><div class="trade-card-head"><div><h4>${h(o.partner)}</h4><small>${fmt(o.resolvedAt||o.createdAt)}</small></div><span class="trade-status ${o.status}">${String(o.status).toUpperCase()}</span></div><div class="trade-swap"><div class="trade-side"><span>YOU SENT</span><strong>${h(o.userPlayer)}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>YOU RECEIVED</span><strong>${h(o.theirPlayer)}</strong></div></div></div>`).join(""):'<div class="empty-state"><strong>No trade history</strong><small>Completed or declined trades will show here.</small></div>';
-      }
+    const renderTabs=()=>{
+      const mine=trades.filter(t=>String(t.from_user)===String(user?.id)&&t.status==="pending");
+      const incoming=trades.filter(t=>String(t.to_user)===String(user?.id)&&t.status==="pending");
+      const history=trades.filter(t=>t.status!=="pending"&&(String(t.from_user)===String(user?.id)||String(t.to_user)===String(user?.id)));
+      const card=t=>{
+        const sent=playerFromId(t.offer?.send_player_id);
+        const receive=playerFromId(t.offer?.receive_player_id);
+        const outgoing=String(t.from_user)===String(user?.id);
+        const counterpart=outgoing?partnerName(t.to_user):partnerName(t.from_user);
+        const status=String(t.status||"pending");
+        return `<div class="trade-card"><div class="trade-card-head"><div><h4>${h(counterpart)}</h4><small>${new Date(t.created_at).toLocaleString()}</small></div><span class="trade-status ${h(status)}">${h(status.toUpperCase())}</span></div><div class="trade-swap"><div class="trade-side"><span>${outgoing?"YOU SEND":"YOU GIVE"}</span><strong>${h(outgoing?sent.name:receive.name)}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>${outgoing?"YOU RECEIVE":"YOU GET"}</span><strong>${h(outgoing?receive.name:sent.name)}</strong></div></div>${status==="pending"?(outgoing?`<div class="trade-card-actions"><button class="secondary-btn" data-cancel-trade="${h(t.id)}">Cancel Offer</button></div>`:`<div class="trade-card-actions"><button class="primary-btn" data-accept-trade="${h(t.id)}">Accept</button><button class="secondary-btn" data-decline-trade="${h(t.id)}">Decline</button></div>`):""}</div>`;
+      };
+      const rows=tab==="offers"?mine:tab==="incoming"?incoming:history;
+      content.innerHTML=rows.length?rows.map(card).join(""):`<div class="empty-state"><strong>No ${tab==="offers"?"outgoing offers":tab==="incoming"?"incoming offers":"trade history"}</strong><small>Trades from your active league will appear here.</small></div>`;
+      content.querySelectorAll("[data-cancel-trade]").forEach(btn=>btn.onclick=async()=>{try{await backend().updateTrade(btn.dataset.cancelTrade,"canceled");await init();showToast("Trade offer canceled");}catch(err){showToast(err.message||"Could not cancel trade");}});
+      content.querySelectorAll("[data-decline-trade]").forEach(btn=>btn.onclick=async()=>{try{await backend().updateTrade(btn.dataset.declineTrade,"declined");await init();showToast("Trade declined");}catch(err){showToast(err.message||"Could not decline trade");}});
+      content.querySelectorAll("[data-accept-trade]").forEach(btn=>btn.onclick=async()=>{try{await backend().acceptTrade(btn.dataset.acceptTrade);await loadRosterFromCloud(leagueId);await init();showToast("Trade accepted");}catch(err){showToast(err.message||"Could not accept trade");}});
     };
 
-    partnerSelect.onchange=()=>{selectedTheirs=null;renderBuilder();};
-    submit.onclick=()=>{
-      const mine=getUserRoster().find(p=>playerKey(p)===selectedMine);
-      const theirs=simulatedRosterForManager(partnerSelect.value).find(p=>playerKey(p)===String(selectedTheirs));
-      if(!mine||!theirs)return;
-      const offers=getTradeOffers();
-      offers.unshift({id:String(Date.now()),direction:"outgoing",partner:partnerSelect.value,userPlayerId:playerKey(mine),userPlayer:mine.name,theirPlayerId:playerKey(theirs),theirPlayer:theirs.name,theirTeam:theirs.team,theirRole:theirs.role,theirFp:Number(theirs.fp??theirs.projection??20),createdAt:new Date().toISOString(),status:"pending"});
-      saveTradeOffers(offers);
-      showToast("Trade offer sent.");
-      selectedMine=null; selectedTheirs=null; renderBuilder(); renderTradeTabs();
-    };
-
-    document.querySelectorAll("[data-trade-tab]").forEach(btn=>btn.onclick=()=>{
-      tab=btn.dataset.tradeTab;
-      document.querySelectorAll("[data-trade-tab]").forEach(x=>x.classList.toggle("active",x===btn));
-      renderTradeTabs();
-    });
-    renderBuilder();
-    renderTradeTabs();
-  }
-  if(view==="transactions"){
+    const init=async()=>{
+      try{
+        await refreshTradeData();
+        const partners=members.filter(m=>String(m.user_id)!==String(user.id));
+        if(!partners.length){
+          partnerSelect.innerHTML="";
+          myList.innerHTML='<div class="empty-state"><strong>No trade partners yet</strong><small>Another manager must join this league first.</small></div>';
+          theirList.innerHTML="";
+          submit.disabled=true;
+          renderTabs();
+          return;
+        }
+        const prior=partnerSelect.value;
+        partnerSelect.innerHTML=partners.map(m=>`<option value="${h(m.user_id)}">${h(m.team_name||"Manager")}</option>`).join("");
+        if(partners.some(m=>String(m.user_id)===String(prior)))partnerSelect.value=prior;
+        renderBuilder();
+        renderTabs();
+      }catch(err){
+        co  if(view==="transactions"){
     let tab="pending";
     const content=document.querySelector("#transactionContent");
     const count=document.querySelector("#pendingClaimCount");
-    const formatTime=(iso)=>{
-      const d=new Date(iso);
-      if(Number.isNaN(d.getTime()))return "";
-      return d.toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
-    };
-    const drawTransactions=()=>{
-      const claims=getWaiverClaims();
-      const history=getTransactionHistory();
-      count.textContent=claims.length;
+    const moveCount=document.querySelector("#transactionMoveCount");
+    const leagueName=document.querySelector("#transactionLeagueName");
+    const leagueId=getActiveLeagueId();
+    let user=null,claims=[],moves=[],members=[],leagues=[];
+    const fmt=iso=>{const d=new Date(iso);return Number.isNaN(d.getTime())?"":d.toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});};
+    const memberName=id=>members.find(m=>String(m.user_id)===String(id))?.team_name||"Manager";
+
+    const draw=()=>{
+      const mineClaims=claims.filter(c=>String(c.user_id)===String(user?.id)&&c.status==="pending");
+      count.textContent=mineClaims.length;
+      moveCount.textContent=moves.length;
       if(tab==="pending"){
-        content.innerHTML=claims.length?claims.map((c,i)=>`<div class="transaction-item">
-          <span class="transaction-icon claim">W</span>
-          <div class="transaction-info"><strong>#${i+1} ${h(c.player)}<span class="status-pill pending">PENDING</span></strong><small>${h(c.team)} · ${h(c.role)} · Your claim order #${i+1}</small><div class="claim-actions"><button class="claim-btn" data-move-up="${c.id}" ${i===0?"disabled":""}>Move up</button><button class="claim-btn cancel" data-cancel-claim="${c.id}">Cancel</button></div></div>
-          <span class="transaction-time">${formatTime(c.createdAt)}</span>
-        </div>`).join(""):'<div class="empty-state"><strong>No pending waiver claims</strong><small>Open a player profile and tap Waiver Claim to add one.</small></div>';
-        content.querySelectorAll("[data-cancel-claim]").forEach(btn=>btn.onclick=()=>{
-          saveWaiverClaims(getWaiverClaims().filter(c=>c.id!==btn.dataset.cancelClaim));
-          showToast("Waiver claim canceled");
-          drawTransactions();
-        });
-        content.querySelectorAll("[data-move-up]").forEach(btn=>btn.onclick=()=>{
-          const items=getWaiverClaims();
-          const idx=items.findIndex(c=>c.id===btn.dataset.moveUp);
-          if(idx>0){[items[idx-1],items[idx]]=[items[idx],items[idx-1]];saveWaiverClaims(items);drawTransactions();}
-        });
+        content.innerHTML=mineClaims.length?mineClaims.map(c=>{const p=playerFromId(c.player_id);return `<div class="transaction-item"><span class="transaction-icon claim">W</span><div class="transaction-info"><strong>${h(p.name)}<span class="status-pill pending">PENDING</span></strong><small>${h(p.team)} · Priority ${h(c.priority)}</small><div class="claim-actions"><button class="claim-btn cancel" data-cancel-claim="${h(c.id)}">Cancel</button></div></div><span class="transaction-time">${fmt(c.created_at)}</span></div>`;}).join(""):'<div class="empty-state"><strong>No pending waiver claims</strong><small>Open a player profile and tap Waiver Claim to submit one.</small></div>';
+        content.querySelectorAll("[data-cancel-claim]").forEach(btn=>btn.onclick=async()=>{try{await backend().cancelWaiver(btn.dataset.cancelClaim);showToast("Waiver claim canceled");await init();}catch(err){showToast(err.message||"Could not cancel claim");}});
       }else if(tab==="history"){
-        content.innerHTML=history.length?history.map(t=>`<div class="transaction-item">
-          <span class="transaction-icon ${t.type==="drop"?"drop":""}">${t.type==="add"?"+":"−"}</span>
-          <div class="transaction-info"><strong>${t.type==="add"?"Added":"Dropped"} ${h(t.player)}<span class="status-pill success">COMPLETE</span></strong><small>${h(t.team)} · ${h(t.role)}${t.pairedWith?" · paired with "+t.pairedWith:""}</small></div>
-          <span class="transaction-time">${formatTime(t.time)}</span>
-        </div>`).join(""):'<div class="empty-state"><strong>No transaction history yet</strong><small>Your completed adds and drops will appear here automatically.</small></div>';
+        const mine=moves.filter(m=>String(m.user_id)===String(user?.id));
+        content.innerHTML=mine.length?mine.map(m=>{const p=playerFromId(m.player_id);return `<div class="transaction-item"><span class="transaction-icon ${m.action==="drop"?"drop":""}">${m.action==="add"?"+":"−"}</span><div class="transaction-info"><strong>${m.action==="add"?"Added":"Dropped"} ${h(p.name)}<span class="status-pill success">COMPLETE</span></strong><small>${h(p.team)} · ${h(p.role||"")}</small></div><span class="transaction-time">${fmt(m.created_at)}</span></div>`;}).join(""):'<div class="empty-state"><strong>No roster moves yet</strong><small>Your completed adds and drops will appear here.</small></div>';
       }else{
-        content.innerHTML='<div class="empty-state"><strong>League-wide activity is not connected yet</strong><small>This requires the future shared league backend. Your own completed adds and drops remain available under My History.</small></div>';
+        content.innerHTML=moves.length?moves.map(m=>{const p=playerFromId(m.player_id);return `<div class="transaction-item"><span class="transaction-icon ${m.action==="drop"?"drop":""}">${m.action==="add"?"+":"−"}</span><div class="transaction-info"><strong>${h(memberName(m.user_id))} ${m.action==="add"?"added":"dropped"} ${h(p.name)}</strong><small>${h(p.team)} · ${h(p.role||"")}</small></div><span class="transaction-time">${fmt(m.created_at)}</span></div>`;}).join(""):'<div class="empty-state"><strong>No league activity yet</strong><small>Roster moves from every manager will appear here.</small></div>';
       }
     };
 
-    document.querySelectorAll("[data-transaction-tab]").forEach(btn=>btn.onclick=()=>{
-      tab=btn.dataset.transactionTab;
-      document.querySelectorAll("[data-transaction-tab]").forEach(x=>x.classList.toggle("active",x===btn));
-      drawTransactions();
-    });
-    drawTransactions();
+    const init=async()=>{
+      if(!leagueId||!cloudReady()){
+        content.innerHTML='<div class="empty-state"><strong>No active online league</strong><small>Join or select a league to use transactions.</small></div>';
+        return;
+      }
+      try{
+        const b=backend();
+        [user,claims,moves,members,leagues]=await Promise.all([b.currentUser(),b.listWaivers(leagueId),b.listTransactions(leagueId),b.listLeagueMembers(leagueId),b.listLeagues()]);
+        leagueName.textContent=leagues.find(l=>String(l.id)===String(leagueId))?.name||"League";
+        draw();
+      }catch(err){content.innerHTML=`<div class="empty-state cloud-error"><strong>Could not load transactions</strong><small>${h(err.message||"Please try again.")}</small></div>`;}
+    };
+    document.querySelectorAll("[data-transaction-tab]").forEach(btn=>btn.onclick=()=>{tab=btn.dataset.transactionTab;document.querySelectorAll("[data-transaction-tab]").forEach(x=>x.classList.toggle("active",x===btn));draw();});
+    void init();
   }
   if(view==="league"){
     const settings=getLeagueSettings();
