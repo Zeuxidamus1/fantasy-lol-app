@@ -1,6 +1,8 @@
 window.ESPORTS_DATA = {
   updatedAt: "2026-10-04",
   sourceLabel: "LoL Esports",
+  dataMode: "snapshot",
+  autoUpdated: false,
   sourceUrl: "https://lolesports.com/en-US",
   worlds: {
     status: "UPCOMING",
