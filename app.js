@@ -540,13 +540,84 @@ function render(view="home",options={}){
   currentView=view;
   app.innerHTML="";
   app.appendChild(template.content.cloneNode(true));
-  const titles={home:"Home",account:"Account",team:"My Team",matchup:"Matchup",schedule:"Schedule",players:"Players",player:"Player",league:"League",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup"};
+  const titles={login:"Sign In",home:"Home",account:"Account",team:"My Team",matchup:"Matchup",schedule:"Schedule",players:"Players",player:"Player",league:"League",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup"};
   document.title=`${titles[view]||"Rift Fantasy"} · Rift Fantasy`;
+  document.body.classList.toggle("login-view",view==="login");
   document.querySelectorAll(".nav-item").forEach(b=>{
     const active=b.dataset.view===view;
     b.classList.toggle("active",active);
     if(active)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");
   });
+
+  if(view==="login"){
+    const b=backend();
+    const ready=cloudReady();
+    const email=document.querySelector("#landingEmail");
+    const password=document.querySelector("#landingPassword");
+    const signInBtn=document.querySelector("#landingSignIn");
+    const setBusy=value=>{signInBtn.disabled=value;document.querySelector("#landingCreateAccount").disabled=value;};
+
+    if(!ready){
+      signInBtn.disabled=true;
+      showToast("Account services are temporarily unavailable.");
+    }
+
+    document.querySelector("#landingPasswordToggle").onclick=()=>{
+      const hidden=password.type==="password";
+      password.type=hidden?"text":"password";
+      document.querySelector("#landingPasswordToggle").textContent=hidden?"Hide":"Show";
+      document.querySelector("#landingPasswordToggle").setAttribute("aria-label",hidden?"Hide password":"Show password");
+    };
+
+    const signIn=async()=>{
+      if(!ready)return showToast("Account services are temporarily unavailable.");
+      if(!email.checkValidity()||password.value.length<8)return showToast("Enter a valid email and password.");
+      setBusy(true);
+      try{
+        await b.signIn(email.value.trim(),password.value);
+        showToast("Welcome back");
+        render("home",{replace:true});
+      }catch(err){
+        const msg=String(err.message||"");
+        showToast(/invalid login credentials/i.test(msg)?"Email or password is incorrect, or your email is not verified yet.":msg||"Sign-in failed");
+      }finally{setBusy(false);}
+    };
+
+    signInBtn.onclick=signIn;
+    password.addEventListener("keydown",e=>{if(e.key==="Enter")signIn();});
+
+    document.querySelector("#landingForgotPassword").onclick=async()=>{
+      const value=email.value.trim();
+      if(!email.checkValidity())return showToast("Enter your email first, then tap Forgot password.");
+      const btn=document.querySelector("#landingForgotPassword");btn.disabled=true;
+      try{
+        await b.requestPasswordReset(value);
+        showToast("Password-reset email sent.");
+      }catch(err){
+        const msg=String(err.message||"");
+        showToast(/rate|limit|too many/i.test(msg)?"Email limit reached. Try again later.":msg||"Could not send password-reset email.");
+      }finally{setTimeout(()=>{btn.disabled=false;},3000);}
+    };
+
+    document.querySelector("#landingForgotUsername").onclick=()=>{
+      showToast("Your Rift Fantasy username is currently your email address.");
+    };
+
+    document.querySelector("#landingResendVerification").onclick=async()=>{
+      const value=email.value.trim();
+      if(!email.checkValidity())return showToast("Enter the email used to create your account first.");
+      const btn=document.querySelector("#landingResendVerification");btn.disabled=true;
+      try{
+        await b.resendSignup(value);
+        showToast("Verification email sent.");
+      }catch(err){
+        const msg=String(err.message||"");
+        showToast(/rate|limit|too many/i.test(msg)?"Email limit reached. Try again later.":msg||"Could not resend verification email.");
+      }finally{setTimeout(()=>{btn.disabled=false;},3000);}
+    };
+
+    document.querySelector("#landingCreateAccount").onclick=()=>render("account");
+  }
 
   if(view==="account"){
     const b=backend();
@@ -583,7 +654,7 @@ function render(view="home",options={}){
       if(!ready)return showToast("Cloud backend is not configured yet.");
       if(!email.checkValidity()||password.value.length<8)return showToast("Enter a valid email and password.");
       busy(true);
-      try{await b.signIn(email.value.trim(),password.value);showToast("Signed in");render("account",{replace:true});}
+      try{await b.signIn(email.value.trim(),password.value);showToast("Welcome back");render("home",{replace:true});}
       catch(err){showToast(err.message||"Sign-in failed");}
       finally{busy(false);}
     };
@@ -639,7 +710,7 @@ function render(view="home",options={}){
       finally{saveNewPasswordBtn.disabled=false;}
     };
 
-    document.querySelector("#signOutBtn").onclick=async()=>{await b?.signOut?.();showToast("Signed out");render("account",{replace:true});};
+    document.querySelector("#signOutBtn").onclick=async()=>{await b?.signOut?.();showToast("Signed out");render("login",{replace:true});};
   }
   if(view==="home"){
     const leagueName=document.querySelector("#homeLeagueName");
@@ -1221,4 +1292,4 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeTransactionModa
 window.addEventListener("popstate",e=>{navigationDepth=Number(e.state?.depth)||0;render(e.state?.view||location.hash.slice(1)||"home",{fromHistory:true});});
 document.querySelector("#accountBtn").onclick=()=>render("account");
 document.querySelector("#notificationBtn").onclick=()=>showToast("No new league notifications.");
-render(location.hash.slice(1)||"home",{replace:true});
+render(location.hash.slice(1)||"login",{replace:true});
