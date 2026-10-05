@@ -7,7 +7,7 @@
   <meta name="description" content="Rift Fantasy is a mobile-first fantasy League of Legends esports prototype with drafts, rosters, schedules, waivers, and trades." />
   <meta name="color-scheme" content="dark" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>" />
@@ -25,7 +25,7 @@
         <div class="eyebrow">FANTASY LEAGUE OF LEGENDS</div>
         <h1>Rift Fantasy</h1>
       </div>
-      <button class="icon-btn" id="notificationBtn" aria-label="Notifications">🔔</button>
+      <div class="topbar-actions"><button class="icon-btn" id="accountBtn" aria-label="Account">👤</button><button class="icon-btn" id="notificationBtn" aria-label="Notifications">🔔</button></div>
     </header>
 
     <main id="app"></main>
@@ -38,6 +38,30 @@
       <button class="nav-item" data-view="league"><span aria-hidden="true">🏆</span><small>League</small></button>
     </nav>
   </div>
+
+  <template id="account-template">
+    <section class="stack">
+      <div class="section-title">
+        <div><div class="eyebrow">RIFT ACCOUNT</div><h2>Account</h2></div>
+        <button class="secondary-btn" data-jump="home">Back</button>
+      </div>
+      <section class="card" id="cloudStatusCard">
+        <div class="section-head"><div><div class="eyebrow">CLOUD SYNC</div><h3 id="cloudStatusTitle">Checking setup…</h3></div><span class="demo-badge" id="cloudStatusBadge">LOCAL</span></div>
+        <p class="profile-copy" id="cloudStatusCopy">Your current data is safely stored on this device.</p>
+      </section>
+      <section class="card setup-card" id="authCard">
+        <div class="section-head"><div><div class="eyebrow">SIGN IN</div><h3>Sync your fantasy leagues</h3></div></div>
+        <div class="form-group"><label for="authEmail">Email</label><input id="authEmail" class="form-control" type="email" autocomplete="email" placeholder="you@example.com" /></div>
+        <div class="form-group"><label for="authPassword">Password</label><input id="authPassword" class="form-control" type="password" autocomplete="current-password" minlength="8" placeholder="At least 8 characters" /></div>
+        <div class="grid-two"><button class="primary-btn" id="signInBtn">Sign In</button><button class="secondary-btn" id="signUpBtn">Create Account</button></div>
+        <p class="setup-footnote" id="authHelp">Account features activate automatically after the production Supabase project is connected.</p>
+      </section>
+      <section class="card setup-card" id="signedInCard" hidden>
+        <div class="section-head"><div><div class="eyebrow">SIGNED IN</div><h3 id="signedInEmail">Manager</h3></div><span class="verified-badge">CLOUD</span></div>
+        <button class="secondary-btn" id="signOutBtn">Sign Out</button>
+      </section>
+    </section>
+  </template>
 
   <template id="home-template">
     <section class="stack">
@@ -219,6 +243,19 @@
   <template id="league-template">
     <section class="stack">
       <div class="section-title"><div><div class="eyebrow" id="leagueNameLabel">SUMMONER'S CUP</div><h2>League</h2></div><button class="secondary-btn" data-jump="setup">League Setup</button></div>
+      <section class="card cloud-league-card" id="cloudLeagueCard">
+        <div class="section-head"><div><div class="eyebrow">ONLINE LEAGUE</div><h3 id="cloudLeagueTitle">Local prototype mode</h3></div><button class="text-btn" data-jump="account">Account</button></div>
+        <p class="profile-copy" id="cloudLeagueCopy">Sign in after cloud setup is connected to create or join a shared league.</p>
+        <div class="cloud-league-actions" id="cloudLeagueActions" hidden>
+          <button class="primary-btn" id="createCloudLeagueBtn">Create Online League</button>
+          <div class="join-league-row">
+            <input class="form-control" id="joinCode" maxlength="12" placeholder="Invite code" aria-label="League invite code" />
+            <input class="form-control" id="joinTeamName" maxlength="40" placeholder="Team name" aria-label="Fantasy team name" />
+            <button class="secondary-btn" id="joinCloudLeagueBtn">Join</button>
+          </div>
+        </div>
+        <div id="cloudLeagueList" class="stack tight"></div>
+      </section>
       <div class="card">
         <div class="section-head"><div><div class="eyebrow">FANTASY STANDINGS</div><h3>Demo standings</h3></div><span class="demo-badge">DEMO</span></div>
         <div id="standings"></div>
@@ -457,6 +494,8 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="esports-data.js"></script>
+  <script src="backend-config.js"></script>
+  <script src="backend.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
