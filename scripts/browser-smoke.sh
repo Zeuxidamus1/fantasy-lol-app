@@ -7,7 +7,7 @@ SERVER_PID=$!
 trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
 
 for _ in {1..20}; do
-  if curl -fsS "http://127.0.0.1:$PORT/" >/dev/null; then break; fi
+  if curl -fsS "http://127.0.0.1:$PORT/" >/dev/null 2>&1; then break; fi
   sleep 0.25
 done
 
