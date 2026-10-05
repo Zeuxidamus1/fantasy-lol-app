@@ -121,6 +121,7 @@ declare
   result public.league_members;
 begin
   if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if nullif(trim(p_team_name),'') is null then raise exception 'Team name is required'; end if;
   select id into target from public.leagues where invite_code=upper(trim(p_invite_code));
   if target is null then raise exception 'Invalid invite code'; end if;
 
@@ -133,7 +134,7 @@ begin
   end if;
 
   insert into public.league_members(league_id,user_id,role,team_name)
-  values(target,auth.uid(),'manager',left(coalesce(nullif(trim(p_team_name),''),'My Team'),40))
+  values(target,auth.uid(),'manager',left(trim(p_team_name),40))
   on conflict (league_id,user_id) do update set team_name=excluded.team_name
   returning * into result;
 
