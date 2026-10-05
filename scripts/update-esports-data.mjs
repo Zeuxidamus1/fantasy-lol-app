@@ -198,6 +198,7 @@ const next = {
   sourceLabel: "LoL Esports API",
   sourceUrl: "https://lolesports.com/en-US",
   autoUpdated: true,
+  dataMode: "live-refresh",
   leagues: rosterData.leagues,
   schedule,
   players: rosterData.players
