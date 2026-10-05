@@ -239,8 +239,22 @@
           <div class="eyebrow" id="teamLeagueName">ACTIVE LEAGUE</div>
           <h2 id="myTeamName">My Team</h2>
         </div>
-        <span class="verified-badge" id="teamSyncBadge">SYNCED</span>
+        <div class="team-title-actions">
+          <button class="text-btn" id="renameTeamBtn">Edit Name</button>
+          <span class="verified-badge" id="teamSyncBadge">SYNCED</span>
+        </div>
       </div>
+
+      <section class="card team-name-editor" id="teamNameEditor" hidden>
+        <div class="form-group">
+          <label for="teamNameInput">Team name</label>
+          <input id="teamNameInput" class="form-control" maxlength="40" placeholder="Your team name" />
+        </div>
+        <div class="grid-two">
+          <button class="primary-btn" id="saveTeamNameBtn">Save</button>
+          <button class="secondary-btn" id="cancelTeamNameBtn">Cancel</button>
+        </div>
+      </section>
 
       <section class="card compact team-summary-card">
         <div class="stat-row"><span>Roster</span><strong id="teamRosterCount">0/0</strong></div>
