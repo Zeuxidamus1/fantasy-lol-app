@@ -94,3 +94,8 @@
 .notification-copy em{font-style:normal;font-size:9px;color:#607a98;margin-top:3px}
 body.notifications-open{overflow:hidden}
 @media(max-width:560px){.notification-sheet{top:12px;right:12px;left:12px;width:auto;max-height:calc(100vh - 24px)}}
+
+.game-card.roster-match{border-color:#245d55}
+.game-team.my-roster-team strong{color:#49e6c5}
+.game-team.my-roster-team small{color:#49cbb1;font-weight:700}
+.game-team.my-roster-team .team-mark{border-color:#2a8d7a;background:#10362f;color:#5af0cf;box-shadow:0 0 0 1px rgba(73,230,197,.08) inset}
