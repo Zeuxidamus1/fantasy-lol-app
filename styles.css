@@ -155,3 +155,17 @@ body.tournament-guide-open{overflow:hidden}
 .tournament-term-detail-card[open]{border-color:#2d8977;background:#10322f}
 .tournament-term-detail-card p{margin:0;padding:0 12px 12px;color:#9cb2c9;font-size:11px;line-height:1.5}
 @media(max-width:380px){.tournament-term-list{grid-template-columns:1fr}}
+
+.profile-source{margin:0;text-align:center;color:#627b98;font-size:9px}
+.recent-game-row{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:10px;border:1px solid #1d3149;background:#091625;border-radius:13px;padding:10px 12px}
+.recent-result{display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:#192536;color:#9db0c7;font-size:11px;font-weight:900}
+.recent-result.win{background:#10382f;color:#54e2c2}
+.recent-result.loss{background:#3a1820;color:#ff909d}
+.recent-game-main{min-width:0}
+.recent-game-main strong,.recent-game-main small{display:block}
+.recent-game-main strong{font-size:11px}
+.recent-game-main small{margin-top:3px;color:#748aa5;font-size:9px;overflow-wrap:anywhere}
+.recent-fp{text-align:right}
+.recent-fp strong,.recent-fp small{display:block}
+.recent-fp strong{font-size:13px;color:#dceafe}
+.recent-fp small{font-size:8px;color:#65809e}
