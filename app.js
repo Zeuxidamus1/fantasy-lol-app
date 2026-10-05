@@ -992,7 +992,7 @@ function render(view="home",options={}){
       storageSet("riftLeagueSettings",JSON.stringify(next));
       if(prior.managers!==next.managers||prior.bench!==next.bench)storageRemove("riftDraftState");
       showToast("League settings saved");
-      setTimeout(()=>render("league"),550);
+      render("league");
     };
   }
   document.querySelectorAll("[data-open-player]").forEach(row=>{
