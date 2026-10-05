@@ -452,8 +452,7 @@ function openDropChooser(incoming){
 }
 
 function allFantasyPlayers(){
-  const live=((window.ESPORTS_DATA&&window.ESPORTS_DATA.players)||[]).map(p=>({...p,fp:Number(p.projection??p.fp??20)}));
-  return live.length?live:freeAgents;
+  return ((window.ESPORTS_DATA&&window.ESPORTS_DATA.players)||[]).map(p=>({...p,fp:Number(p.projection??p.fp??0)}));
 }
 
 function watchlistIds(){
@@ -503,7 +502,6 @@ function playerRow(p, add=false){
       <span class="role-badge">${h(p.role)}</span>
       <span class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.opp || p.trend || "")}</small></span>
     </button>
-    <span class="fp">${Number(p.fp??p.projection??0).toFixed(1)}</span>
     ${add ? '<button class="add-btn" aria-label="Add player">ADD</button>' : ""}
   </div>`;
 }
@@ -514,7 +512,6 @@ function rosterRow(p, manage=false){
   return `<div class="roster-slot ${slot==="BN"?"bench":""}">
     <span class="slot-label">${slot}</span>
     <div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.position||p.role)}${p.opp?" · "+h(p.opp):""}</small></div>
-    <span class="fp">${fp.toFixed(1)}</span>
     ${manage?'<div class="team-actions"><button class="mini-btn danger" data-drop-roster="'+playerKey(p)+'">DROP</button></div>':""}
   </div>`;
 }
@@ -1044,10 +1041,10 @@ function render(view="home",options={}){
     document.querySelector("#profileRole").textContent=p.role||"—";
     document.querySelector("#profileTeam").textContent=p.team||"Unknown team";
     document.querySelector("#profileName").textContent=p.name||"Player";
-    document.querySelector("#profileRank").textContent=`Prototype rank #${p.rank||"—"}`;
+    document.querySelector("#profileRank").textContent=p.rank?`Player pool rank #${p.rank}`:"Player profile";
     const owned=isOwned(p);
     document.querySelector("#profileStatus").textContent=owned?"On your roster":"Available";
-    document.querySelector("#profileProjection").textContent=Number(p.fp??p.projection??0).toFixed(1);
+    document.querySelector("#profileProjection").textContent="—";
 
     const outlookByRole={
       TOP:"Top laners gain value through steady scoring, matchup stability, and strong team win equity.",
@@ -1058,14 +1055,10 @@ function render(view="home",options={}){
     };
     document.querySelector("#profileOutlook").textContent=`${p.name} projects as a ${p.role} option for ${p.team}. ${outlookByRole[p.role]||"Their fantasy value depends on role, team performance, and match volume."}`;
 
-    const base=Number(p.fp??p.projection??20);
     const stats=[
-      ["Projection",base.toFixed(1)],
-      ["Upside",Math.max(base+5,base*1.16).toFixed(1)],
-      ["Floor",Math.max(8,base-6).toFixed(1)],
       ["Role",p.role||"—"],
       ["Team",p.teamCode||String(p.team||"").slice(0,4).toUpperCase()],
-      ["Rank",p.rank?"#"+p.rank:"—"]
+      ["Player pool",p.rank?"#"+p.rank:"—"]
     ];
     document.querySelector("#profileStats").innerHTML=stats.map(s=>`<div class="profile-stat"><small>${h(s[0])}</small><strong>${h(s[1])}</strong></div>`).join("");
 
@@ -1365,15 +1358,15 @@ function render(view="home",options={}){
     const cloudList=document.querySelector("#cloudLeagueList");
     (async()=>{
       if(!cloudReady()){
-        cloudTitle.textContent="Local prototype mode";
-        cloudCopy.textContent="Connect the production backend to enable real accounts, invite codes, and shared leagues.";
+        cloudTitle.textContent="Online leagues unavailable";
+        cloudCopy.textContent="League services are temporarily unavailable.";
         return;
       }
       const b=backend();
       const user=await b.currentUser().catch(()=>null);
       if(!user){
         cloudTitle.textContent="Sign in for online leagues";
-        cloudCopy.textContent="Your local prototype data stays available. Sign in to create or join shared leagues.";
+        cloudCopy.textContent="Sign in to create or join shared leagues.";
         return;
       }
       cloudTitle.textContent="Online leagues";
