@@ -59,7 +59,10 @@ function localScheduleRow(g){
     time:d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})
   };
 }
-const draftPool = ((window.ESPORTS_DATA && window.ESPORTS_DATA.players) || []).map(p=>({...p,fp:p.projection}));
+const draftPool = ((window.ESPORTS_DATA && window.ESPORTS_DATA.players) || []).map(p=>{
+  const n=Number(p.projection??p.fp??20);
+  return {...p,fp:Number.isFinite(n)?n:20};
+});
 
 const draftManagerNames = ["Baron Bandits","Zeuxidamus","Rift Raiders","Pentakill Club","Nexus Breakers","Blue Buff Boys","Dragon Slayers","Iron V","Red Side","First Blood","Scuttle Club","Elder Enjoyers"];
 let draftTimerId=null;
@@ -175,6 +178,7 @@ function getLeagueSettings(){
       ...saved,
       draftType:"Snake",
       teamSlot:false,
+      scoringFormat:"Head-to-head",
       scoring:{...defaultLeagueSettings.scoring,...(saved.scoring||{})}
     };
   }catch{
@@ -184,6 +188,7 @@ function getLeagueSettings(){
 
 let selectedPlayerId=null;
 let tradePrefill={id:null,side:null};
+let modalReturnFocus=null;
 
 function playerKey(p){
   return String(p.id || p.name || "").toLowerCase().replace(/[^a-z0-9]+/g,"-");
@@ -342,7 +347,14 @@ function isOwned(player){
 
 function closeTransactionModal(){
   const modal=document.querySelector("#transactionModal");
-  if(modal) modal.hidden=true;
+  if(modal){
+    modal.hidden=true;
+    document.body.classList.remove("modal-open");
+  }
+  if(modalReturnFocus&&document.contains(modalReturnFocus)){
+    modalReturnFocus.focus();
+  }
+  modalReturnFocus=null;
 }
 
 function addPlayerToRoster(player){
@@ -380,7 +392,10 @@ function openDropChooser(incoming){
     else if(document.querySelector("#rosterList")) render("team");
     else if(document.querySelector("#freeAgentList")) render("players");
   });
+  modalReturnFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
   modal.hidden=false;
+  document.body.classList.add("modal-open");
+  queueMicrotask(()=>list.querySelector("[data-drop-id]")?.focus());
 }
 
 function allFantasyPlayers(){
@@ -923,7 +938,15 @@ function render(view="home",options={}){
   if(view==="setup"){
     const settings=getLeagueSettings();
     document.querySelector("#leagueName").value=settings.name;
-    document.querySelector("#managerCount").value=settings.managers;
+    const managerSelect=document.querySelector("#managerCount");
+    const maxManagers=Math.max(2,Math.floor(draftPool.length/5));
+    [...managerSelect.options].forEach(option=>{
+      const unsupported=Number(option.value)>maxManagers;
+      option.disabled=unsupported;
+      if(unsupported)option.title=`Needs at least ${Number(option.value)*5} verified players`;
+    });
+    if([...managerSelect.options].some(o=>o.value===String(settings.managers)&&!o.disabled)) managerSelect.value=settings.managers;
+    else managerSelect.value=[...managerSelect.options].find(o=>!o.disabled)?.value||"4";
     document.querySelector("#benchCount").value=settings.bench;
     document.querySelector("#competition").value=settings.competition;
     document.querySelector("#teamSlot").checked=settings.teamSlot;
@@ -944,23 +967,25 @@ function render(view="home",options={}){
     });
 
     document.querySelector("#saveLeagueBtn").onclick=()=>{
-      const draftType=document.querySelector('[data-choice-group="draftType"] .choice.active').dataset.value;
-      const scoringFormat=document.querySelector('[data-choice-group="scoringFormat"] .choice.active').dataset.value;
+      const numberOr=(id,fallback)=>{
+        const n=Number(document.querySelector(id).value);
+        return Number.isFinite(n)?n:fallback;
+      };
       const next={
         name:document.querySelector("#leagueName").value.trim()||"Summoner's Cup",
-        managers:document.querySelector("#managerCount").value,
+        managers:managerSelect.value,
         bench:document.querySelector("#benchCount").value,
         draftType:"Snake",
-        scoringFormat,
+        scoringFormat:"Head-to-head",
         competition:document.querySelector("#competition").value,
         teamSlot:false,
         scoring:{
-          kills:Number(document.querySelector("#scoreKills").value),
-          deaths:Number(document.querySelector("#scoreDeaths").value),
-          assists:Number(document.querySelector("#scoreAssists").value),
-          cs:Number(document.querySelector("#scoreCs").value),
-          win:Number(document.querySelector("#scoreWin").value),
-          firstBlood:Number(document.querySelector("#scoreFb").value)
+          kills:numberOr("#scoreKills",defaultLeagueSettings.scoring.kills),
+          deaths:numberOr("#scoreDeaths",defaultLeagueSettings.scoring.deaths),
+          assists:numberOr("#scoreAssists",defaultLeagueSettings.scoring.assists),
+          cs:numberOr("#scoreCs",defaultLeagueSettings.scoring.cs),
+          win:numberOr("#scoreWin",defaultLeagueSettings.scoring.win),
+          firstBlood:numberOr("#scoreFb",defaultLeagueSettings.scoring.firstBlood)
         }
       };
       const prior=getLeagueSettings();
