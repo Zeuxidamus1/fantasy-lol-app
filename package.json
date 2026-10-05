@@ -1,0 +1,14 @@
+{
+  "name": "rift-fantasy",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Static fantasy League of Legends esports prototype",
+  "type": "module",
+  "scripts": {
+    "test": "node scripts/validate.mjs",
+    "check": "node --check app.js && node --check esports-data.js && node --check scripts/update-esports-data.mjs && node scripts/validate.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
