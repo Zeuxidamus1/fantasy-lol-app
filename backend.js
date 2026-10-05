@@ -269,6 +269,19 @@
     return request("/rest/v1/roster_transactions?league_id=eq."+encodeURIComponent(leagueId)+"&select=id,league_id,user_id,action,player_id,created_at&order=created_at.desc",{session:current});
   }
 
+  async function listNotifications(limit=50){
+    const current=await session();
+    if(!current)return [];
+    const max=Math.max(1,Math.min(100,Number(limit)||50));
+    return request("/rest/v1/notifications?select=id,league_id,recipient_user,actor_user,kind,payload,read_at,created_at&order=created_at.desc&limit="+max,{session:current});
+  }
+
+  async function markNotificationsRead(ids=null){
+    const current=await session();
+    if(!current)throw new Error("Sign in before changing notifications.");
+    return request("/rest/v1/rpc/mark_notifications_read",{method:"POST",body:{p_ids:Array.isArray(ids)?ids:null},session:current});
+  }
+
   async function listTrades(leagueId){
     const current=await session();
     if(!current)return [];
@@ -306,6 +319,7 @@
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,
     listRosters,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
+    listNotifications,markNotificationsRead,
     listTrades,createTrade,updateTrade,acceptTrade,
     request
   });
