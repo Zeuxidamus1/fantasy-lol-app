@@ -623,13 +623,17 @@ function render(view="home",options={}){
     document.querySelectorAll("[data-day]").forEach(c=>c.onclick=()=>{day=c.dataset.day;document.querySelectorAll("[data-day]").forEach(x=>x.classList.remove("active"));c.classList.add("active");drawSchedule();});
     const dataText=document.querySelector("#dataUpdatedText");
     const dataTitle=document.querySelector("#dataStatusTitle");
+    const zone=document.querySelector("#scheduleZone");
+    const hasTimestampedMatches=proSchedule.some(g=>g.startTime&&Number.isFinite(Date.parse(g.startTime)));
+    if(zone)zone.textContent=hasTimestampedMatches?"LOCAL TIME":"SNAPSHOT TIME";
     if(dataText&&window.ESPORTS_DATA){
       const stamp=new Date(window.ESPORTS_DATA.updatedAt);
       const when=Number.isNaN(stamp.getTime())?window.ESPORTS_DATA.updatedAt:stamp.toLocaleString();
       const ageHours=(Date.now()-stamp.getTime())/3600000;
       const freshness=Number.isFinite(ageHours)&&ageHours>24?"Data may be stale. ":"";
       if(dataTitle)dataTitle.textContent=window.ESPORTS_DATA.autoUpdated?"LoL Esports data refreshed":"LoL Esports data snapshot";
-      dataText.textContent=`${freshness}${window.ESPORTS_DATA.autoUpdated?"Auto-refreshed":"Snapshot updated"} ${when}. Timestamped matches use your device's local time.`;
+      const timeNote=hasTimestampedMatches?"Match times are converted to your device's local time.":"This fallback snapshot does not include timezone-normalized timestamps; displayed times are preserved as stored.";
+      dataText.textContent=`${freshness}${window.ESPORTS_DATA.autoUpdated?"Auto-refreshed":"Snapshot updated"} ${when}. ${timeNote}`;
     }else if(dataText){
       if(dataTitle)dataTitle.textContent="Schedule data unavailable";
       dataText.textContent="The external data file could not be loaded. The rest of the app remains available.";
