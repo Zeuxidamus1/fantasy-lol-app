@@ -84,7 +84,11 @@
     try{
       if(authType==="recovery")sessionStorage.setItem("riftRecoveryMode","1");
     }catch{}
-    history.replaceState({view:"account",depth:0},"",location.pathname+"#account");
+    if(authType==="recovery"){
+      history.replaceState({view:"account",depth:0},"",location.pathname+"#account");
+    }else{
+      history.replaceState({view:"home",depth:0},"",location.pathname+"#home");
+    }
     return true;
   }
 
