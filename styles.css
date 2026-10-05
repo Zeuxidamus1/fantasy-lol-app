@@ -45,3 +45,9 @@
 .verify-copy p{margin:0;color:#7f93ad;font-size:11px;line-height:1.6}
 .verify-resend-btn{align-self:center}
 .verify-wait{margin:0;text-align:center;color:#60748e;font-size:9px}
+
+.cloud-league-item.league-choice{width:100%;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.cloud-league-item.league-choice:hover{border-color:#31516f;background:#0c1d30}
+.cloud-league-item.league-choice.active-cloud-league{cursor:default}
+.league-choice-state{flex:0 0 auto;border:1px solid #294158;background:#102137;color:#9fc3ee;border-radius:12px;padding:9px 14px;font-size:11px;font-weight:800}
+.active-cloud-league .league-choice-state{border-color:#2a7f70;background:#123b35;color:#58e8ca}
