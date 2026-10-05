@@ -648,6 +648,9 @@ function render(view="home",options={}){
   if(view==="players"){
     const list=document.querySelector("#freeAgentList");
     const search=document.querySelector("#playerSearch");
+    const livePlayers=(window.ESPORTS_DATA&&Array.isArray(window.ESPORTS_DATA.players))?window.ESPORTS_DATA.players:[];
+    const notice=document.querySelector("#playerDataNotice");
+    if(notice)notice.hidden=livePlayers.length>0;
     let role="ALL";
     const draw=()=>{
       const q=search.value.trim().toLowerCase();
