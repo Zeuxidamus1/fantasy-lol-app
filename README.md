@@ -32,6 +32,16 @@ GitHub Pages serves the static files from the repository root. Navigation uses h
 
 Do not commit API credentials. Configure `LOL_ESPORTS_API_KEY` only as a GitHub Actions repository secret.
 
+## Cloud backend
+
+A Supabase-ready backend layer now exists:
+
+- `supabase/schema.sql` defines authenticated profiles, leagues, membership, rosters, waivers, trades, invite-code RPCs, and row-level security policies.
+- `backend.js` provides authentication and shared-league API methods without exposing privileged credentials.
+- `backend-config.js` is intentionally blank until the production Supabase project URL and public anon key are available.
+
+The public anon key is designed for browser use when protected by Row Level Security. Never place a Supabase service-role key in frontend files.
+
 ## Project status
 
-This is an actively developed prototype. It is suitable for controlled testing, but the multi-user fantasy-league backend and live scoring systems must be implemented and validated before a true production launch.
+The frontend and cloud integration layer are ready for backend provisioning. Until a Supabase project is connected and the schema is applied, the app safely remains in local prototype mode. Live fantasy scoring still requires a separate trusted ingestion/scoring service before production launch.
