@@ -124,6 +124,14 @@ begin
   select id into target from public.leagues where invite_code=upper(trim(p_invite_code));
   if target is null then raise exception 'Invalid invite code'; end if;
 
+  if (
+    select count(*) from public.league_members where league_id=target
+  ) >= coalesce((
+    select nullif((settings->>'managers'),'')::integer from public.leagues where id=target
+  ), 12) then
+    raise exception 'League is full';
+  end if;
+
   insert into public.league_members(league_id,user_id,role,team_name)
   values(target,auth.uid(),'manager',left(coalesce(nullif(trim(p_team_name),''),'My Team'),40))
   on conflict (league_id,user_id) do update set team_name=excluded.team_name
@@ -174,3 +182,110 @@ create policy "trade parties update trades" on public.trades for update using ((
 
 grant execute on function public.create_league(text,jsonb) to authenticated;
 grant execute on function public.join_league(text,text) to authenticated;
+
+
+create or replace function public.replace_roster(p_league_id uuid,p_players jsonb)
+returns setof public.rosters
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  item jsonb;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if not public.is_league_member(p_league_id) then raise exception 'League membership required'; end if;
+  if jsonb_typeof(coalesce(p_players,'[]'::jsonb)) <> 'array' then raise exception 'Players must be an array'; end if;
+  if jsonb_array_length(coalesce(p_players,'[]'::jsonb)) > 12 then raise exception 'Roster is too large'; end if;
+
+  -- Lock the league roster so two managers cannot claim the same player simultaneously.
+  perform 1 from public.leagues where id=p_league_id for update;
+
+  -- Validate duplicates within the submitted roster.
+  if exists (
+    select 1
+    from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x
+    group by x->>'player_id'
+    having count(*) > 1
+  ) then
+    raise exception 'Duplicate player in roster';
+  end if;
+
+  -- Validate that no submitted player belongs to another manager.
+  if exists (
+    select 1
+    from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x
+    join public.rosters r
+      on r.league_id=p_league_id
+     and r.player_id=x->>'player_id'
+     and r.user_id<>auth.uid()
+  ) then
+    raise exception 'A submitted player is already rostered by another manager';
+  end if;
+
+  delete from public.rosters where league_id=p_league_id and user_id=auth.uid();
+
+  for item in select * from jsonb_array_elements(coalesce(p_players,'[]'::jsonb))
+  loop
+    insert into public.rosters(league_id,user_id,player_id,slot)
+    values(
+      p_league_id,
+      auth.uid(),
+      left(coalesce(item->>'player_id',''),100),
+      left(coalesce(item->>'slot','BN'),10)
+    );
+  end loop;
+
+  return query
+  select * from public.rosters
+  where league_id=p_league_id and user_id=auth.uid()
+  order by created_at;
+end;
+$$;
+
+create or replace function public.accept_trade(p_trade_id uuid)
+returns public.trades
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  t public.trades;
+  send_id text;
+  receive_id text;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+
+  select * into t from public.trades where id=p_trade_id for update;
+  if t.id is null then raise exception 'Trade not found'; end if;
+  if t.to_user<>auth.uid() then raise exception 'Only the receiving manager can accept this trade'; end if;
+  if t.status<>'pending' then raise exception 'Trade is no longer pending'; end if;
+
+  send_id := nullif(t.offer->>'send_player_id','');
+  receive_id := nullif(t.offer->>'receive_player_id','');
+  if send_id is null or receive_id is null then raise exception 'Trade payload is invalid'; end if;
+
+  if not exists(select 1 from public.rosters where league_id=t.league_id and user_id=t.from_user and player_id=send_id) then
+    raise exception 'Offering manager no longer owns the offered player';
+  end if;
+  if not exists(select 1 from public.rosters where league_id=t.league_id and user_id=t.to_user and player_id=receive_id) then
+    raise exception 'Receiving manager no longer owns the requested player';
+  end if;
+
+  update public.rosters set user_id=t.to_user
+  where league_id=t.league_id and user_id=t.from_user and player_id=send_id;
+
+  update public.rosters set user_id=t.from_user
+  where league_id=t.league_id and user_id=t.to_user and player_id=receive_id;
+
+  update public.trades
+  set status='accepted', resolved_at=now()
+  where id=t.id
+  returning * into t;
+
+  return t;
+end;
+$$;
+
+grant execute on function public.replace_roster(uuid,jsonb) to authenticated;
+grant execute on function public.accept_trade(uuid) to authenticated;
