@@ -869,7 +869,7 @@ function render(view="home",options={}){
       const q=search.value.trim().toLowerCase();
       const isUserTurn=state&&state.started&&!state.complete&&draftOrderForPick(state.pickIndex,state.managerCount)===state.userIndex;
       const filtered=draftPool.filter(p=>!taken.has(p.id)&&(role==="ALL"||p.role===role)&&(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)));
-      list.innerHTML=filtered.map(p=>`<div class="player-row draft-player"><span class="role-badge">${h(p.role)}</span><div class="player-info"><strong>#${h(p.rank)} ${h(p.name)}${p.verified?'<span class="data-chip">ROSTER VERIFIED</span>':""}</strong><small>${h(p.team)}</small></div><span class="fp">${Number(p.fp??0).toFixed(1)}</span><button class="draft-btn" data-player-id="${playerKey(p)}" ${isUserTurn?"":"disabled"}>DRAFT</button></div>`).join("")||'<div class="card muted">No available players match this filter.</div>';
+      list.innerHTML=filtered.map(p=>`<div class="player-row draft-player"><span class="role-badge">${h(p.role)}</span><div class="player-info"><strong>#${h(p.rank)} ${h(p.name)}${p.verified?'<span class="data-chip">ROSTER SNAPSHOT</span>':""}</strong><small>${h(p.team)}</small></div><span class="fp">${Number(p.fp??0).toFixed(1)}</span><button class="draft-btn" data-player-id="${playerKey(p)}" ${isUserTurn?"":"disabled"}>DRAFT</button></div>`).join("")||'<div class="card muted">No available players match this filter.</div>';
       list.querySelectorAll("[data-player-id]").forEach(btn=>btn.onclick=()=>{
         state=getDraftState();
         if(!state||state.complete||draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex)return;
