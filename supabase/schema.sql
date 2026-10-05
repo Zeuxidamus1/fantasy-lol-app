@@ -289,3 +289,87 @@ $$;
 
 grant execute on function public.replace_roster(uuid,jsonb) to authenticated;
 grant execute on function public.accept_trade(uuid) to authenticated;
+
+
+-- Security and performance hardening
+revoke all on function public.is_league_member(uuid) from public, anon;
+revoke all on function public.new_invite_code() from public, anon, authenticated;
+revoke all on function public.create_league(text,jsonb) from public, anon;
+revoke all on function public.join_league(text,text) from public, anon;
+revoke all on function public.replace_roster(uuid,jsonb) from public, anon;
+revoke all on function public.accept_trade(uuid) from public, anon;
+
+grant execute on function public.is_league_member(uuid) to authenticated;
+grant execute on function public.create_league(text,jsonb) to authenticated;
+grant execute on function public.join_league(text,text) to authenticated;
+grant execute on function public.replace_roster(uuid,jsonb) to authenticated;
+grant execute on function public.accept_trade(uuid) to authenticated;
+
+create index if not exists leagues_owner_id_idx on public.leagues(owner_id);
+create index if not exists league_members_user_id_idx on public.league_members(user_id);
+create index if not exists rosters_user_id_idx on public.rosters(user_id);
+create index if not exists trades_league_id_idx on public.trades(league_id);
+create index if not exists trades_from_user_idx on public.trades(from_user);
+create index if not exists trades_to_user_idx on public.trades(to_user);
+create index if not exists waiver_claims_league_id_idx on public.waiver_claims(league_id);
+create index if not exists waiver_claims_user_id_idx on public.waiver_claims(user_id);
+
+drop policy if exists "profiles self read" on public.profiles;
+drop policy if exists "profiles self write" on public.profiles;
+create policy "profiles self select" on public.profiles
+  for select to authenticated using (id=(select auth.uid()));
+create policy "profiles self insert" on public.profiles
+  for insert to authenticated with check (id=(select auth.uid()));
+create policy "profiles self update" on public.profiles
+  for update to authenticated using (id=(select auth.uid())) with check (id=(select auth.uid()));
+create policy "profiles self delete" on public.profiles
+  for delete to authenticated using (id=(select auth.uid()));
+
+drop policy if exists "league members read leagues" on public.leagues;
+drop policy if exists "owners update leagues" on public.leagues;
+create policy "league members read leagues" on public.leagues
+  for select to authenticated using (owner_id=(select auth.uid()) or public.is_league_member(id));
+create policy "owners update leagues" on public.leagues
+  for update to authenticated using (owner_id=(select auth.uid())) with check (owner_id=(select auth.uid()));
+
+drop policy if exists "members read membership" on public.league_members;
+drop policy if exists "users update own membership" on public.league_members;
+create policy "members read membership" on public.league_members
+  for select to authenticated using (public.is_league_member(league_id));
+create policy "users update own membership" on public.league_members
+  for update to authenticated using (user_id=(select auth.uid())) with check (user_id=(select auth.uid()));
+
+drop policy if exists "members read rosters" on public.rosters;
+drop policy if exists "users write own roster" on public.rosters;
+create policy "members read rosters" on public.rosters
+  for select to authenticated using (public.is_league_member(league_id));
+create policy "users insert own roster" on public.rosters
+  for insert to authenticated with check (user_id=(select auth.uid()) and public.is_league_member(league_id));
+create policy "users update own roster" on public.rosters
+  for update to authenticated using (user_id=(select auth.uid()) and public.is_league_member(league_id))
+  with check (user_id=(select auth.uid()) and public.is_league_member(league_id));
+create policy "users delete own roster" on public.rosters
+  for delete to authenticated using (user_id=(select auth.uid()) and public.is_league_member(league_id));
+
+drop policy if exists "members read waivers" on public.waiver_claims;
+drop policy if exists "users write own waivers" on public.waiver_claims;
+create policy "members read waivers" on public.waiver_claims
+  for select to authenticated using (public.is_league_member(league_id));
+create policy "users insert own waivers" on public.waiver_claims
+  for insert to authenticated with check (user_id=(select auth.uid()) and public.is_league_member(league_id));
+create policy "users update own waivers" on public.waiver_claims
+  for update to authenticated using (user_id=(select auth.uid()) and public.is_league_member(league_id))
+  with check (user_id=(select auth.uid()) and public.is_league_member(league_id));
+create policy "users delete own waivers" on public.waiver_claims
+  for delete to authenticated using (user_id=(select auth.uid()) and public.is_league_member(league_id));
+
+drop policy if exists "members read trades" on public.trades;
+drop policy if exists "users create trades" on public.trades;
+drop policy if exists "trade parties update trades" on public.trades;
+create policy "members read trades" on public.trades
+  for select to authenticated using (public.is_league_member(league_id));
+create policy "users create trades" on public.trades
+  for insert to authenticated with check (from_user=(select auth.uid()) and public.is_league_member(league_id));
+create policy "trade parties update trades" on public.trades
+  for update to authenticated using ((from_user=(select auth.uid()) or to_user=(select auth.uid())) and public.is_league_member(league_id))
+  with check ((from_user=(select auth.uid()) or to_user=(select auth.uid())) and public.is_league_member(league_id));
