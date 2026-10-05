@@ -279,14 +279,14 @@
 
   <template id="matchup-template">
     <section class="stack">
-      <div class="section-title"><div><div class="eyebrow">HEAD TO HEAD</div><h2>Demo Matchup</h2></div><span class="live-pill demo-pill">DEMO</span></div>
-      <div class="card matchup-card">
-        <div class="match-score"><div><span class="avatar">Z</span><strong>Zeuxidamus</strong><b>87.4</b></div><span>VS</span><div><span class="avatar rival">R</span><strong>Rift Raiders</strong><b>72.1</b></div></div>
-        <div class="progress"><span style="width:55%"></span></div>
-        <div class="projection-row"><span>128.6 projected</span><span>119.2 projected</span></div>
-      </div>
-      <h3>Position battles</h3>
-      <div id="battleList" class="stack tight"></div>
+      <div class="section-title"><div><div class="eyebrow">HEAD TO HEAD</div><h2>Matchup</h2></div></div>
+      <section class="card">
+        <div class="empty-state">
+          <strong>Fantasy scoring is not live yet</strong>
+          <small>Your real head-to-head matchup will appear here once the game-stat scoring feed is connected. No demo scores are shown.</small>
+          <button class="secondary-btn" data-jump="schedule">View Pro Schedule</button>
+        </div>
+      </section>
     </section>
   </template>
 
