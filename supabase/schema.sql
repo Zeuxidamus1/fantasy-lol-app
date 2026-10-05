@@ -741,3 +741,71 @@ end;
 $$;
 
 create index if not exists draft_picks_user_id_idx on public.draft_picks(user_id);
+
+
+-- League settings validation
+create or replace function public.create_league(p_name text,p_settings jsonb default '{}'::jsonb)
+returns public.leagues
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  result public.leagues;
+  manager_count integer;
+  bench_count integer;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if nullif(trim(p_name),'') is null then raise exception 'League name is required'; end if;
+  manager_count:=coalesce(nullif(p_settings->>'managers','')::integer,4);
+  bench_count:=coalesce(nullif(p_settings->>'bench','')::integer,1);
+  if manager_count not in (2,4,6,8,10,12) then raise exception 'Invalid manager count'; end if;
+  if bench_count not between 1 and 5 then raise exception 'Invalid bench count'; end if;
+
+  insert into public.leagues(owner_id,name,invite_code,settings)
+  values(auth.uid(),left(trim(p_name),40),public.new_invite_code(),coalesce(p_settings,'{}'::jsonb))
+  returning * into result;
+
+  insert into public.league_members(league_id,user_id,role,team_name)
+  values(result.id,auth.uid(),'owner','My Team');
+
+  return result;
+end;
+$$;
+
+create or replace function public.update_league_settings(p_league_id uuid,p_name text,p_settings jsonb)
+returns public.leagues
+language plpgsql
+security definer
+set search_path=public
+as $$
+declare
+  result public.leagues;
+  manager_count integer;
+  bench_count integer;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if not exists(select 1 from public.leagues where id=p_league_id and owner_id=auth.uid()) then
+    raise exception 'Only the commissioner can change league settings';
+  end if;
+  if exists(select 1 from public.leagues where id=p_league_id and status<>'pre_draft') then
+    raise exception 'League settings are locked after the draft starts';
+  end if;
+  if nullif(trim(p_name),'') is null then raise exception 'League name is required'; end if;
+
+  manager_count:=coalesce(nullif(p_settings->>'managers','')::integer,4);
+  bench_count:=coalesce(nullif(p_settings->>'bench','')::integer,1);
+  if manager_count not in (2,4,6,8,10,12) then raise exception 'Invalid manager count'; end if;
+  if bench_count not between 1 and 5 then raise exception 'Invalid bench count'; end if;
+  if manager_count < (select count(*) from public.league_members where league_id=p_league_id) then
+    raise exception 'Manager count cannot be lower than current league membership';
+  end if;
+
+  update public.leagues
+     set name=left(trim(p_name),40),
+         settings=coalesce(p_settings,'{}'::jsonb)
+   where id=p_league_id
+   returning * into result;
+  return result;
+end;
+$$;
