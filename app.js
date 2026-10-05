@@ -1970,6 +1970,7 @@ async function loadNotifications({open=false}={}){
         case "trade_canceled": return {title:"Trade canceled",body:`${actor} canceled a trade offer.`,view:"trade"};
         case "roster_add": return {title:`${actor} added ${rosterPlayer}`,body:"League roster move",view:"transactions"};
         case "roster_drop": return {title:`${actor} dropped ${rosterPlayer}`,body:"League roster move",view:"transactions"};
+        case "roster_swap": return {title:`${actor} made a roster move`,body:"Roster swap",view:"transactions",swap:{dropped:playerName(p.dropped_player_id),added:playerName(p.added_player_id)}};
         default:return {title:"League update",body:"New activity in your league.",view:"league"};
       }
     };
@@ -1978,7 +1979,10 @@ async function loadNotifications({open=false}={}){
     notificationList.innerHTML=notifications.length?notifications.map(n=>{
       const d=describe(n);
       const league=leagueMap.get(String(n.league_id));
-      return `<button class="notification-item ${n.read_at?"":"unread"}" data-notification-view="${h(d.view)}" data-notification-id="${h(n.id)}"><span class="notification-dot"></span><span class="notification-copy"><strong>${h(d.title)}</strong><small>${h(d.body)}</small><em>${h(league?.name||"League")} · ${h(fmt(n.created_at))}</em></span></button>`;
+      const detail=d.swap
+        ? `<span class="notification-swap"><span class="swap-drop">${h(d.swap.dropped)}</span><span class="swap-arrow">→</span><span class="swap-add">${h(d.swap.added)}</span></span><small>Dropped one player and added another.</small>`
+        : `<small>${h(d.body)}</small>`;
+      return `<button class="notification-item ${n.read_at?"":"unread"}" data-notification-view="${h(d.view)}" data-notification-id="${h(n.id)}"><span class="notification-dot"></span><span class="notification-copy"><strong>${h(d.title)}</strong>${detail}<em>${h(league?.name||"League")} · ${h(fmt(n.created_at))}</em></span></button>`;
     }).join(""):'<div class="empty-state"><strong>No notifications yet</strong><small>Trades and league roster changes will appear here.</small></div>';
 
     notificationList.querySelectorAll("[data-notification-view]").forEach(item=>item.onclick=async()=>{
