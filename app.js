@@ -1192,12 +1192,27 @@ function render(view="home",options={}){
       cloudTitle.textContent="Online leagues";
       cloudCopy.textContent="Create a league or join one with an invite code.";
       cloudActions.hidden=false;
+      const applyLeaguePermissions=async(activeId)=>{
+        const controls=document.querySelectorAll(".commissioner-only");
+        controls.forEach(el=>el.hidden=true);
+        if(!activeId)return;
+        try{
+          const members=await b.listLeagueMembers(activeId);
+          const mine=members.find(m=>String(m.user_id)===String(user.id));
+          const commissioner=mine?.role==="owner";
+          controls.forEach(el=>el.hidden=!commissioner);
+        }catch{
+          controls.forEach(el=>el.hidden=true);
+        }
+      };
+
       const drawCloudLeagues=async()=>{
         try{
           const leagues=await b.listLeagues();
           let activeId=getActiveLeagueId();
           if(activeId&&!leagues.some(l=>String(l.id)===String(activeId))){setActiveLeagueId(null);activeId=null;}
           cloudList.innerHTML=leagues.length?leagues.map(l=>'<div class="cloud-league-item '+(String(activeId)===String(l.id)?"active-cloud-league":"")+'"><div><strong>'+h(l.name)+'</strong><small>Invite: '+h(l.invite_code||"—")+'</small></div><button class="secondary-btn cloud-select-btn" data-cloud-league="'+h(l.id)+'">'+(String(activeId)===String(l.id)?"Active":"Use League")+'</button></div>').join(""):'<div class="empty-state"><strong>No online leagues yet</strong><small>Create one or join with an invite code.</small></div>';
+          await applyLeaguePermissions(activeId);
           cloudList.querySelectorAll("[data-cloud-league]").forEach(btn=>btn.onclick=async()=>{
             setActiveLeagueId(btn.dataset.cloudLeague);
             const loaded=await loadRosterFromCloud(btn.dataset.cloudLeague);
@@ -1220,14 +1235,30 @@ function render(view="home",options={}){
         }catch(err){showToast(err.message||"Could not create league");}
         finally{btn.disabled=false;}
       };
-      document.querySelector("#joinCloudLeagueBtn").onclick=async()=>{
-        const code=document.querySelector("#joinCode").value.trim();
-        const teamName=document.querySelector("#joinTeamName").value.trim()||"My Team";
+      const joinCode=document.querySelector("#joinCode");
+      const joinTeamName=document.querySelector("#joinTeamName");
+      const joinBtn=document.querySelector("#joinCloudLeagueBtn");
+      const updateJoinState=()=>{
+        joinBtn.disabled=!(joinCode.value.trim()&&joinTeamName.value.trim());
+      };
+      joinCode.addEventListener("input",updateJoinState);
+      joinTeamName.addEventListener("input",updateJoinState);
+      updateJoinState();
+      joinBtn.onclick=async()=>{
+        const code=joinCode.value.trim();
+        const teamName=joinTeamName.value.trim();
         if(!code)return showToast("Enter an invite code.");
-        const btn=document.querySelector("#joinCloudLeagueBtn");btn.disabled=true;
-        try{await b.joinLeague(code,teamName);showToast("League joined");await drawCloudLeagues();}
+        if(!teamName)return showToast("Enter a team name.");
+        joinBtn.disabled=true;
+        try{
+          const joined=await b.joinLeague(code,teamName);
+          const leagueId=Array.isArray(joined)?joined[0]?.league_id:joined?.league_id;
+          if(leagueId)setActiveLeagueId(leagueId);
+          showToast("League joined");
+          await drawCloudLeagues();
+        }
         catch(err){showToast(err.message||"Could not join league");}
-        finally{btn.disabled=false;}
+        finally{updateJoinState();}
       };
     })();
     const leagueLabel=document.querySelector("#leagueNameLabel");
@@ -1365,6 +1396,28 @@ function render(view="home",options={}){
     },1000);
   }
   if(view==="setup"){
+    const setupScreen=document.querySelector("#setupScreen");
+    const activeLeagueId=getActiveLeagueId();
+    if(cloudReady()&&activeLeagueId){
+      setupScreen.hidden=true;
+      (async()=>{
+        try{
+          const b=backend();
+          const user=await b.currentUser().catch(()=>null);
+          const members=user?await b.listLeagueMembers(activeLeagueId):[];
+          const mine=members.find(m=>String(m.user_id)===String(user?.id));
+          if(mine?.role!=="owner"){
+            showToast("Only the league commissioner can change league settings.");
+            render("league",{replace:true});
+            return;
+          }
+          setupScreen.hidden=false;
+        }catch{
+          showToast("Could not verify commissioner permissions.");
+          render("league",{replace:true});
+        }
+      })();
+    }
     const settings=getLeagueSettings();
     document.querySelector("#leagueName").value=settings.name;
     const managerSelect=document.querySelector("#managerCount");
