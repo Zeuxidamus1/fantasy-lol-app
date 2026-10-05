@@ -1013,6 +1013,27 @@ function render(view="home",options={}){
 
           leagueNameEl.textContent=String(activeLeague?.name||"Active League").toUpperCase();
           teamNameEl.textContent=membership.team_name||"My Team";
+          const renameBtn=document.querySelector("#renameTeamBtn");
+          const editor=document.querySelector("#teamNameEditor");
+          const nameInput=document.querySelector("#teamNameInput");
+          const saveNameBtn=document.querySelector("#saveTeamNameBtn");
+          const cancelNameBtn=document.querySelector("#cancelTeamNameBtn");
+          nameInput.value=membership.team_name||"";
+          renameBtn.onclick=()=>{editor.hidden=false;nameInput.focus();};
+          cancelNameBtn.onclick=()=>{editor.hidden=true;nameInput.value=membership.team_name||"";};
+          saveNameBtn.onclick=async()=>{
+            const nextName=nameInput.value.trim();
+            if(!nextName)return showToast("Enter a team name.");
+            saveNameBtn.disabled=true;
+            try{
+              await b.updateTeamName(leagueId,nextName);
+              membership.team_name=nextName;
+              teamNameEl.textContent=nextName;
+              editor.hidden=true;
+              showToast("Team name updated");
+            }catch(err){showToast(err.message||"Could not update team name");}
+            finally{saveNameBtn.disabled=false;}
+          };
           badge.textContent=String(activeLeague?.status||"pre_draft").replace("_"," ").toUpperCase();
           badge.hidden=false;
           rosterMovesEnabled=activeLeague?.status==="active";
