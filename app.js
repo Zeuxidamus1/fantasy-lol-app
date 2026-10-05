@@ -556,6 +556,7 @@ function render(view="home",options={}){
     const statusBadge=document.querySelector("#cloudStatusBadge");
     const authCard=document.querySelector("#authCard");
     const signedInCard=document.querySelector("#signedInCard");
+    const recoveryCard=document.querySelector("#recoveryCard");
     if(!ready){
       statusTitle.textContent="Local mode";
       statusCopy.textContent="The production cloud project is not configured yet. The app continues to work locally on this device.";
@@ -569,12 +570,19 @@ function render(view="home",options={}){
     }
     (async()=>{
       const user=ready?await b.currentUser().catch(()=>null):null;
-      if(user){
+      const recovery=ready&&b?.isRecoveryMode?.();
+      if(recovery){
         authCard.hidden=true;
+        signedInCard.hidden=true;
+        recoveryCard.hidden=false;
+      }else if(user){
+        authCard.hidden=true;
+        recoveryCard.hidden=true;
         signedInCard.hidden=false;
         document.querySelector("#signedInEmail").textContent=cloudUserEmail(user);
       }else{
         authCard.hidden=false;
+        recoveryCard.hidden=true;
         signedInCard.hidden=true;
       }
     })();
@@ -600,6 +608,47 @@ function render(view="home",options={}){
       }catch(err){showToast(err.message||"Account creation failed");}
       finally{busy(false);}
     };
+    document.querySelector("#resendVerifyBtn").onclick=async()=>{
+      if(!ready)return showToast("Cloud backend is not configured yet.");
+      const value=email.value.trim();
+      if(!email.checkValidity())return showToast("Enter the email address you used to create the account.");
+      const btn=document.querySelector("#resendVerifyBtn");btn.disabled=true;
+      try{
+        await b.resendSignup(value);
+        showToast("Verification email sent. Check your inbox.");
+      }catch(err){
+        const msg=String(err.message||"");
+        showToast(/rate|limit|too many/i.test(msg)?"Email limit reached. Wait a little while before trying again.":msg||"Could not resend verification email.");
+      }finally{setTimeout(()=>{btn.disabled=false;},3000);}
+    };
+
+    document.querySelector("#forgotPasswordBtn").onclick=async()=>{
+      if(!ready)return showToast("Cloud backend is not configured yet.");
+      const value=email.value.trim();
+      if(!email.checkValidity())return showToast("Enter your email address first.");
+      const btn=document.querySelector("#forgotPasswordBtn");btn.disabled=true;
+      try{
+        await b.requestPasswordReset(value);
+        showToast("Password-reset email sent. Check your inbox.");
+      }catch(err){
+        const msg=String(err.message||"");
+        showToast(/rate|limit|too many/i.test(msg)?"Email limit reached. Wait a little while before trying again.":msg||"Could not send password-reset email.");
+      }finally{setTimeout(()=>{btn.disabled=false;},3000);}
+    };
+
+    const saveNewPasswordBtn=document.querySelector("#saveNewPasswordBtn");
+    if(saveNewPasswordBtn)saveNewPasswordBtn.onclick=async()=>{
+      const input=document.querySelector("#newPassword");
+      if(input.value.length<8)return showToast("Use at least 8 characters.");
+      saveNewPasswordBtn.disabled=true;
+      try{
+        await b.updatePassword(input.value);
+        showToast("Password updated.");
+        render("account",{replace:true});
+      }catch(err){showToast(err.message||"Could not update password.");}
+      finally{saveNewPasswordBtn.disabled=false;}
+    };
+
     document.querySelector("#signOutBtn").onclick=async()=>{await b?.signOut?.();showToast("Signed out");render("account",{replace:true});};
   }
   if(view==="home"){
