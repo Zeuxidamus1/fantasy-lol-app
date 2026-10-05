@@ -33,3 +33,15 @@
 .login-divider::before,.login-divider::after{content:"";height:1px;flex:1;background:#1b2d43}
 .login-legal{text-align:center;color:#4f647f;font-size:8px;line-height:1.45;margin:0 auto;max-width:330px}
 @media(max-width:380px){.login-screen{padding-left:16px;padding-right:16px}.login-card{padding:18px}.login-help-row{flex-direction:column;gap:2px}}
+
+[hidden]{display:none!important}
+.compact-brand{margin-bottom:-6px}
+.compact-brand h1{font-size:30px}
+.signup-screen,.verify-screen{padding-top:clamp(28px,7vh,68px)}
+.auth-back-btn{width:100%;margin-top:-4px}
+.verify-mark{font-size:30px}
+.verify-card{text-align:center}
+.verify-copy h2{margin:0 0 8px;font-size:20px}
+.verify-copy p{margin:0;color:#7f93ad;font-size:11px;line-height:1.6}
+.verify-resend-btn{align-self:center}
+.verify-wait{margin:0;text-align:center;color:#60748e;font-size:9px}
