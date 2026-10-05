@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "node scripts/validate.mjs",
-    "check": "node --check app.js && node --check esports-data.js && node --check scripts/update-esports-data.mjs && node --check scripts/browser-interactions.mjs && bash -n scripts/browser-smoke.sh && node scripts/validate.mjs",
+    "check": "node --check app.js && node --check esports-data.js && node --check scripts/update-esports-data.mjs && node --check scripts/update-player-stats.mjs && node --check player-stats.js && node --check scripts/browser-interactions.mjs && bash -n scripts/browser-smoke.sh && node scripts/validate.mjs",
     "smoke": "bash scripts/browser-smoke.sh",
     "e2e": "node scripts/browser-interactions.mjs"
   },
