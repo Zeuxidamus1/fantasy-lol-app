@@ -551,22 +551,12 @@ function render(view="home",options={}){
   if(view==="account"){
     const b=backend();
     const ready=cloudReady();
-    const statusTitle=document.querySelector("#cloudStatusTitle");
-    const statusCopy=document.querySelector("#cloudStatusCopy");
-    const statusBadge=document.querySelector("#cloudStatusBadge");
     const authCard=document.querySelector("#authCard");
     const signedInCard=document.querySelector("#signedInCard");
     const recoveryCard=document.querySelector("#recoveryCard");
     if(!ready){
-      statusTitle.textContent="Local mode";
-      statusCopy.textContent="The production cloud project is not configured yet. The app continues to work locally on this device.";
-      statusBadge.textContent="LOCAL";
       authCard.classList.add("auth-disabled");
-    }else{
-      statusTitle.textContent="Cloud backend connected";
-      statusCopy.textContent="Sign in to synchronize shared leagues and roster data across devices.";
-      statusBadge.textContent="READY";
-      statusBadge.className="verified-badge";
+      document.querySelector("#authHelp").textContent="Account services are temporarily unavailable. You can still use the app locally.";
     }
     (async()=>{
       const user=ready?await b.currentUser().catch(()=>null):null;
