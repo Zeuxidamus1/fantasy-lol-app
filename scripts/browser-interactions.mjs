@@ -85,7 +85,7 @@ try{
 
   await expect("home renders","document.title.includes('Home') && document.body.innerText.includes('Fantasy scoring preview')");
 
-  await evaluate("document.querySelector('[data-view="players"]').click()");
+  await evaluate("document.querySelector('[data-view=players]').click()");
   await expect("players nav works","document.title.includes('Players') && !!document.querySelector('#playerSearch')");
 
   await evaluate("const i=document.querySelector('#playerSearch'); i.value='Faker'; i.dispatchEvent(new Event('input',{bubbles:true}))");
@@ -105,21 +105,21 @@ try{
   await evaluate("document.querySelector('#transactionModal [data-close-transaction]').click()");
   await expect("transaction modal closes","document.querySelector('#transactionModal').hidden === true");
 
-  await evaluate("document.querySelector('[data-view="team"]').click()");
+  await evaluate("document.querySelector('[data-view=team]').click()");
   await expect("team nav works","document.title.includes('My Team') && !!document.querySelector('#rosterList')");
   const beforeDrop=await evaluate("JSON.parse(localStorage.getItem('riftUserRoster')||'[]').length || document.querySelectorAll('#rosterList .roster-slot').length");
   await evaluate("window.confirm=()=>true; document.querySelector('[data-drop-roster]').click()");
   await expect("drop updates roster",`JSON.parse(localStorage.getItem('riftUserRoster')||'[]').length === ${Math.max(0,Number(beforeDrop)-1)}`);
 
-  await evaluate("document.querySelector('[data-view="players"]').click(); const b=document.querySelector('#freeAgentList .add-btn:not([disabled])'); if(b)b.click()");
+  await evaluate("document.querySelector('[data-view=players]').click(); const b=document.querySelector('#freeAgentList .add-btn:not([disabled])'); if(b)b.click()");
   await expect("add updates roster",`JSON.parse(localStorage.getItem('riftUserRoster')||'[]').length === ${Number(beforeDrop)}`);
 
-  await evaluate("document.querySelector('[data-view="team"]').click(); document.querySelector('[data-jump="transactions"]').click()");
+  await evaluate("document.querySelector('[data-view=team]').click(); document.querySelector('[data-jump=transactions]').click()");
   await expect("transactions view opens","document.title.includes('Transactions') && !!document.querySelector('#transactionContent')");
-  await evaluate("document.querySelector('[data-transaction-tab="history"]').click()");
+  await evaluate("document.querySelector('[data-transaction-tab=history]').click()");
   await expect("transaction history records moves","document.querySelector('#transactionContent').innerText.includes('COMPLETE')");
 
-  await evaluate("document.querySelector('[data-view="players"]').click(); const r=[...document.querySelectorAll('#freeAgentList .player-row')].find(x=>x.querySelector('.add-btn:not([disabled])')); if(r)r.querySelector('[data-open-player]').click()");
+  await evaluate("document.querySelector('[data-view=players]').click(); const r=[...document.querySelectorAll('#freeAgentList .player-row')].find(x=>x.querySelector('.add-btn:not([disabled])')); if(r)r.querySelector('[data-open-player]').click()");
   await expect("available player profile opens","!!document.querySelector('#profileWaiverBtn') && !document.querySelector('#profileWaiverBtn').disabled");
   await evaluate("document.querySelector('#profileWaiverBtn').click()");
   await expect("waiver claim saves","JSON.parse(localStorage.getItem('riftWaiverClaims')||'[]').length === 1");
@@ -131,20 +131,20 @@ try{
   await evaluate("document.querySelector('#submitTradeBtn').click()");
   await expect("trade offer saves","JSON.parse(localStorage.getItem('riftTradeOffers')||'[]').some(x=>x.direction==='outgoing')");
 
-  await evaluate("document.querySelector('[data-view="league"]').click(); document.querySelector('[data-jump="setup"]').click()");
+  await evaluate("document.querySelector('[data-view=league]').click(); document.querySelector('[data-jump=setup]').click()");
   await expect("league setup opens","document.title.includes('League Setup') && !!document.querySelector('#leagueName')");
   await evaluate("document.querySelector('#leagueName').value='Audit League'; document.querySelector('#saveLeagueBtn').click()");
   await expect("league settings save","JSON.parse(localStorage.getItem('riftLeagueSettings')||'{}').name === 'Audit League'",3000);
 
-  await evaluate("const b=document.querySelector('[data-jump="draft"]'); if(b)b.click()");
+  await evaluate("const b=document.querySelector('[data-jump=draft]'); if(b)b.click()");
   await expect("draft room opens","document.title.includes('Draft Room') && !!document.querySelector('#startDraftBtn')");
   await evaluate("const b=document.querySelector('#startDraftBtn'); if(!b.disabled)b.click()");
   await expect("mock draft starts","JSON.parse(localStorage.getItem('riftDraftState')||'{}').started === true");
   await evaluate("const b=document.querySelector('#draftPlayerList .draft-btn:not([disabled])'); if(b)b.click()");
   await expect("draft pick records","JSON.parse(localStorage.getItem('riftDraftState')||'{}').picks.length >= 2");
 
-  await evaluate("document.querySelector('[data-view="schedule"]').click(); document.querySelector('[data-day="today"]').click()");
-  await expect("schedule filter works","document.querySelector('[data-day="today"]').classList.contains('active')");
+  await evaluate("document.querySelector('[data-view=schedule]').click(); document.querySelector('[data-day=today]').click()");
+  await expect("schedule filter works","document.querySelector('[data-day=today]').classList.contains('active')");
 
   ws.close();
   console.log("All interaction tests passed.");
