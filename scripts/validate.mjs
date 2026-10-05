@@ -8,7 +8,7 @@ const fail=[];
 const pass=[];
 const check=(ok,msg)=>{(ok?pass:fail).push(msg);};
 
-const required=["index.html","styles.css","app.js","esports-data.js","scripts/update-esports-data.mjs"];
+const required=["index.html","styles.css","app.js","esports-data.js","package.json","scripts/update-esports-data.mjs","scripts/browser-smoke.sh","scripts/browser-interactions.mjs",".github/workflows/validate-app.yml",".github/workflows/update-esports-data.yml"];
 for(const file of required) check(fs.existsSync(path.join(root,file)),`required file: ${file}`);
 
 const html=read("index.html");
