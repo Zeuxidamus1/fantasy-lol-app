@@ -439,6 +439,11 @@ function rosterRow(p, manage=false){
 }
 
 let currentView=null;
+let navigationDepth=0;
+function goBack(fallback="home"){
+  if(navigationDepth>0) history.back();
+  else render(fallback,{replace:true});
+}
 
 function render(view="home",options={}){
   const requested=String(view||"home").replace(/[^a-z-]/g,"");
@@ -451,8 +456,14 @@ function render(view="home",options={}){
   if(view!=="draft"&&draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
   if(!options.fromHistory){
     const hash="#"+view;
-    if(options.replace||currentView===null) history.replaceState({view},"",hash);
-    else if(currentView!==view) history.pushState({view},"",hash);
+    if(options.replace||currentView===null){
+      const depth=Number(history.state?.depth)||0;
+      navigationDepth=depth;
+      history.replaceState({view,depth},"",hash);
+    }else if(currentView!==view){
+      navigationDepth+=1;
+      history.pushState({view,depth:navigationDepth},"",hash);
+    }
   }
   currentView=view;
   app.innerHTML="";
@@ -556,7 +567,7 @@ function render(view="home",options={}){
     if(owned){waiverBtn.textContent="Already Owned";waiverBtn.disabled=true;}
     else waiverBtn.onclick=()=>createWaiverClaim(p);
     document.querySelector("#profileTradeBtn").onclick=()=>{selectedPlayerId=p.id;render("trade");};
-    document.querySelector("#playerBackBtn").onclick=()=>render("players");
+    document.querySelector("#playerBackBtn").onclick=()=>goBack("players");
   }
   if(view==="matchup"){
     const matchupRoster=getUserRoster().filter(p=>(p.slot||p.role)!=="BN").slice(0,5);
@@ -958,6 +969,6 @@ function render(view="home",options={}){
 document.querySelectorAll(".nav-item").forEach(b=>b.addEventListener("click",()=>render(b.dataset.view)));
 document.querySelectorAll("[data-close-transaction]").forEach(el=>el.addEventListener("click",closeTransactionModal));
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeTransactionModal();});
-window.addEventListener("popstate",e=>render(e.state?.view||location.hash.slice(1)||"home",{fromHistory:true}));
+window.addEventListener("popstate",e=>{navigationDepth=Number(e.state?.depth)||0;render(e.state?.view||location.hash.slice(1)||"home",{fromHistory:true});});
 document.querySelector("#notificationBtn").onclick=()=>showToast("No new league notifications.");
 render(location.hash.slice(1)||"home",{replace:true});
