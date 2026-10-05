@@ -1,7 +1,10 @@
 import fs from "node:fs/promises";
 
 const API_BASE = "https://esports-api.lolesports.com/persisted/gw";
-const API_KEY = process.env.LOL_ESPORTS_API_KEY || "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z";
+const API_KEY = process.env.LOL_ESPORTS_API_KEY;
+if (!API_KEY) {
+  throw new Error("LOL_ESPORTS_API_KEY is required. Configure it as a GitHub Actions repository secret.");
+}
 const HL = "en-US";
 const OUT = "esports-data.js";
 
@@ -25,9 +28,23 @@ async function api(path, params = {}) {
     if (Array.isArray(v)) v.forEach(x => url.searchParams.append(k, x));
     else if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, v);
   }
-  const res = await fetch(url, {headers: {"x-api-key": API_KEY, "accept": "application/json"}});
-  if (!res.ok) throw new Error(`${path} failed: ${res.status} ${res.statusText}`);
-  return res.json();
+  let lastError;
+  for (let attempt=1; attempt<=3; attempt++) {
+    try {
+      const res = await fetch(url, {
+        headers: {"x-api-key": API_KEY, "accept": "application/json"},
+        signal: AbortSignal.timeout(15000)
+      });
+      if (!res.ok) throw new Error(`${path} failed: ${res.status} ${res.statusText}`);
+      const payload = await res.json();
+      if (!payload || typeof payload !== "object") throw new Error(`${path} returned an invalid response`);
+      return payload;
+    } catch (err) {
+      lastError = err;
+      if (attempt < 3) await new Promise(resolve => setTimeout(resolve, 750 * attempt));
+    }
+  }
+  throw lastError;
 }
 
 function clean(s) { return String(s ?? "").trim(); }
@@ -74,13 +91,12 @@ async function fetchAllSchedule() {
   const now = Date.now();
   const horizon = now + 45*24*60*60*1000;
 
-  return events
+  const mapped = events
     .filter(e => e?.type === "match" && e?.match)
     .map(e => {
       const teams = Array.isArray(e.match.teams) ? e.match.teams : [];
       const a = teamFromParticipant(teams[0]);
       const b = teamFromParticipant(teams[1]);
-      const start = Date.parse(e.startTime || "");
       return {
         eventId: clean(e.id),
         startTime: e.startTime || null,
@@ -98,8 +114,17 @@ async function fetchAllSchedule() {
       const t = Date.parse(g.startTime || "");
       return Number.isFinite(t) && t >= now - 12*60*60*1000 && t <= horizon;
     })
-    .sort((x,y)=>Date.parse(x.startTime)-Date.parse(y.startTime))
-    .slice(0,80);
+    .sort((x,y)=>Date.parse(x.startTime)-Date.parse(y.startTime));
+
+  const deduped = [];
+  const seen = new Set();
+  for (const event of mapped) {
+    const key = event.eventId || [event.startTime,event.a,event.b].join("|");
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(event);
+  }
+  return deduped.slice(0,80);
 }
 
 async function fetchLeaguesAndPlayers(existing) {
