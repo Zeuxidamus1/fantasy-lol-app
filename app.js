@@ -512,6 +512,48 @@ function rosterRow(p, manage=false){
 
 let currentView=null;
 let navigationDepth=0;
+const VERIFY_PENDING_KEY="riftVerificationPending";
+
+function getVerificationPending(){
+  try{
+    const value=JSON.parse(localStorage.getItem(VERIFY_PENDING_KEY)||"null");
+    if(!value?.email||!Number.isFinite(Number(value.availableAt)))return null;
+    return {email:String(value.email),availableAt:Number(value.availableAt)};
+  }catch{return null;}
+}
+
+function markVerificationPending(email){
+  try{
+    localStorage.setItem(VERIFY_PENDING_KEY,JSON.stringify({
+      email:String(email||"").trim(),
+      availableAt:Date.now()+60000
+    }));
+  }catch{}
+}
+
+function clearVerificationPending(){
+  try{localStorage.removeItem(VERIFY_PENDING_KEY);}catch{}
+}
+
+function setupVerificationResend(button,emailInput){
+  if(!button)return;
+  const pending=getVerificationPending();
+  if(!pending){
+    button.hidden=true;
+    return;
+  }
+  if(emailInput&&!emailInput.value)emailInput.value=pending.email;
+  const reveal=()=>{button.hidden=false;};
+  const delay=pending.availableAt-Date.now();
+  if(delay<=0)reveal();
+  else{
+    button.hidden=true;
+    setTimeout(()=>{
+      const latest=getVerificationPending();
+      if(latest)reveal();
+    },delay);
+  }
+}
 function goBack(fallback="home"){
   if(navigationDepth>0) history.back();
   else render(fallback,{replace:true});
@@ -555,6 +597,8 @@ function render(view="home",options={}){
     const email=document.querySelector("#landingEmail");
     const password=document.querySelector("#landingPassword");
     const signInBtn=document.querySelector("#landingSignIn");
+    const resendBtn=document.querySelector("#landingResendVerification");
+    setupVerificationResend(resendBtn,email);
     const setBusy=value=>{signInBtn.disabled=value;document.querySelector("#landingCreateAccount").disabled=value;};
 
     if(!ready){
@@ -575,6 +619,7 @@ function render(view="home",options={}){
       setBusy(true);
       try{
         await b.signIn(email.value.trim(),password.value);
+        clearVerificationPending();
         showToast("Welcome back");
         render("home",{replace:true});
       }catch(err){
@@ -603,7 +648,7 @@ function render(view="home",options={}){
       showToast("Your Rift Fantasy username is currently your email address.");
     };
 
-    document.querySelector("#landingResendVerification").onclick=async()=>{
+    resendBtn.onclick=async()=>{
       const value=email.value.trim();
       if(!email.checkValidity())return showToast("Enter the email used to create your account first.");
       const btn=document.querySelector("#landingResendVerification");btn.disabled=true;
@@ -649,12 +694,14 @@ function render(view="home",options={}){
     })();
     const email=document.querySelector("#authEmail");
     const password=document.querySelector("#authPassword");
+    const resendVerifyBtn=document.querySelector("#resendVerifyBtn");
+    setupVerificationResend(resendVerifyBtn,email);
     const busy=value=>{document.querySelector("#signInBtn").disabled=value;document.querySelector("#signUpBtn").disabled=value;};
     document.querySelector("#signInBtn").onclick=async()=>{
       if(!ready)return showToast("Cloud backend is not configured yet.");
       if(!email.checkValidity()||password.value.length<8)return showToast("Enter a valid email and password.");
       busy(true);
-      try{await b.signIn(email.value.trim(),password.value);showToast("Welcome back");render("home",{replace:true});}
+      try{await b.signIn(email.value.trim(),password.value);clearVerificationPending();showToast("Welcome back");render("home",{replace:true});}
       catch(err){showToast(err.message||"Sign-in failed");}
       finally{busy(false);}
     };
@@ -663,13 +710,21 @@ function render(view="home",options={}){
       if(!email.checkValidity()||password.value.length<8)return showToast("Use a valid email and a password with at least 8 characters.");
       busy(true);
       try{
-        const result=await b.signUp(email.value.trim(),password.value);
-        showToast(result?.access_token?"Account created and signed in":"Account created. Check your email if confirmation is required.");
-        render("account",{replace:true});
+        const signupEmail=email.value.trim();
+        const result=await b.signUp(signupEmail,password.value);
+        if(result?.access_token){
+          clearVerificationPending();
+          showToast("Account created and signed in");
+          render("home",{replace:true});
+        }else{
+          markVerificationPending(signupEmail);
+          showToast("Account created. Check your email to verify it.");
+          render("account",{replace:true});
+        }
       }catch(err){showToast(err.message||"Account creation failed");}
       finally{busy(false);}
     };
-    document.querySelector("#resendVerifyBtn").onclick=async()=>{
+    resendVerifyBtn.onclick=async()=>{
       if(!ready)return showToast("Cloud backend is not configured yet.");
       const value=email.value.trim();
       if(!email.checkValidity())return showToast("Enter the email address you used to create the account.");
