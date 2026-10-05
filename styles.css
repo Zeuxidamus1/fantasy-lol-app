@@ -68,3 +68,6 @@
 .league-phase-pill{border:1px solid #2a7f70;background:#123b35;color:#58e8ca;border-radius:999px;padding:6px 9px;font-size:9px;font-weight:900;letter-spacing:.7px}
 .home-empty-card .empty-state{display:flex;flex-direction:column;gap:10px;align-items:center}
 @media(max-width:390px){.home-league-grid{grid-template-columns:1fr}.home-league-grid>div{display:flex;justify-content:space-between;align-items:center}.home-league-grid strong{margin-top:0}}
+
+.create-league-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:430px){.create-league-fields{grid-template-columns:1fr}}
