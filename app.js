@@ -183,6 +183,7 @@ function getLeagueSettings(){
 }
 
 let selectedPlayerId=null;
+let tradePrefill={id:null,side:null};
 
 function playerKey(p){
   return String(p.id || p.name || "").toLowerCase().replace(/[^a-z0-9]+/g,"-");
@@ -396,7 +397,7 @@ function setWatchlist(ids){
 }
 
 function playerById(id){
-  return allFantasyPlayers().find(p=>String(p.id)===String(id));
+  return allFantasyPlayers().find(p=>playerKey(p)===String(id)||String(p.id||"")===String(id));
 }
 
 function openPlayer(id){
@@ -418,12 +419,14 @@ function showToast(message){
 }
 
 function playerRow(p, add=false){
-  const pid=p.id||String(p.name).toLowerCase().replace(/[^a-z0-9]+/g,"-");
-  return `<div class="player-row clickable" data-open-player="${pid}" tabindex="0" role="button" aria-label="Open ${p.name} profile">
-    <span class="role-badge">${h(p.role)}</span>
-    <div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.opp || p.trend || "")}</small></div>
-    <span class="fp">${p.fp.toFixed(1)}</span>
-    ${add ? '<button class="add-btn">ADD</button>' : ""}
+  const pid=playerKey(p);
+  return `<div class="player-row">
+    <button class="player-open-btn" data-open-player="${pid}" aria-label="Open ${h(p.name)} profile">
+      <span class="role-badge">${h(p.role)}</span>
+      <span class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.opp || p.trend || "")}</small></span>
+    </button>
+    <span class="fp">${Number(p.fp??p.projection??0).toFixed(1)}</span>
+    ${add ? '<button class="add-btn" aria-label="Add player">ADD</button>' : ""}
   </div>`;
 }
 
@@ -551,9 +554,10 @@ function render(view="home",options={}){
 
     const watch=watchlistIds();
     const watchBtn=document.querySelector("#watchPlayerBtn");
-    const syncWatch=()=>{const active=watch.has(String(p.id));watchBtn.classList.toggle("watching",active);watchBtn.textContent=active?"★ Watching":"☆ Watchlist";};
+    const watchId=playerKey(p);
+    const syncWatch=()=>{const active=watch.has(watchId);watchBtn.classList.toggle("watching",active);watchBtn.textContent=active?"★ Watching":"☆ Watchlist";};
     syncWatch();
-    watchBtn.onclick=()=>{const id=String(p.id);watch.has(id)?watch.delete(id):watch.add(id);setWatchlist(watch);syncWatch();showToast(watch.has(id)?"Added to watchlist":"Removed from watchlist");};
+    watchBtn.onclick=()=>{watch.has(watchId)?watch.delete(watchId):watch.add(watchId);setWatchlist(watch);syncWatch();showToast(watch.has(watchId)?"Added to watchlist":"Removed from watchlist");};
     const addBtn=document.querySelector("#profileAddBtn");
     if(owned){
       addBtn.textContent="On My Team";
@@ -566,7 +570,7 @@ function render(view="home",options={}){
     const waiverBtn=document.querySelector("#profileWaiverBtn");
     if(owned){waiverBtn.textContent="Already Owned";waiverBtn.disabled=true;}
     else waiverBtn.onclick=()=>createWaiverClaim(p);
-    document.querySelector("#profileTradeBtn").onclick=()=>{selectedPlayerId=p.id;render("trade");};
+    document.querySelector("#profileTradeBtn").onclick=()=>{tradePrefill={id:playerKey(p),side:owned?"mine":"theirs"};render("trade");};
     document.querySelector("#playerBackBtn").onclick=()=>goBack("players");
   }
   if(view==="matchup"){
@@ -640,8 +644,8 @@ function render(view="home",options={}){
   }
   if(view==="trade"){
     let tab="offers";
-    let selectedMine=null;
-    let selectedTheirs=selectedPlayerId||null;
+    let selectedMine=tradePrefill.side==="mine"?tradePrefill.id:null;
+    let selectedTheirs=tradePrefill.side==="theirs"?tradePrefill.id:null;
     const partnerSelect=document.querySelector("#tradePartner");
     const myList=document.querySelector("#tradeMyPlayers");
     const theirList=document.querySelector("#tradeTheirPlayers");
@@ -651,6 +655,11 @@ function render(view="home",options={}){
 
     const managers=leagueManagers();
     partnerSelect.innerHTML=managers.map(m=>`<option value="${h(m)}">${h(m)}</option>`).join("");
+    if(selectedTheirs){
+      const preferred=managers.find(m=>simulatedRosterForManager(m).some(p=>playerKey(p)===String(selectedTheirs)));
+      if(preferred)partnerSelect.value=preferred;
+    }
+    tradePrefill={id:null,side:null};
 
     const fmt=(iso)=>{const d=new Date(iso);return Number.isNaN(d.getTime())?"":d.toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});};
 
