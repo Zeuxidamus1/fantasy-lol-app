@@ -374,3 +374,125 @@ create policy "users create trades" on public.trades
 create policy "trade parties update trades" on public.trades
   for update to authenticated using ((from_user=(select auth.uid()) or to_user=(select auth.uid())) and public.is_league_member(league_id))
   with check ((from_user=(select auth.uid()) or to_user=(select auth.uid())) and public.is_league_member(league_id));
+
+
+-- Server-enforced mutation hardening
+drop policy if exists "users update own membership" on public.league_members;
+
+drop policy if exists "users write own roster" on public.rosters;
+drop policy if exists "users insert own roster" on public.rosters;
+drop policy if exists "users update own roster" on public.rosters;
+drop policy if exists "users delete own roster" on public.rosters;
+
+drop policy if exists "users write own waivers" on public.waiver_claims;
+drop policy if exists "users insert own waivers" on public.waiver_claims;
+drop policy if exists "users update own waivers" on public.waiver_claims;
+drop policy if exists "users delete own waivers" on public.waiver_claims;
+
+drop policy if exists "users create trades" on public.trades;
+drop policy if exists "trade parties update trades" on public.trades;
+
+create or replace function public.create_waiver(p_league_id uuid,p_player_id text,p_priority integer default 1)
+returns public.waiver_claims
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare result public.waiver_claims;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if not public.is_league_member(p_league_id) then raise exception 'League membership required'; end if;
+  if nullif(trim(p_player_id),'') is null then raise exception 'Player is required'; end if;
+  if coalesce(p_priority,0) < 1 then raise exception 'Priority must be positive'; end if;
+  insert into public.waiver_claims(league_id,user_id,player_id,priority,status)
+  values(p_league_id,auth.uid(),left(trim(p_player_id),100),p_priority,'pending')
+  returning * into result;
+  return result;
+end;
+$$;
+
+create or replace function public.cancel_waiver(p_claim_id uuid)
+returns public.waiver_claims
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare result public.waiver_claims;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  update public.waiver_claims set status='canceled'
+   where id=p_claim_id and user_id=auth.uid() and status='pending'
+   returning * into result;
+  if result.id is null then raise exception 'Pending waiver claim not found'; end if;
+  return result;
+end;
+$$;
+
+create or replace function public.create_trade(p_league_id uuid,p_to_user uuid,p_offer jsonb)
+returns public.trades
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  result public.trades;
+  send_id text;
+  receive_id text;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if p_to_user is null or p_to_user=auth.uid() then raise exception 'Choose another league manager'; end if;
+  if not public.is_league_member(p_league_id) then raise exception 'League membership required'; end if;
+  if not exists(select 1 from public.league_members where league_id=p_league_id and user_id=p_to_user) then
+    raise exception 'Trade recipient is not in this league';
+  end if;
+
+  send_id := nullif(p_offer->>'send_player_id','');
+  receive_id := nullif(p_offer->>'receive_player_id','');
+  if send_id is null or receive_id is null then raise exception 'Trade payload is invalid'; end if;
+
+  if not exists(select 1 from public.rosters where league_id=p_league_id and user_id=auth.uid() and player_id=send_id) then
+    raise exception 'You no longer own the offered player';
+  end if;
+  if not exists(select 1 from public.rosters where league_id=p_league_id and user_id=p_to_user and player_id=receive_id) then
+    raise exception 'The other manager no longer owns the requested player';
+  end if;
+
+  insert into public.trades(league_id,from_user,to_user,offer,status)
+  values(p_league_id,auth.uid(),p_to_user,p_offer,'pending')
+  returning * into result;
+  return result;
+end;
+$$;
+
+create or replace function public.resolve_trade(p_trade_id uuid,p_status text)
+returns public.trades
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare result public.trades;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if p_status not in ('declined','canceled') then raise exception 'Invalid trade status'; end if;
+
+  update public.trades
+     set status=p_status,resolved_at=now()
+   where id=p_trade_id
+     and status='pending'
+     and ((p_status='canceled' and from_user=auth.uid()) or (p_status='declined' and to_user=auth.uid()))
+   returning * into result;
+
+  if result.id is null then raise exception 'Pending trade not found or action not allowed'; end if;
+  return result;
+end;
+$$;
+
+revoke all on function public.create_waiver(uuid,text,integer) from public, anon;
+revoke all on function public.cancel_waiver(uuid) from public, anon;
+revoke all on function public.create_trade(uuid,uuid,jsonb) from public, anon;
+revoke all on function public.resolve_trade(uuid,text) from public, anon;
+
+grant execute on function public.create_waiver(uuid,text,integer) to authenticated;
+grant execute on function public.cancel_waiver(uuid) to authenticated;
+grant execute on function public.create_trade(uuid,uuid,jsonb) to authenticated;
+grant execute on function public.resolve_trade(uuid,text) to authenticated;
