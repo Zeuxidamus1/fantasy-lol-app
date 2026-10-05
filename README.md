@@ -14,10 +14,12 @@ Fantasy projections, matchup scores, fantasy standings, waiver processing, and m
 
 ## Local validation
 
-No runtime dependencies are required. Node 20+ is used only for repository checks.
+No runtime dependencies are required. Node 24+ is used only for repository checks.
 
 ```bash
 npm run check
+npm run smoke
+npm run e2e
 ```
 
 The validation checks JavaScript syntax, required files, route/template consistency, duplicate HTML IDs, data-file structure, duplicate function declarations, CSS brace balance, accessibility basics, and accidental hard-coded API-key fallbacks.
