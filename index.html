@@ -387,7 +387,11 @@
         <div class="section-head"><div><div class="eyebrow">ONLINE LEAGUE</div><h3 id="cloudLeagueTitle">Online leagues</h3></div></div>
         <p class="profile-copy" id="cloudLeagueCopy">Sign in after cloud setup is connected to create or join a shared league.</p>
         <div class="cloud-league-actions" id="cloudLeagueActions" hidden>
-          <button class="primary-btn" id="createCloudLeagueBtn">Create Online League</button>
+          <div class="create-league-fields">
+            <input class="form-control" id="newLeagueName" maxlength="40" placeholder="New league name" aria-label="New league name" />
+            <input class="form-control" id="newLeagueTeamName" maxlength="40" placeholder="Your team name" aria-label="Your team name" />
+          </div>
+          <button class="primary-btn" id="createCloudLeagueBtn" disabled>Create League</button>
           <div class="join-league-row">
             <input class="form-control" id="joinCode" maxlength="12" placeholder="Invite code" aria-label="League invite code" />
             <input class="form-control" id="joinTeamName" maxlength="40" placeholder="Team name" aria-label="Fantasy team name" />
