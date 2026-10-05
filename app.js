@@ -1263,7 +1263,6 @@ function render(view="home",options={}){
     })();
     const leagueLabel=document.querySelector("#leagueNameLabel");
     if(leagueLabel)leagueLabel.textContent=String(settings.name||"Fantasy League").toUpperCase();
-    document.querySelector("#standings").innerHTML=standings.slice(0,Number(settings.managers)||4).map(s=>`<div class="standing-row"><span class="rank">${s[0]}</span><strong>${s[1]}</strong><span>${s[2]}</span><span class="pts">${s[3]}</span></div>`).join("");
     document.querySelector("#leagueSettingsSummary").innerHTML=`
       <div><span>Teams</span><strong>${settings.managers}</strong></div>
       <div><span>Draft</span><strong>${settings.draftType}</strong></div>
