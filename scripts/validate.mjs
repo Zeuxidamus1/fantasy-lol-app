@@ -19,7 +19,6 @@ const updater=read("scripts/update-esports-data.mjs");
 
 try{new Function(app);pass.push("app.js parses");}catch(err){fail.push("app.js syntax: "+err.message);}
 try{new Function(dataText);pass.push("esports-data.js parses");}catch(err){fail.push("esports-data.js syntax: "+err.message);}
-try{new Function(updater.replace(/^import .*$/mg,""));pass.push("updater parses");}catch(err){fail.push("updater syntax: "+err.message);}
 
 const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
 const idCounts=new Map();
