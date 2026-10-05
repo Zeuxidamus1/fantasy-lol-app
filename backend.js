@@ -147,14 +147,10 @@
     const userId=current?.user?.id;
     if(!current||!userId)throw new Error("Sign in before syncing a roster.");
     const normalized=(players||[]).map(p=>({
-      league_id:leagueId,
-      user_id:userId,
       player_id:String(p.id||p.name||""),
       slot:String(p.slot||p.role||"BN")
     })).filter(p=>p.player_id);
-    await request("/rest/v1/rosters?league_id=eq."+encodeURIComponent(leagueId)+"&user_id=eq."+encodeURIComponent(userId),{method:"DELETE",session:current});
-    if(!normalized.length)return [];
-    return request("/rest/v1/rosters",{method:"POST",body:normalized,session:current,headers:{"Prefer":"return=representation"}});
+    return request("/rest/v1/rpc/replace_roster",{method:"POST",body:{p_league_id:leagueId,p_players:normalized},session:current});
   }
 
   async function listWaivers(leagueId){
@@ -190,11 +186,17 @@
   }
 
   async function updateTrade(id,status){
-    const allowed=new Set(["accepted","declined","canceled"]);
+    const allowed=new Set(["declined","canceled"]);
     if(!allowed.has(status))throw new Error("Invalid trade status.");
     const current=await session();
     if(!current)throw new Error("Sign in before updating a trade.");
     return request("/rest/v1/trades?id=eq."+encodeURIComponent(id),{method:"PATCH",body:{status,resolved_at:new Date().toISOString()},session:current,headers:{"Prefer":"return=representation"}});
+  }
+
+  async function acceptTrade(id){
+    const current=await session();
+    if(!current)throw new Error("Sign in before accepting a trade.");
+    return request("/rest/v1/rpc/accept_trade",{method:"POST",body:{p_trade_id:id},session:current});
   }
 
   window.RiftBackend=Object.freeze({
@@ -205,7 +207,7 @@
     listLeagues,createLeague,joinLeague,listLeagueMembers,
     listRosters,saveRoster,
     listWaivers,createWaiver,cancelWaiver,
-    listTrades,createTrade,updateTrade,
+    listTrades,createTrade,updateTrade,acceptTrade,
     request
   });
 })();
