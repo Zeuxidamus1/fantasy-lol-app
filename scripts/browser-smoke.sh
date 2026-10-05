@@ -42,7 +42,7 @@ smoke_route() {
   echo "PASS #$route"
 }
 
-smoke_route "home" "Fantasy scoring preview"
+smoke_route "home" "Welcome back"
 smoke_route "account" "RIFT ACCOUNT"
 smoke_route "team" "My Team"
 smoke_route "schedule" "Schedule"
@@ -52,7 +52,7 @@ smoke_route "transactions" "Waivers &amp; Transactions"
 smoke_route "trade" "Trades"
 smoke_route "draft" "Draft Room"
 smoke_route "setup" "League Setup"
-smoke_route "matchup" "Demo Matchup"
-smoke_route "not-a-real-route" "Fantasy scoring preview"
+smoke_route "matchup" "Fantasy scoring is not live yet"
+smoke_route "not-a-real-route" "Welcome back"
 
 echo "Browser smoke tests passed."
