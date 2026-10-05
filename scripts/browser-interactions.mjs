@@ -11,7 +11,7 @@ if (!chrome) throw new Error("Chrome/Chromium is not available.");
 
 const server = spawn("python3",["-m","http.server","4174","--bind","127.0.0.1"],{stdio:"ignore"});
 const browser = spawn(chrome,[
-  "--headless=new","--no-sandbox","--disable-gpu","--disable-dev-shm-usage",
+  "--headless=new","--no-sandbox","--disable-gpu","--disable-dev-shm-usage","--window-size=390,844",
   "--remote-debugging-port=9223","--user-data-dir=/tmp/rift-cdp",
   "http://127.0.0.1:4174/#home"
 ],{stdio:"ignore"});
@@ -84,6 +84,7 @@ try{
   await sleep(700);
 
   await expect("home renders","document.title.includes('Home') && document.body.innerText.includes('Fantasy scoring preview')");
+  await expect("home fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
 
   await evaluate("document.querySelector('[data-view=players]').click()");
   await expect("players nav works","document.title.includes('Players') && !!document.querySelector('#playerSearch')");
@@ -126,6 +127,7 @@ try{
 
   await evaluate("document.querySelector('#profileTradeBtn').click()");
   await expect("trade center opens","document.title.includes('Trades') && !!document.querySelector('#tradePartner')");
+  await expect("trade center fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
   await evaluate("(()=>{const a=document.querySelector('[data-trade-mine]'); const b=document.querySelector('[data-trade-theirs]'); if(a)a.click(); if(b)b.click();})()");
   await expect("trade offer becomes submittable","!document.querySelector('#submitTradeBtn').disabled");
   await evaluate("document.querySelector('#submitTradeBtn').click()");
@@ -138,6 +140,8 @@ try{
 
   await evaluate("(()=>{const b=document.querySelector('[data-jump=draft]'); if(b)b.click();})()");
   await expect("draft room opens","document.title.includes('Draft Room') && !!document.querySelector('#startDraftBtn')");
+  await expect("draft room contains horizontal board scroll","document.querySelector('#fullDraftBoard').scrollWidth >= document.querySelector('#fullDraftBoard').clientWidth");
+  await expect("draft page fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
   await evaluate("(()=>{const b=document.querySelector('#startDraftBtn'); if(b&&!b.disabled)b.click();})()");
   await expect("mock draft starts","JSON.parse(localStorage.getItem('riftDraftState')||'{}').started === true");
   await evaluate("(()=>{const b=document.querySelector('#draftPlayerList .draft-btn:not([disabled])'); if(b)b.click();})()");
@@ -145,6 +149,7 @@ try{
 
   await evaluate("document.querySelector('[data-view=schedule]').click(); document.querySelector('[data-day=today]').click()");
   await expect("schedule filter works","document.querySelector('[data-day=today]').classList.contains('active')");
+  await expect("schedule fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
 
   ws.close();
   console.log("All interaction tests passed.");
