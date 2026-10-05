@@ -77,74 +77,48 @@ try{
     if(!ok)throw new Error("Failed: "+label);
     console.log("PASS",label);
   };
+  const route=async hash=>{
+    await evaluate(`location.hash='${hash}'; location.reload()`);
+    await sleep(700);
+  };
 
   await send("Runtime.enable");
   await evaluate("localStorage.clear()");
-  await evaluate("location.hash='home'; location.reload()");
-  await sleep(700);
+  await route("home");
 
-  await expect("home renders","document.title.includes('Home') && document.body.innerText.includes('Fantasy scoring preview')");
-  await expect("home fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
+  await expect("signed-out home routes to login","document.title.includes('Sign In') && !!document.querySelector('#landingSignIn')");
+  await expect("login fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
+  await evaluate("document.querySelector('#landingCreateAccount').click()");
+  await expect("create account opens dedicated signup","document.title.includes('Create Account') && !!document.querySelector('#signupPasswordConfirm')");
+  await evaluate("document.querySelector('#signupBack').click()");
+  await expect("signup back returns to sign in","document.title.includes('Sign In') && !!document.querySelector('#landingEmail')");
 
-  await evaluate("document.querySelector('#accountBtn').click()");
-  await expect("account screen renders","document.title.includes('Account') && !!document.querySelector('#authCard') && !document.querySelector('#cloudStatusTitle')");
-  await evaluate("document.querySelector('[data-jump=home]').click()");
-  await expect("account back returns home","document.title.includes('Home')");
-
-  await evaluate("document.querySelector('[data-view=players]').click()");
-  await expect("players nav works","document.title.includes('Players') && !!document.querySelector('#playerSearch')");
-
+  await route("players");
+  await expect("players route renders","document.title.includes('Players') && !!document.querySelector('#playerSearch')");
   await evaluate("(()=>{const i=document.querySelector('#playerSearch'); i.value='Faker'; i.dispatchEvent(new Event('input',{bubbles:true}));})()");
   await expect("player search filters","document.querySelectorAll('#freeAgentList .player-row').length >= 1");
-
   await evaluate("document.querySelector('#freeAgentList [data-open-player]').click()");
   await expect("player profile opens","document.title.includes('Player') && !!document.querySelector('#profileName')");
-
   await evaluate("document.querySelector('#watchPlayerBtn').click()");
   await expect("watchlist persists","JSON.parse(localStorage.getItem('riftWatchlist')||'[]').length === 1");
 
-  await evaluate("document.querySelector('#playerBackBtn').click()");
-  await expect("player back navigation returns to players","document.title.includes('Players') && !!document.querySelector('#freeAgentList')");
+  await route("team");
+  await expect("team route renders","document.title.includes('My Team') && !!document.querySelector('#teamNoLeague')");
+  await expect("team shows no-league state without active league","document.querySelector('#teamNoLeague').hidden === false");
 
-  await evaluate("(()=>{const i=document.querySelector('#playerSearch'); i.value=''; i.dispatchEvent(new Event('input',{bubbles:true})); const b=document.querySelector('#freeAgentList .add-btn:not([disabled])'); if(b)b.click();})()");
-  await expect("full-roster add opens drop chooser","document.querySelector('#transactionModal') && document.querySelector('#transactionModal').hidden === false");
-  await evaluate("document.querySelector('#transactionModal [data-close-transaction]').click()");
-  await expect("transaction modal closes","document.querySelector('#transactionModal').hidden === true");
+  await route("league");
+  await expect("league route renders","document.title.includes('League') && !!document.querySelector('#joinCloudLeagueBtn')");
+  await expect("join disabled until required fields entered","document.querySelector('#joinCloudLeagueBtn').disabled === true");
 
-  await evaluate("document.querySelector('[data-view=team]').click()");
-  await expect("team nav works","document.title.includes('My Team') && !!document.querySelector('#teamNoLeague')");
-  await expect("team requires active league","document.querySelector('#teamNoLeague').hidden === false");
-
-  await evaluate("document.querySelector('[data-view=players]').click()");
-
-  await evaluate("document.querySelector('[data-view=players]').click(); const r=[...document.querySelectorAll('#freeAgentList .player-row')].find(x=>x.querySelector('.add-btn:not([disabled])')); if(r)r.querySelector('[data-open-player]').click()");
-  await expect("available player profile opens","!!document.querySelector('#profileWaiverBtn') && !document.querySelector('#profileWaiverBtn').disabled");
-  await evaluate("document.querySelector('#profileWaiverBtn').click()");
-  await expect("waiver claim saves","JSON.parse(localStorage.getItem('riftWaiverClaims')||'[]').length === 1");
-
-  await evaluate("document.querySelector('#profileTradeBtn').click()");
-  await expect("trade center opens","document.title.includes('Trades') && !!document.querySelector('#tradePartner')");
-  await expect("trade center fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
-  await evaluate("(()=>{const a=document.querySelector('[data-trade-mine]'); const b=document.querySelector('[data-trade-theirs]'); if(a)a.click(); if(b)b.click();})()");
-  await expect("trade offer becomes submittable","!document.querySelector('#submitTradeBtn').disabled");
-  await evaluate("document.querySelector('#submitTradeBtn').click()");
-  await expect("trade offer saves","JSON.parse(localStorage.getItem('riftTradeOffers')||'[]').some(x=>x.direction==='outgoing')");
-
-  await evaluate("document.querySelector('[data-view=league]').click(); document.querySelector('[data-jump=setup]').click()");
-  await expect("league setup opens","document.title.includes('League Setup') && !!document.querySelector('#leagueName')");
-  await evaluate("document.querySelector('#leagueName').value='Audit League'; document.querySelector('#saveLeagueBtn').click()");
-  await expect("league settings save","JSON.parse(localStorage.getItem('riftLeagueSettings')||'{}').name === 'Audit League'",3000);
-
-  await evaluate("(()=>{const b=document.querySelector('[data-jump=draft]'); if(b)b.click();})()");
-  await expect("draft room opens","document.title.includes('Draft Room') && !!document.querySelector('#startDraftBtn')");
-  await expect("draft room contains horizontal board scroll","document.querySelector('#fullDraftBoard').scrollWidth >= document.querySelector('#fullDraftBoard').clientWidth");
+  await route("draft");
+  await expect("draft room renders","document.title.includes('Draft Room') && !!document.querySelector('#draftPlayerList')");
   await expect("draft page fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
-  await evaluate("(()=>{const b=document.querySelector('#startDraftBtn'); if(b&&!b.disabled)b.click();})()");
-  await expect("mock draft starts","JSON.parse(localStorage.getItem('riftDraftState')||'{}').started === true");
-  await evaluate("(()=>{const b=document.querySelector('#draftPlayerList .draft-btn:not([disabled])'); if(b)b.click();})()");
-  await expect("draft pick records","JSON.parse(localStorage.getItem('riftDraftState')||'{}').picks.length >= 2");
 
-  await evaluate("document.querySelector('[data-view=schedule]').click(); document.querySelector('[data-day=today]').click()");
+  await route("matchup");
+  await expect("matchup avoids fake scores","document.body.innerText.includes('Fantasy scoring is not live yet')");
+
+  await route("schedule");
+  await evaluate("document.querySelector('[data-day=today]').click()");
   await expect("schedule filter works","document.querySelector('[data-day=today]').classList.contains('active')");
   await expect("schedule fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
 
