@@ -429,6 +429,16 @@ function h(value){
   return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 }
 
+function backend(){
+  return window.RiftBackend||null;
+}
+function cloudReady(){
+  return !!backend()?.isConfigured?.();
+}
+function cloudUserEmail(user){
+  return user?.email||user?.user_metadata?.email||"Manager";
+}
+
 const app = document.querySelector("#app");
 const toast = document.querySelector("#toast");
 
@@ -491,7 +501,7 @@ function render(view="home",options={}){
   currentView=view;
   app.innerHTML="";
   app.appendChild(template.content.cloneNode(true));
-  const titles={home:"Home",team:"My Team",matchup:"Matchup",schedule:"Schedule",players:"Players",player:"Player",league:"League",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup"};
+  const titles={home:"Home",account:"Account",team:"My Team",matchup:"Matchup",schedule:"Schedule",players:"Players",player:"Player",league:"League",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup"};
   document.title=`${titles[view]||"Rift Fantasy"} · Rift Fantasy`;
   document.querySelectorAll(".nav-item").forEach(b=>{
     const active=b.dataset.view===view;
@@ -499,6 +509,60 @@ function render(view="home",options={}){
     if(active)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");
   });
 
+  if(view==="account"){
+    const b=backend();
+    const ready=cloudReady();
+    const statusTitle=document.querySelector("#cloudStatusTitle");
+    const statusCopy=document.querySelector("#cloudStatusCopy");
+    const statusBadge=document.querySelector("#cloudStatusBadge");
+    const authCard=document.querySelector("#authCard");
+    const signedInCard=document.querySelector("#signedInCard");
+    if(!ready){
+      statusTitle.textContent="Local mode";
+      statusCopy.textContent="The production cloud project is not configured yet. The app continues to work locally on this device.";
+      statusBadge.textContent="LOCAL";
+      authCard.classList.add("auth-disabled");
+    }else{
+      statusTitle.textContent="Cloud backend connected";
+      statusCopy.textContent="Sign in to synchronize shared leagues and roster data across devices.";
+      statusBadge.textContent="READY";
+      statusBadge.className="verified-badge";
+    }
+    (async()=>{
+      const user=ready?await b.currentUser().catch(()=>null):null;
+      if(user){
+        authCard.hidden=true;
+        signedInCard.hidden=false;
+        document.querySelector("#signedInEmail").textContent=cloudUserEmail(user);
+      }else{
+        authCard.hidden=false;
+        signedInCard.hidden=true;
+      }
+    })();
+    const email=document.querySelector("#authEmail");
+    const password=document.querySelector("#authPassword");
+    const busy=value=>{document.querySelector("#signInBtn").disabled=value;document.querySelector("#signUpBtn").disabled=value;};
+    document.querySelector("#signInBtn").onclick=async()=>{
+      if(!ready)return showToast("Cloud backend is not configured yet.");
+      if(!email.checkValidity()||password.value.length<8)return showToast("Enter a valid email and password.");
+      busy(true);
+      try{await b.signIn(email.value.trim(),password.value);showToast("Signed in");render("account",{replace:true});}
+      catch(err){showToast(err.message||"Sign-in failed");}
+      finally{busy(false);}
+    };
+    document.querySelector("#signUpBtn").onclick=async()=>{
+      if(!ready)return showToast("Cloud backend is not configured yet.");
+      if(!email.checkValidity()||password.value.length<8)return showToast("Use a valid email and a password with at least 8 characters.");
+      busy(true);
+      try{
+        const result=await b.signUp(email.value.trim(),password.value);
+        showToast(result?.access_token?"Account created and signed in":"Account created. Check your email if confirmation is required.");
+        render("account",{replace:true});
+      }catch(err){showToast(err.message||"Account creation failed");}
+      finally{busy(false);}
+    };
+    document.querySelector("#signOutBtn").onclick=async()=>{await b?.signOut?.();showToast("Signed out");render("account",{replace:true});};
+  }
   if(view==="home"){
     const leagueName=document.querySelector("#homeLeagueName");
     if(leagueName)leagueName.textContent=getLeagueSettings().name;
@@ -810,6 +874,55 @@ function render(view="home",options={}){
   }
   if(view==="league"){
     const settings=getLeagueSettings();
+    const cloudTitle=document.querySelector("#cloudLeagueTitle");
+    const cloudCopy=document.querySelector("#cloudLeagueCopy");
+    const cloudActions=document.querySelector("#cloudLeagueActions");
+    const cloudList=document.querySelector("#cloudLeagueList");
+    (async()=>{
+      if(!cloudReady()){
+        cloudTitle.textContent="Local prototype mode";
+        cloudCopy.textContent="Connect the production backend to enable real accounts, invite codes, and shared leagues.";
+        return;
+      }
+      const b=backend();
+      const user=await b.currentUser().catch(()=>null);
+      if(!user){
+        cloudTitle.textContent="Sign in for online leagues";
+        cloudCopy.textContent="Your local prototype data stays available. Sign in to create or join shared leagues.";
+        return;
+      }
+      cloudTitle.textContent="Online leagues";
+      cloudCopy.textContent="Create a league or join one with an invite code.";
+      cloudActions.hidden=false;
+      const drawCloudLeagues=async()=>{
+        try{
+          const leagues=await b.listLeagues();
+          cloudList.innerHTML=leagues.length?leagues.map(l=>'<div class="cloud-league-item"><div><strong>'+h(l.name)+'</strong><small>Invite: '+h(l.invite_code||"—")+'</small></div><span class="verified-badge">ONLINE</span></div>').join(""):'<div class="empty-state"><strong>No online leagues yet</strong><small>Create one or join with an invite code.</small></div>';
+        }catch(err){
+          cloudList.innerHTML='<div class="empty-state cloud-error"><strong>Could not load leagues</strong><small>'+h(err.message||"Cloud request failed")+'</small></div>';
+        }
+      };
+      await drawCloudLeagues();
+      document.querySelector("#createCloudLeagueBtn").onclick=async()=>{
+        const btn=document.querySelector("#createCloudLeagueBtn");btn.disabled=true;
+        try{
+          const created=await b.createLeague(settings.name,settings);
+          const league=Array.isArray(created)?created[0]:created;
+          showToast("Online league created"+(league?.invite_code?": "+league.invite_code:""));
+          await drawCloudLeagues();
+        }catch(err){showToast(err.message||"Could not create league");}
+        finally{btn.disabled=false;}
+      };
+      document.querySelector("#joinCloudLeagueBtn").onclick=async()=>{
+        const code=document.querySelector("#joinCode").value.trim();
+        const teamName=document.querySelector("#joinTeamName").value.trim()||"My Team";
+        if(!code)return showToast("Enter an invite code.");
+        const btn=document.querySelector("#joinCloudLeagueBtn");btn.disabled=true;
+        try{await b.joinLeague(code,teamName);showToast("League joined");await drawCloudLeagues();}
+        catch(err){showToast(err.message||"Could not join league");}
+        finally{btn.disabled=false;}
+      };
+    })();
     const leagueLabel=document.querySelector("#leagueNameLabel");
     if(leagueLabel)leagueLabel.textContent=String(settings.name||"Fantasy League").toUpperCase();
     document.querySelector("#standings").innerHTML=standings.slice(0,Number(settings.managers)||4).map(s=>`<div class="standing-row"><span class="rank">${s[0]}</span><strong>${s[1]}</strong><span>${s[2]}</span><span class="pts">${s[3]}</span></div>`).join("");
@@ -1017,5 +1130,6 @@ document.querySelectorAll(".nav-item").forEach(b=>b.addEventListener("click",()=
 document.querySelectorAll("[data-close-transaction]").forEach(el=>el.addEventListener("click",closeTransactionModal));
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeTransactionModal();});
 window.addEventListener("popstate",e=>{navigationDepth=Number(e.state?.depth)||0;render(e.state?.view||location.hash.slice(1)||"home",{fromHistory:true});});
+document.querySelector("#accountBtn").onclick=()=>render("account");
 document.querySelector("#notificationBtn").onclick=()=>showToast("No new league notifications.");
 render(location.hash.slice(1)||"home",{replace:true});
