@@ -1048,3 +1048,98 @@ revoke all on function public.mark_notifications_read(uuid[]) from public,anon;
 revoke all on function public.notify_league_members(uuid,uuid,text,jsonb,uuid) from public,anon,authenticated;
 grant execute on function public.mark_notifications_read(uuid[]) to authenticated;
 
+
+
+-- Notification-producing trade and roster mutations
+create or replace function public.create_trade(p_league_id uuid,p_to_user uuid,p_offer jsonb)
+returns public.trades
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare result public.trades; send_id text; receive_id text;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if not exists(select 1 from public.leagues where id=p_league_id and status='active') then raise exception 'Trading opens after the draft is complete'; end if;
+  if p_to_user is null or p_to_user=auth.uid() then raise exception 'Choose another league manager'; end if;
+  if not public.is_league_member(p_league_id) then raise exception 'League membership required'; end if;
+  if not exists(select 1 from public.league_members where league_id=p_league_id and user_id=p_to_user) then raise exception 'Trade recipient is not in this league'; end if;
+  send_id:=nullif(p_offer->>'send_player_id','');
+  receive_id:=nullif(p_offer->>'receive_player_id','');
+  if send_id is null or receive_id is null then raise exception 'Trade payload is invalid'; end if;
+  if not exists(select 1 from public.rosters where league_id=p_league_id and user_id=auth.uid() and player_id=send_id) then raise exception 'You no longer own the offered player'; end if;
+  if not exists(select 1 from public.rosters where league_id=p_league_id and user_id=p_to_user and player_id=receive_id) then raise exception 'The other manager no longer owns the requested player'; end if;
+
+  insert into public.trades(league_id,from_user,to_user,offer,status)
+  values(p_league_id,auth.uid(),p_to_user,p_offer,'pending') returning * into result;
+
+  perform public.notify_league_members(
+    p_league_id,auth.uid(),'trade_offer',
+    jsonb_build_object('trade_id',result.id,'from_user',auth.uid(),'to_user',p_to_user,'send_player_id',send_id,'receive_player_id',receive_id),
+    p_to_user
+  );
+  insert into public.notifications(league_id,recipient_user,actor_user,kind,payload)
+  select p_league_id,lm.user_id,auth.uid(),'trade_activity',
+         jsonb_build_object('trade_id',result.id,'from_user',auth.uid(),'to_user',p_to_user,'send_player_id',send_id,'receive_player_id',receive_id)
+  from public.league_members lm
+  where lm.league_id=p_league_id and lm.user_id not in (auth.uid(),p_to_user);
+  return result;
+end;
+$$;
+
+create or replace function public.accept_trade(p_trade_id uuid)
+returns public.trades
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare t public.trades; send_id text; receive_id text;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  select * into t from public.trades where id=p_trade_id for update;
+  if t.id is null then raise exception 'Trade not found'; end if;
+  if t.to_user<>auth.uid() then raise exception 'Only the receiving manager can accept this trade'; end if;
+  if t.status<>'pending' then raise exception 'Trade is no longer pending'; end if;
+  send_id:=nullif(t.offer->>'send_player_id','');
+  receive_id:=nullif(t.offer->>'receive_player_id','');
+  if send_id is null or receive_id is null then raise exception 'Trade payload is invalid'; end if;
+  if not exists(select 1 from public.rosters where league_id=t.league_id and user_id=t.from_user and player_id=send_id) then raise exception 'Offering manager no longer owns the offered player'; end if;
+  if not exists(select 1 from public.rosters where league_id=t.league_id and user_id=t.to_user and player_id=receive_id) then raise exception 'Receiving manager no longer owns the requested player'; end if;
+
+  update public.rosters set user_id=t.to_user where league_id=t.league_id and user_id=t.from_user and player_id=send_id;
+  update public.rosters set user_id=t.from_user where league_id=t.league_id and user_id=t.to_user and player_id=receive_id;
+  update public.trades set status='accepted',resolved_at=now() where id=t.id returning * into t;
+
+  perform public.notify_league_members(
+    t.league_id,auth.uid(),'trade_accepted',
+    jsonb_build_object('trade_id',t.id,'from_user',t.from_user,'to_user',t.to_user,'send_player_id',send_id,'receive_player_id',receive_id),
+    null
+  );
+  return t;
+end;
+$$;
+
+create or replace function public.resolve_trade(p_trade_id uuid,p_status text)
+returns public.trades
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare result public.trades;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if p_status not in ('declined','canceled') then raise exception 'Invalid trade status'; end if;
+  update public.trades set status=p_status,resolved_at=now()
+   where id=p_trade_id and status='pending'
+     and ((p_status='canceled' and from_user=auth.uid()) or (p_status='declined' and to_user=auth.uid()))
+   returning * into result;
+  if result.id is null then raise exception 'Pending trade not found or action not allowed'; end if;
+  perform public.notify_league_members(
+    result.league_id,auth.uid(),
+    case when p_status='declined' then 'trade_declined' else 'trade_canceled' end,
+    jsonb_build_object('trade_id',result.id,'from_user',result.from_user,'to_user',result.to_user,'send_player_id',result.offer->>'send_player_id','receive_player_id',result.offer->>'receive_player_id'),
+    null
+  );
+  return result;
+end;
+$$;
