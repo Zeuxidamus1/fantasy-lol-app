@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1220" />
-  <meta name="description" content="Rift Fantasy is a mobile-first fantasy League of Legends esports prototype with drafts, rosters, schedules, waivers, and trades." />
+  <meta name="description" content="Rift Fantasy is a mobile-first fantasy League of Legends esports app with shared leagues, drafts, rosters, schedules, waivers, and trades." />
   <meta name="color-scheme" content="dark" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests" />
@@ -328,7 +328,7 @@
             <span id="profileStatus">Available</span>
           </div>
         </div>
-        <div class="profile-projection"><small>Projected</small><strong id="profileProjection">0.0</strong></div>
+        <div class="profile-projection"><small>Fantasy scoring</small><strong id="profileProjection">—</strong></div>
       </section>
 
       <div class="profile-actions three-actions">
@@ -343,9 +343,9 @@
       </section>
 
       <section class="card">
-        <div class="section-head"><div><div class="eyebrow">SCORING SNAPSHOT</div><h3>Projected contribution</h3></div></div>
+        <div class="section-head"><div><div class="eyebrow">PLAYER DETAILS</div><h3>Fantasy profile</h3></div></div>
         <div class="profile-stats" id="profileStats"></div>
-        <p class="profile-disclaimer">Prototype projections for UX testing. These are not official Riot fantasy projections.</p>
+        <p class="profile-disclaimer">Live fantasy scoring will appear after the official game-stat scoring feed is connected.</p>
       </section>
 
       <section class="card">
@@ -373,8 +373,8 @@
         <button class="chip" data-role="SUP">Support</button>
       </div>
       <div class="card schedule-note" id="playerDataNotice" hidden>
-        <strong>Demo player fallback</strong>
-        <small>Live roster data is unavailable, so this list is using local demo players.</small>
+        <strong>Player data unavailable</strong>
+        <small>The current esports roster feed is unavailable. Check back after the next data refresh.</small>
       </div>
       <div id="freeAgentList" class="player-list"></div>
     </section>
@@ -384,7 +384,7 @@
     <section class="stack">
       <div class="section-title"><div><div class="eyebrow" id="leagueNameLabel">SUMMONER'S CUP</div><h2>League</h2></div><button class="secondary-btn commissioner-only" id="leagueSetupBtn" data-jump="setup" hidden>League Setup</button></div>
       <section class="card cloud-league-card" id="cloudLeagueCard">
-        <div class="section-head"><div><div class="eyebrow">ONLINE LEAGUE</div><h3 id="cloudLeagueTitle">Local prototype mode</h3></div></div>
+        <div class="section-head"><div><div class="eyebrow">ONLINE LEAGUE</div><h3 id="cloudLeagueTitle">Online leagues</h3></div></div>
         <p class="profile-copy" id="cloudLeagueCopy">Sign in after cloud setup is connected to create or join a shared league.</p>
         <div class="cloud-league-actions" id="cloudLeagueActions" hidden>
           <button class="primary-btn" id="createCloudLeagueBtn">Create Online League</button>
@@ -397,7 +397,7 @@
         <div id="cloudLeagueList" class="stack tight"></div>
       </section>
       <div class="grid-two">
-        <button class="action-card" data-jump="draft"><span class="action-icon">◎</span><strong>Draft Room</strong><small>Run a mock snake draft</small></button>
+        <button class="action-card" data-jump="draft"><span class="action-icon">◎</span><strong>Draft Room</strong><small>Live snake draft</small></button>
         <button class="action-card" data-jump="transactions"><span class="action-icon">↕</span><strong>Transactions</strong><small>Waivers, adds & drops</small></button>
       </div>
       <div class="card">
