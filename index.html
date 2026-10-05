@@ -54,8 +54,22 @@
         <div class="form-group"><label for="authEmail">Email</label><input id="authEmail" class="form-control" type="email" autocomplete="email" placeholder="you@example.com" /></div>
         <div class="form-group"><label for="authPassword">Password</label><input id="authPassword" class="form-control" type="password" autocomplete="current-password" minlength="8" placeholder="At least 8 characters" /></div>
         <div class="grid-two"><button class="primary-btn" id="signInBtn">Sign In</button><button class="secondary-btn" id="signUpBtn">Create Account</button></div>
-        <p class="setup-footnote" id="authHelp">Account features activate automatically after the production Supabase project is connected.</p>
+        <div class="auth-help-actions">
+          <button class="text-btn" id="resendVerifyBtn">Resend verification email</button>
+          <button class="text-btn" id="forgotPasswordBtn">Forgot password?</button>
+        </div>
+        <p class="setup-footnote" id="authHelp">If your account is waiting for verification, use Resend verification instead of creating it again.</p>
       </section>
+      <section class="card setup-card recovery-card" id="recoveryCard" hidden>
+        <div class="section-head"><div><div class="eyebrow">RESET PASSWORD</div><h3>Choose a new password</h3></div><span class="verified-badge">SECURE</span></div>
+        <div class="form-group">
+          <label for="newPassword">New password</label>
+          <input id="newPassword" class="form-control" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" />
+        </div>
+        <button class="primary-btn" id="saveNewPasswordBtn">Save New Password</button>
+        <p class="setup-footnote">This screen only appears after opening a valid password-reset email link.</p>
+      </section>
+
       <section class="card setup-card" id="signedInCard" hidden>
         <div class="section-head"><div><div class="eyebrow">SIGNED IN</div><h3 id="signedInEmail">Manager</h3></div><span class="verified-badge">CLOUD</span></div>
         <button class="secondary-btn" id="signOutBtn">Sign Out</button>
