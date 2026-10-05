@@ -28,11 +28,11 @@
     <main id="app"></main>
 
     <nav class="bottom-nav" aria-label="Primary navigation">
-      <button class="nav-item active" data-view="home"><span>⌂</span><small>Home</small></button>
-      <button class="nav-item" data-view="team"><span>♟</span><small>My Team</small></button>
-      <button class="nav-item" data-view="schedule"><span>▣</span><small>Schedule</small></button>
-      <button class="nav-item" data-view="players"><span>⌕</span><small>Players</small></button>
-      <button class="nav-item" data-view="league"><span>🏆</span><small>League</small></button>
+      <button class="nav-item active" data-view="home"><span aria-hidden="true">⌂</span><small>Home</small></button>
+      <button class="nav-item" data-view="team"><span aria-hidden="true">♟</span><small>My Team</small></button>
+      <button class="nav-item" data-view="schedule"><span aria-hidden="true">▣</span><small>Schedule</small></button>
+      <button class="nav-item" data-view="players"><span aria-hidden="true">⌕</span><small>Players</small></button>
+      <button class="nav-item" data-view="league"><span aria-hidden="true">🏆</span><small>League</small></button>
     </nav>
   </div>
 
@@ -196,7 +196,7 @@
   <template id="players-template">
     <section class="stack">
       <div class="section-title"><div><div class="eyebrow">FREE AGENTS</div><h2>Players</h2></div></div>
-      <label class="search"><span>⌕</span><input id="playerSearch" placeholder="Search players, teams or roles" /></label>
+      <label class="search"><span>⌕</span><input id="playerSearch" aria-label="Search players, teams or roles" placeholder="Search players, teams or roles" /></label>
       <div class="filter-row">
         <button class="chip active" data-role="ALL">All</button>
         <button class="chip" data-role="TOP">Top</button>
@@ -334,7 +334,7 @@
         <div id="fullDraftBoard" class="full-draft-board"></div>
       </div>
 
-      <label class="search"><span>⌕</span><input id="draftSearch" placeholder="Search draft pool" /></label>
+      <label class="search"><span>⌕</span><input id="draftSearch" aria-label="Search draft pool" placeholder="Search draft pool" /></label>
       <div class="filter-row" id="draftFilters">
         <button class="chip active" data-draft-role="ALL">All</button>
         <button class="chip" data-draft-role="TOP">Top</button>
