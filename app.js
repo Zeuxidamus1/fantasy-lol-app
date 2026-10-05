@@ -375,6 +375,10 @@ function openPlayer(id){
   render("player");
 }
 
+function h(value){
+  return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+
 const app = document.querySelector("#app");
 const toast = document.querySelector("#toast");
 
@@ -387,8 +391,8 @@ function showToast(message){
 function playerRow(p, add=false){
   const pid=p.id||String(p.name).toLowerCase().replace(/[^a-z0-9]+/g,"-");
   return `<div class="player-row clickable" data-open-player="${pid}" tabindex="0" role="button" aria-label="Open ${p.name} profile">
-    <span class="role-badge">${p.role}</span>
-    <div class="player-info"><strong>${p.name}</strong><small>${p.team} · ${p.opp || p.trend || ""}</small></div>
+    <span class="role-badge">${h(p.role)}</span>
+    <div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.opp || p.trend || "")}</small></div>
     <span class="fp">${p.fp.toFixed(1)}</span>
     ${add ? '<button class="add-btn">ADD</button>' : ""}
   </div>`;
@@ -399,7 +403,7 @@ function rosterRow(p, manage=false){
   const fp=Number(p.fp??p.projection??0);
   return `<div class="roster-slot ${slot==="BN"?"bench":""}">
     <span class="slot-label">${slot}</span>
-    <div class="player-info"><strong>${p.name}</strong><small>${p.team} · ${p.position||p.role}${p.opp?" · "+p.opp:""}</small></div>
+    <div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.position||p.role)}${p.opp?" · "+h(p.opp):""}</small></div>
     <span class="fp">${fp.toFixed(1)}</span>
     ${manage?'<div class="team-actions"><button class="mini-btn danger" data-drop-roster="'+playerKey(p)+'">DROP</button></div>':""}
   </div>`;
@@ -497,7 +501,7 @@ function render(view="home",options={}){
     }).slice(0,3);
     document.querySelector("#profileMatches").innerHTML=matches.length?matches.map(g=>{
       const opponent=(String(g.a||"").toLowerCase().includes(teamName)||String(g.aCode||"").toLowerCase()===teamCode)?g.b:g.a;
-      return `<div class="profile-match"><div><strong>vs ${opponent}</strong><small>${g.league||""} · ${g.stage||""}</small></div><div><strong>${g.time||"TBD"}</strong><small>${g.label||""}</small></div></div>`;
+      return `<div class="profile-match"><div><strong>vs ${h(opponent||"TBD")}</strong><small>${h(g.league||"")} · ${h(g.stage||"")}</small></div><div><strong>${h(g.time||"TBD")}</strong><small>${h(g.label||"")}</small></div></div>`;
     }).join(""):'<div class="empty-state"><strong>No upcoming match found</strong><small>The schedule will populate automatically when a matching event is available.</small></div>';
 
     document.querySelector("#profileTrend").innerHTML='<div class="empty-state"><strong>Game logs not connected yet</strong><small>Recent fantasy results will appear here once live scoring and historical statistics are connected.</small></div>';
@@ -540,12 +544,12 @@ function render(view="home",options={}){
       const filtered=rows.filter(g=>day==="all"||g.day===day||(day==="upcoming"&&g.day==="upcoming"));
       let lastLabel="";
       list.innerHTML=filtered.length?filtered.map(g=>{
-        const heading=g.label!==lastLabel ? `<div class="schedule-day">${g.label}</div>` : "";
+        const heading=g.label!==lastLabel ? `<div class="schedule-day">${h(g.label||"Upcoming")}</div>` : "";
         lastLabel=g.label;
         return heading+`<div class="game-card">
-          <div class="game-team"><span class="team-mark">${g.aCode}</span><div><strong>${g.a}</strong><small>Team 1</small></div></div>
-          <div class="game-meta"><span class="game-time">${g.time}</span><span class="game-league">${g.league}</span><span class="game-stage">${g.stage||""}</span><span class="game-status">${g.status}</span></div>
-          <div class="game-team right"><div><strong>${g.b}</strong><small>Team 2</small></div><span class="team-mark">${g.bCode}</span></div>
+          <div class="game-team"><span class="team-mark">${h(g.aCode||"TBD")}</span><div><strong>${h(g.a||"TBD")}</strong><small>Team 1</small></div></div>
+          <div class="game-meta"><span class="game-time">${h(g.time||"TBD")}</span><span class="game-league">${h(g.league||"LoL Esports")}</span><span class="game-stage">${h(g.stage||"")}</span><span class="game-status">${h(g.status||"UPCOMING")}</span></div>
+          <div class="game-team right"><div><strong>${h(g.b||"TBD")}</strong><small>Team 2</small></div><span class="team-mark">${h(g.bCode||"TBD")}</span></div>
         </div>`;
       }).join(""):'<div class="empty-state"><strong>No matches found</strong><small>Try another filter or check back after the next data refresh.</small></div>';
     };
@@ -730,7 +734,7 @@ function render(view="home",options={}){
     document.querySelector("#standings").innerHTML=standings.map(s=>`<div class="standing-row"><span class="rank">${s[0]}</span><strong>${s[1]}</strong><span>${s[2]}</span><span class="pts">${s[3]}</span></div>`).join("");
     const rankings=(window.ESPORTS_DATA&&window.ESPORTS_DATA.rankings)||[];
     const power=document.querySelector("#powerRankings");
-    if(power) power.innerHTML=rankings.map(t=>`<div class="power-row"><span class="power-rank">#${t.rank}</span><div class="power-team"><strong>${t.code}</strong><small>${t.name} · ${t.league}</small></div><span class="power-score">${t.score}</span><span class="power-record">${t.record}</span></div>`).join("");
+    if(power) power.innerHTML=rankings.length?rankings.map(t=>`<div class="power-row"><span class="power-rank">#${h(t.rank)}</span><div class="power-team"><strong>${h(t.code)}</strong><small>${h(t.name)} · ${h(t.league)}</small></div><span class="power-score">${h(t.score)}</span><span class="power-record">${h(t.record)}</span></div>`).join(""):'<div class="empty-state"><strong>No rankings available</strong><small>The last data snapshot did not include power rankings.</small></div>';
     document.querySelector("#leagueSettingsSummary").innerHTML=`
       <div><span>Teams</span><strong>${settings.managers}</strong></div>
       <div><span>Draft</span><strong>${settings.draftType}</strong></div>
