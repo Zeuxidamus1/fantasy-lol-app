@@ -309,6 +309,7 @@
       <div class="section-title">
         <div><div class="eyebrow">PRO MATCHES</div><h2>Schedule</h2></div>
       </div>
+
       <div class="filter-row schedule-filters">
         <button class="chip active" data-day="all">All</button>
         <button class="chip" data-day="today">Today</button>
@@ -316,52 +317,46 @@
         <button class="chip" data-day="upcoming">Upcoming</button>
       </div>
 
-      <button class="wide-link-btn tournament-guide-btn" id="tournamentGuideBtn" type="button" aria-expanded="false">
-        Tournament Guide &amp; Format Help →
-      </button>
-
-      <section class="card tournament-guide-inline" id="tournamentGuideInline" hidden>
-        <div class="section-head">
-          <div><div class="eyebrow">HOW PRO LOL WORKS</div><h3>Tournament Guide</h3></div>
-          <button class="icon-btn small-icon" id="closeTournamentGuideBtn" type="button" aria-label="Close tournament guide">×</button>
-        </div>
-        <p class="tournament-guide-intro">Follow the general path from regional competition to the Worlds Final. Exact formats can vary by event and season.</p>
-
-        <div class="tournament-flow" aria-label="League of Legends tournament path">
-          <div class="flow-node"><small>START</small><strong>Regional Leagues</strong><span>LCK · LPL · LEC · Americas &amp; more</span></div>
-          <div class="flow-arrow">↓</div>
-          <div class="flow-node"><small>QUALIFY</small><strong>Regional Playoffs</strong><span>Top teams compete for seeds and international qualification</span></div>
-          <div class="flow-branch">
-            <div class="flow-branch-card"><small>MID-SEASON EVENT</small><strong>MSI</strong><span>A separate international tournament held before Worlds</span></div>
-            <div class="flow-arrow horizontal">→</div>
-            <div class="flow-branch-card worlds-path"><small>SEASON CHAMPIONSHIP PATH</small><strong>Worlds Qualification</strong><span>Teams earn or secure a spot at Worlds</span></div>
+      <details class="tournament-guide-details">
+        <summary class="wide-link-btn tournament-guide-summary">Tournament Guide &amp; Format Help <span aria-hidden="true">⌄</span></summary>
+        <section class="card tournament-guide-inline">
+          <div class="section-head">
+            <div><div class="eyebrow">HOW PRO LOL WORKS</div><h3>Tournament Guide</h3></div>
           </div>
-          <div class="flow-arrow">↓</div>
-          <div class="flow-node worlds-node"><small>WORLD CHAMPIONSHIP</small><strong>Worlds</strong><span>Qualified teams enter the season-ending championship tournament</span></div>
-          <div class="flow-arrow">↓</div>
-          <div class="flow-node"><small>ADVANCEMENT</small><strong>Swiss / Group-style Stage</strong><span>Teams play for enough wins to advance and avoid elimination</span></div>
-          <div class="flow-arrow">↓</div>
-          <div class="flow-node"><small>ELIMINATION</small><strong>Knockout Stage</strong><span>Lose the series and your Worlds run ends</span></div>
-          <div class="flow-arrow">↓</div>
-          <div class="flow-node final-node"><small>FINAL STEP</small><strong>Worlds Final</strong><span>The championship series that decides the world champion</span></div>
-        </div>
+          <p class="tournament-guide-intro">Follow the general path from regional competition to the Worlds Final. Exact formats can vary by event and season.</p>
 
-        <div class="section-head tournament-terms-head"><div><div class="eyebrow">FORMAT TERMS</div><h3>What does that mean?</h3></div></div>
-        <div class="tournament-term-grid">
-          <button class="tournament-term" type="button" data-term-detail="bo1"><strong>BO1</strong><small>Best of 1</small></button>
-          <button class="tournament-term" type="button" data-term-detail="bo3"><strong>BO3</strong><small>Best of 3</small></button>
-          <button class="tournament-term" type="button" data-term-detail="bo5"><strong>BO5</strong><small>Best of 5</small></button>
-          <button class="tournament-term" type="button" data-term-detail="playoffs"><strong>Playoffs</strong><small>Higher-stakes stage</small></button>
-          <button class="tournament-term" type="button" data-term-detail="swiss"><strong>Swiss</strong><small>Record-based pairings</small></button>
-          <button class="tournament-term" type="button" data-term-detail="knockout"><strong>Knockout</strong><small>Lose and you're out</small></button>
-          <button class="tournament-term" type="button" data-term-detail="seed"><strong>Seed</strong><small>Tournament placement</small></button>
-          <button class="tournament-term" type="button" data-term-detail="qualifier"><strong>Qualifier</strong><small>Earn a tournament spot</small></button>
-        </div>
-        <div class="tournament-term-detail" id="tournamentTermDetail">
-          <strong>Tap a term above</strong>
-          <span>We’ll explain it in plain English.</span>
-        </div>
-      </section>
+          <div class="tournament-flow" aria-label="League of Legends tournament path">
+            <div class="flow-node"><small>START</small><strong>Regional Leagues</strong><span>LCK · LPL · LEC · Americas &amp; more</span></div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-node"><small>QUALIFY</small><strong>Regional Playoffs</strong><span>Top teams compete for seeds and international qualification</span></div>
+            <div class="flow-branch">
+              <div class="flow-branch-card"><small>MID-SEASON EVENT</small><strong>MSI</strong><span>A separate international tournament held before Worlds</span></div>
+              <div class="flow-arrow horizontal">→</div>
+              <div class="flow-branch-card worlds-path"><small>SEASON CHAMPIONSHIP PATH</small><strong>Worlds Qualification</strong><span>Teams earn or secure a spot at Worlds</span></div>
+            </div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-node worlds-node"><small>WORLD CHAMPIONSHIP</small><strong>Worlds</strong><span>Qualified teams enter the season-ending championship tournament</span></div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-node"><small>ADVANCEMENT</small><strong>Swiss / Group-style Stage</strong><span>Teams play for enough wins to advance and avoid elimination</span></div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-node"><small>ELIMINATION</small><strong>Knockout Stage</strong><span>Lose the series and your Worlds run ends</span></div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-node final-node"><small>FINAL STEP</small><strong>Worlds Final</strong><span>The championship series that decides the world champion</span></div>
+          </div>
+
+          <div class="section-head tournament-terms-head"><div><div class="eyebrow">FORMAT TERMS</div><h3>What does that mean?</h3></div></div>
+          <div class="tournament-term-list">
+            <details class="tournament-term-detail-card"><summary><strong>BO1</strong><small>Best of 1</small></summary><p>One game decides the winner. There is no second or third game to recover from a loss.</p></details>
+            <details class="tournament-term-detail-card"><summary><strong>BO3</strong><small>Best of 3</small></summary><p>The first team to win 2 games wins the series. A series can end 2–0 or 2–1.</p></details>
+            <details class="tournament-term-detail-card"><summary><strong>BO5</strong><small>Best of 5</small></summary><p>The first team to win 3 games wins the series. A series can last anywhere from 3 to 5 games.</p></details>
+            <details class="tournament-term-detail-card"><summary><strong>Playoffs</strong><small>Higher-stakes stage</small></summary><p>The stage after regular competition where teams play to advance, qualify, or win the regional title.</p></details>
+            <details class="tournament-term-detail-card"><summary><strong>Swiss</strong><small>Record-based pairings</small></summary><p>Teams are paired mainly against teams with similar records until they reach the advancement or elimination threshold.</p></details>
+            <details class="tournament-term-detail-card"><summary><strong>Knockout</strong><small>Lose and you're out</small></summary><p>An elimination bracket. Lose the series and you are out; win and you advance.</p></details>
+            <details class="tournament-term-detail-card"><summary><strong>Seed</strong><small>Tournament placement</small></summary><p>A team's placement going into an event or bracket, usually based on earlier results or qualification position.</p></details>
+            <details class="tournament-term-detail-card"><summary><strong>Qualifier</strong><small>Earn a tournament spot</small></summary><p>A match, series, or mini-tournament used to earn a place in a larger event such as Worlds.</p></details>
+          </div>
+        </section>
+      </details>
 
       <div id="scheduleList" class="stack tight"></div>
     </section>
