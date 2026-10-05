@@ -1217,37 +1217,6 @@ function render(view="home",options={}){
     };
 
     document.querySelectorAll("[data-day]").forEach(c=>c.onclick=()=>{day=c.dataset.day;document.querySelectorAll("[data-day]").forEach(x=>x.classList.remove("active"));c.classList.add("active");drawSchedule();});
-    const guideBtn=document.querySelector("#tournamentGuideBtn");
-    const guidePanel=document.querySelector("#tournamentGuideInline");
-    const guideClose=document.querySelector("#closeTournamentGuideBtn");
-    const guideDetail=document.querySelector("#tournamentTermDetail");
-    const termCopy={
-      bo1:["BO1 · Best of 1","One game decides the winner. There is no second or third game to recover from a loss."],
-      bo3:["BO3 · Best of 3","The first team to win 2 games wins the series. A series can end 2–0 or 2–1."],
-      bo5:["BO5 · Best of 5","The first team to win 3 games wins the series. A series can last anywhere from 3 to 5 games."],
-      playoffs:["Playoffs","The higher-stakes stage after regular competition. Teams usually play series to advance, qualify, or win the regional title."],
-      swiss:["Swiss Stage","Teams are paired mainly against teams with similar records. They continue until they reach the tournament's advancement threshold or elimination threshold."],
-      knockout:["Knockout Stage","An elimination bracket. Lose the series and you are out; win and you advance."],
-      seed:["Seed","A team's placement going into an event or bracket. Seeding is usually based on prior results or qualification position."],
-      qualifier:["Qualifier","A match, series, or mini-tournament used to earn a place in a larger event such as Worlds."]
-    };
-    const setGuideOpen=open=>{
-      if(!guideBtn||!guidePanel)return;
-      guidePanel.hidden=!open;
-      guideBtn.setAttribute("aria-expanded",String(open));
-      guideBtn.textContent=open?"Hide Tournament Guide ↑":"Tournament Guide & Format Help →";
-      if(open)guidePanel.scrollIntoView({behavior:"smooth",block:"start"});
-    };
-    if(guideBtn&&guidePanel){
-      guideBtn.onclick=()=>setGuideOpen(guidePanel.hidden);
-      if(guideClose)guideClose.onclick=()=>setGuideOpen(false);
-      guidePanel.querySelectorAll("[data-term-detail]").forEach(btn=>btn.onclick=()=>{
-        guidePanel.querySelectorAll("[data-term-detail]").forEach(x=>x.classList.toggle("active",x===btn));
-        const [title,copy]=termCopy[btn.dataset.termDetail]||["Tournament term",""];
-        guideDetail.innerHTML=`<strong>${h(title)}</strong><span>${h(copy)}</span>`;
-      });
-    }
-
     (async()=>{
       const leagueId=getActiveLeagueId();
       if(leagueId&&cloudReady()){
