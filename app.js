@@ -480,6 +480,8 @@ function render(view="home",options={}){
   });
 
   if(view==="home"){
+    const leagueName=document.querySelector("#homeLeagueName");
+    if(leagueName)leagueName.textContent=getLeagueSettings().name;
     const currentRoster=getUserRoster();
     const starters=currentRoster.filter(p=>(p.slot||p.role)!=="BN").slice(0,3);
     document.querySelector("#starterPreview").innerHTML = starters.length?starters.map(p=>playerRow({...p,role:p.position||p.role})).join(""):'<div class="empty-state"><strong>Your roster is empty</strong><small>Browse Players to add your first fantasy player.</small></div>';
@@ -781,6 +783,8 @@ function render(view="home",options={}){
   }
   if(view==="league"){
     const settings=getLeagueSettings();
+    const leagueLabel=document.querySelector("#leagueNameLabel");
+    if(leagueLabel)leagueLabel.textContent=String(settings.name||"Fantasy League").toUpperCase();
     document.querySelector("#standings").innerHTML=standings.slice(0,Number(settings.managers)||4).map(s=>`<div class="standing-row"><span class="rank">${s[0]}</span><strong>${s[1]}</strong><span>${s[2]}</span><span class="pts">${s[3]}</span></div>`).join("");
     const rankings=(window.ESPORTS_DATA&&window.ESPORTS_DATA.rankings)||[];
     const power=document.querySelector("#powerRankings");
