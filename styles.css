@@ -74,3 +74,23 @@
 
 .team-title-actions{display:flex;align-items:center;gap:10px}
 .team-name-editor{padding:14px}
+
+.notification-btn{position:relative}
+.notification-badge{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#ffcc3d;color:#07111e;border:2px solid #07111e;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.notification-panel{position:fixed;inset:0;z-index:1200}
+.notification-backdrop{position:absolute;inset:0;background:rgba(2,8,18,.68)}
+.notification-sheet{position:absolute;top:74px;right:max(14px,calc((100vw - 520px)/2 + 14px));width:min(440px,calc(100vw - 28px));max-height:calc(100vh - 104px);overflow:auto;background:#0b1a2b;border:1px solid #24415f;border-radius:18px;padding:16px;box-shadow:0 24px 70px rgba(0,0,0,.45)}
+.notification-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0 12px}
+.notification-toolbar small{color:#7f9bbc}
+.notification-list{display:grid;gap:8px}
+.notification-item{width:100%;display:flex;align-items:flex-start;gap:10px;text-align:left;border:1px solid #1d3550;background:#091625;color:inherit;border-radius:14px;padding:12px;cursor:pointer}
+.notification-item:hover{border-color:#315b7e;background:#0c1e31}
+.notification-item.unread{border-color:#2b8e7d;background:#0d2928}
+.notification-dot{width:8px;height:8px;border-radius:50%;background:transparent;margin-top:7px;flex:0 0 auto}
+.notification-item.unread .notification-dot{background:#38e1c1;box-shadow:0 0 0 3px rgba(56,225,193,.12)}
+.notification-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+.notification-copy strong{font-size:13px}
+.notification-copy small{font-size:11px;color:#9eb4ce;line-height:1.4}
+.notification-copy em{font-style:normal;font-size:9px;color:#607a98;margin-top:3px}
+body.notifications-open{overflow:hidden}
+@media(max-width:560px){.notification-sheet{top:12px;right:12px;left:12px;width:auto;max-height:calc(100vh - 24px)}}
