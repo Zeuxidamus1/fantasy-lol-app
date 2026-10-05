@@ -1235,6 +1235,32 @@ function render(view="home",options={}){
       dataText.textContent="The external data file could not be loaded. The rest of the app remains available.";
     }
 
+    const guideBtn=document.querySelector("#tournamentGuideBtn");
+    const guideModal=document.querySelector("#tournamentGuideModal");
+    const guideDetail=document.querySelector("#tournamentTermDetail");
+    const termCopy={
+      bo1:["BO1 · Best of 1","One game decides the winner. There is no second or third game to recover from a loss."],
+      bo3:["BO3 · Best of 3","The first team to win 2 games wins the series. A series can end 2–0 or 2–1."],
+      bo5:["BO5 · Best of 5","The first team to win 3 games wins the series. A series can last anywhere from 3 to 5 games."],
+      playoffs:["Playoffs","The higher-stakes stage after regular competition. Teams usually play series to advance, qualify, or win the regional title."],
+      swiss:["Swiss Stage","Teams are matched mainly against teams with similar records. They keep playing until they reach the event's advancement threshold or elimination threshold."],
+      knockout:["Knockout Stage","An elimination bracket. Lose the series and you are out of the tournament; win and you advance."],
+      seed:["Seed","A team's placement going into an event or bracket. Higher seeds usually earned better results before the tournament."],
+      qualifier:["Qualifier","A match, series, or mini-tournament used to earn a spot in a larger event such as Worlds."]
+    };
+    if(guideBtn&&guideModal){
+      guideBtn.onclick=()=>{guideModal.hidden=false;document.body.classList.add("tournament-guide-open");};
+      guideModal.querySelectorAll("[data-close-tournament-guide]").forEach(el=>el.onclick=()=>{
+        guideModal.hidden=true;
+        document.body.classList.remove("tournament-guide-open");
+      });
+      guideModal.querySelectorAll("[data-term-detail]").forEach(btn=>btn.onclick=()=>{
+        guideModal.querySelectorAll("[data-term-detail]").forEach(x=>x.classList.toggle("active",x===btn));
+        const [title,copy]=termCopy[btn.dataset.termDetail]||["Tournament term",""];
+        guideDetail.innerHTML=`<strong>${h(title)}</strong><span>${h(copy)}</span>`;
+      });
+    }
+
     (async()=>{
       const leagueId=getActiveLeagueId();
       if(leagueId&&cloudReady()){
@@ -1872,7 +1898,12 @@ function render(view="home",options={}){
 
 document.querySelectorAll(".nav-item").forEach(b=>b.addEventListener("click",()=>render(b.dataset.view)));
 document.querySelectorAll("[data-close-transaction]").forEach(el=>el.addEventListener("click",closeTransactionModal));
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeTransactionModal();});
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Escape")return;
+  closeTransactionModal();
+  const guide=document.querySelector("#tournamentGuideModal");
+  if(guide&&!guide.hidden){guide.hidden=true;document.body.classList.remove("tournament-guide-open");}
+});
 window.addEventListener("popstate",e=>{navigationDepth=Number(e.state?.depth)||0;render(e.state?.view||location.hash.slice(1)||"home",{fromHistory:true});});
 document.querySelector("#accountBtn").onclick=()=>render("account");
 
