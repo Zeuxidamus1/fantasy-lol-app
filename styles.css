@@ -128,3 +128,8 @@ body.notifications-open{overflow:hidden}
 .tournament-term-detail span{font-size:11px;line-height:1.5;color:#9cb2c9}
 body.tournament-guide-open{overflow:hidden}
 @media(max-width:420px){.flow-branch{grid-template-columns:1fr}.flow-arrow.horizontal{transform:rotate(90deg)}.tournament-term-grid{grid-template-columns:1fr 1fr}}
+
+.notification-swap{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:3px 0 1px}
+.notification-swap .swap-drop{color:#ff7d88;font-weight:800}
+.notification-swap .swap-arrow{color:#7390ad;font-weight:900}
+.notification-swap .swap-add{color:#4ae2c1;font-weight:800}
