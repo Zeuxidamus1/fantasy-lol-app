@@ -582,9 +582,9 @@ function render(view="home",options={}){
   currentView=view;
   app.innerHTML="";
   app.appendChild(template.content.cloneNode(true));
-  const titles={login:"Sign In",home:"Home",account:"Account",team:"My Team",matchup:"Matchup",schedule:"Schedule",players:"Players",player:"Player",league:"League",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup"};
+  const titles={login:"Sign In",signup:"Create Account",verify:"Verify Email",home:"Home",account:"Account",team:"My Team",matchup:"Matchup",schedule:"Schedule",players:"Players",player:"Player",league:"League",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup"};
   document.title=`${titles[view]||"Rift Fantasy"} · Rift Fantasy`;
-  document.body.classList.toggle("login-view",view==="login");
+  document.body.classList.toggle("login-view",["login","signup","verify"].includes(view));
   document.querySelectorAll(".nav-item").forEach(b=>{
     const active=b.dataset.view===view;
     b.classList.toggle("active",active);
@@ -661,7 +661,99 @@ function render(view="home",options={}){
       }finally{setTimeout(()=>{btn.disabled=false;},3000);}
     };
 
-    document.querySelector("#landingCreateAccount").onclick=()=>render("account");
+    document.querySelector("#landingCreateAccount").onclick=()=>render("signup");
+  }
+
+  if(view==="signup"){
+    const b=backend();
+    const ready=cloudReady();
+    const email=document.querySelector("#signupEmail");
+    const password=document.querySelector("#signupPassword");
+    const confirm=document.querySelector("#signupPasswordConfirm");
+    const submit=document.querySelector("#signupSubmit");
+    const toggle=document.querySelector("#signupPasswordToggle");
+
+    toggle.onclick=()=>{
+      const hidden=password.type==="password";
+      password.type=hidden?"text":"password";
+      confirm.type=hidden?"text":"password";
+      toggle.textContent=hidden?"Hide":"Show";
+      toggle.setAttribute("aria-label",hidden?"Hide password":"Show password");
+    };
+
+    document.querySelector("#signupBack").onclick=()=>render("login");
+
+    submit.onclick=async()=>{
+      if(!ready)return showToast("Account services are temporarily unavailable.");
+      const value=email.value.trim();
+      if(!email.checkValidity())return showToast("Enter a valid email address.");
+      if(password.value.length<8)return showToast("Password must be at least 8 characters.");
+      if(password.value!==confirm.value)return showToast("Passwords do not match.");
+      submit.disabled=true;
+      try{
+        const result=await b.signUp(value,password.value);
+        if(result?.access_token){
+          clearVerificationPending();
+          showToast("Account created");
+          render("home",{replace:true});
+        }else{
+          markVerificationPending(value);
+          render("verify",{replace:true});
+        }
+      }catch(err){
+        const msg=String(err.message||"");
+        showToast(/rate|limit|too many/i.test(msg)?"Email limit reached. Try again later.":msg||"Could not create account.");
+      }finally{submit.disabled=false;}
+    };
+  }
+
+  if(view==="verify"){
+    const pending=getVerificationPending();
+    const emailText=document.querySelector("#verifyEmailText");
+    const resend=document.querySelector("#verifyResendBtn");
+    const waitText=document.querySelector("#verifyWaitText");
+    if(pending?.email)emailText.textContent=pending.email;
+
+    document.querySelector("#verifyBackToLogin").onclick=()=>render("login");
+
+    if(pending){
+      setupVerificationResend(resend,null);
+      const updateWait=()=>{
+        const latest=getVerificationPending();
+        if(!latest){waitText.hidden=true;return;}
+        const seconds=Math.max(0,Math.ceil((latest.availableAt-Date.now())/1000));
+        if(seconds<=0){
+          waitText.hidden=true;
+          resend.hidden=false;
+        }else{
+          waitText.hidden=false;
+          waitText.textContent=`You can request another email in ${seconds} second${seconds===1?"":"s"}.`;
+          setTimeout(updateWait,1000);
+        }
+      };
+      updateWait();
+    }else{
+      waitText.hidden=true;
+      resend.hidden=true;
+    }
+
+    resend.onclick=async()=>{
+      const latest=getVerificationPending();
+      if(!latest?.email)return showToast("Return to sign up and enter your email again.");
+      resend.disabled=true;
+      try{
+        await backend().resendSignup(latest.email);
+        markVerificationPending(latest.email);
+        resend.hidden=true;
+        waitText.hidden=false;
+        waitText.textContent="Verification email sent. You can request another in 60 seconds.";
+        showToast("Verification email sent.");
+        setTimeout(()=>render("verify",{replace:true}),60000);
+      }catch(err){
+        const msg=String(err.message||"");
+        showToast(/rate|limit|too many/i.test(msg)?"Email limit reached. Try again later.":msg||"Could not resend verification email.");
+      }finally{resend.disabled=false;}
+    };
   }
 
   if(view==="account"){
