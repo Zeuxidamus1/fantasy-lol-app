@@ -65,7 +65,7 @@
 
       <section class="card">
         <div class="section-head">
-          <div><div class="eyebrow">DEMO MATCHUP</div><h3>Summoner's Cup</h3></div>
+          <div><div class="eyebrow">DEMO MATCHUP</div><h3 id="homeLeagueName">Summoner's Cup</h3></div>
           <button class="text-btn" data-jump="matchup">View matchup</button>
         </div>
         <div class="scoreboard">
@@ -392,12 +392,12 @@
           <label>Scoring format</label>
           <div class="option-grid" data-choice-group="scoringFormat">
             <button class="choice active" data-value="Head-to-head"><strong>Head-to-Head</strong><small>Face one manager each fantasy round.</small></button>
-            <button class="choice" data-value="Total Points"><strong>Total Points</strong><small>Highest season or tournament total wins.</small></button>
+            <button class="choice disabled-choice" data-value="Total Points" disabled aria-disabled="true"><strong>Total Points</strong><small>Coming soon. Head-to-head is currently supported.</small></button>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="competition">Competition</label>
+          <label for="competition">Competition focus</label>
           <select id="competition" class="form-control">
             <option selected>Worlds</option>
             <option>MSI</option>
@@ -406,6 +406,7 @@
             <option>LEC</option>
             <option>LTA</option>
           </select>
+          <small class="field-help">Saved as a league preference. Competition-specific player filtering is not active yet.</small>
         </div>
 
         <div class="form-group">
