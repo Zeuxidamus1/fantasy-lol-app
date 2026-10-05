@@ -3,3 +3,33 @@
 .active-cloud-league{border-color:#2ddcba;background:#10322f}.cloud-select-btn{min-width:88px}.cloud-league-item .secondary-btn{padding:8px 10px;min-height:36px}.auth-help-actions{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center}.auth-help-actions .text-btn{padding:6px 2px}.recovery-card{border-color:#2a655b;background:#0d2424}
 #authCard .section-head{margin-bottom:2px}
 #authCard .setup-footnote{margin-top:4px}
+
+/* First-run sign-in experience */
+.login-view{min-height:100vh;background:radial-gradient(circle at 50% -10%,rgba(45,220,186,.14),transparent 42%),#07111d}
+.login-view .topbar,.login-view .bottom-nav{display:none}
+.login-view .app-shell{max-width:none;min-height:100vh;border:0;border-radius:0;background:transparent}
+.login-view main{padding:0;min-height:100vh}
+.login-screen{width:min(430px,100%);min-height:100vh;margin:0 auto;padding:clamp(38px,9vh,86px) 22px 26px;display:flex;flex-direction:column;justify-content:center;gap:28px}
+.login-brand{text-align:center}
+.login-mark{width:68px;height:68px;margin:0 auto 18px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(145deg,#36e3c1,#168b80);box-shadow:0 16px 42px rgba(22,139,128,.28);color:#041512;font-size:23px;font-weight:900;letter-spacing:-1px}
+.login-kicker{font-size:9px;font-weight:900;letter-spacing:1.8px;color:#59e6ca}
+.login-brand h1{margin:7px 0 8px;font-size:34px;letter-spacing:-1.3px}
+.login-brand p{margin:0 auto;max-width:310px;color:#7f93ad;font-size:12px;line-height:1.55}
+.login-card{background:rgba(12,25,41,.94);border:1px solid #1c3048;border-radius:22px;padding:22px;box-shadow:0 22px 60px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:16px}
+.login-card-head{text-align:center;margin-bottom:2px}
+.login-card-head h2{margin:0 0 6px;font-size:21px}
+.login-card-head p{margin:0;color:#71859f;font-size:11px}
+.login-control{min-height:48px;font-size:14px}
+.field-label-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.field-label-row label{font-size:12px;font-weight:800;color:#94a7c2}
+.inline-help-btn{border:0;background:transparent;color:#55dfc4;font:inherit;font-size:10px;font-weight:800;padding:4px;cursor:pointer}
+.inline-help-btn:disabled{opacity:.5;cursor:not-allowed}
+.password-field{position:relative}
+.password-field .form-control{padding-right:60px}
+.password-toggle{position:absolute;right:7px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#89a0bc;font:inherit;font-size:10px;font-weight:800;padding:8px;cursor:pointer}
+.login-primary,.login-secondary{width:100%;min-height:48px}
+.login-help-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.login-divider{display:flex;align-items:center;gap:10px;color:#60748e;font-size:9px;font-weight:700}
+.login-divider::before,.login-divider::after{content:"";height:1px;flex:1;background:#1b2d43}
+.login-legal{text-align:center;color:#4f647f;font-size:8px;line-height:1.45;margin:0 auto;max-width:330px}
+@media(max-width:380px){.login-screen{padding-left:16px;padding-right:16px}.login-card{padding:18px}.login-help-row{flex-direction:column;gap:2px}}
