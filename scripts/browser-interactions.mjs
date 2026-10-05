@@ -88,7 +88,7 @@ try{
   await evaluate("document.querySelector('[data-view=players]').click()");
   await expect("players nav works","document.title.includes('Players') && !!document.querySelector('#playerSearch')");
 
-  await evaluate("const i=document.querySelector('#playerSearch'); i.value='Faker'; i.dispatchEvent(new Event('input',{bubbles:true}))");
+  await evaluate("(()=>{const i=document.querySelector('#playerSearch'); i.value='Faker'; i.dispatchEvent(new Event('input',{bubbles:true}));})()");
   await expect("player search filters","document.querySelectorAll('#freeAgentList .player-row').length >= 1");
 
   await evaluate("document.querySelector('#freeAgentList [data-open-player]').click()");
@@ -100,7 +100,7 @@ try{
   await evaluate("document.querySelector('#playerBackBtn').click()");
   await expect("player back navigation returns to players","document.title.includes('Players') && !!document.querySelector('#freeAgentList')");
 
-  await evaluate("const i=document.querySelector('#playerSearch'); i.value=''; i.dispatchEvent(new Event('input',{bubbles:true})); const b=document.querySelector('#freeAgentList .add-btn:not([disabled])'); if(b)b.click()");
+  await evaluate("(()=>{const i=document.querySelector('#playerSearch'); i.value=''; i.dispatchEvent(new Event('input',{bubbles:true})); const b=document.querySelector('#freeAgentList .add-btn:not([disabled])'); if(b)b.click();})()");
   await expect("full-roster add opens drop chooser","document.querySelector('#transactionModal') && document.querySelector('#transactionModal').hidden === false");
   await evaluate("document.querySelector('#transactionModal [data-close-transaction]').click()");
   await expect("transaction modal closes","document.querySelector('#transactionModal').hidden === true");
@@ -126,7 +126,7 @@ try{
 
   await evaluate("document.querySelector('#profileTradeBtn').click()");
   await expect("trade center opens","document.title.includes('Trades') && !!document.querySelector('#tradePartner')");
-  await evaluate("const a=document.querySelector('[data-trade-mine]'); const b=document.querySelector('[data-trade-theirs]'); if(a)a.click(); if(b)b.click()");
+  await evaluate("(()=>{const a=document.querySelector('[data-trade-mine]'); const b=document.querySelector('[data-trade-theirs]'); if(a)a.click(); if(b)b.click();})()");
   await expect("trade offer becomes submittable","!document.querySelector('#submitTradeBtn').disabled");
   await evaluate("document.querySelector('#submitTradeBtn').click()");
   await expect("trade offer saves","JSON.parse(localStorage.getItem('riftTradeOffers')||'[]').some(x=>x.direction==='outgoing')");
@@ -136,11 +136,11 @@ try{
   await evaluate("document.querySelector('#leagueName').value='Audit League'; document.querySelector('#saveLeagueBtn').click()");
   await expect("league settings save","JSON.parse(localStorage.getItem('riftLeagueSettings')||'{}').name === 'Audit League'",3000);
 
-  await evaluate("const b=document.querySelector('[data-jump=draft]'); if(b)b.click()");
+  await evaluate("(()=>{const b=document.querySelector('[data-jump=draft]'); if(b)b.click();})()");
   await expect("draft room opens","document.title.includes('Draft Room') && !!document.querySelector('#startDraftBtn')");
-  await evaluate("const b=document.querySelector('#startDraftBtn'); if(!b.disabled)b.click()");
+  await evaluate("(()=>{const b=document.querySelector('#startDraftBtn'); if(b&&!b.disabled)b.click();})()");
   await expect("mock draft starts","JSON.parse(localStorage.getItem('riftDraftState')||'{}').started === true");
-  await evaluate("const b=document.querySelector('#draftPlayerList .draft-btn:not([disabled])'); if(b)b.click()");
+  await evaluate("(()=>{const b=document.querySelector('#draftPlayerList .draft-btn:not([disabled])'); if(b)b.click();})()");
   await expect("draft pick records","JSON.parse(localStorage.getItem('riftDraftState')||'{}').picks.length >= 2");
 
   await evaluate("document.querySelector('[data-view=schedule]').click(); document.querySelector('[data-day=today]').click()");
