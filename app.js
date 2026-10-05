@@ -1844,5 +1844,117 @@ document.querySelectorAll("[data-close-transaction]").forEach(el=>el.addEventLis
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeTransactionModal();});
 window.addEventListener("popstate",e=>{navigationDepth=Number(e.state?.depth)||0;render(e.state?.view||location.hash.slice(1)||"home",{fromHistory:true});});
 document.querySelector("#accountBtn").onclick=()=>render("account");
-document.querySelector("#notificationBtn").onclick=()=>showToast("No new league notifications.");
+
+const notificationBtn=document.querySelector("#notificationBtn");
+const notificationBadge=document.querySelector("#notificationBadge");
+const notificationPanel=document.querySelector("#notificationPanel");
+const notificationList=document.querySelector("#notificationList");
+const notificationSummary=document.querySelector("#notificationSummary");
+const markNotificationsReadBtn=document.querySelector("#markNotificationsRead");
+let notificationTimerId=null;
+
+function closeNotifications(){
+  if(notificationPanel)notificationPanel.hidden=true;
+  document.body.classList.remove("notifications-open");
+}
+
+async function loadNotifications({open=false}={}){
+  if(!cloudReady()){
+    notificationBadge.hidden=true;
+    return [];
+  }
+  try{
+    const b=backend();
+    const user=await b.currentUser().catch(()=>null);
+    if(!user){
+      notificationBadge.hidden=true;
+      return [];
+    }
+
+    const notifications=await b.listNotifications(60);
+    const unread=notifications.filter(n=>!n.read_at);
+    notificationBadge.textContent=unread.length>99?"99+":String(unread.length);
+    notificationBadge.hidden=unread.length===0;
+
+    if(!open)return notifications;
+
+    const leagueIds=[...new Set(notifications.map(n=>String(n.league_id)).filter(Boolean))];
+    const leagueRows=await b.listLeagues();
+    const leagueMap=new Map(leagueRows.map(l=>[String(l.id),l]));
+    const memberMap=new Map();
+    await Promise.all(leagueIds.map(async id=>{
+      try{memberMap.set(id,await b.listLeagueMembers(id));}catch{memberMap.set(id,[]);}
+    }));
+
+    const teamName=(leagueId,userId)=>{
+      const members=memberMap.get(String(leagueId))||[];
+      return members.find(m=>String(m.user_id)===String(userId))?.team_name||"Manager";
+    };
+    const playerName=id=>playerById(id)?.name||String(id||"Player");
+    const fmt=iso=>{const d=new Date(iso);return Number.isNaN(d.getTime())?"":d.toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});};
+
+    const describe=n=>{
+      const p=n.payload||{};
+      const actor=teamName(n.league_id,n.actor_user);
+      const target=teamName(n.league_id,p.to_user);
+      const send=playerName(p.send_player_id);
+      const receive=playerName(p.receive_player_id);
+      const rosterPlayer=playerName(p.player_id);
+      switch(n.kind){
+        case "trade_offer": return {title:`Trade offer from ${actor}`,body:`${send} for ${receive}. Tap to review.`,view:"trade"};
+        case "trade_activity": return {title:`${actor} sent a trade offer`,body:`Trade proposed with ${target}: ${send} ↔ ${receive}.`,view:"trade"};
+        case "trade_accepted": return {title:"Trade completed",body:`${actor} accepted a trade: ${send} ↔ ${receive}.`,view:"trade"};
+        case "trade_declined": return {title:"Trade declined",body:`${actor} declined a trade offer.`,view:"trade"};
+        case "trade_canceled": return {title:"Trade canceled",body:`${actor} canceled a trade offer.`,view:"trade"};
+        case "roster_add": return {title:`${actor} added ${rosterPlayer}`,body:"League roster move",view:"transactions"};
+        case "roster_drop": return {title:`${actor} dropped ${rosterPlayer}`,body:"League roster move",view:"transactions"};
+        default:return {title:"League update",body:"New activity in your league.",view:"league"};
+      }
+    };
+
+    notificationSummary.textContent=unread.length?`${unread.length} unread notification${unread.length===1?"":"s"}`:"You're all caught up.";
+    notificationList.innerHTML=notifications.length?notifications.map(n=>{
+      const d=describe(n);
+      const league=leagueMap.get(String(n.league_id));
+      return `<button class="notification-item ${n.read_at?"":"unread"}" data-notification-view="${h(d.view)}" data-notification-id="${h(n.id)}"><span class="notification-dot"></span><span class="notification-copy"><strong>${h(d.title)}</strong><small>${h(d.body)}</small><em>${h(league?.name||"League")} · ${h(fmt(n.created_at))}</em></span></button>`;
+    }).join(""):'<div class="empty-state"><strong>No notifications yet</strong><small>Trades and league roster changes will appear here.</small></div>';
+
+    notificationList.querySelectorAll("[data-notification-view]").forEach(item=>item.onclick=async()=>{
+      if(!item.classList.contains("unread")){closeNotifications();render(item.dataset.notificationView);return;}
+      try{await b.markNotificationsRead([item.dataset.notificationId]);}catch{}
+      closeNotifications();
+      render(item.dataset.notificationView);
+      void loadNotifications();
+    });
+
+    notificationPanel.hidden=false;
+    document.body.classList.add("notifications-open");
+    if(unread.length){
+      try{await b.markNotificationsRead(unread.map(n=>n.id));}catch{}
+      notificationBadge.hidden=true;
+      notificationList.querySelectorAll(".notification-item.unread").forEach(el=>el.classList.remove("unread"));
+      notificationSummary.textContent="You're all caught up.";
+    }
+    return notifications;
+  }catch(err){
+    if(open){
+      notificationList.innerHTML='<div class="empty-state cloud-error"><strong>Could not load notifications</strong><small>'+h(err.message||"Please try again.")+'</small></div>';
+      notificationPanel.hidden=false;
+    }
+    return [];
+  }
+}
+
+notificationBtn.onclick=()=>loadNotifications({open:true});
+document.querySelectorAll("[data-close-notifications]").forEach(el=>el.addEventListener("click",closeNotifications));
+markNotificationsReadBtn.onclick=async()=>{
+  try{await backend().markNotificationsRead(null);await loadNotifications({open:true});}
+  catch(err){showToast(err.message||"Could not update notifications");}
+};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNotifications();});
+
+void loadNotifications();
+notificationTimerId=setInterval(()=>{if(!document.hidden)void loadNotifications();},8000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)void loadNotifications();});
+
 render(location.hash.slice(1)||"login",{replace:true});
