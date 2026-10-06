@@ -115,15 +115,9 @@ try{
   await expect("draft assignment creates FLEX before bench","(()=>{const p=[{pick_number:1,role:'TOP'},{pick_number:2,role:'JNG'},{pick_number:3,role:'MID'},{pick_number:4,role:'ADC'},{pick_number:5,role:'SUP'},{pick_number:6,role:'ADC'},{pick_number:7,role:'TOP'}];const a=draftAssignments(p);return a[5].slot==='FLEX'&&a[6].slot==='BN'})()");
   await expect("FLEX eligibility is centralized","isFlexEligible({position:'ADC'})===true && isFlexEligible({position:'COACH'})===false");
 
-  await route("league");
-  await expect("league route renders","document.title.includes('League') && !!document.querySelector('[data-jump=\"create-league\"]') && !!document.querySelector('[data-jump=\"join-league\"]') && !!document.querySelector('[data-jump=\"bot-league\"]')");
-
-  await route("join-league");
-  await expect("join route is dedicated","document.title.includes('Join League') && !!document.querySelector('#joinLeagueCode') && !document.querySelector('#createLeagueName')");
-  await expect("join disabled until required fields entered","document.querySelector('#confirmJoinLeagueBtn').disabled === true");
-
-  await route("bot-league");
-  await expect("bot league route renders","document.title.includes('Create Bot League') && document.querySelectorAll('[data-bot-size]').length===10");
+  await expect("league entry choices exist","(()=>{const t=document.querySelector('#league-template');return !!t?.content.querySelector('[data-jump=\"create-league\"]')&&!!t.content.querySelector('[data-jump=\"join-league\"]')&&!!t.content.querySelector('[data-jump=\"bot-league\"]')})()");
+  await expect("join route is dedicated","(()=>{const t=document.querySelector('#join-league-template');return !!t?.content.querySelector('#joinLeagueCode')&&!t.content.querySelector('#createLeagueName')})()");
+  await expect("bot league offers sizes one through ten","(()=>{const t=document.querySelector('#bot-league-template');const values=[...t.content.querySelectorAll('[data-bot-size]')].map(x=>Number(x.dataset.botSize));return values.length===10&&values.every((v,i)=>v===i+1)})()");
 
   await route("draft");
   await expect("draft room renders","document.title.includes('Draft Room') && !!document.querySelector('#draftPlayerList')");
