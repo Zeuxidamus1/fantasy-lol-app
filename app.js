@@ -1508,15 +1508,20 @@ function render(view="home",options={}){
       (async()=>{
         try{
           const b=backend();
-          const [members,leagues,user]=await Promise.all([b.listLeagueMembers(leagueId),b.listLeagues(),b.currentUser()]);
+          const [members,bots,leagues,user]=await Promise.all([b.listLeagueMembers(leagueId),b.listLeagueBots(leagueId),b.listLeagues(),b.currentUser()]);
           const league=leagues.find(l=>String(l.id)===String(leagueId));
           const name=document.querySelector("#standingsLeagueName");
           if(name)name.textContent=String(league?.name||"League").toUpperCase();
-          list.innerHTML=members.length?members.map((m,index)=>{
-            const mine=String(m.user_id)===String(user?.id);
-            return `<div class="standing-live-row ${mine?"mine":""}">
+          const managers=[
+            ...members.map(m=>({...m,managerType:"human"})),
+            ...bots.map(bot=>({user_id:bot.id,team_name:bot.team_name,role:"bot",managerType:"bot"}))
+          ];
+          list.innerHTML=managers.length?managers.map((m,index)=>{
+            const mine=m.managerType==="human"&&String(m.user_id)===String(user?.id);
+            const detail=m.managerType==="bot"?"🤖 Bot":(m.role==="owner"?"Commissioner":"Manager")+(mine?" · You":"");
+            return `<div class="standing-live-row ${mine?"mine":""} ${m.managerType==="bot"?"bot-manager-row":""}">
               <span class="rank">${index+1}</span>
-              <div class="standing-live-team"><strong>${h(m.team_name||"Unnamed Team")}</strong><small>${m.role==="owner"?"Commissioner":"Manager"}${mine?" · You":""}</small></div>
+              <div class="standing-live-team"><strong>${h(m.team_name||"Unnamed Team")}</strong><small>${h(detail)}</small></div>
               <div class="standing-live-record"><strong>—</strong><small>Record</small></div>
               <div class="standing-live-points"><strong>—</strong><small>FP</small></div>
             </div>`;
