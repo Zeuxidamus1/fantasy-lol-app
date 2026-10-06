@@ -802,18 +802,13 @@ function render(view="home",options={}){
 
   if(view==="login"){
     const b=backend();
-    const ready=cloudReady();
     const email=document.querySelector("#landingEmail");
     const password=document.querySelector("#landingPassword");
     const signInBtn=document.querySelector("#landingSignIn");
     const resendBtn=document.querySelector("#landingResendVerification");
     setupVerificationResend(resendBtn,email);
-    const setBusy=value=>{signInBtn.disabled=value;document.querySelector("#landingCreateAccount").disabled=value;};
-
-    if(!ready){
-      signInBtn.disabled=true;
-      showToast("Account services are temporarily unavailable.");
-    }
+    const createAccountBtn=document.querySelector("#landingCreateAccount");
+    const setBusy=value=>{signInBtn.disabled=value;if(createAccountBtn)createAccountBtn.disabled=value;};
 
     document.querySelector("#landingPasswordToggle").onclick=()=>{
       const hidden=password.type==="password";
@@ -823,8 +818,8 @@ function render(view="home",options={}){
     };
 
     const signIn=async()=>{
-      if(!ready)return showToast("Account services are temporarily unavailable.");
       if(!email.checkValidity()||password.value.length<8)return showToast("Enter a valid email and password.");
+      if(!b?.signIn)return showToast("Account service failed to load. Refresh the app and try again.");
       setBusy(true);
       try{
         await b.signIn(email.value.trim(),password.value);
@@ -870,7 +865,7 @@ function render(view="home",options={}){
       }finally{setTimeout(()=>{btn.disabled=false;},3000);}
     };
 
-    document.querySelector("#landingCreateAccount").onclick=()=>render("signup");
+    createAccountBtn.onclick=()=>render("signup");
   }
 
   if(view==="signup"){
