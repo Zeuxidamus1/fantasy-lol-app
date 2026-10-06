@@ -1879,7 +1879,7 @@ function render(view="home",options={}){
 
         if(overviewCard)overviewCard.hidden=false;
         if(quickAccess)quickAccess.hidden=false;
-        if(formatCard)formatCard.hidden=false;
+        if(formatCard)formatCard.hidden=true;
         if(cloudList)cloudList.hidden=false;
         cloudCard?.classList.remove("empty-league-mode");
         if(entryActions)entryActions.classList.remove("empty-league-actions");
@@ -1890,6 +1890,17 @@ function render(view="home",options={}){
         document.querySelector("#leagueOverviewRole").textContent=activeMembership?.role==="owner"?"Commissioner":"Manager";
         document.querySelector("#leagueOverviewInvite").textContent=activeLeague.invite_code||"—";
         document.querySelector("#leagueOverviewCopy").textContent="This is the league currently used throughout the app.";
+
+        const rulesToggle=document.querySelector("#leagueRulesToggle");
+        if(rulesToggle){
+          rulesToggle.onclick=()=>{
+            const opening=!!formatCard?.hidden;
+            if(formatCard)formatCard.hidden=!opening;
+            rulesToggle.setAttribute("aria-expanded",String(opening));
+            rulesToggle.textContent=opening?"Hide Rules & Setup":"Rules & Setup";
+            if(opening)formatCard?.scrollIntoView?.({behavior:"smooth",block:"nearest"});
+          };
+        }
 
         cloudTitle.textContent="Your leagues";
         cloudCopy.textContent="Choose which league you want to manage.";
