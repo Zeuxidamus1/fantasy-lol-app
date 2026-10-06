@@ -2100,8 +2100,6 @@ function render(view="home",options={}){
       const teamInput=document.querySelector("#createTeamName");
       const createBtn=document.querySelector("#confirmCreateLeagueBtn");
       const defaults=getLeagueSettings();
-      const maxManagers=Math.max(2,Math.floor(draftPool.length/rosterRequirements(defaults).totalRequired));
-      [...managerSelect.options].forEach(option=>option.disabled=Number(option.value)>maxManagers);
 
       createBtn.onclick=async()=>{
         const name=nameInput.value.trim();
