@@ -179,6 +179,15 @@
     return request("/rest/v1/rpc/create_league",{method:"POST",body:{p_name:name,p_settings:settings},session:current});
   }
 
+  async function createBotLeague(name,teamName,totalManagers,humanManagers,difficulty,settings={}){
+    const current=await session();
+    if(!current)throw new Error("Sign in before creating a Bot League.");
+    return request("/rest/v1/rpc/create_bot_league",{method:"POST",body:{
+      p_name:name,p_team_name:teamName,p_total_managers:Number(totalManagers),
+      p_human_managers:Number(humanManagers),p_difficulty:difficulty,p_settings:settings
+    },session:current});
+  }
+
   async function joinLeague(inviteCode,teamName){
     const current=await session();
     if(!current)throw new Error("Sign in before joining a league.");
@@ -234,10 +243,22 @@
     return request("/rest/v1/rpc/make_draft_pick",{method:"POST",body:{p_league_id:leagueId,p_player_id:String(playerId),p_role:String(role)},session:current});
   }
 
+  async function makeBotDraftPick(leagueId){
+    const current=await session();
+    if(!current)throw new Error("Sign in before drafting.");
+    return request("/rest/v1/rpc/make_bot_draft_pick",{method:"POST",body:{p_league_id:leagueId},session:current});
+  }
+
   async function listLeagueMembers(leagueId){
     const current=await session();
     if(!current)return [];
     return request("/rest/v1/league_members?league_id=eq."+encodeURIComponent(leagueId)+"&select=league_id,user_id,role,team_name,joined_at&order=joined_at",{session:current});
+  }
+
+  async function listLeagueBots(leagueId){
+    const current=await session();
+    if(!current)return [];
+    return request("/rest/v1/league_bots?league_id=eq."+encodeURIComponent(leagueId)+"&select=id,league_id,team_name,difficulty,created_at&order=created_at",{session:current});
   }
 
   async function listRosters(leagueId){
@@ -327,8 +348,8 @@
     readSession,
     onSessionChange(fn){listeners.add(fn);return()=>listeners.delete(fn);},
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
-    listLeagues,createLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,
-    getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,
+    listLeagues,createLeague,createBotLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
+    getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,makeBotDraftPick,
     listRosters,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
     listNotifications,markNotificationsRead,
