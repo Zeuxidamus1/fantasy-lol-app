@@ -1118,11 +1118,18 @@ function render(view="home",options={}){
           copy.textContent="The live league draft is underway. Open the Draft Room to see the board and make your picks.";
           action.textContent="Open Draft Room";
           action.onclick=()=>render("draft");
+        }else if(["disbanded","archived"].includes(status)){
+          title.textContent="League archived";
+          copy.textContent="This league has been disbanded and is read-only. Historical rosters, draft results, transactions, and results remain available.";
+          action.textContent="View League";
+          action.onclick=()=>render("league");
         }else{
-          title.textContent="League active";
-          copy.textContent="Your draft is complete. Manage your roster, transactions, and upcoming match schedule.";
-          action.textContent="Manage My Team";
-          action.onclick=()=>render("team");
+          title.textContent=status==="completed"?"Season complete":"League active";
+          copy.textContent=status==="completed"
+            ?"The season is complete. Review league history, standings, rosters, and results."
+            :"Your draft is complete. Manage your roster, transactions, and upcoming match schedule.";
+          action.textContent=status==="completed"?"View League":"Manage My Team";
+          action.onclick=()=>render(status==="completed"?"league":"team");
         }
       }catch(err){
         noLeague.hidden=false;
@@ -1821,7 +1828,9 @@ function render(view="home",options={}){
             const membership=memberships[index];
             const teamName=membership?.team_name||"Your team";
             const role=membership?.role==="owner"?"Commissioner":"Manager";
-            return '<button class="cloud-league-item league-choice '+(active?"active-cloud-league":"")+'" data-cloud-league="'+h(l.id)+'" aria-pressed="'+String(active)+'"><div><strong>'+h(l.name)+'</strong><small>'+h(teamName)+' · '+h(role)+' · Invite: '+h(l.invite_code||"—")+'</small></div><span class="league-choice-state">'+(active?"Active":"Select")+'</span></button>';
+            const archived=["disbanded","archived"].includes(l.status);
+            const statusLabel=archived?"Archived":String(l.status||"pre_draft").replace("_"," ");
+            return '<button class="cloud-league-item league-choice '+(active?"active-cloud-league ":"")+(archived?"archived-cloud-league":"")+'" data-cloud-league="'+h(l.id)+'" aria-pressed="'+String(active)+'"><div><strong>'+h(l.name)+'</strong><small>'+h(teamName)+' · '+h(role)+' · '+h(statusLabel)+' · Invite: '+h(l.invite_code||"—")+'</small></div><span class="league-choice-state">'+(active?(archived?"Archived":"Active"):"Select")+'</span></button>';
           }).join(""):'<div class="empty-state"><strong>No online leagues yet</strong><small>Create one or join with an invite code.</small></div>';
 
           await applyLeaguePermissions(activeId);
@@ -1893,6 +1902,23 @@ function render(view="home",options={}){
     })();
     const leagueLabel=document.querySelector("#leagueNameLabel");
     if(leagueLabel)leagueLabel.textContent=String(settings.name||"Fantasy League").toUpperCase();
+    (async()=>{
+      const stateCard=document.querySelector("#leagueStateCard");
+      if(!stateCard||!cloudReady())return;
+      try{
+        const activeId=getActiveLeagueId();
+        const leagues=await backend().listLeagues();
+        const league=leagues.find(l=>String(l.id)===String(activeId));
+        if(!league)return;
+        const archived=["disbanded","archived"].includes(league.status);
+        stateCard.hidden=!archived;
+        if(archived){
+          document.querySelector("#leagueStateTitle").textContent="This league has been disbanded";
+          document.querySelector("#leagueStatePill").textContent="ARCHIVED";
+          document.querySelector("#leagueStateCopy").textContent="This league is read-only. League history, rosters, draft results, transactions, and recorded results remain available.";
+        }
+      }catch{}
+    })();
     document.querySelector("#leagueSettingsSummary").innerHTML=`
       <div><span>Teams</span><strong>${settings.managers}</strong></div>
       <div><span>Draft</span><strong>${settings.draftType}</strong></div>
@@ -1979,7 +2005,7 @@ function render(view="home",options={}){
 
         const taken=new Set(picks.map(p=>String(p.player_id)));
         const q=search.value.trim().toLowerCase();
-        const myTurn=draft?.status==="drafting"&&String(managerForPick(Number(draft.current_pick)||0,draft.manager_order||[]))===String(currentUser.id);
+        const myTurn=league?.status==="drafting"&&draft?.status==="drafting"&&String(managerForPick(Number(draft.current_pick)||0,draft.manager_order||[]))===String(currentUser.id);
         const mine=picks.filter(p=>String(p.user_id)===String(currentUser.id));
         const assignedMine=draftAssignments(mine);
         const draftValidation=validateRoster(assignedMine,draftSettings);
@@ -2127,14 +2153,87 @@ function render(view="home",options={}){
             render("league",{replace:true});
             return;
           }
-          if(league?.status!=="pre_draft"){
-            showToast("League settings are locked after the draft starts.");
-            render("league",{replace:true});
-            return;
-          }
+          const editable=league?.status==="pre_draft";
           settings={...defaultLeagueSettings,...(league?.settings||{}),name:league?.name||settings.name,scoring:{...defaultLeagueSettings.scoring,...(league?.settings?.scoring||{})}};
           storageSet("riftLeagueSettings",JSON.stringify(settings));
           setupScreen.hidden=false;
+
+          const saveBtn=document.querySelector("#saveLeagueBtn");
+          const managementPill=document.querySelector("#managementStatusPill");
+          const managementCopy=document.querySelector("#managementStatusCopy");
+          const disbandBtn=document.querySelector("#disbandLeagueBtn");
+          const reactivateBtn=document.querySelector("#reactivateLeagueBtn");
+          const renewBtn=document.querySelector("#renewLeagueBtn");
+          const archived=["disbanded","archived"].includes(league?.status);
+          const completed=league?.status==="completed" || league?.settings?.preDisbandStatus==="completed";
+
+          managementPill.textContent=archived?"ARCHIVED":String(league?.status||"pre_draft").replace("_"," ").toUpperCase();
+          managementCopy.textContent=archived
+            ?"This league is read-only. Historical data remains available to every member."
+            :"Disbanding ends active league activity without deleting league history.";
+          disbandBtn.hidden=archived;
+          reactivateBtn.hidden=!archived||completed;
+          renewBtn.hidden=!archived||!completed;
+
+          if(!editable){
+            document.querySelectorAll("#setupScreen input:not([type=button]), #setupScreen select, #setupScreen .choice").forEach(el=>{el.disabled=true;el.setAttribute("aria-disabled","true");});
+            if(saveBtn){saveBtn.disabled=true;saveBtn.textContent="League Settings Locked";}
+            document.querySelectorAll("[data-remove-member]").forEach(el=>el.disabled=true);
+          }
+
+          disbandBtn.onclick=async()=>{
+            const currentStatus=league?.status||"pre_draft";
+            if(["drafting","active"].includes(currentStatus)){
+              const proceed=window.confirm("League activity may currently be in progress. Disbanding now will immediately stop future league activity. Recorded scores and history will not be changed. Continue?");
+              if(!proceed)return;
+            }
+            const typed=window.prompt('Type DISBAND to confirm. This will make the league read-only but preserve its history.');
+            if(String(typed||"").trim().toUpperCase()!=="DISBAND")return showToast("Disband canceled");
+            if(!window.confirm("Final confirmation: disband this league for all members?"))return;
+            disbandBtn.disabled=true;
+            try{
+              await b.disbandLeague(activeLeagueId);
+              showToast("League disbanded and archived");
+              render("league",{replace:true});
+            }catch(err){
+              showToast(err.message||"Could not disband league");
+              disbandBtn.disabled=false;
+            }
+          };
+
+          reactivateBtn.onclick=async()=>{
+            if(!window.confirm("Reactivate this league and restore league activity?"))return;
+            reactivateBtn.disabled=true;
+            try{
+              await b.reactivateLeague(activeLeagueId);
+              showToast("League reactivated");
+              render("league",{replace:true});
+            }catch(err){
+              showToast(err.message||"Could not reactivate league");
+              reactivateBtn.disabled=false;
+            }
+          };
+
+          renewBtn.onclick=async()=>{
+            const mineTeam=mine?.team_name||"My Team";
+            const nextName=(league?.name||"Fantasy League")+" - New Season";
+            if(!window.confirm('Create "'+nextName+'" as a new season while keeping this archived league intact?'))return;
+            renewBtn.disabled=true;
+            try{
+              const nextSettings={...settings,parentLeagueId:activeLeagueId,renewedFrom:league?.name||null};
+              const created=await b.createLeague(nextName,nextSettings);
+              const nextLeague=Array.isArray(created)?created[0]:created;
+              if(nextLeague?.id){
+                await b.updateTeamName(nextLeague.id,mineTeam);
+                setActiveLeagueId(nextLeague.id);
+              }
+              showToast("New season created");
+              render("league",{replace:true});
+            }catch(err){
+              showToast(err.message||"Could not renew league");
+              renewBtn.disabled=false;
+            }
+          };
         }catch(err){
           showToast(err.message||"Could not load league settings.");
           render("league",{replace:true});

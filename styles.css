@@ -199,3 +199,15 @@ body.tournament-guide-open{overflow:hidden}
 @media (max-width:520px){
   .roster-status-banner{padding:11px 12px}
 }
+
+
+/* League lifecycle management */
+.archived-cloud-league{opacity:.82;border-style:dashed}
+.archived-cloud-league .league-choice-state{border-color:#725c32;background:#231c0f;color:#f0ca75}
+.league-state-card{border-color:#725c32;background:#17130d}
+.league-management-card{border-color:#55313a}
+.league-management-actions{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.danger-btn{width:100%;min-height:44px;border:1px solid #9a4658;background:#3a1820;color:#ffd9df;border-radius:12px;padding:11px 14px;font:inherit;font-weight:800;cursor:pointer}
+.danger-btn:hover{background:#4a1d27}
+.danger-btn:disabled{opacity:.55;cursor:not-allowed}
+@media (min-width:560px){.league-management-actions{flex-direction:row}.league-management-actions>*{flex:1}}
