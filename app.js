@@ -1859,12 +1859,14 @@ function render(view="home",options={}){
     const cloudCopy=document.querySelector("#cloudLeagueCopy");
     const cloudList=document.querySelector("#cloudLeagueList");
     const overviewCard=document.querySelector("#leagueOverviewCard");
+    const activeLeagueEntryCard=document.querySelector("#activeLeagueEntryCard");
     const quickAccess=document.querySelector("#leagueQuickAccess");
     const rulesModal=document.querySelector("#leagueRulesModal");
     const entryActions=document.querySelector("#leagueEntryActions");
 
     if(!getActiveLeagueId()){
       if(overviewCard)overviewCard.hidden=true;
+      if(activeLeagueEntryCard)activeLeagueEntryCard.hidden=true;
       if(quickAccess)quickAccess.hidden=true;
       if(rulesModal)rulesModal.hidden=true;
     }
@@ -1917,6 +1919,7 @@ function render(view="home",options={}){
 
         if(!leagues.length){
           if(overviewCard)overviewCard.hidden=true;
+          if(activeLeagueEntryCard)activeLeagueEntryCard.hidden=true;
           if(quickAccess)quickAccess.hidden=true;
           if(rulesModal)rulesModal.hidden=true;
           if(cloudCard)cloudCard.hidden=false;
@@ -1940,6 +1943,7 @@ function render(view="home",options={}){
         const activeMembership=memberships[activeIndex]||null;
 
         if(overviewCard)overviewCard.hidden=false;
+        if(activeLeagueEntryCard)activeLeagueEntryCard.hidden=false;
         if(quickAccess)quickAccess.hidden=false;
         if(rulesModal)rulesModal.hidden=true;
         if(cloudCard)cloudCard.hidden=true;
@@ -1951,11 +1955,6 @@ function render(view="home",options={}){
         document.querySelector("#leagueOverviewTeam").textContent=activeMembership?.team_name||"Your team";
         document.querySelector("#leagueOverviewRole").textContent=activeMembership?.role==="owner"?"Commissioner":"Manager";
         document.querySelector("#leagueOverviewInvite").textContent=activeLeague.invite_code||"—";
-        const botCount=Number(activeLeague.settings?.botManagers)||0;
-        const humanCount=Number(activeLeague.settings?.humanManagers)||Math.max(1,Number(activeLeague.settings?.managers||1)-botCount);
-        document.querySelector("#leagueOverviewCopy").textContent=activeLeague.settings?.botLeague
-          ?`Bot League · ${humanCount} human${humanCount===1?"":"s"} · ${botCount} bot${botCount===1?"":"s"} · ${String(activeLeague.settings?.botDifficulty||"competitive").replace(/^./,c=>c.toUpperCase())} difficulty`
-          :"Your active fantasy league.";
 
         const rulesToggle=document.querySelector("#leagueRulesToggle");
         const closeRules=()=>{
