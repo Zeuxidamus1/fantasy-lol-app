@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261005-4" />
+  <link rel="stylesheet" href="styles.css?v=20261005-5" />
 </head>
 <body>
   <noscript><div class="no-js-message">Rift Fantasy requires JavaScript to run. Enable JavaScript and reload the page.</div></noscript>
@@ -32,10 +32,8 @@
 
     <nav class="bottom-nav" aria-label="Primary navigation">
       <button class="nav-item active" data-view="home"><span aria-hidden="true">⌂</span><small>Home</small></button>
-      <button class="nav-item" data-view="team"><span aria-hidden="true">♟</span><small>My Team</small></button>
-      <button class="nav-item" data-view="schedule"><span aria-hidden="true">▣</span><small>Schedule</small></button>
-      <button class="nav-item" data-view="players"><span aria-hidden="true">⌕</span><small>Players</small></button>
       <button class="nav-item" data-view="league"><span aria-hidden="true">🏆</span><small>League</small></button>
+      <button class="nav-item" data-view="players"><span aria-hidden="true">⌕</span><small>Players</small></button>
     </nav>
   </div>
 
@@ -186,44 +184,33 @@
   </template>
 
   <template id="home-template">
-    <section class="stack home-dashboard">
+    <section class="stack home-esports">
       <div class="section-title">
-        <div><div class="eyebrow" id="homeLeagueEyebrow">RIFT FANTASY</div><h2 id="homeTitle">Home</h2></div>
-        <span class="league-phase-pill" id="homeLeaguePhase" hidden>PRE-DRAFT</span>
+        <div><div class="eyebrow">PRO LEAGUE OF LEGENDS</div><h2>Home</h2></div>
+        <button class="text-btn" data-jump="schedule">Full Schedule</button>
       </div>
 
-      <section class="card home-league-card" id="homeLeagueCard" hidden>
+      <section class="card home-esports-hero">
         <div class="section-head">
-          <div><div class="eyebrow">ACTIVE LEAGUE</div><h3 id="homeLeagueName">League</h3></div>
-          <button class="text-btn" data-jump="league">League</button>
+          <div><div class="eyebrow">ESPORTS OVERVIEW</div><h3>What’s happening</h3></div>
+          <span class="verified-badge">PRO LOL</span>
         </div>
-        <div class="home-league-grid">
-          <div><small>Your team</small><strong id="homeTeamName">My Team</strong></div>
-          <div><small>Managers</small><strong id="homeManagerCount">0/0</strong></div>
-          <div><small>Roster</small><strong id="homeRosterCount">0/0</strong></div>
-        </div>
+        <p class="profile-copy" id="homeEsportsSummary">Loading the latest tournament schedule available in Rift Fantasy.</p>
       </section>
 
-      <section class="card" id="homeNextCard" hidden>
+      <section class="card">
         <div class="section-head">
-          <div><div class="eyebrow">NEXT STEP</div><h3 id="homeNextTitle">Get started</h3></div>
+          <div><div class="eyebrow">UP NEXT</div><h3>Upcoming matches</h3></div>
+          <button class="text-btn" data-jump="schedule">See All</button>
         </div>
-        <p class="profile-copy" id="homeNextCopy"></p>
-        <button class="primary-btn" id="homeNextAction">Continue</button>
+        <div id="homeUpcomingMatches" class="stack tight home-match-list"></div>
       </section>
 
-      <section class="card" id="homeRosterCard" hidden>
-        <div class="section-head"><div><div class="eyebrow">YOUR TEAM</div><h3>Roster</h3></div><button class="text-btn" data-jump="team">Manage</button></div>
-        <div id="starterPreview" class="player-list"></div>
-      </section>
-
-
-      <section class="card home-empty-card" id="homeNoLeague">
-        <div class="empty-state">
-          <strong>Start your first league</strong>
-          <small>Create a league or join one with an invite code to begin.</small>
-          <button class="primary-btn" data-jump="league">Go to League</button>
+      <section class="card">
+        <div class="section-head">
+          <div><div class="eyebrow">TOURNAMENTS</div><h3>In the current feed</h3></div>
         </div>
+        <div id="homeTournamentList" class="home-tournament-list"></div>
       </section>
     </section>
   </template>
@@ -422,7 +409,7 @@
 
   <template id="players-template">
     <section class="stack">
-      <div class="section-title"><div><div class="eyebrow">FREE AGENTS</div><h2>Players</h2></div></div>
+      <div class="section-title"><div><div class="eyebrow">PRO PLAYER DIRECTORY</div><h2>Players</h2></div></div>
       <label class="search"><span>⌕</span><input id="playerSearch" aria-label="Search players, teams or roles" placeholder="Search players, teams or roles" /></label>
       <div class="filter-row">
         <button class="chip active" data-role="ALL">All</button>
@@ -492,8 +479,9 @@
         </div>
         <div class="league-quick-grid">
           <button class="action-card" data-jump="team"><span class="action-icon">◈</span><strong>My Team</strong><small>Roster & lineup</small></button>
+          <button class="action-card" data-jump="matchup"><span class="action-icon">⚔</span><strong>Matchup</strong><small>Head-to-head</small></button>
           <button class="action-card" data-jump="draft"><span class="action-icon">◎</span><strong>Draft Room</strong><small>Draft board & picks</small></button>
-          <button class="action-card" data-jump="transactions"><span class="action-icon">↕</span><strong>Transactions</strong><small>Waivers, adds & drops</small></button>
+          <button class="action-card" data-jump="transactions"><span class="action-icon">↕</span><strong>Transactions</strong><small>Waivers, trades, adds & drops</small></button>
         </div>
       </section>
 
@@ -821,10 +809,10 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="esports-data.js?v=20261005-4"></script>
-  <script src="backend-config.js?v=20261005-4"></script>
-  <script src="backend.js?v=20261005-4"></script>
-  <script src="player-stats.js?v=20261005-4"></script>
-  <script src="app.js?v=20261005-4"></script>
+  <script src="esports-data.js?v=20261005-5"></script>
+  <script src="backend-config.js?v=20261005-5"></script>
+  <script src="backend.js?v=20261005-5"></script>
+  <script src="player-stats.js?v=20261005-5"></script>
+  <script src="app.js?v=20261005-5"></script>
 </body>
 </html>
