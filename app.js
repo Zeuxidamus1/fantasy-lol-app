@@ -2265,6 +2265,115 @@ function render(view="home",options={}){
     }
   }
 
+  if(view==="bot-league"){
+    const stored=(()=>{try{return JSON.parse(sessionStorage.getItem("riftBotLeagueSetup")||"{}");}catch{return {};}})();
+    let total=Number(stored.totalManagers)||8;
+    let humans=Number(stored.humanManagers)||1;
+    let difficulty=stored.difficulty||"competitive";
+    const botCountEl=document.querySelector("#botManagerCount");
+    const update=()=>{
+      humans=Math.min(humans,total);
+      document.querySelectorAll("[data-bot-size]").forEach(btn=>btn.classList.toggle("active",Number(btn.dataset.botSize)===total));
+      document.querySelectorAll("[data-human-count]").forEach(btn=>{
+        const value=Number(btn.dataset.humanCount);
+        btn.disabled=value>total;
+        btn.classList.toggle("active",value===humans);
+      });
+      document.querySelectorAll("[data-bot-difficulty]").forEach(btn=>btn.classList.toggle("active",btn.dataset.botDifficulty===difficulty));
+      const bots=Math.max(0,total-humans);
+      botCountEl.textContent=`${bots} Bot Manager${bots===1?"":"s"}`;
+    };
+    document.querySelectorAll("[data-bot-size]").forEach(btn=>btn.onclick=()=>{total=Number(btn.dataset.botSize);humans=Math.min(humans,total);update();});
+    document.querySelectorAll("[data-human-count]").forEach(btn=>btn.onclick=()=>{humans=Number(btn.dataset.humanCount);update();});
+    document.querySelectorAll("[data-bot-difficulty]").forEach(btn=>btn.onclick=()=>{difficulty=btn.dataset.botDifficulty;update();});
+    document.querySelector("#botSetupNext").onclick=()=>{
+      sessionStorage.setItem("riftBotLeagueSetup",JSON.stringify({totalManagers:total,humanManagers:humans,difficulty}));
+      render("bot-settings");
+    };
+    update();
+  }
+
+  if(view==="bot-settings"){
+    const setup=(()=>{try{return JSON.parse(sessionStorage.getItem("riftBotLeagueSetup")||"{}");}catch{return {};}})();
+    if(!setup.totalManagers)return render("bot-league",{replace:true});
+    let timer=30;
+    document.querySelectorAll("[data-bot-timer]").forEach(btn=>btn.onclick=()=>{
+      timer=Number(btn.dataset.botTimer);
+      document.querySelectorAll("[data-bot-timer]").forEach(x=>x.classList.toggle("active",x===btn));
+    });
+    document.querySelector("#botSettingsNext").onclick=()=>{
+      const name=document.querySelector("#botLeagueName").value.trim();
+      const teamName=document.querySelector("#botTeamName").value.trim();
+      if(!name)return showToast("Enter a league name.");
+      if(!teamName)return showToast("Enter your team name.");
+      sessionStorage.setItem("riftBotLeagueSettings",JSON.stringify({
+        name,teamName,draftTimer:timer,
+        waivers:document.querySelector("#botWaivers").checked,
+        trades:document.querySelector("#botTrades").checked,
+        autoBotLineups:document.querySelector("#botAutoLineups").checked
+      }));
+      render("bot-confirm");
+    };
+  }
+
+  if(view==="bot-confirm"){
+    const setup=(()=>{try{return JSON.parse(sessionStorage.getItem("riftBotLeagueSetup")||"{}");}catch{return {};}})();
+    const config=(()=>{try{return JSON.parse(sessionStorage.getItem("riftBotLeagueSettings")||"{}");}catch{return {};}})();
+    if(!setup.totalManagers||!config.name)return render("bot-league",{replace:true});
+    const bots=Math.max(0,Number(setup.totalManagers)-Number(setup.humanManagers));
+    document.querySelector("#botConfirmName").textContent=config.name;
+    document.querySelector("#botConfirmManagers").textContent=`${setup.humanManagers} Human${Number(setup.humanManagers)===1?"":"s"} · ${bots} Bot${bots===1?"":"s"}`;
+    document.querySelector("#botConfirmDifficulty").textContent=`${String(setup.difficulty||"competitive").replace(/^./,c=>c.toUpperCase())} Difficulty`;
+    document.querySelector("#botConfirmSettings").innerHTML=`
+      <div><span>League Size</span><strong>${setup.totalManagers} managers</strong></div>
+      <div><span>Draft Type</span><strong>Snake Draft</strong></div>
+      <div><span>Draft Timer</span><strong>${config.draftTimer}s</strong></div>
+      <div><span>Waivers</span><strong>${config.waivers?"Enabled":"Disabled"}</strong></div>
+      <div><span>Trades</span><strong>${config.trades?"Enabled":"Disabled"}</strong></div>
+      <div><span>Bot Lineups</span><strong>${config.autoBotLineups?"Automatic":"Manual"}</strong></div>`;
+
+    const createBtn=document.querySelector("#botCreateLeagueBtn");
+    createBtn.onclick=async()=>{
+      createBtn.disabled=true;
+      try{
+        const settings={
+          ...defaultLeagueSettings,
+          name:config.name,
+          managers:String(setup.totalManagers),
+          bench:"1",
+          draftType:"Snake",
+          scoringFormat:"Head-to-head",
+          draftTimer:Number(config.draftTimer)||30,
+          waivers:!!config.waivers,
+          trades:!!config.trades,
+          botLeague:true,
+          botDifficulty:setup.difficulty,
+          autoBotLineups:!!config.autoBotLineups
+        };
+        const created=await backend().createBotLeague(
+          config.name,config.teamName,setup.totalManagers,setup.humanManagers,setup.difficulty,settings
+        );
+        const league=Array.isArray(created)?created[0]:created;
+        if(!league?.id)throw new Error("Bot League was not created.");
+        setActiveLeagueId(league.id);
+        storageSet("riftLeagueSettings",JSON.stringify(settings));
+        sessionStorage.setItem("riftBotLeagueCreated",JSON.stringify({name:config.name,human:setup.humanManagers,bots}));
+        sessionStorage.removeItem("riftBotLeagueSetup");
+        sessionStorage.removeItem("riftBotLeagueSettings");
+        render("bot-success",{replace:true});
+      }catch(err){
+        showToast(err.message||"Could not create Bot League");
+        createBtn.disabled=false;
+      }
+    };
+  }
+
+  if(view==="bot-success"){
+    const created=(()=>{try{return JSON.parse(sessionStorage.getItem("riftBotLeagueCreated")||"{}");}catch{return {};}})();
+    const copy=document.querySelector("#botSuccessCopy");
+    if(copy&&created.name)copy.textContent=`${created.name} is ready to go. ${created.human} human and ${created.bots} bot manager${created.bots===1?" is":"s are"} in the league.`;
+  }
+
   if(view==="setup"){
     const setupScreen=document.querySelector("#setupScreen");
     const activeLeagueId=getActiveLeagueId();
