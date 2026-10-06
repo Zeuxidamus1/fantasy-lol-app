@@ -203,25 +203,6 @@
     return request("/rest/v1/rpc/remove_league_member",{method:"POST",body:{p_league_id:leagueId,p_user_id:userId},session:current});
   }
 
-  async function disbandLeague(leagueId){
-    const current=await session();
-    if(!current)throw new Error("Sign in before disbanding a league.");
-    return request("/rest/v1/rpc/disband_league",{method:"POST",body:{p_league_id:leagueId},session:current});
-  }
-
-  async function reactivateLeague(leagueId){
-    const current=await session();
-    if(!current)throw new Error("Sign in before reactivating a league.");
-    return request("/rest/v1/rpc/reactivate_league",{method:"POST",body:{p_league_id:leagueId},session:current});
-  }
-
-  async function deleteLeague(leagueId){
-    const current=await session();
-    if(!current)throw new Error("Sign in before deleting a league.");
-    return request("/rest/v1/rpc/delete_league",{method:"POST",body:{p_league_id:leagueId},session:current});
-  }
-
-
   async function getLeagueDraft(leagueId){
     const current=await session();
     if(!current)return null;
@@ -340,7 +321,7 @@
     readSession,
     onSessionChange(fn){listeners.add(fn);return()=>listeners.delete(fn);},
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
-    listLeagues,createLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,disbandLeague,reactivateLeague,deleteLeague,listLeagueMembers,
+    listLeagues,createLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,
     listRosters,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
