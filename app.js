@@ -244,7 +244,7 @@ async function loadRosterFromCloud(leagueId){
       const p=source.find(x=>playerKey(x)===String(row.player_id)||String(x.id||"")===String(row.player_id));
       return p?{...p,id:playerKey(p),position:p.role,slot:row.slot||"BN",role:row.slot==="BN"?"BN":p.role}:null;
     }).filter(Boolean);
-    storageSet("riftUserRoster",JSON.stringify(loaded.length?arrangeUserRoster(loaded):[]));
+    storageSet("riftUserRoster",JSON.stringify(loaded.length?normalizeUserRoster(loaded):[]));
     return true;
   }catch(err){
     console.warn("Cloud roster load failed:",err);
@@ -252,7 +252,7 @@ async function loadRosterFromCloud(leagueId){
   }
 }
 async function saveUserRoster(players){
-  const normalized=arrangeUserRoster(players);
+  const normalized=normalizeUserRoster(players);
   const leagueId=getActiveLeagueId();
   if(leagueId&&cloudReady()){
     const b=backend();
@@ -372,10 +372,29 @@ function arrangeUserRoster(players){
   const arranged=[];
   starterRoles.forEach(role=>{
     const idx=players.findIndex((p,i)=>!used.has(i)&&(p.position||p.role)===role);
-    if(idx>=0){used.add(idx);arranged.push({...players[idx],slot:role,role});}
+    if(idx>=0){used.add(idx);arranged.push({...players[idx],position:role,slot:role,role});}
   });
-  players.forEach((p,i)=>{if(!used.has(i))arranged.push({...p,slot:"BN",role:"BN"});});
+  players.forEach((p,i)=>{
+    if(!used.has(i)){
+      const position=p.position||(p.role==="BN"?"":p.role);
+      arranged.push({...p,position,slot:"BN",role:"BN"});
+    }
+  });
   return arranged;
+}
+
+function normalizeUserRoster(players){
+  const validRoles=new Set(["TOP","JNG","MID","ADC","SUP"]);
+  const usedStarters=new Set();
+  return (players||[]).map(p=>{
+    const position=validRoles.has(p.position)?p.position:(validRoles.has(p.role)?p.role:"");
+    const requested=p.slot||p.role||"BN";
+    if(position&&requested===position&&!usedStarters.has(position)){
+      usedStarters.add(position);
+      return {...p,position,slot:position,role:position};
+    }
+    return {...p,position:position||p.position||"",slot:"BN",role:"BN"};
+  });
 }
 
 function rosterLimit(){
@@ -524,11 +543,14 @@ function playerRow(p, add=false){
 
 function rosterRow(p, manage=false){
   const slot=p.slot||p.role;
-  const fp=Number(p.fp??p.projection??0);
+  const position=p.position||(p.role==="BN"?"":p.role);
+  const lineupAction=slot==="BN"
+    ? '<button class="mini-btn" data-start-roster="'+playerKey(p)+'">START</button>'
+    : '<button class="mini-btn" data-bench-roster="'+playerKey(p)+'">BENCH</button>';
   return `<div class="roster-slot ${slot==="BN"?"bench":""}">
-    <span class="slot-label">${slot}</span>
-    <div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.position||p.role)}${p.opp?" · "+h(p.opp):""}</small></div>
-    ${manage?'<div class="team-actions"><button class="mini-btn danger" data-drop-roster="'+playerKey(p)+'">DROP</button></div>':""}
+    <span class="slot-label">${h(slot)}</span>
+    <div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(position||p.role)}${p.opp?" · "+h(p.opp):""}</small></div>
+    ${manage?'<div class="team-actions">'+lineupAction+'<button class="mini-btn danger" data-drop-roster="'+playerKey(p)+'">DROP</button></div>':""}
   </div>`;
 }
 
@@ -972,7 +994,7 @@ function render(view="home",options={}){
     const rosterCards=document.querySelectorAll(".team-roster-card,.team-summary-card");
 
     let rosterMovesEnabled=false;
-    const bindDrops=()=>{
+    const bindRosterActions=()=>{
       document.querySelectorAll("[data-drop-roster]").forEach(btn=>btn.onclick=async()=>{
         if(!rosterMovesEnabled)return showToast("Roster moves unlock after the draft.");
         const currentNow=getUserRoster();
@@ -986,6 +1008,38 @@ function render(view="home",options={}){
           showToast(`${player.name} dropped`);
           render("team",{replace:true});
         }catch(err){showToast(err.message||"Could not drop player");btn.disabled=false;}
+      });
+
+      document.querySelectorAll("[data-bench-roster]").forEach(btn=>btn.onclick=async()=>{
+        if(!rosterMovesEnabled)return showToast("Lineup changes unlock after the draft.");
+        const currentNow=getUserRoster();
+        const player=currentNow.find(p=>playerKey(p)===btn.dataset.benchRoster);
+        if(!player)return;
+        btn.disabled=true;
+        try{
+          await saveUserRoster(currentNow.map(p=>playerKey(p)===playerKey(player)?{...p,slot:"BN",role:"BN"}:p));
+          showToast(`${player.name} moved to bench`);
+          render("team",{replace:true});
+        }catch(err){showToast(err.message||"Could not update lineup");btn.disabled=false;}
+      });
+
+      document.querySelectorAll("[data-start-roster]").forEach(btn=>btn.onclick=async()=>{
+        if(!rosterMovesEnabled)return showToast("Lineup changes unlock after the draft.");
+        const currentNow=getUserRoster();
+        const player=currentNow.find(p=>playerKey(p)===btn.dataset.startRoster);
+        const position=player?.position||(player?.role==="BN"?"":player?.role);
+        if(!player||!position)return showToast("Player role is unavailable.");
+        btn.disabled=true;
+        const next=currentNow.map(p=>{
+          if(playerKey(p)===playerKey(player))return {...p,position,slot:position,role:position};
+          if((p.slot||p.role)===position)return {...p,slot:"BN",role:"BN"};
+          return p;
+        });
+        try{
+          await saveUserRoster(next);
+          showToast(`${player.name} moved into the starting lineup`);
+          render("team",{replace:true});
+        }catch(err){showToast(err.message||"Could not update lineup");btn.disabled=false;}
       });
     };
 
@@ -1001,7 +1055,7 @@ function render(view="home",options={}){
       benchList.innerHTML=bench.length
         ?bench.map(p=>rosterRow(p,rosterMovesEnabled)).join("")
         :'<div class="empty-state"><strong>Bench is empty</strong><small>Bench players will appear here.</small></div>';
-      bindDrops();
+      bindRosterActions();
     };
 
     if(!leagueId||!cloudReady()){
