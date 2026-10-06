@@ -302,3 +302,15 @@ body.tournament-guide-open{overflow:hidden}
 
 .profile-player-image{width:54px;height:54px;border-radius:16px;object-fit:cover;background:#133248;grid-row:1}
 .profile-player-image:not([hidden]) + .profile-badge{display:none}
+
+
+/* Active vs legacy archived league separation */
+.league-list-tabs{display:flex;gap:7px;margin-top:12px}
+.league-list-tabs .chip{min-height:36px}
+.legacy-archive-row{cursor:default}
+.archive-row-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.archive-row-actions .league-choice-state{white-space:nowrap}
+@media(max-width:430px){
+  .legacy-archive-row{align-items:flex-start}
+  .archive-row-actions{flex-direction:column;align-items:flex-end}
+}
