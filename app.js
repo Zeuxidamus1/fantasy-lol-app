@@ -541,13 +541,15 @@ function playerRow(p, add=false){
   </div>`;
 }
 
-function rosterRow(p, manage=false){
+function rosterRow(p, manage=false, occupiedStarterRoles=new Set()){
   const slot=p.slot||p.role;
   const position=p.position||(p.role==="BN"?"":p.role);
-  const lineupAction=slot==="BN"
-    ? '<button class="mini-btn" data-start-roster="'+playerKey(p)+'">START</button>'
+  const isBench=slot==="BN";
+  const actionLabel=isBench&&position&&occupiedStarterRoles.has(position)?"SWAP":"START";
+  const lineupAction=isBench
+    ? '<button class="mini-btn" data-start-roster="'+playerKey(p)+'">'+actionLabel+'</button>'
     : '<button class="mini-btn" data-bench-roster="'+playerKey(p)+'">BENCH</button>';
-  return `<div class="roster-slot ${slot==="BN"?"bench":""}">
+  return `<div class="roster-slot ${isBench?"bench":""}">
     <span class="slot-label">${h(slot)}</span>
     <div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(position||p.role)}${p.opp?" · "+h(p.opp):""}</small></div>
     ${manage?'<div class="team-actions">'+lineupAction+'<button class="mini-btn danger" data-drop-roster="'+playerKey(p)+'">DROP</button></div>':""}
@@ -1037,7 +1039,8 @@ function render(view="home",options={}){
         });
         try{
           await saveUserRoster(next);
-          showToast(`${player.name} moved into the starting lineup`);
+          const replacing=currentNow.some(p=>playerKey(p)!==playerKey(player)&&(p.slot||p.role)===position);
+          showToast(replacing?`${player.name} swapped into ${position}`:`${player.name} moved into the ${position} slot`);
           render("team",{replace:true});
         }catch(err){showToast(err.message||"Could not update lineup");btn.disabled=false;}
       });
@@ -1045,16 +1048,29 @@ function render(view="home",options={}){
 
     const drawRoster=()=>{
       const current=getUserRoster();
+      const starterRoles=["TOP","JNG","MID","ADC","SUP"];
       const starters=current.filter(p=>(p.slot||p.role)!=="BN");
       const bench=current.filter(p=>(p.slot||p.role)==="BN");
+      const occupied=new Set(starters.map(p=>p.slot||p.role));
+      const rosterPositions=new Set(current.map(p=>p.position||(p.role==="BN"?"":p.role)).filter(Boolean));
       rosterCount.textContent=`${current.length}/${rosterLimit()}`;
       starterCount.textContent=`${starters.length}/5`;
-      starterList.innerHTML=starters.length
-        ?starters.map(p=>rosterRow(p,rosterMovesEnabled)).join("")
-        :'<div class="empty-state"><strong>No starters yet</strong><small>Add players from the Players tab to build your lineup.</small></div>';
-      benchList.innerHTML=bench.length
-        ?bench.map(p=>rosterRow(p,rosterMovesEnabled)).join("")
-        :'<div class="empty-state"><strong>Bench is empty</strong><small>Bench players will appear here.</small></div>';
+
+      starterList.innerHTML=starterRoles.map(role=>{
+        const p=starters.find(x=>(x.slot||x.role)===role);
+        if(p)return rosterRow(p,rosterMovesEnabled,occupied);
+        const hasRoleOnBench=bench.some(x=>(x.position||(x.role==="BN"?"":x.role))===role);
+        return `<div class="roster-slot empty-roster-slot"><span class="slot-label">${role}</span><div class="player-info"><strong>Empty ${role} slot</strong><small>${hasRoleOnBench?"A bench player can fill this spot":"No "+role+" player is on your roster"}</small></div></div>`;
+      }).join("");
+
+      const missingRosterRoles=starterRoles.filter(role=>!rosterPositions.has(role));
+      const warning=missingRosterRoles.length
+        ? `<div class="lineup-warning"><strong>Incomplete roster</strong><small>You do not currently have a ${h(missingRosterRoles.join(" or "))} player, so a full 5-player starting lineup is impossible until you add/trade for those roles.</small></div>`
+        : "";
+
+      benchList.innerHTML=warning+(bench.length
+        ?bench.map(p=>rosterRow(p,rosterMovesEnabled,occupied)).join("")
+        :'<div class="empty-state"><strong>Bench is empty</strong><small>Bench players will appear here.</small></div>');
       bindRosterActions();
     };
 
