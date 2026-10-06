@@ -1659,11 +1659,6 @@ begin
    where id=p_league_id
    returning * into result;
 
-  update public.league_drafts
-     set status=case when status='drafting' then 'waiting' else status end,
-         updated_at=now()
-   where league_id=p_league_id;
-
   perform public.notify_league_members(
     p_league_id,auth.uid(),'league_disbanded',
     jsonb_build_object('league_id',p_league_id,'disbanded_at',now()),null
@@ -1777,6 +1772,7 @@ declare
   canonical_role text;
 begin
   if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if not exists(select 1 from public.leagues where id=p_league_id and status='drafting') then raise exception 'Draft is not active'; end if;
   select role into canonical_role from public.fantasy_players where id=p_player_id and active;
   if canonical_role is null then raise exception 'Player is invalid or inactive'; end if;
   if p_role<>canonical_role then raise exception 'Player role does not match authoritative player data'; end if;
