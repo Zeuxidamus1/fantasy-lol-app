@@ -1909,8 +1909,7 @@ function render(view="home",options={}){
         };
         if(rulesToggle)rulesToggle.onclick=openRules;
         rulesModal?.querySelectorAll("[data-close-league-rules]").forEach(el=>el.onclick=closeRules);
-        const rulesKeyHandler=e=>{if(e.key==="Escape"&&!rulesModal?.hidden)closeRules();};
-        document.addEventListener("keydown",rulesKeyHandler,{once:false});
+        if(rulesModal)rulesModal.onkeydown=e=>{if(e.key==="Escape")closeRules();};
 
         const switchRow=document.querySelector("#leagueSwitchRow");
         const switcher=document.querySelector("#leagueSwitcherSelect");
