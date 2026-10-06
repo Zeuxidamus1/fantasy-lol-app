@@ -196,7 +196,7 @@ function playerKey(p){
 }
 
 function defaultUserRoster(){
-  const limit=5+Number(getLeagueSettings().bench||1);
+  const limit=rosterLimit();
   const live=((window.ESPORTS_DATA&&window.ESPORTS_DATA.players)||[]).map(p=>({...p,fp:Number(p.projection??p.fp??20)}));
   if(live.length>=5){
     const roles=["TOP","JNG","MID","ADC","SUP"];
@@ -1898,7 +1898,7 @@ function render(view="home",options={}){
       <div><span>Draft</span><strong>${settings.draftType}</strong></div>
       <div><span>Scoring</span><strong>${settings.scoringFormat}</strong></div>
       <div><span>Competition</span><strong>${settings.competition}</strong></div>
-      <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP${settings.teamSlot?" · TEAM":""}</strong></div>`;
+      <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP · FLEX · ${settings.bench} BN</strong></div>`;
     document.querySelector("#rulesBtn").onclick=()=>showToast(`Scoring: K +${settings.scoring.kills} · D ${settings.scoring.deaths} · A +${settings.scoring.assists} · CS +${settings.scoring.cs} · Win +${settings.scoring.win}`);
   }
   if(view==="draft"){
