@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261005-40" />
+  <link rel="stylesheet" href="styles.css?v=20261005-41" />
 </head>
 <body>
   <noscript><div class="no-js-message">Rift Fantasy requires JavaScript to run. Enable JavaScript and reload the page.</div></noscript>
@@ -503,6 +503,7 @@
         <div class="league-entry-actions active-league-entry-actions">
           <button class="primary-btn" type="button" data-jump="create-league">Create a League</button>
           <button class="secondary-btn" type="button" data-jump="join-league">Join a League</button>
+          <button class="secondary-btn bot-entry-btn" type="button" data-jump="bot-league">🤖 Bot League</button>
         </div>
       </section>
 
@@ -709,6 +710,18 @@
         <div><div class="eyebrow">NEW FANTASY LEAGUE</div><h2>Create League</h2></div>
         <button class="secondary-btn" data-jump="league">Back</button>
       </div>
+
+      <section class="card bot-create-callout">
+        <div class="bot-create-callout-content">
+          <span class="bot-avatar">🤖</span>
+          <div>
+            <div class="eyebrow">PLAY SOLO OR WITH AI</div>
+            <h3>Create a Bot League</h3>
+            <p>Want AI managers to draft and compete against you? Use Bot League setup instead.</p>
+          </div>
+        </div>
+        <button class="secondary-btn bot-entry-btn" type="button" data-jump="bot-league">Create Bot League</button>
+      </section>
 
       <section class="card setup-card">
         <div class="form-group">
@@ -1046,10 +1059,10 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="esports-data.js?v=20261005-40"></script>
-  <script src="backend-config.js?v=20261005-40"></script>
-  <script src="backend.js?v=20261005-40"></script>
-  <script src="player-stats.js?v=20261005-40"></script>
-  <script src="app.js?v=20261005-40"></script>
+  <script src="esports-data.js?v=20261005-41"></script>
+  <script src="backend-config.js?v=20261005-41"></script>
+  <script src="backend.js?v=20261005-41"></script>
+  <script src="player-stats.js?v=20261005-41"></script>
+  <script src="app.js?v=20261005-41"></script>
 </body>
 </html>
