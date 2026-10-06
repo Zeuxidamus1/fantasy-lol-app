@@ -1806,6 +1806,12 @@ function render(view="home",options={}){
     const formatCard=document.querySelector("#leagueFormatCard");
     const entryActions=document.querySelector("#leagueEntryActions");
 
+    if(!getActiveLeagueId()){
+      if(overviewCard)overviewCard.hidden=true;
+      if(quickAccess)quickAccess.hidden=true;
+      if(formatCard)formatCard.hidden=true;
+    }
+
     (async()=>{
       if(!cloudReady()){
         if(overviewCard)overviewCard.hidden=true;
