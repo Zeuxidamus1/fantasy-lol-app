@@ -2118,7 +2118,12 @@ function render(view="home",options={}){
         const myTurn=league?.status==="drafting"&&draft?.status==="drafting"&&String(managerForPick(Number(draft.current_pick)||0,draft.manager_order||[]))===String(currentUser.id);
         const mine=picks.filter(p=>String(p.user_id)===String(currentUser.id));
         const assignedMine=draftAssignments(mine);
-        const draftValidation=validateRoster(assignedMine,draftSettings);
+        const activeDraftSettings={
+          ...defaultLeagueSettings,
+          ...(league?.settings||{}),
+          scoring:{...defaultLeagueSettings.scoring,...(league?.settings?.scoring||{})}
+        };
+        const draftValidation=validateRoster(assignedMine,activeDraftSettings);
         const draftStatus=document.querySelector("#draftRosterStatus");
         const draftStatusTitle=document.querySelector("#draftRosterStatusTitle");
         const draftStatusCopy=document.querySelector("#draftRosterStatusCopy");
