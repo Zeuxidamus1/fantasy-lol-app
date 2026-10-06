@@ -1601,3 +1601,33 @@ grant execute on function public.replace_roster(uuid,jsonb) to authenticated;
 grant execute on function public.create_waiver(uuid,text,integer) to authenticated;
 grant execute on function public.make_draft_pick(uuid,text,text) to authenticated;
 grant execute on function public.accept_trade(uuid) to authenticated;
+
+
+-- Commissioner member management
+create or replace function public.remove_league_member(p_league_id uuid,p_user_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path=public
+as $$
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if p_user_id is null then raise exception 'Manager is required'; end if;
+  if p_user_id=auth.uid() then raise exception 'Commissioner cannot remove themselves'; end if;
+  if not exists(
+    select 1 from public.leagues
+    where id=p_league_id and owner_id=auth.uid() and status='pre_draft'
+  ) then
+    raise exception 'Only the commissioner can remove managers before the draft starts';
+  end if;
+
+  delete from public.league_members
+  where league_id=p_league_id and user_id=p_user_id and role<>'owner';
+
+  if not found then raise exception 'League manager not found'; end if;
+  return true;
+end;
+$$;
+
+revoke all on function public.remove_league_member(uuid,uuid) from public,anon;
+grant execute on function public.remove_league_member(uuid,uuid) to authenticated;
