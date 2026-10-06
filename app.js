@@ -2209,6 +2209,10 @@ function render(view="home",options={}){
       const teamInput=document.querySelector("#createTeamName");
       const createBtn=document.querySelector("#confirmCreateLeagueBtn");
       const defaults=getLeagueSettings();
+      document.querySelectorAll("[data-create-managers]").forEach(btn=>btn.onclick=()=>{
+        managerSelect.value=btn.dataset.createManagers;
+        document.querySelectorAll("[data-create-managers]").forEach(x=>x.classList.toggle("active",x===btn));
+      });
 
       createBtn.onclick=async()=>{
         const name=nameInput.value.trim();
