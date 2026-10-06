@@ -202,8 +202,6 @@ body.tournament-guide-open{overflow:hidden}
 
 
 /* League lifecycle management */
-.archived-cloud-league{opacity:.82;border-style:dashed}
-.archived-cloud-league .league-choice-state{border-color:#725c32;background:#231c0f;color:#f0ca75}
 .league-state-card{border-color:#725c32;background:#17130d}
 .league-management-card{border-color:#55313a}
 .league-management-actions{display:flex;flex-direction:column;gap:10px;margin-top:14px}
@@ -304,13 +302,9 @@ body.tournament-guide-open{overflow:hidden}
 .profile-player-image:not([hidden]) + .profile-badge{display:none}
 
 
-/* Active vs legacy archived league separation */
-.league-list-tabs{display:flex;gap:7px;margin-top:12px}
-.league-list-tabs .chip{min-height:36px}
-.legacy-archive-row{cursor:default}
-.archive-row-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
-.archive-row-actions .league-choice-state{white-space:nowrap}
-@media(max-width:430px){
-  .legacy-archive-row{align-items:flex-start}
-  .archive-row-actions{flex-direction:column;align-items:flex-end}
-}
+
+
+/* Empty League state */
+.cloud-league-card.empty-league-mode .league-add-panel{margin-top:0;border-top:0;padding-top:0}
+.cloud-league-card.empty-league-mode .league-add-panel>summary{display:none}
+.cloud-league-card.empty-league-mode .cloud-league-actions{display:flex!important}
