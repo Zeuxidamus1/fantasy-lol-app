@@ -1297,6 +1297,15 @@ function render(view="home",options={}){
     const p=playerById(selectedPlayerId) || allFantasyPlayers()[0];
     if(!p){ render("players"); return; }
     selectedPlayerId=p.id||selectedPlayerId;
+    const profileImage=document.querySelector("#profileImage");
+    const playerImage=p.image||p.imageUrl||p.photo||"";
+    if(profileImage){
+      profileImage.hidden=!playerImage;
+      if(playerImage){
+        profileImage.src=playerImage;
+        profileImage.alt=`${p.name||"Player"} profile photo`;
+      }
+    }
     document.querySelector("#profileRole").textContent=p.role||"—";
     document.querySelector("#profileTeam").textContent=p.team||"Unknown team";
     document.querySelector("#profileName").textContent=p.name||"Player";
