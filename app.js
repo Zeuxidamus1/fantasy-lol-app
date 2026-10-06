@@ -2482,6 +2482,24 @@ markNotificationsReadBtn.onclick=async()=>{
 };
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNotifications();});
 
+// Brief visual confirmation for button taps. The state clears automatically.
+document.addEventListener("pointerdown",e=>{
+  const button=e.target.closest?.("button");
+  if(!button||button.disabled)return;
+  button.classList.add("ui-pressed");
+});
+const clearPressed=e=>{
+  const button=e.target.closest?.("button");
+  if(!button)return;
+  setTimeout(()=>button.classList.remove("ui-pressed"),120);
+};
+document.addEventListener("pointerup",clearPressed);
+document.addEventListener("pointercancel",clearPressed);
+document.addEventListener("pointerleave",e=>{
+  const button=e.target.closest?.("button");
+  if(button)button.classList.remove("ui-pressed");
+},true);
+
 void loadNotifications();
 notificationTimerId=setInterval(()=>{if(!document.hidden)void loadNotifications();},8000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)void loadNotifications();});
