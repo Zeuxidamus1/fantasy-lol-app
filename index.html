@@ -464,6 +464,10 @@
         <button class="action-card" data-jump="draft"><span class="action-icon">◎</span><strong>Draft Room</strong><small>Live snake draft</small></button>
         <button class="action-card" data-jump="transactions"><span class="action-icon">↕</span><strong>Transactions</strong><small>Waivers, adds & drops</small></button>
       </div>
+      <div class="card league-state-card" id="leagueStateCard" hidden>
+        <div class="section-head"><div><div class="eyebrow">LEAGUE STATUS</div><h3 id="leagueStateTitle">League archived</h3></div><span class="status-pill" id="leagueStatePill">ARCHIVED</span></div>
+        <p class="profile-copy" id="leagueStateCopy">This league is read-only. History, standings, rosters, draft results, and transactions remain available.</p>
+      </div>
       <div class="card">
         <div class="section-head"><div><div class="eyebrow">LEAGUE SETTINGS</div><h3>Current format</h3></div><button class="text-btn" id="rulesBtn">Scoring</button></div>
         <div class="settings-list" id="leagueSettingsSummary">
@@ -683,6 +687,17 @@
         <div id="commissionerMemberList" class="stack tight">
           <div class="empty-state"><strong>Loading managers…</strong><small>Commissioner controls are available before the draft begins.</small></div>
         </div>
+      </div>
+
+      <div class="card setup-card league-management-card" id="leagueManagementCard">
+        <div class="section-head"><div><div class="eyebrow">LEAGUE MANAGEMENT</div><h3>League lifecycle</h3></div><span class="status-pill" id="managementStatusPill">ACTIVE</span></div>
+        <p class="profile-copy" id="managementStatusCopy">End league activity without deleting league history.</p>
+        <div class="league-management-actions">
+          <button class="danger-btn" id="disbandLeagueBtn" type="button">Disband League</button>
+          <button class="secondary-btn" id="reactivateLeagueBtn" type="button" hidden>Reactivate League</button>
+          <button class="secondary-btn" id="renewLeagueBtn" type="button" hidden>Renew League for Next Season</button>
+        </div>
+        <small class="field-help">Disbanding makes the league read-only. Rosters, draft results, transactions, scores, and league history are preserved.</small>
       </div>
 
       <button class="primary-btn" id="saveLeagueBtn">Save League Settings</button>
