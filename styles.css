@@ -178,3 +178,10 @@ body.tournament-guide-open{overflow:hidden}
 .commissioner-member-row strong,.commissioner-member-row small{display:block}
 .commissioner-member-row strong{font-size:12px}
 .commissioner-member-row small{margin-top:3px;color:#7288a4;font-size:9px}
+
+.empty-roster-slot{border-style:dashed;opacity:.82}
+.empty-roster-slot .player-info strong{color:#8ea2bc}
+.lineup-warning{border:1px solid #5f4520;background:#1b160d;border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.lineup-warning strong,.lineup-warning small{display:block}
+.lineup-warning strong{font-size:11px;color:#f4c46b}
+.lineup-warning small{margin-top:4px;color:#bca77d;font-size:9px;line-height:1.45}
