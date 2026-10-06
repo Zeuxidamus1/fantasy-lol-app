@@ -1121,6 +1121,58 @@ function render(view="home",options={}){
     const statusTitle=document.querySelector("#rosterStatusTitle");
     const statusCopy=document.querySelector("#rosterStatusCopy");
     const rosterCards=document.querySelectorAll(".team-roster-card,.team-summary-card");
+    const rosterHelpPopover=document.querySelector("#rosterHelpPopover");
+    const rosterHelpTitle=document.querySelector("#rosterHelpTitle");
+    const rosterHelpCopy=document.querySelector("#rosterHelpCopy");
+    const rosterHelpText={
+      flex:{
+        title:"FLEX",
+        copy:"FLEX is an extra starting slot. An eligible player can start here without replacing the normal starter at that player's role. FLEX players count toward your starting lineup."
+      },
+      bench:{
+        title:"Bench",
+        copy:"Bench players are on your fantasy roster but are not currently starting. They do not fill a starting slot until you move them into an eligible starting position or FLEX."
+      }
+    };
+    let rosterHelpTimer=null;
+    const hideRosterHelp=()=>{
+      clearTimeout(rosterHelpTimer);
+      if(rosterHelpPopover)rosterHelpPopover.hidden=true;
+      document.querySelectorAll("[data-roster-help]").forEach(btn=>btn.setAttribute("aria-expanded","false"));
+    };
+    const showRosterHelp=(type,button)=>{
+      const info=rosterHelpText[type];
+      if(!info||!rosterHelpPopover)return;
+      clearTimeout(rosterHelpTimer);
+      rosterHelpTitle.textContent=info.title;
+      rosterHelpCopy.textContent=info.copy;
+      rosterHelpPopover.hidden=false;
+      document.querySelectorAll("[data-roster-help]").forEach(btn=>btn.setAttribute("aria-expanded",String(btn===button)));
+      const rect=button.getBoundingClientRect();
+      const width=Math.min(300,window.innerWidth-32);
+      rosterHelpPopover.style.width=width+"px";
+      rosterHelpPopover.style.left=Math.max(16,Math.min(window.innerWidth-width-16,rect.left-width/2+rect.width/2))+"px";
+      rosterHelpPopover.style.top=Math.min(window.innerHeight-rosterHelpPopover.offsetHeight-16,rect.bottom+8)+"px";
+    };
+    document.querySelectorAll("[data-roster-help]").forEach(btn=>{
+      const type=btn.dataset.rosterHelp;
+      btn.onclick=e=>{
+        e.stopPropagation();
+        if(!rosterHelpPopover?.hidden&&btn.getAttribute("aria-expanded")==="true")hideRosterHelp();
+        else showRosterHelp(type,btn);
+      };
+      btn.addEventListener("mouseenter",()=>showRosterHelp(type,btn));
+      btn.addEventListener("mouseleave",()=>{
+        rosterHelpTimer=setTimeout(()=>hideRosterHelp(),120);
+      });
+      btn.addEventListener("focus",()=>showRosterHelp(type,btn));
+      btn.addEventListener("blur",()=>hideRosterHelp());
+    });
+    rosterHelpPopover?.addEventListener("mouseenter",()=>clearTimeout(rosterHelpTimer));
+    rosterHelpPopover?.addEventListener("mouseleave",()=>hideRosterHelp());
+    document.addEventListener("click",e=>{
+      if(!e.target.closest?.("[data-roster-help]")&&!e.target.closest?.("#rosterHelpPopover"))hideRosterHelp();
+    });
 
     let rosterMovesEnabled=false;
     const refreshTeam=()=>render("team",{replace:true});
