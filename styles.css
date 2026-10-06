@@ -169,3 +169,6 @@ body.tournament-guide-open{overflow:hidden}
 .recent-fp strong,.recent-fp small{display:block}
 .recent-fp strong{font-size:13px;color:#dceafe}
 .recent-fp small{font-size:8px;color:#65809e}
+
+.team-actions{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:wrap}
+.team-actions .mini-btn{min-width:48px}
