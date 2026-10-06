@@ -29,7 +29,7 @@ try{
   const runtime={window:{RIFT_CONFIG:{
     supabaseUrl:"https://example.supabase.co",
     supabaseAnonKey:"test_publishable_key_abcdefghijklmnopqrstuvwxyz"
-  }},localStorage:{getItem(){return null;},setItem(){},removeItem(){}},location:{origin:"https://example.com",pathname:"/"}};
+  }},localStorage:{getItem(){return null;},setItem(){},removeItem(){}},sessionStorage:{getItem(){return null;},setItem(){},removeItem(){}},location:{origin:"https://example.com",pathname:"/",hash:""},history:{replaceState(){}}};
   vm.runInNewContext(backend,runtime,{timeout:1000});
   check(!!runtime.window.RiftBackend,"backend runtime initializes");
   check(typeof runtime.window.RiftBackend?.signIn==="function","backend exports signIn");
