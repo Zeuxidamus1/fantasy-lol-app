@@ -441,42 +441,116 @@
   </template>
 
   <template id="league-template">
-    <section class="stack">
-      <div class="section-title"><div><div class="eyebrow" id="leagueNameLabel">SUMMONER'S CUP</div><h2>League</h2></div><button class="secondary-btn commissioner-only" id="leagueSetupBtn" data-jump="setup" hidden>League Setup</button></div>
-      <section class="card cloud-league-card" id="cloudLeagueCard">
-        <div class="section-head"><div><div class="eyebrow">ONLINE LEAGUE</div><h3 id="cloudLeagueTitle">Online leagues</h3></div></div>
-        <p class="profile-copy" id="cloudLeagueCopy">Sign in after cloud setup is connected to create or join a shared league.</p>
-        <div class="cloud-league-actions" id="cloudLeagueActions" hidden>
-          <div class="create-league-fields">
-            <input class="form-control" id="newLeagueName" maxlength="40" placeholder="New league name" aria-label="New league name" />
-            <input class="form-control" id="newLeagueTeamName" maxlength="40" placeholder="Your team name" aria-label="Your team name" />
+    <section class="stack league-page">
+      <div class="section-title league-page-title">
+        <div>
+          <div class="eyebrow" id="leagueNameLabel">SUMMONER'S CUP</div>
+          <h2>League</h2>
+        </div>
+        <button class="secondary-btn commissioner-only" id="leagueSetupBtn" data-jump="setup" hidden>Commissioner Tools</button>
+      </div>
+
+      <section class="card league-overview-card" id="leagueOverviewCard">
+        <div class="league-overview-head">
+          <div>
+            <div class="eyebrow">ACTIVE LEAGUE</div>
+            <h3 id="leagueOverviewName">No league selected</h3>
           </div>
-          <button class="primary-btn" id="createCloudLeagueBtn" disabled>Create League</button>
-          <div class="join-league-row">
-            <input class="form-control" id="joinCode" maxlength="12" placeholder="Invite code" aria-label="League invite code" />
-            <input class="form-control" id="joinTeamName" maxlength="40" placeholder="Team name" aria-label="Fantasy team name" />
-            <button class="secondary-btn" id="joinCloudLeagueBtn" disabled>Join</button>
+          <span class="status-pill league-overview-status" id="leagueOverviewStatus">—</span>
+        </div>
+        <div class="league-overview-grid">
+          <div>
+            <small>Your Team</small>
+            <strong id="leagueOverviewTeam">—</strong>
+          </div>
+          <div>
+            <small>Role</small>
+            <strong id="leagueOverviewRole">—</strong>
+          </div>
+          <div>
+            <small>Invite Code</small>
+            <strong id="leagueOverviewInvite">—</strong>
           </div>
         </div>
-        <div id="cloudLeagueList" class="stack tight"></div>
+        <p class="profile-copy league-overview-copy" id="leagueOverviewCopy">Select or create a league below to get started.</p>
       </section>
-      <div class="grid-two">
-        <button class="action-card" data-jump="draft"><span class="action-icon">◎</span><strong>Draft Room</strong><small>Live snake draft</small></button>
-        <button class="action-card" data-jump="transactions"><span class="action-icon">↕</span><strong>Transactions</strong><small>Waivers, adds & drops</small></button>
-      </div>
+
       <div class="card league-state-card" id="leagueStateCard" hidden>
-        <div class="section-head"><div><div class="eyebrow">LEAGUE STATUS</div><h3 id="leagueStateTitle">League archived</h3></div><span class="status-pill" id="leagueStatePill">ARCHIVED</span></div>
+        <div class="section-head">
+          <div><div class="eyebrow">LEAGUE STATUS</div><h3 id="leagueStateTitle">League archived</h3></div>
+          <span class="status-pill" id="leagueStatePill">ARCHIVED</span>
+        </div>
         <p class="profile-copy" id="leagueStateCopy">This league is read-only. History, standings, rosters, draft results, and transactions remain available.</p>
       </div>
-      <div class="card">
-        <div class="section-head"><div><div class="eyebrow">LEAGUE SETTINGS</div><h3>Current format</h3></div><button class="text-btn" id="rulesBtn">Scoring</button></div>
+
+      <section class="league-section">
+        <div class="league-section-heading">
+          <div>
+            <div class="eyebrow">QUICK ACCESS</div>
+            <h3>League tools</h3>
+          </div>
+        </div>
+        <div class="league-quick-grid">
+          <button class="action-card" data-jump="team"><span class="action-icon">◈</span><strong>My Team</strong><small>Roster & lineup</small></button>
+          <button class="action-card" data-jump="draft"><span class="action-icon">◎</span><strong>Draft Room</strong><small>Draft board & picks</small></button>
+          <button class="action-card" data-jump="transactions"><span class="action-icon">↕</span><strong>Transactions</strong><small>Waivers, adds & drops</small></button>
+        </div>
+      </section>
+
+      <section class="card cloud-league-card" id="cloudLeagueCard">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">MY LEAGUES</div>
+            <h3 id="cloudLeagueTitle">Your leagues</h3>
+          </div>
+        </div>
+        <p class="profile-copy" id="cloudLeagueCopy">Choose which league you want to manage.</p>
+        <div id="cloudLeagueList" class="stack tight league-list"></div>
+
+        <details class="league-add-panel" id="leagueAddPanel">
+          <summary>Add a league</summary>
+          <div class="cloud-league-actions" id="cloudLeagueActions" hidden>
+            <div class="league-create-block">
+              <div class="league-subhead">
+                <strong>Create a League</strong>
+                <small>Start a new fantasy league and become commissioner.</small>
+              </div>
+              <div class="create-league-fields">
+                <input class="form-control" id="newLeagueName" maxlength="40" placeholder="League name" aria-label="New league name" />
+                <input class="form-control" id="newLeagueTeamName" maxlength="40" placeholder="Your team name" aria-label="Your team name" />
+              </div>
+              <button class="primary-btn" id="createCloudLeagueBtn" disabled>Create League</button>
+            </div>
+
+            <div class="league-divider"><span>OR</span></div>
+
+            <div class="league-join-block">
+              <div class="league-subhead">
+                <strong>Join a League</strong>
+                <small>Enter a commissioner-provided invite code.</small>
+              </div>
+              <div class="join-league-row">
+                <input class="form-control" id="joinCode" maxlength="12" placeholder="Invite code" aria-label="League invite code" />
+                <input class="form-control" id="joinTeamName" maxlength="40" placeholder="Team name" aria-label="Fantasy team name" />
+                <button class="secondary-btn" id="joinCloudLeagueBtn" disabled>Join League</button>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <section class="card league-format-card">
+        <div class="section-head">
+          <div><div class="eyebrow">LEAGUE FORMAT</div><h3>Rules & setup</h3></div>
+          <button class="text-btn" id="rulesBtn">View Scoring</button>
+        </div>
         <div class="settings-list" id="leagueSettingsSummary">
           <div><span>Teams</span><strong>8</strong></div>
           <div><span>Draft</span><strong>Snake</strong></div>
           <div><span>Scoring</span><strong>Head-to-head</strong></div>
           <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP · FLEX</strong></div>
         </div>
-      </div>
+      </section>
     </section>
   </template>
 
