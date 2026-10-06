@@ -1478,7 +1478,7 @@ function render(view="home",options={}){
   if(view==="schedule"){
     const list=document.querySelector("#scheduleList");
     let day="all";
-    let rosterPlayers=getUserRoster();
+    let rosterPlayers=[];
 
     const normalizeTeam=value=>String(value||"").toLowerCase().replace(/[^a-z0-9]/g,"");
     const rosterMatchForTeam=(teamName,teamCode)=>{
@@ -1523,9 +1523,20 @@ function render(view="home",options={}){
       const leagueId=getActiveLeagueId();
       if(leagueId&&cloudReady()){
         try{
-          await loadRosterFromCloud(leagueId);
-          rosterPlayers=getUserRoster();
-        }catch{}
+          const leagues=await backend().listLeagues();
+          const league=leagues.find(l=>String(l.id)===String(leagueId));
+          const isActiveLeague=league&&!["disbanded","archived"].includes(league.status);
+          if(isActiveLeague){
+            const loaded=await loadRosterFromCloud(leagueId);
+            rosterPlayers=loaded?getUserRoster():[];
+          }else{
+            rosterPlayers=[];
+          }
+        }catch{
+          rosterPlayers=[];
+        }
+      }else{
+        rosterPlayers=[];
       }
       drawSchedule();
     })();
