@@ -172,3 +172,9 @@ body.tournament-guide-open{overflow:hidden}
 
 .team-actions{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:wrap}
 .team-actions .mini-btn{min-width:48px}
+
+.commissioner-member-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #1d3149;background:#091625;border-radius:12px;padding:11px 12px}
+.commissioner-member-row>div{min-width:0}
+.commissioner-member-row strong,.commissioner-member-row small{display:block}
+.commissioner-member-row strong{font-size:12px}
+.commissioner-member-row small{margin-top:3px;color:#7288a4;font-size:9px}
