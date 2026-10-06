@@ -2259,77 +2259,31 @@ function render(view="home",options={}){
           const saveBtn=document.querySelector("#saveLeagueBtn");
           const managementPill=document.querySelector("#managementStatusPill");
           const managementCopy=document.querySelector("#managementStatusCopy");
-          const disbandBtn=document.querySelector("#disbandLeagueBtn");
-          const reactivateBtn=document.querySelector("#reactivateLeagueBtn");
-          const renewBtn=document.querySelector("#renewLeagueBtn");
-          const archived=["disbanded","archived"].includes(league?.status);
-          const completed=league?.status==="completed" || league?.settings?.preDisbandStatus==="completed";
+          const deleteBtn=document.querySelector("#deleteLeagueBtn");
 
-          managementPill.textContent=archived?"ARCHIVED":String(league?.status||"pre_draft").replace("_"," ").toUpperCase();
-          managementCopy.textContent=archived
-            ?"This league is read-only. Historical data remains available to every member."
-            :"Disbanding ends active league activity without deleting league history.";
-          disbandBtn.hidden=archived;
-          reactivateBtn.hidden=!archived||completed;
-          renewBtn.hidden=!archived||!completed;
+          managementPill.textContent=String(league?.status||"pre_draft").replace("_"," ").toUpperCase();
+          managementCopy.textContent="Permanently delete this league and all league-specific data.";
 
           if(!editable){
             document.querySelectorAll("#setupScreen input:not([type=button]), #setupScreen select, #setupScreen .choice").forEach(el=>{el.disabled=true;el.setAttribute("aria-disabled","true");});
             if(saveBtn){saveBtn.disabled=true;saveBtn.textContent="League Settings Locked";}
           }
 
-          disbandBtn.onclick=async()=>{
-            const currentStatus=league?.status||"pre_draft";
-            if(["drafting","active"].includes(currentStatus)){
-              const proceed=window.confirm("League activity may currently be in progress. Disbanding now will immediately stop future league activity. Recorded scores and history will not be changed. Continue?");
-              if(!proceed)return;
-            }
-            const typed=window.prompt('Type DISBAND to confirm. This will make the league read-only but preserve its history.');
-            if(String(typed||"").trim().toUpperCase()!=="DISBAND")return showToast("Disband canceled");
-            if(!window.confirm("Final confirmation: disband this league for all members?"))return;
-            disbandBtn.disabled=true;
+          deleteBtn.onclick=async()=>{
+            const leagueName=String(league?.name||"").trim();
+            const typed=window.prompt(`Permanent deletion cannot be undone. Type the league name exactly to delete it:\n\n${leagueName}`);
+            if(String(typed||"").trim()!==leagueName)return showToast("League deletion canceled");
+            if(!window.confirm("Final confirmation: permanently delete this league and all league-specific data?"))return;
+            deleteBtn.disabled=true;
             try{
-              await b.disbandLeague(activeLeagueId);
+              await b.deleteLeague(activeLeagueId);
               setActiveLeagueId(null);
-              showToast("League disbanded and archived");
+              storageRemove("riftDraftState");
+              showToast("League permanently deleted");
               render("league",{replace:true});
             }catch(err){
-              showToast(err.message||"Could not disband league");
-              disbandBtn.disabled=false;
-            }
-          };
-
-          reactivateBtn.onclick=async()=>{
-            if(!window.confirm("Reactivate this league and restore league activity?"))return;
-            reactivateBtn.disabled=true;
-            try{
-              await b.reactivateLeague(activeLeagueId);
-              showToast("League reactivated");
-              render("league",{replace:true});
-            }catch(err){
-              showToast(err.message||"Could not reactivate league");
-              reactivateBtn.disabled=false;
-            }
-          };
-
-          renewBtn.onclick=async()=>{
-            const mineTeam=mine?.team_name||"My Team";
-            const nextName=(league?.name||"Fantasy League")+" - New Season";
-            if(!window.confirm('Create "'+nextName+'" as a new season while keeping this archived league intact?'))return;
-            renewBtn.disabled=true;
-            try{
-              const nextSettings={...settings,parentLeagueId:activeLeagueId,renewedFrom:league?.name||null};
-              const created=await b.createLeague(nextName,nextSettings);
-              const nextLeague=Array.isArray(created)?created[0]:created;
-              if(nextLeague?.id){
-                await b.updateTeamName(nextLeague.id,mineTeam);
-                setActiveLeagueId(nextLeague.id);
-              }
-              showToast("New season created");
-              render("league",{replace:true});
-            }catch(err){
-              showToast(err.message||"Could not renew league");
-              renewBtn.disabled=false;
+              showToast(err.message||"Could not delete league");
+              deleteBtn.disabled=false;
             }
           };
         }catch(err){
