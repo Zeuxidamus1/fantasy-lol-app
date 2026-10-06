@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261005-13" />
+  <link rel="stylesheet" href="styles.css?v=20261005-14" />
 </head>
 <body>
   <noscript><div class="no-js-message">Rift Fantasy requires JavaScript to run. Enable JavaScript and reload the page.</div></noscript>
@@ -448,7 +448,7 @@
     <section class="stack league-page">
       <div class="section-title league-page-title">
         <div>
-          <div class="eyebrow" id="leagueNameLabel">SUMMONER'S CUP</div>
+          <div class="eyebrow" id="leagueNameLabel">FANTASY LEAGUE</div>
           <h2>League</h2>
         </div>
         <button class="secondary-btn commissioner-only" id="leagueSetupBtn" data-jump="setup" hidden>Commissioner Tools</button>
@@ -479,14 +479,6 @@
         <p class="profile-copy league-overview-copy" id="leagueOverviewCopy">Select or create a league below to get started.</p>
       </section>
 
-      <div class="card league-state-card" id="leagueStateCard" hidden>
-        <div class="section-head">
-          <div><div class="eyebrow">LEAGUE STATUS</div><h3 id="leagueStateTitle">League archived</h3></div>
-          <span class="status-pill" id="leagueStatePill">ARCHIVED</span>
-        </div>
-        <p class="profile-copy" id="leagueStateCopy">This league is read-only. History, standings, rosters, draft results, and transactions remain available.</p>
-      </div>
-
       <section class="league-section" id="leagueQuickAccess">
         <div class="league-section-heading">
           <div>
@@ -511,14 +503,10 @@
           </div>
         </div>
         <p class="profile-copy" id="cloudLeagueCopy">Choose which league you want to manage.</p>
-        <div class="league-list-tabs" role="tablist" aria-label="League lists">
-          <button class="chip active" id="activeLeaguesTab" type="button" role="tab" aria-selected="true">Active</button>
-          <button class="chip" id="archivedLeaguesTab" type="button" role="tab" aria-selected="false">Archived</button>
-        </div>
         <div id="cloudLeagueList" class="stack tight league-list"></div>
 
         <details class="league-add-panel" id="leagueAddPanel">
-          <summary>Start/Join a league</summary>
+          <summary>Start/Join a League</summary>
           <div class="cloud-league-actions" id="cloudLeagueActions" hidden>
             <div class="league-create-block">
               <div class="league-subhead">
@@ -694,7 +682,7 @@
       <div class="card setup-card">
         <div class="form-group">
           <label for="leagueName">League name</label>
-          <input id="leagueName" class="form-control" value="Summoner's Cup" maxlength="40" />
+          <input id="leagueName" class="form-control" value="Fantasy League" maxlength="40" />
         </div>
 
         <div class="form-grid">
@@ -829,10 +817,10 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="esports-data.js?v=20261005-13"></script>
-  <script src="backend-config.js?v=20261005-13"></script>
-  <script src="backend.js?v=20261005-13"></script>
-  <script src="player-stats.js?v=20261005-13"></script>
-  <script src="app.js?v=20261005-13"></script>
+  <script src="esports-data.js?v=20261005-14"></script>
+  <script src="backend-config.js?v=20261005-14"></script>
+  <script src="backend.js?v=20261005-14"></script>
+  <script src="player-stats.js?v=20261005-14"></script>
+  <script src="app.js?v=20261005-14"></script>
 </body>
 </html>
