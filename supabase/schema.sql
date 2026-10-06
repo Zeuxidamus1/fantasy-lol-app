@@ -1772,6 +1772,33 @@ revoke all on function public.reactivate_league(uuid) from public,anon;
 grant execute on function public.disband_league(uuid) to authenticated;
 grant execute on function public.reactivate_league(uuid) to authenticated;
 
+create or replace function public.delete_league(p_league_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path=public
+as $delete_league$
+declare
+  league_owner uuid;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+
+  select owner_id into league_owner
+  from public.leagues
+  where id=p_league_id
+  for update;
+
+  if league_owner is null then raise exception 'League not found'; end if;
+  if league_owner<>auth.uid() then raise exception 'Only the commissioner can permanently delete this league'; end if;
+
+  delete from public.leagues where id=p_league_id;
+  return true;
+end;
+$delete_league$;
+
+revoke all on function public.delete_league(uuid) from public,anon;
+grant execute on function public.delete_league(uuid) to authenticated;
+
 
 -- FLEX roster rules
 create or replace function public.start_league_draft(p_league_id uuid)
