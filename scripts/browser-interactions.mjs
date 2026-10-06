@@ -106,6 +106,15 @@ try{
   await expect("team route renders","document.title.includes('My Team') && !!document.querySelector('#teamNoLeague')");
   await expect("team shows no-league state without active league","document.querySelector('#teamNoLeague').hidden === false");
 
+  await expect("empty roster is incomplete","(()=>{const v=validateRoster([],{bench:2});return !v.isComplete&&v.missingStarterSlots===5&&v.missingFlexSlots===1&&v.missingBenchSlots===2&&v.totalPlayersMissing===8})()");
+  await expect("full starters without FLEX are incomplete","(()=>{const ps=['TOP','JNG','MID','ADC','SUP'].map((r,i)=>({id:'p'+i,position:r,role:r,slot:r}));const v=validateRoster(ps,{bench:1});return !v.isComplete&&v.missingStarterSlots===0&&v.missingFlexSlots===1&&v.missingBenchSlots===1})()");
+  await expect("full lineup with FLEX but short bench is incomplete","(()=>{const ps=['TOP','JNG','MID','ADC','SUP'].map((r,i)=>({id:'p'+i,position:r,role:r,slot:r}));ps.push({id:'f',position:'ADC',role:'ADC',slot:'FLEX'});const v=validateRoster(ps,{bench:2});return !v.isComplete&&v.missingFlexSlots===0&&v.missingBenchSlots===2})()");
+  await expect("complete FLEX roster validates","(()=>{const ps=['TOP','JNG','MID','ADC','SUP'].map((r,i)=>({id:'p'+i,position:r,role:r,slot:r}));ps.push({id:'f',position:'ADC',role:'ADC',slot:'FLEX'},{id:'b1',position:'TOP',role:'BN',slot:'BN'},{id:'b2',position:'MID',role:'BN',slot:'BN'});const v=validateRoster(ps,{bench:2});return v.isComplete&&v.totalPlayersMissing===0})()");
+  await expect("bench warning uses singular grammar","(()=>{const v={isComplete:false,missingStarterSlots:0,missingStarterPositions:[],missingFlexSlots:0,missingBenchSlots:1,requiredBenchSize:2};return rosterStatusText(v).includes('1 Bench Player')&&!rosterStatusText(v).includes('1 Bench Players')})()");
+  await expect("bench warning uses plural grammar","(()=>{const v={isComplete:false,missingStarterSlots:0,missingStarterPositions:[],missingFlexSlots:0,missingBenchSlots:2,requiredBenchSize:2};return rosterStatusText(v).includes('2 Bench Players')})()");
+  await expect("draft assignment creates FLEX before bench","(()=>{const p=[{pick_number:1,role:'TOP'},{pick_number:2,role:'JNG'},{pick_number:3,role:'MID'},{pick_number:4,role:'ADC'},{pick_number:5,role:'SUP'},{pick_number:6,role:'ADC'},{pick_number:7,role:'TOP'}];const a=draftAssignments(p);return a[5].slot==='FLEX'&&a[6].slot==='BN'})()");
+  await expect("FLEX eligibility is centralized","isFlexEligible({position:'ADC'})===true && isFlexEligible({position:'COACH'})===false");
+
   await route("league");
   await expect("league route renders","document.title.includes('League') && !!document.querySelector('#joinCloudLeagueBtn')");
   await expect("join disabled until required fields entered","document.querySelector('#joinCloudLeagueBtn').disabled === true");
@@ -121,6 +130,12 @@ try{
   await evaluate("document.querySelector('[data-day=today]').click()");
   await expect("schedule filter works","document.querySelector('[data-day=today]').classList.contains('active')");
   await expect("schedule fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
+
+  await send("Emulation.setDeviceMetricsOverride",{width:1280,height:900,deviceScaleFactor:1,mobile:false});
+  await route("team");
+  await expect("team fits desktop viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
+  await route("draft");
+  await expect("draft fits desktop viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
 
   ws.close();
   console.log("All interaction tests passed.");
