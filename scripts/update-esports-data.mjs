@@ -1,10 +1,11 @@
 import fs from "node:fs/promises";
 
 const API_BASE = "https://esports-api.lolesports.com/persisted/gw";
-const API_KEY = process.env.LOL_ESPORTS_API_KEY;
-if (!API_KEY) {
-  throw new Error("LOL_ESPORTS_API_KEY is required. Configure it as a GitHub Actions repository secret.");
-}
+// LoL Esports uses a browser-facing persisted API key on lolesports.com.
+// Allow a repository secret to override it, but keep schedule refresh working
+// without requiring the separate developer.riotgames.com RGAPI development key.
+const SITE_API_KEY = "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z";
+const API_KEY = process.env.LOL_ESPORTS_API_KEY || SITE_API_KEY;
 const HL = "en-US";
 const OUT = "esports-data.js";
 
@@ -75,17 +76,18 @@ async function fetchAllSchedule() {
   const first = await api("getSchedule");
   const schedule = first?.data?.schedule || {};
   let events = Array.isArray(schedule.events) ? [...schedule.events] : [];
+  const seenTokens = new Set();
   let token = schedule?.pages?.newer || null;
 
-  // Pull a few future pages only. This keeps the workflow fast and avoids
-  // hammering an undocumented endpoint.
-  for (let i=0; i<4 && token; i++) {
+  // Follow future pages far enough to cover the next 45 days. The LoL Esports
+  // schedule page often publishes lower-tier and promotion events before they
+  // appear in our previously saved snapshot.
+  for (let i=0; i<12 && token && !seenTokens.has(token); i++) {
+    seenTokens.add(token);
     const next = await api("getSchedule", {pageToken: token});
     const s = next?.data?.schedule || {};
     if (Array.isArray(s.events)) events.push(...s.events);
-    const nextToken = s?.pages?.newer || null;
-    if (!nextToken || nextToken === token) break;
-    token = nextToken;
+    token = s?.pages?.newer || null;
   }
 
   const now = Date.now();
@@ -124,7 +126,7 @@ async function fetchAllSchedule() {
     seen.add(key);
     deduped.push(event);
   }
-  return deduped.slice(0,80);
+  return deduped.slice(0,200);
 }
 
 async function fetchLeaguesAndPlayers(existing) {
@@ -195,7 +197,7 @@ if (rosterData.players.length < 10) throw new Error("Too few players returned; r
 const next = {
   ...existing,
   updatedAt: new Date().toISOString(),
-  sourceLabel: "LoL Esports API",
+  sourceLabel: "LoL Esports",
   sourceUrl: "https://lolesports.com/en-US",
   autoUpdated: true,
   dataMode: "live-refresh",
