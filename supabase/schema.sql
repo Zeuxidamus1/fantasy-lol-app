@@ -1613,25 +1613,50 @@ returns boolean
 language plpgsql
 security definer
 set search_path=public
-as $$
+as $remove_member$
+declare
+  league_status text;
 begin
   if auth.uid() is null then raise exception 'Authentication required'; end if;
   if p_user_id is null then raise exception 'Manager is required'; end if;
   if p_user_id=auth.uid() then raise exception 'Commissioner cannot remove themselves'; end if;
-  if not exists(
-    select 1 from public.leagues
-    where id=p_league_id and owner_id=auth.uid() and status='pre_draft'
-  ) then
-    raise exception 'Only the commissioner can remove managers before the draft starts';
+
+  select status into league_status
+  from public.leagues
+  where id=p_league_id and owner_id=auth.uid();
+
+  if league_status is null then
+    raise exception 'Only the commissioner can remove managers';
+  end if;
+  if league_status='drafting' then
+    raise exception 'Managers cannot be removed while the draft is in progress';
+  end if;
+  if league_status in ('completed','disbanded','archived') then
+    raise exception 'Managers cannot be removed from a completed or archived league';
+  end if;
+
+  if league_status='active' then
+    update public.waiver_claims
+       set status='canceled'
+     where league_id=p_league_id and user_id=p_user_id and status='pending';
+
+    update public.trades
+       set status='canceled', resolved_at=now()
+     where league_id=p_league_id
+       and status='pending'
+       and (from_user=p_user_id or to_user=p_user_id);
+
+    delete from public.rosters
+     where league_id=p_league_id and user_id=p_user_id;
   end if;
 
   delete from public.league_members
-  where league_id=p_league_id and user_id=p_user_id and role<>'owner';
+   where league_id=p_league_id and user_id=p_user_id and role<>'owner';
 
   if not found then raise exception 'League manager not found'; end if;
   return true;
 end;
-$$;
+$remove_member$;
 
 revoke all on function public.remove_league_member(uuid,uuid) from public,anon;
 grant execute on function public.remove_league_member(uuid,uuid) to authenticated;
@@ -1642,55 +1667,87 @@ returns public.leagues
 language plpgsql
 security definer
 set search_path=public
-as $league$
+as $disband$
 declare
   result public.leagues;
 begin
   if auth.uid() is null then raise exception 'Authentication required'; end if;
-  select * into result from public.leagues where id=p_league_id for update;
+
+  select * into result
+  from public.leagues
+  where id=p_league_id
+  for update;
+
   if result.id is null then raise exception 'League not found'; end if;
   if result.owner_id<>auth.uid() then raise exception 'Only the commissioner can disband this league'; end if;
   if result.status in ('disbanded','archived') then return result; end if;
 
   update public.leagues
-     set settings = coalesce(settings,'{}'::jsonb)
-                    || jsonb_build_object('preDisbandStatus', result.status, 'disbandedAt', now()),
+     set settings=coalesce(settings,'{}'::jsonb)
+                  || jsonb_build_object('preDisbandStatus',result.status,'disbandedAt',now()),
          status='disbanded'
    where id=p_league_id
    returning * into result;
 
+  update public.league_drafts
+     set status=case when status='drafting' then 'waiting' else status end,
+         updated_at=now()
+   where league_id=p_league_id;
+
   perform public.notify_league_members(
-    p_league_id,auth.uid(),'league_disbanded',
-    jsonb_build_object('league_id',p_league_id,'disbanded_at',now()),null
+    p_league_id,
+    auth.uid(),
+    'league_disbanded',
+    jsonb_build_object('league_id',p_league_id,'disbanded_at',now()),
+    null
   );
+
   return result;
 end;
-$league$;
+$disband$;
 
 create or replace function public.reactivate_league(p_league_id uuid)
 returns public.leagues
 language plpgsql
 security definer
 set search_path=public
-as $league$
+as $reactivate$
 declare
   result public.leagues;
   restore_status text;
   draft_state text;
 begin
   if auth.uid() is null then raise exception 'Authentication required'; end if;
-  select * into result from public.leagues where id=p_league_id for update;
+
+  select * into result
+  from public.leagues
+  where id=p_league_id
+  for update;
+
   if result.id is null then raise exception 'League not found'; end if;
   if result.owner_id<>auth.uid() then raise exception 'Only the commissioner can reactivate this league'; end if;
   if result.status not in ('disbanded','archived') then raise exception 'League is not archived'; end if;
 
   restore_status:=coalesce(nullif(result.settings->>'preDisbandStatus',''),'pre_draft');
-  if restore_status='completed' then raise exception 'Completed leagues should be renewed for a new season'; end if;
+  if restore_status='completed' then
+    raise exception 'Completed leagues should be renewed for a new season';
+  end if;
 
-  select status into draft_state from public.league_drafts where league_id=p_league_id;
-  if draft_state='complete' then restore_status:='active'; end if;
-  if restore_status not in ('pre_draft','drafting','active') then restore_status:='pre_draft'; end if;
-  if restore_status='drafting' and coalesce(draft_state,'waiting')<>'drafting' then restore_status:='pre_draft'; end if;
+  select status into draft_state
+  from public.league_drafts
+  where league_id=p_league_id;
+
+  if draft_state='complete' then
+    restore_status:='active';
+  elsif restore_status='drafting' then
+    update public.league_drafts
+       set status='drafting', updated_at=now()
+     where league_id=p_league_id;
+  end if;
+
+  if restore_status not in ('pre_draft','drafting','active') then
+    restore_status:='pre_draft';
+  end if;
 
   update public.leagues
      set status=restore_status,
@@ -1699,18 +1756,21 @@ begin
    returning * into result;
 
   perform public.notify_league_members(
-    p_league_id,auth.uid(),'league_reactivated',
-    jsonb_build_object('league_id',p_league_id,'status',restore_status),null
+    p_league_id,
+    auth.uid(),
+    'league_reactivated',
+    jsonb_build_object('league_id',p_league_id,'status',restore_status),
+    null
   );
+
   return result;
 end;
-$league$;
+$reactivate$;
 
 revoke all on function public.disband_league(uuid) from public,anon;
 revoke all on function public.reactivate_league(uuid) from public,anon;
 grant execute on function public.disband_league(uuid) to authenticated;
 grant execute on function public.reactivate_league(uuid) to authenticated;
-
 
 
 -- FLEX roster rules
