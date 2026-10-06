@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261005-29" />
+  <link rel="stylesheet" href="styles.css?v=20261005-30" />
 </head>
 <body>
   <noscript><div class="no-js-message">Rift Fantasy requires JavaScript to run. Enable JavaScript and reload the page.</div></noscript>
@@ -530,7 +530,19 @@
             <div><span>Scoring</span><strong>Head-to-head</strong></div>
             <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP · FLEX</strong></div>
           </div>
-          <button class="secondary-btn league-rules-scoring" id="rulesBtn" type="button">View Scoring Details</button>
+
+          <div class="league-scoring-details">
+            <div class="eyebrow">SCORING DETAILS</div>
+            <div class="scoring-summary-grid" id="leagueScoringSummary">
+              <div><span>Kills</span><strong>+3</strong></div>
+              <div><span>Deaths</span><strong>-1</strong></div>
+              <div><span>Assists</span><strong>+2</strong></div>
+              <div><span>CS</span><strong>+0.02</strong></div>
+              <div><span>Win</span><strong>+5</strong></div>
+              <div><span>First Blood</span><strong>+2</strong></div>
+            </div>
+          </div>
+
           <button class="secondary-btn transaction-cancel" type="button" data-close-league-rules>Close</button>
         </section>
       </div>
@@ -895,10 +907,10 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="esports-data.js?v=20261005-29"></script>
-  <script src="backend-config.js?v=20261005-29"></script>
-  <script src="backend.js?v=20261005-29"></script>
-  <script src="player-stats.js?v=20261005-29"></script>
-  <script src="app.js?v=20261005-29"></script>
+  <script src="esports-data.js?v=20261005-30"></script>
+  <script src="backend-config.js?v=20261005-30"></script>
+  <script src="backend.js?v=20261005-30"></script>
+  <script src="player-stats.js?v=20261005-30"></script>
+  <script src="app.js?v=20261005-30"></script>
 </body>
 </html>
