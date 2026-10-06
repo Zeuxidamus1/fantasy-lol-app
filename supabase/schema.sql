@@ -763,7 +763,7 @@ begin
   if nullif(trim(p_name),'') is null then raise exception 'League name is required'; end if;
   manager_count:=coalesce(nullif(p_settings->>'managers','')::integer,4);
   bench_count:=coalesce(nullif(p_settings->>'bench','')::integer,1);
-  if manager_count not in (2,4,6,8,10,12) then raise exception 'Invalid manager count'; end if;
+  if manager_count not between 1 and 10 then raise exception 'Manager count must be between 1 and 10'; end if;
   if bench_count not between 1 and 5 then raise exception 'Invalid bench count'; end if;
 
   insert into public.leagues(owner_id,name,invite_code,settings)
@@ -799,7 +799,7 @@ begin
 
   manager_count:=coalesce(nullif(p_settings->>'managers','')::integer,4);
   bench_count:=coalesce(nullif(p_settings->>'bench','')::integer,1);
-  if manager_count not in (2,4,6,8,10,12) then raise exception 'Invalid manager count'; end if;
+  if manager_count not between 1 and 10 then raise exception 'Manager count must be between 1 and 10'; end if;
   if bench_count not between 1 and 5 then raise exception 'Invalid bench count'; end if;
   if manager_count < (select count(*) from public.league_members where league_id=p_league_id) then
     raise exception 'Manager count cannot be lower than current league membership';
