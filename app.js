@@ -1799,20 +1799,20 @@ function render(view="home",options={}){
     const cloudList=document.querySelector("#cloudLeagueList");
     const overviewCard=document.querySelector("#leagueOverviewCard");
     const quickAccess=document.querySelector("#leagueQuickAccess");
-    const formatCard=document.querySelector("#leagueFormatCard");
+    const rulesModal=document.querySelector("#leagueRulesModal");
     const entryActions=document.querySelector("#leagueEntryActions");
 
     if(!getActiveLeagueId()){
       if(overviewCard)overviewCard.hidden=true;
       if(quickAccess)quickAccess.hidden=true;
-      if(formatCard)formatCard.hidden=true;
+      if(rulesModal)rulesModal.hidden=true;
     }
 
     (async()=>{
       if(!cloudReady()){
         if(overviewCard)overviewCard.hidden=true;
         if(quickAccess)quickAccess.hidden=true;
-        if(formatCard)formatCard.hidden=true;
+        if(rulesModal)rulesModal.hidden=true;
         if(cloudList)cloudList.hidden=true;
         cloudCard?.classList.add("empty-league-mode");
         cloudTitle.textContent="Create or join a fantasy league to get started.";
@@ -1857,7 +1857,7 @@ function render(view="home",options={}){
         if(!leagues.length){
           if(overviewCard)overviewCard.hidden=true;
           if(quickAccess)quickAccess.hidden=true;
-          if(formatCard)formatCard.hidden=true;
+          if(rulesModal)rulesModal.hidden=true;
           if(cloudCard)cloudCard.hidden=false;
           if(cloudList)cloudList.hidden=true;
           cloudCard?.classList.add("empty-league-mode");
@@ -1880,7 +1880,7 @@ function render(view="home",options={}){
 
         if(overviewCard)overviewCard.hidden=false;
         if(quickAccess)quickAccess.hidden=false;
-        if(formatCard)formatCard.hidden=true;
+        if(rulesModal)rulesModal.hidden=true;
         if(cloudCard)cloudCard.hidden=true;
         cloudCard?.classList.remove("empty-league-mode");
         if(entryActions)entryActions.classList.remove("empty-league-actions");
@@ -1893,15 +1893,24 @@ function render(view="home",options={}){
         document.querySelector("#leagueOverviewCopy").textContent="This is the league currently used throughout the app.";
 
         const rulesToggle=document.querySelector("#leagueRulesToggle");
-        if(rulesToggle){
-          rulesToggle.onclick=()=>{
-            const opening=!!formatCard?.hidden;
-            if(formatCard)formatCard.hidden=!opening;
-            rulesToggle.setAttribute("aria-expanded",String(opening));
-            rulesToggle.textContent=opening?"Hide Rules & Setup":"Rules & Setup";
-            if(opening)formatCard?.scrollIntoView?.({behavior:"smooth",block:"nearest"});
-          };
-        }
+        const closeRules=()=>{
+          if(!rulesModal||rulesModal.hidden)return;
+          rulesModal.hidden=true;
+          document.body.classList.remove("modal-open");
+          rulesToggle?.setAttribute("aria-expanded","false");
+          rulesToggle?.focus?.();
+        };
+        const openRules=()=>{
+          if(!rulesModal)return;
+          rulesModal.hidden=false;
+          document.body.classList.add("modal-open");
+          rulesToggle?.setAttribute("aria-expanded","true");
+          rulesModal.querySelector("[data-close-league-rules]")?.focus?.();
+        };
+        if(rulesToggle)rulesToggle.onclick=openRules;
+        rulesModal?.querySelectorAll("[data-close-league-rules]").forEach(el=>el.onclick=closeRules);
+        const rulesKeyHandler=e=>{if(e.key==="Escape"&&!rulesModal?.hidden)closeRules();};
+        document.addEventListener("keydown",rulesKeyHandler,{once:false});
 
         const switchRow=document.querySelector("#leagueSwitchRow");
         const switcher=document.querySelector("#leagueSwitcherSelect");
@@ -1921,7 +1930,7 @@ function render(view="home",options={}){
       }catch(err){
         if(overviewCard)overviewCard.hidden=true;
         if(quickAccess)quickAccess.hidden=true;
-        if(formatCard)formatCard.hidden=true;
+        if(rulesModal)rulesModal.hidden=true;
         if(cloudCard)cloudCard.hidden=false;
         if(cloudList)cloudList.hidden=true;
         cloudTitle.textContent="Could not load leagues";
