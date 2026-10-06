@@ -760,7 +760,7 @@ function render(view="home",options={}){
     return;
   }
   view=requested;
-  if(view==="home"&&cloudReady()&&!backend().readSession()?.access_token){
+  if(["home","league","create-league","join-league"].includes(view)&&!backend()?.readSession?.()?.access_token){
     return render("login",{...options,replace:true});
   }
   if(view!=="draft"&&draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
@@ -1818,8 +1818,9 @@ function render(view="home",options={}){
         if(quickAccess)quickAccess.hidden=true;
         if(formatCard)formatCard.hidden=true;
         if(cloudList)cloudList.hidden=true;
-        cloudTitle.textContent="League services unavailable";
-        cloudCopy.textContent="The league backend is not configured or could not be loaded.";
+        cloudCard?.classList.add("empty-league-mode");
+        cloudTitle.textContent="Create or join a fantasy league to get started.";
+        cloudCopy.textContent="Choose one of the options below.";
         return;
       }
 
