@@ -2005,7 +2005,7 @@ function render(view="home",options={}){
 
         const taken=new Set(picks.map(p=>String(p.player_id)));
         const q=search.value.trim().toLowerCase();
-        const myTurn=draft?.status==="drafting"&&String(managerForPick(Number(draft.current_pick)||0,draft.manager_order||[]))===String(currentUser.id);
+        const myTurn=league?.status==="drafting"&&draft?.status==="drafting"&&String(managerForPick(Number(draft.current_pick)||0,draft.manager_order||[]))===String(currentUser.id);
         const mine=picks.filter(p=>String(p.user_id)===String(currentUser.id));
         const assignedMine=draftAssignments(mine);
         const draftValidation=validateRoster(assignedMine,draftSettings);
