@@ -194,8 +194,18 @@ const [schedule, rosterData] = await Promise.all([
   fetchLeaguesAndPlayers(existing)
 ]);
 
-if (schedule.length < 1) throw new Error("No schedule events returned; refusing to overwrite good data.");
-if (rosterData.players.length < 10) throw new Error("Too few players returned; refusing to overwrite good data.");
+if (schedule.length < 1) throw new Error("No schedule events returned; refusing to overwrite good schedule data.");
+
+const refreshedPlayers = rosterData.players.length >= 10
+  ? rosterData.players
+  : (existing.players || []);
+const refreshedLeagues = rosterData.leagues.length
+  ? rosterData.leagues
+  : (existing.leagues || []);
+
+if (rosterData.players.length < 10) {
+  console.warn(`Only ${rosterData.players.length} players returned by the roster endpoint; preserving the existing player pool while still refreshing the official schedule.`);
+}
 
 const next = {
   ...existing,
@@ -204,10 +214,10 @@ const next = {
   sourceUrl: "https://lolesports.com/en-US",
   autoUpdated: true,
   dataMode: "live-refresh",
-  leagues: rosterData.leagues,
+  leagues: refreshedLeagues,
   schedule,
-  players: rosterData.players
+  players: refreshedPlayers
 };
 
 await fs.writeFile(OUT, "window.ESPORTS_DATA = " + JSON.stringify(next, null, 2) + ";\n", "utf8");
-console.log(`Updated ${schedule.length} schedule events and ${rosterData.players.length} players.`);
+console.log(`Updated ${schedule.length} official schedule events and ${refreshedPlayers.length} player records.`);
