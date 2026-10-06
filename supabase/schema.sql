@@ -1642,7 +1642,7 @@ returns public.leagues
 language plpgsql
 security definer
 set search_path=public
-as $
+as $league$
 declare
   result public.leagues;
 begin
@@ -1665,14 +1665,14 @@ begin
   );
   return result;
 end;
-$;
+$league$;
 
 create or replace function public.reactivate_league(p_league_id uuid)
 returns public.leagues
 language plpgsql
 security definer
 set search_path=public
-as $
+as $league$
 declare
   result public.leagues;
   restore_status text;
@@ -1704,7 +1704,7 @@ begin
   );
   return result;
 end;
-$;
+$league$;
 
 revoke all on function public.disband_league(uuid) from public,anon;
 revoke all on function public.reactivate_league(uuid) from public,anon;
