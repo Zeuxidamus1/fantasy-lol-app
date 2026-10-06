@@ -116,8 +116,14 @@ try{
   await expect("FLEX eligibility is centralized","isFlexEligible({position:'ADC'})===true && isFlexEligible({position:'COACH'})===false");
 
   await route("league");
-  await expect("league route renders","document.title.includes('League') && !!document.querySelector('#joinCloudLeagueBtn')");
-  await expect("join disabled until required fields entered","document.querySelector('#joinCloudLeagueBtn').disabled === true");
+  await expect("league route renders","document.title.includes('League') && !!document.querySelector('[data-jump=\"create-league\"]') && !!document.querySelector('[data-jump=\"join-league\"]') && !!document.querySelector('[data-jump=\"bot-league\"]')");
+
+  await route("join-league");
+  await expect("join route is dedicated","document.title.includes('Join League') && !!document.querySelector('#joinLeagueCode') && !document.querySelector('#createLeagueName')");
+  await expect("join disabled until required fields entered","document.querySelector('#confirmJoinLeagueBtn').disabled === true");
+
+  await route("bot-league");
+  await expect("bot league route renders","document.title.includes('Create Bot League') && document.querySelectorAll('[data-bot-size]').length===10");
 
   await route("draft");
   await expect("draft room renders","document.title.includes('Draft Room') && !!document.querySelector('#draftPlayerList')");
