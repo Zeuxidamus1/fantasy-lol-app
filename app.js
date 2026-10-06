@@ -161,7 +161,7 @@ function runCpuPicks(state){
 }
 
 const defaultLeagueSettings = {
-  name:"Summoner's Cup",
+  name:"Fantasy League",
   managers:"4",
   bench:"1",
   draftType:"Snake",
@@ -1525,8 +1525,7 @@ function render(view="home",options={}){
         try{
           const leagues=await backend().listLeagues();
           const league=leagues.find(l=>String(l.id)===String(leagueId));
-          const isActiveLeague=league&&!["disbanded","archived"].includes(league.status);
-          if(isActiveLeague){
+          if(league){
             const loaded=await loadRosterFromCloud(leagueId);
             rosterPlayers=loaded?getUserRoster():[];
           }else{
@@ -1798,21 +1797,21 @@ function render(view="home",options={}){
   }
   if(view==="league"){
     const settings=getLeagueSettings();
+    const cloudCard=document.querySelector("#cloudLeagueCard");
     const cloudTitle=document.querySelector("#cloudLeagueTitle");
     const cloudCopy=document.querySelector("#cloudLeagueCopy");
     const cloudActions=document.querySelector("#cloudLeagueActions");
     const cloudList=document.querySelector("#cloudLeagueList");
-    const activeTab=document.querySelector("#activeLeaguesTab");
-    const archivedTab=document.querySelector("#archivedLeaguesTab");
+    const overviewCard=document.querySelector("#leagueOverviewCard");
     const quickAccess=document.querySelector("#leagueQuickAccess");
     const formatCard=document.querySelector("#leagueFormatCard");
-    const overviewCard=document.querySelector("#leagueOverviewCard");
-    let leagueListMode="active";
+    const addPanel=document.querySelector("#leagueAddPanel");
 
     (async()=>{
       if(!cloudReady()){
-        cloudTitle.textContent="Online leagues unavailable";
+        cloudTitle.textContent="League services unavailable";
         cloudCopy.textContent="League services are temporarily unavailable.";
+        if(overviewCard)overviewCard.hidden=true;
         if(quickAccess)quickAccess.hidden=true;
         if(formatCard)formatCard.hidden=true;
         return;
@@ -1821,29 +1820,11 @@ function render(view="home",options={}){
       const b=backend();
       const user=await b.currentUser().catch(()=>null);
       if(!user){
-        cloudTitle.textContent="Sign in for online leagues";
-        cloudCopy.textContent="Sign in to create or join shared leagues.";
-        if(quickAccess)quickAccess.hidden=true;
-        if(formatCard)formatCard.hidden=true;
+        render("login",{replace:true});
         return;
       }
 
       cloudActions.hidden=false;
-
-      const permanentlyDeleteLeague=async(league)=>{
-        if(!league)return;
-        const typed=window.prompt(`Permanent deletion cannot be undone. Type the league name exactly to delete it:\n\n${league.name}`);
-        if(String(typed||"").trim()!==String(league.name||"").trim())return showToast("League deletion canceled");
-        if(!window.confirm("Final confirmation: permanently delete this league and all of its league data?"))return;
-        try{
-          await b.deleteLeague(league.id);
-          if(String(getActiveLeagueId())===String(league.id))setActiveLeagueId(null);
-          showToast("League permanently deleted");
-          await drawCloudLeagues();
-        }catch(err){
-          showToast(err.message||"Could not delete league");
-        }
-      };
 
       const applyLeaguePermissions=async(activeId)=>{
         const controls=document.querySelectorAll(".commissioner-only");
@@ -1861,16 +1842,14 @@ function render(view="home",options={}){
       const drawCloudLeagues=async()=>{
         try{
           const leagues=await b.listLeagues();
-          const activeLeagues=leagues.filter(l=>!["disbanded","archived"].includes(l.status));
-          const archivedLeagues=leagues.filter(l=>["disbanded","archived"].includes(l.status));
           let activeId=getActiveLeagueId();
 
-          if(activeId&&!activeLeagues.some(l=>String(l.id)===String(activeId))){
+          if(activeId&&!leagues.some(l=>String(l.id)===String(activeId))){
             setActiveLeagueId(null);
             activeId=null;
           }
-          if(!activeId&&activeLeagues.length===1){
-            activeId=String(activeLeagues[0].id);
+          if(!activeId&&leagues.length){
+            activeId=String(leagues[0].id);
             setActiveLeagueId(activeId);
             await loadRosterFromCloud(activeId);
           }
@@ -1883,90 +1862,68 @@ function render(view="home",options={}){
           }));
           const membershipFor=id=>memberships[leagues.findIndex(l=>String(l.id)===String(id))]||null;
 
-          const activeLeague=activeLeagues.find(l=>String(l.id)===String(activeId))||null;
+          const activeLeague=leagues.find(l=>String(l.id)===String(activeId))||null;
           const activeMembership=activeLeague?membershipFor(activeLeague.id):null;
-
           const overviewName=document.querySelector("#leagueOverviewName");
           const overviewStatus=document.querySelector("#leagueOverviewStatus");
           const overviewTeam=document.querySelector("#leagueOverviewTeam");
           const overviewRole=document.querySelector("#leagueOverviewRole");
           const overviewInvite=document.querySelector("#leagueOverviewInvite");
           const overviewCopy=document.querySelector("#leagueOverviewCopy");
-          const addPanel=document.querySelector("#leagueAddPanel");
-          const stateCard=document.querySelector("#leagueStateCard");
 
-          if(stateCard)stateCard.hidden=true;
-          if(addPanel)addPanel.open=!activeLeague;
-          if(quickAccess)quickAccess.hidden=!activeLeague;
-          if(formatCard)formatCard.hidden=!activeLeague;
+          if(!activeLeague){
+            if(overviewCard)overviewCard.hidden=true;
+            if(quickAccess)quickAccess.hidden=true;
+            if(formatCard)formatCard.hidden=true;
+            if(cloudList)cloudList.hidden=true;
+            cloudCard?.classList.add("empty-league-mode");
+            cloudTitle.textContent="Start/Join a League";
+            cloudCopy.textContent="Create a new fantasy league or join an existing league with an invite code.";
+            if(addPanel)addPanel.open=true;
+            if(cloudCard?.parentElement)cloudCard.parentElement.insertBefore(cloudCard,overviewCard||cloudCard.nextSibling);
+            await applyLeaguePermissions(null);
+            return;
+          }
+
           if(overviewCard)overviewCard.hidden=false;
+          if(quickAccess)quickAccess.hidden=false;
+          if(formatCard)formatCard.hidden=false;
+          if(cloudList)cloudList.hidden=false;
+          cloudCard?.classList.remove("empty-league-mode");
+          cloudTitle.textContent="Your leagues";
+          cloudCopy.textContent="Choose which league you want to manage.";
+          if(addPanel)addPanel.open=false;
 
-          if(activeLeague){
-            if(overviewName)overviewName.textContent=activeLeague.name;
-            if(overviewStatus)overviewStatus.textContent=String(activeLeague.status||"pre_draft").replace("_"," ").toUpperCase();
-            if(overviewTeam)overviewTeam.textContent=activeMembership?.team_name||"Your team";
-            if(overviewRole)overviewRole.textContent=activeMembership?.role==="owner"?"Commissioner":"Manager";
-            if(overviewInvite)overviewInvite.textContent=activeLeague.invite_code||"—";
-            if(overviewCopy)overviewCopy.textContent="This is the league currently used throughout the app.";
-            if(cloudTitle)cloudTitle.textContent="Your leagues";
-            if(cloudCopy)cloudCopy.textContent="Choose which active league you want to manage.";
-          }else{
-            if(overviewName)overviewName.textContent="No active league";
-            if(overviewStatus)overviewStatus.textContent="—";
-            if(overviewTeam)overviewTeam.textContent="—";
-            if(overviewRole)overviewRole.textContent="—";
-            if(overviewInvite)overviewInvite.textContent="—";
-            if(overviewCopy)overviewCopy.textContent="Start a new league or join one with an invite code.";
-            if(cloudTitle)cloudTitle.textContent="Start or join a league";
-            if(cloudCopy)cloudCopy.textContent="You are not currently in an active league.";
-          }
+          if(overviewName)overviewName.textContent=activeLeague.name;
+          if(overviewStatus)overviewStatus.textContent=String(activeLeague.status||"pre_draft").replace("_"," ").toUpperCase();
+          if(overviewTeam)overviewTeam.textContent=activeMembership?.team_name||"Your team";
+          if(overviewRole)overviewRole.textContent=activeMembership?.role==="owner"?"Commissioner":"Manager";
+          if(overviewInvite)overviewInvite.textContent=activeLeague.invite_code||"—";
+          if(overviewCopy)overviewCopy.textContent="This is the league currently used throughout the app.";
 
-          const rows=leagueListMode==="archived"?archivedLeagues:activeLeagues;
-          activeTab?.classList.toggle("active",leagueListMode==="active");
-          archivedTab?.classList.toggle("active",leagueListMode==="archived");
-          activeTab?.setAttribute("aria-selected",String(leagueListMode==="active"));
-          archivedTab?.setAttribute("aria-selected",String(leagueListMode==="archived"));
+          cloudList.innerHTML=leagues.map(l=>{
+            const membership=membershipFor(l.id);
+            const selected=String(activeId)===String(l.id);
+            const teamName=membership?.team_name||"Your team";
+            const role=membership?.role==="owner"?"Commissioner":"Manager";
+            const statusLabel=String(l.status||"pre_draft").replace("_"," ");
+            return '<button class="cloud-league-item league-choice '+(selected?"active-cloud-league":"")+'" data-cloud-league="'+h(l.id)+'" aria-pressed="'+String(selected)+'"><div><strong>'+h(l.name)+'</strong><small>'+h(teamName)+' · '+h(role)+' · '+h(statusLabel)+' · Invite: '+h(l.invite_code||"—")+'</small></div><span class="league-choice-state">'+(selected?"Active":"Select")+'</span></button>';
+          }).join("");
 
-          if(leagueListMode==="active"){
-            cloudList.innerHTML=rows.length?rows.map(l=>{
-              const membership=membershipFor(l.id);
-              const selected=String(activeId)===String(l.id);
-              const teamName=membership?.team_name||"Your team";
-              const role=membership?.role==="owner"?"Commissioner":"Manager";
-              const statusLabel=String(l.status||"pre_draft").replace("_"," ");
-              return '<button class="cloud-league-item league-choice '+(selected?"active-cloud-league":"")+'" data-cloud-league="'+h(l.id)+'" aria-pressed="'+String(selected)+'"><div><strong>'+h(l.name)+'</strong><small>'+h(teamName)+' · '+h(role)+' · '+h(statusLabel)+' · Invite: '+h(l.invite_code||"—")+'</small></div><span class="league-choice-state">'+(selected?"Active":"Select")+'</span></button>';
-            }).join(""):'<div class="empty-state"><strong>No active leagues</strong><small>Use Start/Join a league below to begin.</small></div>';
-
-            cloudList.querySelectorAll("[data-cloud-league]").forEach(card=>card.onclick=async()=>{
-              if(String(getActiveLeagueId())===String(card.dataset.cloudLeague))return;
-              setActiveLeagueId(card.dataset.cloudLeague);
-              const loaded=await loadRosterFromCloud(card.dataset.cloudLeague);
-              showToast(loaded?"League selected · roster loaded":"League selected");
-              await drawCloudLeagues();
-            });
-          }else{
-            cloudList.innerHTML=rows.length?rows.map(l=>{
-              const membership=membershipFor(l.id);
-              const teamName=membership?.team_name||"Your team";
-              const role=membership?.role==="owner"?"Commissioner":"Manager";
-              const canDelete=membership?.role==="owner";
-              return '<div class="cloud-league-item archived-cloud-league legacy-archive-row"><div><strong>'+h(l.name)+'</strong><small>'+h(teamName)+' · '+h(role)+' · Archived</small></div><div class="archive-row-actions"><span class="league-choice-state">Archived</span>'+(canDelete?'<button class="mini-btn danger" data-delete-archived="'+h(l.id)+'">DELETE</button>':'')+'</div></div>';
-            }).join(""):'<div class="empty-state"><strong>No archived leagues</strong><small>Archived leagues from the previous system would appear here.</small></div>';
-
-            cloudList.querySelectorAll("[data-delete-archived]").forEach(btn=>btn.onclick=async()=>{
-              const league=archivedLeagues.find(l=>String(l.id)===String(btn.dataset.deleteArchived));
-              await permanentlyDeleteLeague(league);
-            });
-          }
+          cloudList.querySelectorAll("[data-cloud-league]").forEach(card=>card.onclick=async()=>{
+            if(String(getActiveLeagueId())===String(card.dataset.cloudLeague))return;
+            setActiveLeagueId(card.dataset.cloudLeague);
+            const loaded=await loadRosterFromCloud(card.dataset.cloudLeague);
+            showToast(loaded?"League selected · roster loaded":"League selected");
+            await drawCloudLeagues();
+          });
 
           await applyLeaguePermissions(activeId);
         }catch(err){
+          cloudList.hidden=false;
           cloudList.innerHTML='<div class="empty-state cloud-error"><strong>Could not load leagues</strong><small>'+h(err.message||"Cloud request failed")+'</small></div>';
         }
       };
-
-      activeTab.onclick=async()=>{leagueListMode="active";await drawCloudLeagues();};
-      archivedTab.onclick=async()=>{leagueListMode="archived";await drawCloudLeagues();};
 
       await drawCloudLeagues();
 
@@ -1995,9 +1952,6 @@ function render(view="home",options={}){
           showToast("League created"+(league?.invite_code?": "+league.invite_code:""));
           createName.value="";
           createTeam.value="";
-          const panel=document.querySelector("#leagueAddPanel");
-          if(panel)panel.open=false;
-          leagueListMode="active";
           await drawCloudLeagues();
         }catch(err){showToast(err.message||"Could not create league");}
         finally{updateCreateState();}
@@ -2022,17 +1976,12 @@ function render(view="home",options={}){
           const leagueId=Array.isArray(joined)?joined[0]?.league_id:joined?.league_id;
           if(leagueId)setActiveLeagueId(leagueId);
           showToast("League joined");
-          const panel=document.querySelector("#leagueAddPanel");
-          if(panel)panel.open=false;
-          leagueListMode="active";
           await drawCloudLeagues();
         }catch(err){showToast(err.message||"Could not join league");}
         finally{updateJoinState();}
       };
     })();
 
-    const leagueLabel=document.querySelector("#leagueNameLabel");
-    if(leagueLabel)leagueLabel.textContent=String(settings.name||"Fantasy League").toUpperCase();
     document.querySelector("#leagueSettingsSummary").innerHTML=`
       <div><span>Teams</span><strong>${settings.managers}</strong></div>
       <div><span>Draft</span><strong>${settings.draftType}</strong></div>
@@ -2313,7 +2262,7 @@ function render(view="home",options={}){
       document.querySelector("#saveLeagueBtn").onclick=async()=>{
         const numberOr=(id,fallback)=>{const n=Number(document.querySelector(id).value);return Number.isFinite(n)?n:fallback;};
         const next={
-          name:document.querySelector("#leagueName").value.trim()||"Summoner's Cup",
+          name:document.querySelector("#leagueName").value.trim()||"Fantasy League",
           managers:document.querySelector("#managerCount").value,
           bench:document.querySelector("#benchCount").value,
           draftType:"Snake",
