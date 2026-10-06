@@ -254,15 +254,27 @@
 
       <section class="card compact team-summary-card">
         <div class="stat-row"><span>Roster</span><strong id="teamRosterCount">0/0</strong></div>
-        <div class="stat-row"><span>Starting lineup</span><strong id="teamStarterCount">0/5</strong></div>
+        <div class="stat-row"><span>Starting lineup</span><strong id="teamStarterCount">0/6</strong></div>
+      </section>
+
+      <section class="roster-status-banner" id="rosterStatusBanner" aria-live="polite">
+        <strong id="rosterStatusTitle">⚠ Roster Incomplete</strong>
+        <small id="rosterStatusCopy">Checking your roster…</small>
       </section>
 
       <section class="card team-roster-card">
         <div class="section-head">
-          <div><h3>Starting lineup</h3></div>
+          <div><h3>Starting Players</h3></div>
           <button class="text-btn" data-jump="players">Add Players</button>
         </div>
         <div id="starterRosterList" class="roster"></div>
+      </section>
+
+      <section class="card team-roster-card">
+        <div class="section-head">
+          <div><h3>FLEX</h3></div>
+        </div>
+        <div id="flexRosterList" class="roster"></div>
       </section>
 
       <section class="card team-roster-card">
@@ -546,6 +558,11 @@
         <button class="secondary-btn" id="refreshDraftBtn">Refresh Draft</button>
       </div>
 
+      <section class="roster-status-banner" id="draftRosterStatus" aria-live="polite">
+        <strong id="draftRosterStatusTitle">⚠ Roster Incomplete</strong>
+        <small id="draftRosterStatusCopy">Roster needs will appear as you draft.</small>
+      </section>
+
       <div class="card draft-board-card">
         <div class="section-head">
           <div><div class="eyebrow">DRAFT BOARD</div><h3>Recent picks</h3></div>
@@ -639,7 +656,7 @@
         <div class="form-group">
           <label>Starting roster</label>
           <div class="position-grid">
-            <span>TOP</span><span>JNG</span><span>MID</span><span>ADC</span><span>SUP</span><span class="optional">TEAM</span>
+            <span>TOP</span><span>JNG</span><span>MID</span><span>ADC</span><span>SUP</span><span>FLEX</span>
           </div>
           <label class="toggle-row">
             <span><strong>Team slot</strong><small>Coming soon. Team-objective scoring is not active yet.</small></span>
@@ -683,6 +700,19 @@
       <p class="transaction-copy" id="transactionCopy"></p>
       <div id="transactionDropList" class="stack tight"></div>
       <button class="secondary-btn transaction-cancel" data-close-transaction>Cancel</button>
+    </section>
+  </div>
+
+  <div class="transaction-modal" id="lineupSwapModal" hidden>
+    <div class="transaction-backdrop" data-close-lineup-swap></div>
+    <section class="transaction-sheet" role="dialog" aria-modal="true" aria-labelledby="lineupSwapTitle">
+      <div class="section-head">
+        <div><div class="eyebrow">LINEUP FULL</div><h3 id="lineupSwapTitle">Who would you like to replace?</h3></div>
+        <button class="icon-btn small-icon" data-close-lineup-swap aria-label="Close">×</button>
+      </div>
+      <p class="transaction-copy" id="lineupSwapCopy">Your starting lineup is full. Choose an eligible player to swap.</p>
+      <div id="lineupSwapList" class="stack tight"></div>
+      <button class="secondary-btn transaction-cancel" data-close-lineup-swap>Cancel</button>
     </section>
   </div>
 
