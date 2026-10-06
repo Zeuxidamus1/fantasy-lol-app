@@ -775,12 +775,13 @@ function render(view="home",options={}){
   currentView=view;
   app.innerHTML="";
   app.appendChild(template.content.cloneNode(true));
-  const titles={login:"Sign In",signup:"Create Account",verify:"Verify Email",home:"Home",account:"Account",team:"My Team",matchup:"Matchup",schedule:"Schedule",players:"Players",player:"Player",league:"League",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup"};
+  const titles={login:"Sign In",signup:"Create Account",verify:"Verify Email",home:"Home",account:"Account",team:"My Team",matchup:"Matchup",standings:"Standings",schedule:"Schedule",players:"Players",player:"Player",league:"League",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup"};
   document.title=`${titles[view]||"Rift Fantasy"} · Rift Fantasy`;
   document.body.classList.toggle("login-view",["login","signup","verify"].includes(view));
   const primaryView={
     team:"league",
     matchup:"league",
+    standings:"league",
     transactions:"league",
     trade:"league",
     draft:"league",
@@ -1432,6 +1433,34 @@ function render(view="home",options={}){
     void configureLeagueActions();
     document.querySelector("#playerBackBtn").onclick=()=>goBack("players");
   }
+  if(view==="standings"){
+    const list=document.querySelector("#standingsList");
+    const leagueId=getActiveLeagueId();
+    if(!leagueId||!cloudReady()){
+      list.innerHTML='<div class="empty-state"><strong>No active league</strong><small>Select a league before viewing standings.</small><button class="primary-btn" data-jump="league">Go to League</button></div>';
+    }else{
+      (async()=>{
+        try{
+          const b=backend();
+          const [members,leagues,user]=await Promise.all([b.listLeagueMembers(leagueId),b.listLeagues(),b.currentUser()]);
+          const league=leagues.find(l=>String(l.id)===String(leagueId));
+          const name=document.querySelector("#standingsLeagueName");
+          if(name)name.textContent=String(league?.name||"League").toUpperCase();
+          list.innerHTML=members.length?members.map((m,index)=>{
+            const mine=String(m.user_id)===String(user?.id);
+            return `<div class="standing-live-row ${mine?"mine":""}">
+              <span class="rank">${index+1}</span>
+              <div class="standing-live-team"><strong>${h(m.team_name||"Unnamed Team")}</strong><small>${m.role==="owner"?"Commissioner":"Manager"}${mine?" · You":""}</small></div>
+              <div class="standing-live-record"><strong>—</strong><small>Record</small></div>
+              <div class="standing-live-points"><strong>—</strong><small>FP</small></div>
+            </div>`;
+          }).join(""):'<div class="empty-state"><strong>No managers found</strong><small>League members will appear here.</small></div>';
+        }catch(err){
+          list.innerHTML='<div class="empty-state"><strong>Could not load standings</strong><small>'+h(err.message||"Try again later.")+'</small></div>';
+        }
+      })();
+    }
+  }
   if(view==="schedule"){
     const list=document.querySelector("#scheduleList");
     let day="all";
@@ -1524,9 +1553,8 @@ function render(view="home",options={}){
           if(state)state.textContent=leagueStatus==="drafting"?"Drafting":"Unavailable";
           b.disabled=true;
         }else if(!getActiveLeagueId()){
-          b.textContent="VIEW";
           if(state)state.textContent="Free agent";
-          b.disabled=true;
+          b.hidden=true;
         }else{
           if(state)state.textContent="Free agent";
           b.onclick=async e=>{e.stopPropagation();b.disabled=true;await addPlayerToRoster(p);await refreshOwnership();};
