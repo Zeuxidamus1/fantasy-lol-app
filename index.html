@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261005-35" />
+  <link rel="stylesheet" href="styles.css?v=20261005-36" />
 </head>
 <body>
   <noscript><div class="no-js-message">Rift Fantasy requires JavaScript to run. Enable JavaScript and reload the page.</div></noscript>
@@ -518,9 +518,22 @@
         </div>
         <p class="profile-copy" id="cloudLeagueCopy">Choose which league you want to manage.</p>
         <div id="cloudLeagueList" class="stack tight league-list"></div>
-        <div class="league-entry-actions" id="leagueEntryActions">
-          <button class="primary-btn" type="button" data-jump="create-league">Create a League</button>
-          <button class="secondary-btn" type="button" data-jump="join-league">Join a League</button>
+        <div class="league-entry-actions league-entry-stack" id="leagueEntryActions">
+          <button class="league-choice-card create-choice" type="button" data-jump="create-league">
+            <span class="league-choice-icon">♜</span>
+            <span><strong>Create a League</strong><small>Start a new league with friends.</small></span>
+            <span class="league-choice-arrow">›</span>
+          </button>
+          <button class="league-choice-card join-choice" type="button" data-jump="join-league">
+            <span class="league-choice-icon">♟</span>
+            <span><strong>Join a League</strong><small>Enter a league with an invite code.</small></span>
+            <span class="league-choice-arrow">›</span>
+          </button>
+          <button class="league-choice-card bot-choice" type="button" data-jump="bot-league">
+            <span class="league-choice-icon bot-icon">🤖</span>
+            <span><strong>Bot League</strong><small>Play against AI managers. Perfect for solo play.</small></span>
+            <span class="league-choice-arrow">›</span>
+          </button>
         </div>
       </section>
 
@@ -770,6 +783,109 @@
     </section>
   </template>
 
+  <template id="bot-league-template">
+    <section class="stack bot-flow-screen">
+      <div class="section-title compact-flow-header">
+        <button class="icon-btn flow-back" type="button" data-jump="league" aria-label="Back">‹</button>
+        <div><div class="eyebrow">BOT LEAGUE</div><h2>Create Bot League</h2></div>
+      </div>
+      <p class="profile-copy flow-intro">Set up your bot league with custom options.</p>
+
+      <section class="card bot-setup-card">
+        <div class="form-group">
+          <div class="field-label-row"><label>League Size</label><span class="mini-help" title="Total managers including humans and bots.">?</span></div>
+          <small class="field-help">Total number of managers (humans + bots).</small>
+          <div class="number-choice-grid ten-up" id="botLeagueSize">
+            <button type="button" class="number-choice " data-bot-size="1">1</button><button type="button" class="number-choice " data-bot-size="2">2</button><button type="button" class="number-choice " data-bot-size="3">3</button><button type="button" class="number-choice " data-bot-size="4">4</button><button type="button" class="number-choice " data-bot-size="5">5</button><button type="button" class="number-choice " data-bot-size="6">6</button><button type="button" class="number-choice " data-bot-size="7">7</button><button type="button" class="number-choice active" data-bot-size="8">8</button><button type="button" class="number-choice " data-bot-size="9">9</button><button type="button" class="number-choice " data-bot-size="10">10</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="field-label-row"><label>Human Managers</label><span class="mini-help" title="You are always one of the human managers.">?</span></div>
+          <small class="field-help">You will always be one of the managers.</small>
+          <div class="number-choice-grid five-up" id="botHumanCount">
+            <button type="button" class="number-choice active" data-human-count="1">1</button><button type="button" class="number-choice " data-human-count="2">2</button><button type="button" class="number-choice " data-human-count="3">3</button><button type="button" class="number-choice " data-human-count="4">4</button><button type="button" class="number-choice " data-human-count="5">5</button>
+          </div>
+        </div>
+
+        <div class="bot-count-card">
+          <span class="bot-avatar">🤖</span>
+          <div><strong id="botManagerCount">7 Bot Managers</strong><small>AI managers will join this league.</small></div>
+        </div>
+
+        <div class="form-group">
+          <div class="field-label-row"><label>Bot Difficulty</label><span class="mini-help" title="Changes how much structure versus randomness bots use when drafting.">?</span></div>
+          <div class="difficulty-list">
+            <button class="difficulty-option" type="button" data-bot-difficulty="casual"><span>◉</span><strong>Casual</strong><small>Fun and relaxed. More random decisions.</small></button>
+            <button class="difficulty-option active" type="button" data-bot-difficulty="competitive"><span>◈</span><strong>Competitive</strong><small>Balanced and realistic.</small></button>
+            <button class="difficulty-option" type="button" data-bot-difficulty="expert"><span>◎</span><strong>Expert</strong><small>More strategic and aggressive.</small></button>
+          </div>
+        </div>
+      </section>
+      <button class="primary-btn" id="botSetupNext" type="button">Next</button>
+    </section>
+  </template>
+
+  <template id="bot-settings-template">
+    <section class="stack bot-flow-screen">
+      <div class="section-title compact-flow-header">
+        <button class="icon-btn flow-back" type="button" data-jump="bot-league" aria-label="Back">‹</button>
+        <div><div class="eyebrow">BOT LEAGUE</div><h2>League Settings</h2></div>
+      </div>
+      <p class="profile-copy flow-intro">Customize how your league works.</p>
+
+      <section class="card setup-card">
+        <div class="form-group"><label for="botLeagueName">League Name</label><input id="botLeagueName" class="form-control" maxlength="40" value="My Bot League" /></div>
+        <div class="form-group"><label for="botTeamName">Your Team Name</label><input id="botTeamName" class="form-control" maxlength="40" value="My Team" /></div>
+
+        <div class="form-group">
+          <label>Scoring Format</label>
+          <div class="setting-choice active"><span class="setting-choice-icon">🏆</span><div><strong>Standard</strong><small>Default scoring (recommended)</small></div></div>
+        </div>
+        <div class="form-group">
+          <label>Draft Type</label>
+          <div class="setting-choice active"><span class="setting-choice-icon">↝</span><div><strong>Snake Draft</strong><small>Draft order reverses each round.</small></div></div>
+        </div>
+        <div class="form-group">
+          <label>Draft Timer</label>
+          <div class="segmented-control" id="botDraftTimer">
+            <button type="button" class="segment active" data-bot-timer="30">30s</button>
+            <button type="button" class="segment" data-bot-timer="60">60s</button>
+            <button type="button" class="segment" data-bot-timer="90">90s</button>
+          </div>
+        </div>
+        <div class="toggle-setting"><span><strong>Enable Waivers</strong><small>Allow waiver claims.</small></span><input id="botWaivers" type="checkbox" checked></div>
+        <div class="toggle-setting"><span><strong>Enable Trades</strong><small>Allow trades between human managers.</small></span><input id="botTrades" type="checkbox" checked></div>
+        <div class="toggle-setting"><span><strong>Auto Set Lineups (Bots)</strong><small>Bots keep valid starting lineups automatically.</small></span><input id="botAutoLineups" type="checkbox" checked></div>
+      </section>
+      <button class="primary-btn" id="botSettingsNext" type="button">Next</button>
+    </section>
+  </template>
+
+  <template id="bot-confirm-template">
+    <section class="stack bot-flow-screen">
+      <div class="section-title compact-flow-header">
+        <button class="icon-btn flow-back" type="button" data-jump="bot-settings" aria-label="Back">‹</button>
+        <div><div class="eyebrow">BOT LEAGUE</div><h2>Confirm League</h2></div>
+      </div>
+      <section class="card bot-confirm-card">
+        <div class="bot-confirm-hero"><span class="bot-avatar large">🤖</span><div><h3 id="botConfirmName">My Bot League</h3><p id="botConfirmManagers">1 Human · 7 Bots</p><small id="botConfirmDifficulty">Competitive Difficulty</small></div></div>
+        <div class="settings-list" id="botConfirmSettings"></div>
+      </section>
+      <button class="primary-btn" id="botCreateLeagueBtn" type="button">Create League</button>
+      <button class="secondary-btn" type="button" data-jump="bot-settings">Back</button>
+    </section>
+  </template>
+
+  <template id="bot-success-template">
+    <section class="stack bot-success-screen">
+      <div class="success-check">✓</div>
+      <h2>League Created!</h2>
+      <p class="profile-copy" id="botSuccessCopy">Your Bot League is ready to go.</p>
+      <button class="primary-btn" type="button" data-jump="league">Go to League</button>
+    </section>
+  </template>
+
   <template id="setup-template">
     <section class="stack" id="setupScreen">
       <div class="section-title">
@@ -915,10 +1031,10 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="esports-data.js?v=20261005-35"></script>
-  <script src="backend-config.js?v=20261005-35"></script>
-  <script src="backend.js?v=20261005-35"></script>
-  <script src="player-stats.js?v=20261005-35"></script>
-  <script src="app.js?v=20261005-35"></script>
+  <script src="esports-data.js?v=20261005-36"></script>
+  <script src="backend-config.js?v=20261005-36"></script>
+  <script src="backend.js?v=20261005-36"></script>
+  <script src="player-stats.js?v=20261005-36"></script>
+  <script src="app.js?v=20261005-36"></script>
 </body>
 </html>
