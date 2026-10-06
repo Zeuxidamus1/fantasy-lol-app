@@ -298,3 +298,7 @@ body.tournament-guide-open{overflow:hidden}
 .standing-live-team small,.standing-live-record small,.standing-live-points small{color:#7186a2;font-size:8px;margin-top:2px}
 .standing-live-record,.standing-live-points{text-align:right}
 .standing-live-record strong,.standing-live-points strong{font-size:11px}
+
+
+.profile-player-image{width:54px;height:54px;border-radius:16px;object-fit:cover;background:#133248;grid-row:1}
+.profile-player-image:not([hidden]) + .profile-badge{display:none}
