@@ -777,8 +777,18 @@ function render(view="home",options={}){
   const titles={login:"Sign In",signup:"Create Account",verify:"Verify Email",home:"Home",account:"Account",team:"My Team",matchup:"Matchup",schedule:"Schedule",players:"Players",player:"Player",league:"League",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup"};
   document.title=`${titles[view]||"Rift Fantasy"} · Rift Fantasy`;
   document.body.classList.toggle("login-view",["login","signup","verify"].includes(view));
+  const primaryView={
+    team:"league",
+    matchup:"league",
+    transactions:"league",
+    trade:"league",
+    draft:"league",
+    setup:"league",
+    schedule:"home",
+    player:"players"
+  }[view]||view;
   document.querySelectorAll(".nav-item").forEach(b=>{
-    const active=b.dataset.view===view;
+    const active=b.dataset.view===primaryView;
     b.classList.toggle("active",active);
     if(active)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");
   });
@@ -1052,103 +1062,46 @@ function render(view="home",options={}){
     document.querySelector("#signOutBtn").onclick=async()=>{await b?.signOut?.();showToast("Signed out");render("login",{replace:true});};
   }
   if(view==="home"){
-    const noLeague=document.querySelector("#homeNoLeague");
-    const leagueCard=document.querySelector("#homeLeagueCard");
-    const nextCard=document.querySelector("#homeNextCard");
-    const rosterCard=document.querySelector("#homeRosterCard");
-    const phase=document.querySelector("#homeLeaguePhase");
-    const activeId=getActiveLeagueId();
+    const upcomingList=document.querySelector("#homeUpcomingMatches");
+    const tournamentList=document.querySelector("#homeTournamentList");
+    const summary=document.querySelector("#homeEsportsSummary");
 
-    (async()=>{
-      if(!cloudReady()){
-        noLeague.hidden=false;
-        return;
-      }
-      try{
-        const b=backend();
-        const user=await b.currentUser().catch(()=>null);
-        if(!user){render("login",{replace:true});return;}
-        const leagues=await b.listLeagues();
-        const activeLeagues=leagues.filter(l=>!["disbanded","archived"].includes(l.status));
-        let leagueId=activeId;
-        const selectedLeague=leagues.find(l=>String(l.id)===String(leagueId));
-        if(selectedLeague&&["disbanded","archived"].includes(selectedLeague.status)){
-          setActiveLeagueId(null);
-          leagueId=null;
-        }else if(leagueId&&!activeLeagues.some(l=>String(l.id)===String(leagueId))){
-          setActiveLeagueId(null);
-          leagueId=null;
-        }
-        if(!leagueId&&activeLeagues.length===1){
-          leagueId=String(activeLeagues[0].id);
-          setActiveLeagueId(leagueId);
-        }
-        const league=activeLeagues.find(l=>String(l.id)===String(leagueId));
-        const draftSettings={...defaultLeagueSettings,...(league?.settings||{}),scoring:{...defaultLeagueSettings.scoring,...(league?.settings?.scoring||{})}};
-        if(!league){
-          noLeague.hidden=false;
-          leagueCard.hidden=true;
-          nextCard.hidden=true;
-          rosterCard.hidden=true;
-          phase.hidden=true;
-          return;
-        }
+    const rows=proSchedule.map(localScheduleRow).sort((a,b)=>{
+      const ta=Date.parse(a.startTime||a.date||"");
+      const tb=Date.parse(b.startTime||b.date||"");
+      if(Number.isFinite(ta)&&Number.isFinite(tb))return ta-tb;
+      return 0;
+    });
 
-        const members=await b.listLeagueMembers(league.id);
-        const mine=members.find(m=>String(m.user_id)===String(user.id));
-        storageSet("riftLeagueSettings",JSON.stringify({...defaultLeagueSettings,...(league.settings||{}),name:league.name,scoring:{...defaultLeagueSettings.scoring,...(league.settings?.scoring||{})}}));
-        await loadRosterFromCloud(league.id);
-        const current=getUserRoster();
-        const settings=getLeagueSettings();
-        const expected=Number(settings.managers)||members.length;
+    const upcoming=rows.filter(g=>g.day!=="past").slice(0,3);
+    const tournaments=[...new Set(rows.map(g=>String(g.league||"").trim()).filter(Boolean))].slice(0,4);
 
-        noLeague.hidden=true;
-        leagueCard.hidden=false;
-        nextCard.hidden=false;
-        rosterCard.hidden=false;
-        phase.hidden=false;
-        phase.textContent=String(league.status||"pre_draft").replace("_"," ").toUpperCase();
-        document.querySelector("#homeLeagueEyebrow").textContent=league.name.toUpperCase();
-        document.querySelector("#homeTitle").textContent=mine?.team_name||"My Team";
-        document.querySelector("#homeLeagueName").textContent=league.name;
-        document.querySelector("#homeTeamName").textContent=mine?.team_name||"My Team";
-        document.querySelector("#homeManagerCount").textContent=`${members.length}/${expected}`;
-        document.querySelector("#homeRosterCount").textContent=`${current.length}/${rosterLimit()}`;
+    if(summary){
+      summary.textContent=upcoming.length
+        ?`Quick look at the next ${upcoming.length} professional match${upcoming.length===1?"":"es"} currently available in the Rift Fantasy esports feed.`
+        :"No upcoming professional matches are currently available in the local esports feed.";
+    }
 
-        const starters=current.filter(p=>(p.slot||p.role)!=="BN").slice(0,5);
-        document.querySelector("#starterPreview").innerHTML=starters.length
-          ?starters.map(p=>playerRow({...p,role:p.position||p.role})).join("")
-          :'<div class="empty-state"><strong>Your roster is empty</strong><small>Your drafted players will appear here.</small></div>';
+    if(upcomingList){
+      upcomingList.innerHTML=upcoming.length?upcoming.map(g=>`
+        <div class="home-match-row">
+          <div class="home-match-teams">
+            <strong>${h(g.a||"TBD")} <span>vs</span> ${h(g.b||"TBD")}</strong>
+            <small>${h(g.league||"LoL Esports")}${g.stage?" · "+h(g.stage):""}</small>
+          </div>
+          <div class="home-match-time">
+            <strong>${h(g.time||"TBD")}</strong>
+            <small>${h(g.label||"Upcoming")}</small>
+          </div>
+        </div>`).join("")
+        :'<div class="empty-state"><strong>No upcoming matches</strong><small>Check back after the next esports-data refresh.</small></div>';
+    }
 
-        const action=document.querySelector("#homeNextAction");
-        const title=document.querySelector("#homeNextTitle");
-        const copy=document.querySelector("#homeNextCopy");
-        const status=league.status||"pre_draft";
-        if(status==="pre_draft"){
-          title.textContent=members.length<expected?"Waiting for managers":"Ready to draft";
-          copy.textContent=members.length<expected
-            ?`Share the invite code with ${expected-members.length} more manager${expected-members.length===1?"":"s"}.`
-            :"Your league is full. The commissioner can start the live snake draft.";
-          action.textContent=members.length<expected?"View League":"Open Draft Room";
-          action.onclick=()=>render(members.length<expected?"league":"draft");
-        }else if(status==="drafting"){
-          title.textContent="Draft in progress";
-          copy.textContent="The live league draft is underway. Open the Draft Room to see the board and make your picks.";
-          action.textContent="Open Draft Room";
-          action.onclick=()=>render("draft");
-}else{
-          title.textContent=status==="completed"?"Season complete":"League active";
-          copy.textContent=status==="completed"
-            ?"The season is complete. Review league history, standings, rosters, and results."
-            :"Your draft is complete. Manage your roster, transactions, and upcoming match schedule.";
-          action.textContent=status==="completed"?"View League":"Manage My Team";
-          action.onclick=()=>render(status==="completed"?"league":"team");
-        }
-      }catch(err){
-        noLeague.hidden=false;
-        noLeague.querySelector("small").textContent=err.message||"Could not load your active league.";
-      }
-    })();
+    if(tournamentList){
+      tournamentList.innerHTML=tournaments.length
+        ?tournaments.map(name=>`<div class="home-tournament-chip">${h(name)}</div>`).join("")
+        :'<div class="empty-state"><strong>Tournament feed unavailable</strong><small>Rift Fantasy will continue using the existing local esports data when it becomes available.</small></div>';
+    }
   }
   if(view==="team"){
     const leagueId=getActiveLeagueId();
@@ -1844,6 +1797,8 @@ function render(view="home",options={}){
           const overviewRole=document.querySelector("#leagueOverviewRole");
           const overviewInvite=document.querySelector("#leagueOverviewInvite");
           const overviewCopy=document.querySelector("#leagueOverviewCopy");
+          const addPanel=document.querySelector("#leagueAddPanel");
+          if(addPanel)addPanel.open=!activeLeague;
           if(activeLeague){
             const archived=["disbanded","archived"].includes(activeLeague.status);
             const statusText=archived?"ARCHIVED":String(activeLeague.status||"pre_draft").replace("_"," ").toUpperCase();
@@ -1861,7 +1816,9 @@ function render(view="home",options={}){
             if(overviewTeam)overviewTeam.textContent="—";
             if(overviewRole)overviewRole.textContent="—";
             if(overviewInvite)overviewInvite.textContent="—";
-            if(overviewCopy)overviewCopy.textContent="Select, create, or join a league below to get started.";
+            if(overviewCopy)overviewCopy.textContent="Create a league or join one with an invite code to start playing.";
+            if(cloudTitle)cloudTitle.textContent="Create or join a league";
+            if(cloudCopy)cloudCopy.textContent="You are not currently in an active league. Start a new league or join an existing one below.";
           }
 
           cloudList.innerHTML=leagues.length?leagues.map((l,index)=>{
