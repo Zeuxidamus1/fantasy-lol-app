@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261005-32" />
+  <link rel="stylesheet" href="styles.css?v=20261005-33" />
 </head>
 <body>
   <noscript><div class="no-js-message">Rift Fantasy requires JavaScript to run. Enable JavaScript and reload the page.</div></noscript>
@@ -249,37 +249,43 @@
         <small id="rosterStatusCopy">Checking your roster…</small>
       </section>
 
-      <section class="card team-roster-card">
-        <div class="section-head">
-          <div><h3>Starting Players</h3></div>
-        </div>
-        <div id="starterRosterList" class="roster"></div>
-      </section>
-
-      <section class="card team-roster-card">
-        <div class="section-head">
-          <div class="roster-heading-with-help">
-            <h3>FLEX</h3>
-            <button class="roster-help-btn" type="button" data-roster-help="flex" aria-label="What is FLEX?" aria-expanded="false">?</button>
+      <section class="card team-roster-card unified-roster-card">
+        <div class="roster-subsection">
+          <div class="section-head">
+            <div><h3>Starting Players</h3></div>
+            <button class="text-btn" data-jump="players">Add Players</button>
           </div>
+          <div id="starterRosterList" class="roster"></div>
         </div>
-        <div id="flexRosterList" class="roster"></div>
-      </section>
 
-      <section class="card team-roster-card">
-        <div class="section-head">
-          <div class="roster-heading-with-help">
-            <h3>Bench</h3>
-            <button class="roster-help-btn" type="button" data-roster-help="bench" aria-label="What is the Bench?" aria-expanded="false">?</button>
+        <div class="roster-subsection">
+          <div class="section-head">
+            <div class="roster-heading-with-help">
+              <h3>FLEX</h3>
+              <button class="roster-help-btn" type="button" data-roster-help="flex" aria-label="What is FLEX?" aria-expanded="false">?</button>
+            </div>
           </div>
+          <div id="flexRosterList" class="roster"></div>
         </div>
-        <div id="benchRosterList" class="roster"></div>
+
+        <div class="roster-subsection">
+          <div class="section-head">
+            <div class="roster-heading-with-help">
+              <h3>Bench</h3>
+              <button class="roster-help-btn" type="button" data-roster-help="bench" aria-label="What is the Bench?" aria-expanded="false">?</button>
+            </div>
+          </div>
+          <div id="benchRosterList" class="roster"></div>
+        </div>
       </section>
 
-      <div class="grid-two">
-        <button class="action-card" data-jump="players"><span class="action-icon">＋</span><strong>Players</strong><small>Add or review players</small></button>
-        <button class="action-card" data-jump="transactions"><span class="action-icon">↕</span><strong>Transactions</strong><small>Waivers, adds & drops</small></button>
-      </div>
+      <section class="card team-transactions-card">
+        <button class="action-card team-transaction-action" data-jump="transactions">
+          <span class="action-icon">↕</span>
+          <strong>Transactions</strong>
+          <small>Waivers, adds & drops</small>
+        </button>
+      </section>
 
       <div class="roster-help-popover" id="rosterHelpPopover" role="dialog" aria-live="polite" hidden>
         <strong id="rosterHelpTitle">Roster Help</strong>
@@ -917,10 +923,10 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="esports-data.js?v=20261005-32"></script>
-  <script src="backend-config.js?v=20261005-32"></script>
-  <script src="backend.js?v=20261005-32"></script>
-  <script src="player-stats.js?v=20261005-32"></script>
-  <script src="app.js?v=20261005-32"></script>
+  <script src="esports-data.js?v=20261005-33"></script>
+  <script src="backend-config.js?v=20261005-33"></script>
+  <script src="backend.js?v=20261005-33"></script>
+  <script src="player-stats.js?v=20261005-33"></script>
+  <script src="app.js?v=20261005-33"></script>
 </body>
 </html>
