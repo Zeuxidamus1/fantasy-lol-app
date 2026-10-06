@@ -1943,7 +1943,19 @@ function render(view="home",options={}){
       <div><span>Scoring</span><strong>${settings.scoringFormat}</strong></div>
       <div><span>Competition</span><strong>${settings.competition}</strong></div>
       <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP · FLEX · ${settings.bench} BN</strong></div>`;
-    document.querySelector("#rulesBtn").onclick=()=>showToast(`Scoring: K +${settings.scoring.kills} · D ${settings.scoring.deaths} · A +${settings.scoring.assists} · CS +${settings.scoring.cs} · Win +${settings.scoring.win}`);
+    const signedScore=value=>{
+      const n=Number(value);
+      if(!Number.isFinite(n))return "—";
+      return n>0?"+"+n:String(n);
+    };
+    const scoringSummary=document.querySelector("#leagueScoringSummary");
+    if(scoringSummary)scoringSummary.innerHTML=`
+      <div><span>Kills</span><strong>${signedScore(settings.scoring.kills)}</strong></div>
+      <div><span>Deaths</span><strong>${signedScore(settings.scoring.deaths)}</strong></div>
+      <div><span>Assists</span><strong>${signedScore(settings.scoring.assists)}</strong></div>
+      <div><span>CS</span><strong>${signedScore(settings.scoring.cs)}</strong></div>
+      <div><span>Win</span><strong>${signedScore(settings.scoring.win)}</strong></div>
+      <div><span>First Blood</span><strong>${signedScore(settings.scoring.firstBlood)}</strong></div>`;
   }
   if(view==="draft"){
     if(draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
