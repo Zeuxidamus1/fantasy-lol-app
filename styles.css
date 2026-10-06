@@ -353,3 +353,10 @@ body.modal-open{overflow:hidden}
 @media(max-width:360px){
   .scoring-summary-grid{grid-template-columns:1fr}
 }
+
+
+/* Global tap feedback and clearer active navigation */
+button{transition:transform .12s ease,background-color .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease}
+button.ui-pressed{transform:scale(.98);background:#17443f!important;border-color:#36e3c1!important;color:#78f1d8!important;box-shadow:0 0 0 2px rgba(54,227,193,.10) inset}
+.nav-item{border:1px solid transparent;border-radius:12px;margin:0 3px}
+.nav-item.active{color:#3de4c1;background:#0f2b2a;border-color:#2d6c65;box-shadow:0 0 0 1px rgba(61,228,193,.05) inset}
