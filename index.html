@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261005-9" />
+  <link rel="stylesheet" href="styles.css?v=20261005-10" />
 </head>
 <body>
   <noscript><div class="no-js-message">Rift Fantasy requires JavaScript to run. Enable JavaScript and reload the page.</div></noscript>
@@ -511,10 +511,14 @@
           </div>
         </div>
         <p class="profile-copy" id="cloudLeagueCopy">Choose which league you want to manage.</p>
+        <div class="league-list-tabs" role="tablist" aria-label="League lists">
+          <button class="chip active" id="activeLeaguesTab" type="button" role="tab" aria-selected="true">Active</button>
+          <button class="chip" id="archivedLeaguesTab" type="button" role="tab" aria-selected="false">Archived</button>
+        </div>
         <div id="cloudLeagueList" class="stack tight league-list"></div>
 
         <details class="league-add-panel" id="leagueAddPanel">
-          <summary>Add a league</summary>
+          <summary>Start/Join a league</summary>
           <div class="cloud-league-actions" id="cloudLeagueActions" hidden>
             <div class="league-create-block">
               <div class="league-subhead">
@@ -770,14 +774,12 @@
       </div>
 
       <div class="card setup-card league-management-card" id="leagueManagementCard">
-        <div class="section-head"><div><div class="eyebrow">LEAGUE MANAGEMENT</div><h3>League lifecycle</h3></div><span class="status-pill" id="managementStatusPill">ACTIVE</span></div>
-        <p class="profile-copy" id="managementStatusCopy">End league activity without deleting league history.</p>
+        <div class="section-head"><div><div class="eyebrow">LEAGUE MANAGEMENT</div><h3>Delete league</h3></div><span class="status-pill" id="managementStatusPill">ACTIVE</span></div>
+        <p class="profile-copy" id="managementStatusCopy">Permanently delete this league and all league-specific data.</p>
         <div class="league-management-actions">
-          <button class="danger-btn" id="disbandLeagueBtn" type="button">Disband League</button>
-          <button class="secondary-btn" id="reactivateLeagueBtn" type="button" hidden>Reactivate League</button>
-          <button class="secondary-btn" id="renewLeagueBtn" type="button" hidden>Renew League for Next Season</button>
+          <button class="danger-btn" id="deleteLeagueBtn" type="button">Delete League</button>
         </div>
-        <small class="field-help">Disbanding makes the league read-only. Rosters, draft results, transactions, scores, and league history are preserved.</small>
+        <small class="field-help">Permanent deletion cannot be undone. League rosters, draft data, transactions, waivers, trades, notifications, and memberships for this league will be removed.</small>
       </div>
 
       <button class="primary-btn" id="saveLeagueBtn">Save League Settings</button>
@@ -827,10 +829,10 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="esports-data.js?v=20261005-9"></script>
-  <script src="backend-config.js?v=20261005-9"></script>
-  <script src="backend.js?v=20261005-9"></script>
-  <script src="player-stats.js?v=20261005-9"></script>
-  <script src="app.js?v=20261005-9"></script>
+  <script src="esports-data.js?v=20261005-10"></script>
+  <script src="backend-config.js?v=20261005-10"></script>
+  <script src="backend.js?v=20261005-10"></script>
+  <script src="player-stats.js?v=20261005-10"></script>
+  <script src="app.js?v=20261005-10"></script>
 </body>
 </html>
