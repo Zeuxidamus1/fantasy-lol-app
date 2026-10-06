@@ -2178,7 +2178,6 @@ function render(view="home",options={}){
           if(!editable){
             document.querySelectorAll("#setupScreen input:not([type=button]), #setupScreen select, #setupScreen .choice").forEach(el=>{el.disabled=true;el.setAttribute("aria-disabled","true");});
             if(saveBtn){saveBtn.disabled=true;saveBtn.textContent="League Settings Locked";}
-            document.querySelectorAll("[data-remove-member]").forEach(el=>el.disabled=true);
           }
 
           disbandBtn.onclick=async()=>{
