@@ -284,3 +284,17 @@ body.tournament-guide-open{overflow:hidden}
 @media(max-width:350px){
   .league-quick-grid{grid-template-columns:1fr}
 }
+
+
+/* Real-data standings shell; scoring columns intentionally blank until live scoring exists */
+.standings-live-list{margin-top:12px}
+.standing-live-row{display:grid;grid-template-columns:28px minmax(0,1fr) 54px 48px;gap:8px;align-items:center;padding:11px 0;border-top:1px solid #16263d}
+.standing-live-row:first-child{border-top:0}
+.standing-live-row.mine{background:#0c2426;border-radius:10px;padding-left:8px;padding-right:8px}
+.standing-live-row .rank{color:#6f829e;font-weight:800}
+.standing-live-team{min-width:0}
+.standing-live-team strong,.standing-live-team small,.standing-live-record strong,.standing-live-record small,.standing-live-points strong,.standing-live-points small{display:block}
+.standing-live-team strong{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.standing-live-team small,.standing-live-record small,.standing-live-points small{color:#7186a2;font-size:8px;margin-top:2px}
+.standing-live-record,.standing-live-points{text-align:right}
+.standing-live-record strong,.standing-live-points strong{font-size:11px}
