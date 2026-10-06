@@ -679,12 +679,13 @@ function showToast(message){
 
 function playerRow(p, add=false){
   const pid=playerKey(p);
+  const image=p.image||p.imageUrl||p.photo||"";
   return `<div class="player-row">
     <button class="player-open-btn" data-open-player="${pid}" aria-label="Open ${h(p.name)} profile">
-      <span class="role-badge">${h(p.role)}</span>
-      <span class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.opp || p.trend || "")}</small></span>
+      ${image?`<img class="player-list-image" src="${h(image)}" alt="" loading="lazy" />`:`<span class="role-badge">${h(p.role)}</span>`}
+      <span class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.role)}</small></span>
     </button>
-    ${add ? '<button class="add-btn" aria-label="Add player">ADD</button>' : ""}
+    ${add ? '<div class="player-fantasy-state"><span class="player-status-label">Available</span><button class="add-btn" aria-label="Add player">ADD</button></div>' : ""}
   </div>`;
 }
 
@@ -1507,17 +1508,27 @@ function render(view="home",options={}){
         const p=filtered[i];
         const pid=playerKey(p);
         const ownership=leagueRosters.find(r=>String(r.player_id)===String(pid));
+        const state=b.closest(".player-fantasy-state")?.querySelector(".player-status-label");
         if(ownership){
-          if(String(ownership.user_id)===String(currentUser?.id)){b.textContent="OWNED";b.classList.add("owned");}
-          else b.textContent="ROSTERED";
+          if(String(ownership.user_id)===String(currentUser?.id)){
+            b.textContent="OWNED";
+            b.classList.add("owned");
+            if(state)state.textContent="On your roster";
+          }else{
+            b.textContent="ROSTERED";
+            if(state)state.textContent="Rostered";
+          }
           b.disabled=true;
         }else if(leagueStatus&&leagueStatus!=="active"){
           b.textContent=leagueStatus==="drafting"?"DRAFTING":"LOCKED";
+          if(state)state.textContent=leagueStatus==="drafting"?"Drafting":"Unavailable";
           b.disabled=true;
         }else if(!getActiveLeagueId()){
-          b.textContent="NO LEAGUE";
+          b.textContent="VIEW";
+          if(state)state.textContent="Free agent";
           b.disabled=true;
         }else{
+          if(state)state.textContent="Free agent";
           b.onclick=async e=>{e.stopPropagation();b.disabled=true;await addPlayerToRoster(p);await refreshOwnership();};
         }
       });
