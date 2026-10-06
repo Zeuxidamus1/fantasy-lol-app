@@ -25,6 +25,17 @@ try{new Function(dataText);pass.push("esports-data.js parses");}catch(err){fail.
 try{new Function(backendConfig);pass.push("backend-config.js parses");}catch(err){fail.push("backend-config.js syntax: "+err.message);}
 try{new Function(backend);pass.push("backend.js parses");}catch(err){fail.push("backend.js syntax: "+err.message);}
 
+try{
+  const runtime={window:{RIFT_CONFIG:{
+    supabaseUrl:"https://example.supabase.co",
+    supabaseAnonKey:"test_publishable_key_abcdefghijklmnopqrstuvwxyz"
+  }},localStorage:{getItem(){return null;},setItem(){},removeItem(){}},location:{origin:"https://example.com",pathname:"/"}};
+  vm.runInNewContext(backend,runtime,{timeout:1000});
+  check(!!runtime.window.RiftBackend,"backend runtime initializes");
+  check(typeof runtime.window.RiftBackend?.signIn==="function","backend exports signIn");
+  check(typeof runtime.window.RiftBackend?.deleteLeague==="function","backend exports deleteLeague");
+}catch(err){fail.push("backend.js runtime: "+err.message);}
+
 const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
 const idCounts=new Map();
 for(const id of ids) idCounts.set(id,(idCounts.get(id)||0)+1);
