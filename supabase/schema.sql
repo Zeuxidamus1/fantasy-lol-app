@@ -500,8 +500,12 @@ grant execute on function public.resolve_trade(uuid,text) to authenticated;
 
 -- Shared league settings, lifecycle, and live snake draft
 alter table public.leagues
-  add column if not exists status text not null default 'pre_draft'
-  check (status in ('pre_draft','drafting','active','completed'));
+  add column if not exists status text not null default 'pre_draft';
+
+alter table public.leagues drop constraint if exists leagues_status_check;
+alter table public.leagues
+  add constraint leagues_status_check
+  check (status in ('pre_draft','drafting','active','completed','disbanded','archived'));
 
 create table if not exists public.league_drafts (
   league_id uuid primary key references public.leagues(id) on delete cascade,
@@ -1632,6 +1636,86 @@ $$;
 revoke all on function public.remove_league_member(uuid,uuid) from public,anon;
 grant execute on function public.remove_league_member(uuid,uuid) to authenticated;
 
+-- League lifecycle management
+create or replace function public.disband_league(p_league_id uuid)
+returns public.leagues
+language plpgsql
+security definer
+set search_path=public
+as $
+declare
+  result public.leagues;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  select * into result from public.leagues where id=p_league_id for update;
+  if result.id is null then raise exception 'League not found'; end if;
+  if result.owner_id<>auth.uid() then raise exception 'Only the commissioner can disband this league'; end if;
+  if result.status in ('disbanded','archived') then return result; end if;
+
+  update public.leagues
+     set settings = coalesce(settings,'{}'::jsonb)
+                    || jsonb_build_object('preDisbandStatus', result.status, 'disbandedAt', now()),
+         status='disbanded'
+   where id=p_league_id
+   returning * into result;
+
+  update public.league_drafts
+     set status=case when status='drafting' then 'waiting' else status end,
+         updated_at=now()
+   where league_id=p_league_id;
+
+  perform public.notify_league_members(
+    p_league_id,auth.uid(),'league_disbanded',
+    jsonb_build_object('league_id',p_league_id,'disbanded_at',now()),null
+  );
+  return result;
+end;
+$;
+
+create or replace function public.reactivate_league(p_league_id uuid)
+returns public.leagues
+language plpgsql
+security definer
+set search_path=public
+as $
+declare
+  result public.leagues;
+  restore_status text;
+  draft_state text;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  select * into result from public.leagues where id=p_league_id for update;
+  if result.id is null then raise exception 'League not found'; end if;
+  if result.owner_id<>auth.uid() then raise exception 'Only the commissioner can reactivate this league'; end if;
+  if result.status not in ('disbanded','archived') then raise exception 'League is not archived'; end if;
+
+  restore_status:=coalesce(nullif(result.settings->>'preDisbandStatus',''),'pre_draft');
+  if restore_status='completed' then raise exception 'Completed leagues should be renewed for a new season'; end if;
+
+  select status into draft_state from public.league_drafts where league_id=p_league_id;
+  if draft_state='complete' then restore_status:='active'; end if;
+  if restore_status not in ('pre_draft','drafting','active') then restore_status:='pre_draft'; end if;
+  if restore_status='drafting' and coalesce(draft_state,'waiting')<>'drafting' then restore_status:='pre_draft'; end if;
+
+  update public.leagues
+     set status=restore_status,
+         settings=(coalesce(settings,'{}'::jsonb)-'disbandedAt')
+   where id=p_league_id
+   returning * into result;
+
+  perform public.notify_league_members(
+    p_league_id,auth.uid(),'league_reactivated',
+    jsonb_build_object('league_id',p_league_id,'status',restore_status),null
+  );
+  return result;
+end;
+$;
+
+revoke all on function public.disband_league(uuid) from public,anon;
+revoke all on function public.reactivate_league(uuid) from public,anon;
+grant execute on function public.disband_league(uuid) to authenticated;
+grant execute on function public.reactivate_league(uuid) to authenticated;
+
 
 
 -- FLEX roster rules
@@ -1650,7 +1734,7 @@ declare
   active_player_count integer;
 begin
   if auth.uid() is null then raise exception 'Authentication required'; end if;
-  if not exists(select 1 from public.leagues where id=p_league_id and owner_id=auth.uid()) then raise exception 'Only the commissioner can start the draft'; end if;
+  if not exists(select 1 from public.leagues where id=p_league_id and owner_id=auth.uid() and status='pre_draft') then raise exception 'Only the commissioner can start a pre-draft league'; end if;
   select coalesce(nullif(settings->>'managers','')::integer,4),
          6 + coalesce(nullif(settings->>'bench','')::integer,1)
     into expected_count,rounds from public.leagues where id=p_league_id;
