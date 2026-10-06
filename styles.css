@@ -231,12 +231,6 @@ body.tournament-guide-open{overflow:hidden}
 .league-quick-grid .action-card strong{font-size:12px}
 .league-quick-grid .action-card small{font-size:9px;line-height:1.3}
 .league-list{margin-top:12px}
-.league-add-panel{margin-top:14px;border-top:1px solid #1b2f47;padding-top:12px}
-.league-add-panel summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;color:#9fc4eb;font-size:11px;font-weight:900;padding:4px 1px}
-.league-add-panel summary::-webkit-details-marker{display:none}
-.league-add-panel summary::after{content:"+";font-size:18px;color:#58e8ca;font-weight:500}
-.league-add-panel[open] summary::after{content:"−"}
-.league-add-panel[open] summary{margin-bottom:12px}
 .league-create-block,.league-join-block{display:flex;flex-direction:column;gap:9px}
 .league-subhead strong,.league-subhead small{display:block}
 .league-subhead strong{font-size:12px}
@@ -304,7 +298,17 @@ body.tournament-guide-open{overflow:hidden}
 
 
 
-/* Empty League state */
-.cloud-league-card.empty-league-mode .league-add-panel{margin-top:0;border-top:0;padding-top:0}
-.cloud-league-card.empty-league-mode .league-add-panel>summary{display:none}
-.cloud-league-card.empty-league-mode .cloud-league-actions{display:flex!important}
+
+
+/* Separate Create / Join league entry points */
+.league-entry-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.league-entry-actions .primary-btn,.league-entry-actions .secondary-btn{width:100%;min-height:48px}
+.cloud-league-card.empty-league-mode{border-color:#285365}
+.cloud-league-card.empty-league-mode #cloudLeagueEyebrow{display:none}
+.cloud-league-card.empty-league-mode .league-entry-actions{margin-top:16px}
+.static-setting-row{display:flex;flex-direction:column;gap:3px;border:1px solid #1e344d;background:#091626;border-radius:12px;padding:12px 14px}
+.static-setting-row strong{font-size:12px}
+.static-setting-row small{color:#7186a2;font-size:9px;line-height:1.4}
+@media(max-width:430px){
+  .league-entry-actions{grid-template-columns:1fr}
+}
