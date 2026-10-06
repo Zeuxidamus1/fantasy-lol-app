@@ -203,6 +203,12 @@
     return request("/rest/v1/rpc/remove_league_member",{method:"POST",body:{p_league_id:leagueId,p_user_id:userId},session:current});
   }
 
+  async function deleteLeague(leagueId){
+    const current=await session();
+    if(!current)throw new Error("Sign in before deleting a league.");
+    return request("/rest/v1/rpc/delete_league",{method:"POST",body:{p_league_id:leagueId},session:current});
+  }
+
   async function getLeagueDraft(leagueId){
     const current=await session();
     if(!current)return null;
