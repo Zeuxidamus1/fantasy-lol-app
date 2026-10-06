@@ -389,3 +389,13 @@ button.ui-pressed{transform:scale(.98);background:#17443f!important;border-color
     color:#ffdce2;
   }
 }
+
+
+/* Unified roster layout */
+.unified-roster-card{display:flex;flex-direction:column;gap:0}
+.roster-subsection{padding:2px 0 16px}
+.roster-subsection+.roster-subsection{border-top:1px solid #1b3046;padding-top:16px}
+.roster-subsection:last-child{padding-bottom:0}
+.unified-roster-card .roster{margin-top:10px}
+.team-transactions-card{padding:0;overflow:hidden}
+.team-transaction-action{width:100%;border:0;border-radius:18px;padding:18px}
