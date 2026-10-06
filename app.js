@@ -662,7 +662,8 @@ function backend(){
   return window.RiftBackend||null;
 }
 function cloudReady(){
-  return !!backend()?.isConfigured?.();
+  const b=backend();
+  return !!(b&&typeof b.request==="function"&&typeof b.currentUser==="function");
 }
 function cloudUserEmail(user){
   return user?.email||user?.user_metadata?.email||"Manager";
