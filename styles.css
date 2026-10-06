@@ -321,3 +321,12 @@ body.tournament-guide-open{overflow:hidden}
   .league-overview-head{align-items:flex-start}
   .league-overview-actions{flex-direction:column;align-items:flex-end}
 }
+
+
+/* Compact multi-league switcher */
+.league-switch-row{margin-top:14px;padding-top:12px;border-top:1px solid #1b3046;display:grid;grid-template-columns:auto minmax(0,220px);gap:10px;align-items:center}
+.league-switch-row label{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.7px;color:#7f96b2}
+.league-switch-row .form-control{min-height:40px}
+@media(max-width:430px){
+  .league-switch-row{grid-template-columns:1fr}
+}
