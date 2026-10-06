@@ -37,13 +37,16 @@ const routeTargets=new Set([
 ]);
 for(const target of routeTargets) check(templates.has(target),`route target has template: ${target}`);
 
+const localAssetPath=value=>String(value||"").split(/[?#]/,1)[0];
 for(const src of [...html.matchAll(/<script\s+src="([^"]+)"/g)].map(m=>m[1])){
   if(/^https?:/.test(src)) continue;
-  check(fs.existsSync(path.join(root,src)),`script exists: ${src}`);
+  const local=localAssetPath(src);
+  check(fs.existsSync(path.join(root,local)),`script exists: ${src}`);
 }
 for(const href of [...html.matchAll(/<link[^>]+href="([^"]+)"/g)].map(m=>m[1])){
   if(/^https?:|^data:/.test(href)) continue;
-  check(fs.existsSync(path.join(root,href)),`linked asset exists: ${href}`);
+  const local=localAssetPath(href);
+  check(fs.existsSync(path.join(root,local)),`linked asset exists: ${href}`);
 }
 
 const sandbox={window:{}};
