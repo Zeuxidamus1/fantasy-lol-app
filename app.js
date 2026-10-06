@@ -2026,9 +2026,11 @@ function render(view="home",options={}){
     let role="ALL";
     let currentUser=null;
     let members=[];
+    let bots=[];
     let memberById=new Map();
     let draft=null;
     let picks=[];
+    let botPickPending=false;
 
     const managerForPick=(pickIndex,order)=>{
       const count=order.length;
@@ -2053,21 +2055,26 @@ function render(view="home",options={}){
         const leagues=await b.listLeagues();
         const league=leagues.find(l=>String(l.id)===String(leagueId));
         members=await b.listLeagueMembers(leagueId);
-        memberById=new Map(members.map(m=>[String(m.user_id),m]));
+        bots=await b.listLeagueBots(leagueId);
+        memberById=new Map([
+          ...members.map(m=>[String(m.user_id),m]),
+          ...bots.map(bot=>[String(bot.id),{user_id:bot.id,team_name:bot.team_name,role:"bot",manager_type:"bot",difficulty:bot.difficulty}])
+        ]);
         draft=await b.getLeagueDraft(leagueId);
         picks=await b.listDraftPicks(leagueId);
         const me=memberById.get(String(currentUser.id));
         document.querySelector("#draftMyTeamName").textContent=me?.team_name||"My Team";
 
         const owner=me?.role==="owner";
-        const expected=Number(league?.settings?.managers)||members.length;
+        const expected=Number(league?.settings?.managers)||(members.length+bots.length);
+        const presentManagers=members.length+bots.length;
         startBtn.hidden=!(owner && (!draft||draft.status!=="drafting") && league?.status==="pre_draft");
-        startBtn.disabled=members.length!==expected;
-        startBtn.textContent=members.length===expected?"Start Draft":`Waiting for ${expected-members.length} Manager${expected-members.length===1?"":"s"}`;
+        startBtn.disabled=presentManagers!==expected;
+        startBtn.textContent=presentManagers===expected?"Start Draft":`Waiting for ${expected-presentManagers} Manager${expected-presentManagers===1?"":"s"}`;
 
         if(!draft){
           document.querySelector("#draftRoundLabel").textContent="PRE-DRAFT";
-          document.querySelector("#draftTurnLabel").textContent=members.length===expected?"League is ready":"Waiting for managers";
+          document.querySelector("#draftTurnLabel").textContent=presentManagers===expected?"League is ready":"Waiting for managers";
           document.querySelector("#draftHint").textContent=owner
             ?"Start the draft once every manager has joined."
             :"The commissioner will start the draft when the league is ready.";
@@ -2077,16 +2084,25 @@ function render(view="home",options={}){
           const order=draft.manager_order||[];
           const currentManager=managerForPick(Number(draft.current_pick)||0,order);
           const currentMember=memberById.get(String(currentManager));
+          const currentIsBot=currentMember?.role==="bot"||currentMember?.manager_type==="bot";
           const round=Math.floor((Number(draft.current_pick)||0)/Math.max(1,order.length))+1;
           document.querySelector("#draftRoundLabel").textContent=draft.status==="complete"?"DRAFT COMPLETE":`ROUND ${round} · PICK ${Number(draft.current_pick||0)+1}`;
           document.querySelector("#draftTurnLabel").textContent=draft.status==="complete"
             ?"Draft complete"
-            :String(currentManager)===String(currentUser.id)?"You're on the clock":`${currentMember?.team_name||"Another manager"} is on the clock`;
+            :String(currentManager)===String(currentUser.id)?"You're on the clock":`${currentMember?.team_name||"Another manager"}${currentIsBot?" 🤖":""} is on the clock`;
           document.querySelector("#draftHint").textContent=draft.status==="complete"
             ?"Rosters have been created automatically from the final board."
             :"Picks sync across every manager's device.";
           document.querySelector("#draftClock").textContent=draft.status==="drafting"?"LIVE":"DONE";
           document.querySelector("#draftProgress").textContent=`${picks.length}/${(draft.manager_order?.length||0)*(draft.total_rounds||0)} picks`;
+          const botOnClock=currentIsBot&&draft.status==="drafting";
+          if(botOnClock&&!botPickPending){
+            botPickPending=true;
+            setTimeout(async()=>{
+              try{await b.makeBotDraftPick(leagueId);}catch(err){console.warn("Bot draft pick:",err.message||err);}
+              finally{botPickPending=false;void refresh();}
+            },850);
+          }
         }
 
         const taken=new Set(picks.map(p=>String(p.player_id)));
