@@ -1858,6 +1858,7 @@ function render(view="home",options={}){
           if(overviewCard)overviewCard.hidden=true;
           if(quickAccess)quickAccess.hidden=true;
           if(formatCard)formatCard.hidden=true;
+          if(cloudCard)cloudCard.hidden=false;
           if(cloudList)cloudList.hidden=true;
           cloudCard?.classList.add("empty-league-mode");
           cloudTitle.textContent="Create or join a fantasy league to get started.";
@@ -1880,7 +1881,7 @@ function render(view="home",options={}){
         if(overviewCard)overviewCard.hidden=false;
         if(quickAccess)quickAccess.hidden=false;
         if(formatCard)formatCard.hidden=true;
-        if(cloudList)cloudList.hidden=false;
+        if(cloudCard)cloudCard.hidden=true;
         cloudCard?.classList.remove("empty-league-mode");
         if(entryActions)entryActions.classList.remove("empty-league-actions");
 
@@ -1902,30 +1903,26 @@ function render(view="home",options={}){
           };
         }
 
-        cloudTitle.textContent="Your leagues";
-        cloudCopy.textContent="Choose which league you want to manage.";
-        cloudList.innerHTML=leagues.map((l,index)=>{
-          const membership=memberships[index];
-          const selected=String(activeId)===String(l.id);
-          const teamName=membership?.team_name||"Your team";
-          const role=membership?.role==="owner"?"Commissioner":"Manager";
-          const statusLabel=String(l.status||"pre_draft").replace("_"," ");
-          return '<button class="cloud-league-item league-choice '+(selected?"active-cloud-league":"")+'" data-cloud-league="'+h(l.id)+'" aria-pressed="'+String(selected)+'"><div><strong>'+h(l.name)+'</strong><small>'+h(teamName)+' · '+h(role)+' · '+h(statusLabel)+' · Invite: '+h(l.invite_code||"—")+'</small></div><span class="league-choice-state">'+(selected?"Active":"Select")+'</span></button>';
-        }).join("");
-
-        cloudList.querySelectorAll("[data-cloud-league]").forEach(card=>card.onclick=async()=>{
-          if(String(getActiveLeagueId())===String(card.dataset.cloudLeague))return;
-          setActiveLeagueId(card.dataset.cloudLeague);
-          const loaded=await loadRosterFromCloud(card.dataset.cloudLeague);
-          showToast(loaded?"League selected · roster loaded":"League selected");
-          render("league",{replace:true});
-        });
+        const switchRow=document.querySelector("#leagueSwitchRow");
+        const switcher=document.querySelector("#leagueSwitcherSelect");
+        if(switchRow&&switcher){
+          switchRow.hidden=leagues.length<2;
+          switcher.innerHTML=leagues.map(l=>'<option value="'+h(l.id)+'" '+(String(l.id)===String(activeId)?"selected":"")+'>'+h(l.name)+'</option>').join("");
+          switcher.onchange=async()=>{
+            if(String(switcher.value)===String(getActiveLeagueId()))return;
+            setActiveLeagueId(switcher.value);
+            const loaded=await loadRosterFromCloud(switcher.value);
+            showToast(loaded?"League switched · roster loaded":"League switched");
+            render("league",{replace:true});
+          };
+        }
 
         await applyLeaguePermissions(activeId);
       }catch(err){
         if(overviewCard)overviewCard.hidden=true;
         if(quickAccess)quickAccess.hidden=true;
         if(formatCard)formatCard.hidden=true;
+        if(cloudCard)cloudCard.hidden=false;
         if(cloudList)cloudList.hidden=true;
         cloudTitle.textContent="Could not load leagues";
         cloudCopy.textContent=err.message||"A network or league-service error occurred.";
