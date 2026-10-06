@@ -185,3 +185,17 @@ body.tournament-guide-open{overflow:hidden}
 .lineup-warning strong,.lineup-warning small{display:block}
 .lineup-warning strong{font-size:11px;color:#f4c46b}
 .lineup-warning small{margin-top:4px;color:#bca77d;font-size:9px;line-height:1.45}
+
+.roster-status-banner{border:1px solid #5f4520;background:#1b160d;border-radius:14px;padding:12px 14px}
+.roster-status-banner strong,.roster-status-banner small{display:block}
+.roster-status-banner strong{font-size:12px}
+.roster-status-banner small{margin-top:4px;font-size:9px;line-height:1.45}
+.roster-status-banner.incomplete strong{color:#f4c46b}
+.roster-status-banner.incomplete small{color:#bca77d}
+.roster-status-banner.complete{border-color:#1e5a4c;background:#0d251f}
+.roster-status-banner.complete strong{color:#54e2c2}
+.roster-status-banner.complete small{color:#91bfb2}
+#lineupSwapList .drop-option{width:100%}
+@media (max-width:520px){
+  .roster-status-banner{padding:11px 12px}
+}
