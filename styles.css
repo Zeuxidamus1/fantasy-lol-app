@@ -520,3 +520,7 @@ body{background:
   .difficulty-option{grid-template-columns:22px 1fr}
   .difficulty-option small{grid-column:2}
 }
+
+
+.bot-pill{background:#241d4d!important;border-color:#6f59c9!important;color:#c2b4ff!important}
+.commissioner-member-row.bot-manager-row{border-left:2px solid #866af0}
