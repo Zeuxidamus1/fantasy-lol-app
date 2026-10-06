@@ -61,7 +61,10 @@ function normalizeRole(role) {
 }
 function parseExisting(text) {
   const m = text.match(/window\.ESPORTS_DATA\s*=\s*([\s\S]*);\s*$/);
-  return m ? JSON.parse(m[1]) : {};
+  if (!m) return {};
+  // The checked-in snapshot is JavaScript object syntax rather than strict JSON.
+  // It is repository-controlled input, so evaluate only the captured object.
+  return Function('"use strict"; return (' + m[1] + ');')();
 }
 function teamFromParticipant(x) {
   const name = clean(x?.name || x?.team?.name || x?.code || "TBD");
