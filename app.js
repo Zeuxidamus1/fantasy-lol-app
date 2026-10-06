@@ -2410,14 +2410,8 @@ function render(view="home",options={}){
     const populate=(settings)=>{
       document.querySelector("#leagueName").value=settings.name;
       const managerSelect=document.querySelector("#managerCount");
-      const maxManagers=Math.max(2,Math.floor(draftPool.length/rosterRequirements(settings).totalRequired));
-      [...managerSelect.options].forEach(option=>{
-        const unsupported=Number(option.value)>maxManagers;
-        option.disabled=unsupported;
-        if(unsupported)option.title=`Needs at least ${Number(option.value)*rosterRequirements(settings).totalRequired} verified players`;
-      });
-      if([...managerSelect.options].some(o=>o.value===String(settings.managers)&&!o.disabled))managerSelect.value=settings.managers;
-      else managerSelect.value=[...managerSelect.options].find(o=>!o.disabled)?.value||"4";
+      if([...managerSelect.options].some(o=>o.value===String(settings.managers)))managerSelect.value=String(settings.managers);
+      else managerSelect.value="4";
       document.querySelector("#benchCount").value=settings.bench;
       document.querySelector("#competition").value=settings.competition;
       document.querySelector("#teamSlot").checked=false;
@@ -2437,16 +2431,18 @@ function render(view="home",options={}){
         try{
           const b=backend();
           const user=await b.currentUser();
-          const [members,leagues]=await Promise.all([b.listLeagueMembers(activeLeagueId),b.listLeagues()]);
+          const [members,bots,leagues]=await Promise.all([b.listLeagueMembers(activeLeagueId),b.listLeagueBots(activeLeagueId),b.listLeagues()]);
           const mine=members.find(m=>String(m.user_id)===String(user?.id));
           league=leagues.find(l=>String(l.id)===String(activeLeagueId));
           const memberList=document.querySelector("#commissionerMemberList");
           const drawMembers=()=>{
             if(!memberList)return;
-            memberList.innerHTML=members.map(m=>{
+            const humanRows=members.map(m=>{
               const isOwner=m.role==="owner";
               return `<div class="commissioner-member-row"><div><strong>${h(m.team_name||"My Team")}</strong><small>${isOwner?"Commissioner":"Manager"}</small></div>${isOwner?"<span class=\"status-pill success\">OWNER</span>":'<button class="mini-btn danger" data-remove-member="'+h(m.user_id)+'">REMOVE</button>'}</div>`;
-            }).join("");
+            });
+            const botRows=bots.map(bot=>`<div class="commissioner-member-row bot-manager-row"><div><strong>🤖 ${h(bot.team_name)}</strong><small>${h(String(bot.difficulty||"competitive").replace(/^./,c=>c.toUpperCase()))} Bot</small></div><span class="status-pill bot-pill">BOT</span></div>`);
+            memberList.innerHTML=[...humanRows,...botRows].join("");
             memberList.querySelectorAll("[data-remove-member]").forEach(btn=>btn.onclick=async()=>{
               const target=members.find(m=>String(m.user_id)===String(btn.dataset.removeMember));
               if(!target)return;
