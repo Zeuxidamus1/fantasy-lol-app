@@ -1069,12 +1069,30 @@ function render(view="home",options={}){
         const user=await b.currentUser().catch(()=>null);
         if(!user){render("login",{replace:true});return;}
         const leagues=await b.listLeagues();
+        const activeLeagues=leagues.filter(l=>!["disbanded","archived"].includes(l.status));
         let leagueId=activeId;
-        if(leagueId&&!leagues.some(l=>String(l.id)===String(leagueId)))leagueId=null;
-        if(!leagueId&&leagues.length===1){leagueId=String(leagues[0].id);setActiveLeagueId(leagueId);}
-        const league=leagues.find(l=>String(l.id)===String(leagueId));
+        const selectedLeague=leagues.find(l=>String(l.id)===String(leagueId));
+        if(selectedLeague&&["disbanded","archived"].includes(selectedLeague.status)){
+          setActiveLeagueId(null);
+          leagueId=null;
+        }else if(leagueId&&!activeLeagues.some(l=>String(l.id)===String(leagueId))){
+          setActiveLeagueId(null);
+          leagueId=null;
+        }
+        if(!leagueId&&activeLeagues.length===1){
+          leagueId=String(activeLeagues[0].id);
+          setActiveLeagueId(leagueId);
+        }
+        const league=activeLeagues.find(l=>String(l.id)===String(leagueId));
         const draftSettings={...defaultLeagueSettings,...(league?.settings||{}),scoring:{...defaultLeagueSettings.scoring,...(league?.settings?.scoring||{})}};
-        if(!league){noLeague.hidden=false;return;}
+        if(!league){
+          noLeague.hidden=false;
+          leagueCard.hidden=true;
+          nextCard.hidden=true;
+          rosterCard.hidden=true;
+          phase.hidden=true;
+          return;
+        }
 
         const members=await b.listLeagueMembers(league.id);
         const mine=members.find(m=>String(m.user_id)===String(user.id));
@@ -1118,12 +1136,7 @@ function render(view="home",options={}){
           copy.textContent="The live league draft is underway. Open the Draft Room to see the board and make your picks.";
           action.textContent="Open Draft Room";
           action.onclick=()=>render("draft");
-        }else if(["disbanded","archived"].includes(status)){
-          title.textContent="League archived";
-          copy.textContent="This league has been disbanded and is read-only. Historical rosters, draft results, transactions, and results remain available.";
-          action.textContent="View League";
-          action.onclick=()=>render("league");
-        }else{
+}else{
           title.textContent=status==="completed"?"Season complete":"League active";
           copy.textContent=status==="completed"
             ?"The season is complete. Review league history, standings, rosters, and results."
@@ -2224,6 +2237,7 @@ function render(view="home",options={}){
             disbandBtn.disabled=true;
             try{
               await b.disbandLeague(activeLeagueId);
+              setActiveLeagueId(null);
               showToast("League disbanded and archived");
               render("league",{replace:true});
             }catch(err){
