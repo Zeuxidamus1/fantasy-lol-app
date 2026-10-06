@@ -312,3 +312,12 @@ body.tournament-guide-open{overflow:hidden}
 @media(max-width:430px){
   .league-entry-actions{grid-template-columns:1fr}
 }
+
+
+/* Compact Rules & Setup access */
+.league-overview-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.league-rules-toggle{min-height:34px;padding:7px 10px;font-size:9px;white-space:nowrap}
+@media(max-width:430px){
+  .league-overview-head{align-items:flex-start}
+  .league-overview-actions{flex-direction:column;align-items:flex-end}
+}
