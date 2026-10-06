@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261005-39" />
+  <link rel="stylesheet" href="styles.css?v=20261005-40" />
 </head>
 <body>
   <noscript><div class="no-js-message">Rift Fantasy requires JavaScript to run. Enable JavaScript and reload the page.</div></noscript>
@@ -486,10 +486,23 @@
             <strong id="leagueOverviewInvite">—</strong>
           </div>
         </div>
-        <p class="profile-copy league-overview-copy" id="leagueOverviewCopy">Select or create a league below to get started.</p>
         <div class="league-switch-row" id="leagueSwitchRow" hidden>
           <label for="leagueSwitcherSelect">Switch League</label>
           <select id="leagueSwitcherSelect" class="form-control" aria-label="Switch active league"></select>
+        </div>
+      </section>
+
+      <section class="card league-additional-actions-card" id="activeLeagueEntryCard" hidden>
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">MORE LEAGUES</div>
+            <h3>Create/Join a League</h3>
+          </div>
+        </div>
+        <p class="profile-copy">Create another fantasy league or join an existing one.</p>
+        <div class="league-entry-actions active-league-entry-actions">
+          <button class="primary-btn" type="button" data-jump="create-league">Create a League</button>
+          <button class="secondary-btn" type="button" data-jump="join-league">Join a League</button>
         </div>
       </section>
 
@@ -1033,10 +1046,10 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="esports-data.js?v=20261005-39"></script>
-  <script src="backend-config.js?v=20261005-39"></script>
-  <script src="backend.js?v=20261005-39"></script>
-  <script src="player-stats.js?v=20261005-39"></script>
-  <script src="app.js?v=20261005-39"></script>
+  <script src="esports-data.js?v=20261005-40"></script>
+  <script src="backend-config.js?v=20261005-40"></script>
+  <script src="backend.js?v=20261005-40"></script>
+  <script src="player-stats.js?v=20261005-40"></script>
+  <script src="app.js?v=20261005-40"></script>
 </body>
 </html>
