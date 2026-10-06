@@ -1883,6 +1883,31 @@ function render(view="home",options={}){
           const [members,leagues]=await Promise.all([b.listLeagueMembers(activeLeagueId),b.listLeagues()]);
           const mine=members.find(m=>String(m.user_id)===String(user?.id));
           league=leagues.find(l=>String(l.id)===String(activeLeagueId));
+          const memberList=document.querySelector("#commissionerMemberList");
+          const drawMembers=()=>{
+            if(!memberList)return;
+            memberList.innerHTML=members.map(m=>{
+              const isOwner=m.role==="owner";
+              return `<div class="commissioner-member-row"><div><strong>${h(m.team_name||"My Team")}</strong><small>${isOwner?"Commissioner":"Manager"}</small></div>${isOwner?"<span class=\"status-pill success\">OWNER</span>":'<button class="mini-btn danger" data-remove-member="'+h(m.user_id)+'">REMOVE</button>'}</div>`;
+            }).join("");
+            memberList.querySelectorAll("[data-remove-member]").forEach(btn=>btn.onclick=async()=>{
+              const target=members.find(m=>String(m.user_id)===String(btn.dataset.removeMember));
+              if(!target)return;
+              if(!window.confirm(`Remove ${target.team_name||"this manager"} from the league?`))return;
+              btn.disabled=true;
+              try{
+                await b.removeLeagueMember(activeLeagueId,target.user_id);
+                const idx=members.findIndex(m=>String(m.user_id)===String(target.user_id));
+                if(idx>=0)members.splice(idx,1);
+                drawMembers();
+                showToast("Manager removed from league");
+              }catch(err){
+                showToast(err.message||"Could not remove manager");
+                btn.disabled=false;
+              }
+            });
+          };
+          drawMembers();
           if(mine?.role!=="owner"){
             showToast("Only the league commissioner can change league settings.");
             render("league",{replace:true});
