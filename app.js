@@ -1120,7 +1120,7 @@ function render(view="home",options={}){
     const statusBanner=document.querySelector("#rosterStatusBanner");
     const statusTitle=document.querySelector("#rosterStatusTitle");
     const statusCopy=document.querySelector("#rosterStatusCopy");
-    const rosterCards=document.querySelectorAll(".team-roster-card,.team-summary-card");
+    const rosterCards=document.querySelectorAll(".team-roster-card,.team-summary-card,.team-transactions-card");
     const rosterHelpPopover=document.querySelector("#rosterHelpPopover");
     const rosterHelpTitle=document.querySelector("#rosterHelpTitle");
     const rosterHelpCopy=document.querySelector("#rosterHelpCopy");
