@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261005-16" />
+  <link rel="stylesheet" href="styles.css?v=20261005-17" />
 </head>
 <body>
   <noscript><div class="no-js-message">Rift Fantasy requires JavaScript to run. Enable JavaScript and reload the page.</div></noscript>
@@ -497,43 +497,16 @@
       <section class="card cloud-league-card" id="cloudLeagueCard">
         <div class="section-head">
           <div>
-            <div class="eyebrow">MY LEAGUES</div>
+            <div class="eyebrow" id="cloudLeagueEyebrow">MY LEAGUES</div>
             <h3 id="cloudLeagueTitle">Your leagues</h3>
           </div>
         </div>
         <p class="profile-copy" id="cloudLeagueCopy">Choose which league you want to manage.</p>
         <div id="cloudLeagueList" class="stack tight league-list"></div>
-
-        <details class="league-add-panel" id="leagueAddPanel">
-          <summary>Start/Join a League</summary>
-          <div class="cloud-league-actions" id="cloudLeagueActions" hidden>
-            <div class="league-create-block">
-              <div class="league-subhead">
-                <strong>Create a League</strong>
-                <small>Start a new fantasy league and become commissioner.</small>
-              </div>
-              <div class="create-league-fields">
-                <input class="form-control" id="newLeagueName" maxlength="40" placeholder="League name" aria-label="New league name" />
-                <input class="form-control" id="newLeagueTeamName" maxlength="40" placeholder="Your team name" aria-label="Your team name" />
-              </div>
-              <button class="primary-btn" id="createCloudLeagueBtn" disabled>Create League</button>
-            </div>
-
-            <div class="league-divider"><span>OR</span></div>
-
-            <div class="league-join-block">
-              <div class="league-subhead">
-                <strong>Join a League</strong>
-                <small>Enter a commissioner-provided invite code.</small>
-              </div>
-              <div class="join-league-row">
-                <input class="form-control" id="joinCode" maxlength="12" placeholder="Invite code" aria-label="League invite code" />
-                <input class="form-control" id="joinTeamName" maxlength="40" placeholder="Team name" aria-label="Fantasy team name" />
-                <button class="secondary-btn" id="joinCloudLeagueBtn" disabled>Join League</button>
-              </div>
-            </div>
-          </div>
-        </details>
+        <div class="league-entry-actions" id="leagueEntryActions">
+          <button class="primary-btn" type="button" data-jump="create-league">Create a League</button>
+          <button class="secondary-btn" type="button" data-jump="join-league">Join a League</button>
+        </div>
       </section>
 
       <section class="card league-format-card" id="leagueFormatCard">
@@ -668,6 +641,99 @@
         <div class="section-head"><div><div class="eyebrow">MY PICKS</div><h3 id="draftMyTeamName">My Team</h3></div></div>
         <div id="myDraftRoster" class="draft-roster"></div>
       </div>
+    </section>
+  </template>
+
+  <template id="create-league-template">
+    <section class="stack">
+      <div class="section-title">
+        <div><div class="eyebrow">NEW FANTASY LEAGUE</div><h2>Create League</h2></div>
+        <button class="secondary-btn" data-jump="league">Back</button>
+      </div>
+
+      <section class="card setup-card">
+        <div class="form-group">
+          <label for="createLeagueName">League Name</label>
+          <input id="createLeagueName" class="form-control" maxlength="40" placeholder="League name" />
+        </div>
+        <div class="form-group">
+          <label for="createTeamName">Your Team Name</label>
+          <input id="createTeamName" class="form-control" maxlength="40" placeholder="Team name" />
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="createManagerCount">Managers</label>
+            <select id="createManagerCount" class="form-control">
+              <option>2</option><option selected>4</option><option>6</option><option>8</option><option>10</option><option>12</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="createBenchCount">Bench Spots</label>
+            <select id="createBenchCount" class="form-control">
+              <option selected>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="createCompetition">Competition Focus</label>
+          <select id="createCompetition" class="form-control">
+            <option selected>Worlds</option>
+            <option>MSI</option>
+            <option>LCK</option>
+            <option>LPL</option>
+            <option>LEC</option>
+            <option>LTA</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Draft</label>
+          <div class="static-setting-row"><strong>Snake Draft</strong><small>Managers take turns drafting players.</small></div>
+        </div>
+
+        <div class="form-group">
+          <label>Scoring</label>
+          <div class="static-setting-row"><strong>Head-to-Head</strong><small>Face one manager each fantasy round.</small></div>
+        </div>
+      </section>
+
+      <section class="card setup-card">
+        <div class="section-head"><div><div class="eyebrow">PLAYER SCORING</div><h3>Scoring Settings</h3></div></div>
+        <div class="scoring-grid">
+          <label>Kills <input class="score-input" id="createScoreKills" type="number" step="0.5" value="3"></label>
+          <label>Deaths <input class="score-input" id="createScoreDeaths" type="number" step="0.5" value="-1"></label>
+          <label>Assists <input class="score-input" id="createScoreAssists" type="number" step="0.5" value="2"></label>
+          <label>CS <input class="score-input" id="createScoreCs" type="number" step="0.01" value="0.02"></label>
+          <label>Win <input class="score-input" id="createScoreWin" type="number" step="0.5" value="5"></label>
+          <label>First Blood <input class="score-input" id="createScoreFb" type="number" step="0.5" value="2"></label>
+        </div>
+      </section>
+
+      <button class="primary-btn" id="confirmCreateLeagueBtn" type="button">Create League</button>
+    </section>
+  </template>
+
+  <template id="join-league-template">
+    <section class="stack">
+      <div class="section-title">
+        <div><div class="eyebrow">EXISTING FANTASY LEAGUE</div><h2>Join League</h2></div>
+        <button class="secondary-btn" data-jump="league">Back</button>
+      </div>
+
+      <section class="card setup-card">
+        <p class="profile-copy">Enter the invite code provided by the league commissioner.</p>
+        <div class="form-group">
+          <label for="joinLeagueCode">Invite Code</label>
+          <input id="joinLeagueCode" class="form-control" maxlength="12" placeholder="Invite code" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="joinLeagueTeamName">Your Team Name</label>
+          <input id="joinLeagueTeamName" class="form-control" maxlength="40" placeholder="Team name" />
+        </div>
+        <button class="primary-btn" id="confirmJoinLeagueBtn" type="button" disabled>Join League</button>
+      </section>
     </section>
   </template>
 
@@ -816,10 +882,10 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="esports-data.js?v=20261005-16"></script>
-  <script src="backend-config.js?v=20261005-16"></script>
-  <script src="backend.js?v=20261005-16"></script>
-  <script src="player-stats.js?v=20261005-16"></script>
-  <script src="app.js?v=20261005-16"></script>
+  <script src="esports-data.js?v=20261005-17"></script>
+  <script src="backend-config.js?v=20261005-17"></script>
+  <script src="backend.js?v=20261005-17"></script>
+  <script src="player-stats.js?v=20261005-17"></script>
+  <script src="app.js?v=20261005-17"></script>
 </body>
 </html>
