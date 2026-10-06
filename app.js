@@ -761,7 +761,7 @@ function render(view="home",options={}){
     return;
   }
   view=requested;
-  if(["home","league","create-league","join-league"].includes(view)&&!backend()?.readSession?.()?.access_token){
+  if(["home","league","create-league","join-league","bot-league","bot-settings","bot-confirm","bot-success"].includes(view)&&!backend()?.readSession?.()?.access_token){
     return render("login",{...options,replace:true});
   }
   if(view!=="draft"&&draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
@@ -779,7 +779,7 @@ function render(view="home",options={}){
   currentView=view;
   app.innerHTML="";
   app.appendChild(template.content.cloneNode(true));
-  const titles={login:"Sign In",signup:"Create Account",verify:"Verify Email",home:"Home",account:"Account",team:"My Team",matchup:"Matchup",standings:"Standings",schedule:"Schedule",players:"Players",player:"Player",league:"League","create-league":"Create League","join-league":"Join League",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup"};
+  const titles={login:"Sign In",signup:"Create Account",verify:"Verify Email",home:"Home",account:"Account",team:"My Team",matchup:"Matchup",standings:"Standings",schedule:"Schedule",players:"Players",player:"Player",league:"League","create-league":"Create League","join-league":"Join League","bot-league":"Create Bot League","bot-settings":"Bot League Settings","bot-confirm":"Confirm Bot League","bot-success":"League Created",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup"};
   document.title=`${titles[view]||"Rift Fantasy"} · Rift Fantasy`;
   document.body.classList.toggle("login-view",["login","signup","verify"].includes(view));
   const primaryView={
@@ -792,6 +792,10 @@ function render(view="home",options={}){
     setup:"league",
     "create-league":"league",
     "join-league":"league",
+    "bot-league":"league",
+    "bot-settings":"league",
+    "bot-confirm":"league",
+    "bot-success":"league",
     schedule:"home",
     player:"players"
   }[view]||view;
