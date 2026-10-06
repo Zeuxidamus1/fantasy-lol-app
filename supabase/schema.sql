@@ -1631,3 +1631,234 @@ $$;
 
 revoke all on function public.remove_league_member(uuid,uuid) from public,anon;
 grant execute on function public.remove_league_member(uuid,uuid) to authenticated;
+
+
+
+-- FLEX roster rules
+create or replace function public.start_league_draft(p_league_id uuid)
+returns public.league_drafts
+language plpgsql
+security definer
+set search_path=public
+as $$
+declare
+  result public.league_drafts;
+  expected_count integer;
+  actual_count integer;
+  rounds integer;
+  ordering uuid[];
+  active_player_count integer;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if not exists(select 1 from public.leagues where id=p_league_id and owner_id=auth.uid()) then raise exception 'Only the commissioner can start the draft'; end if;
+  select coalesce(nullif(settings->>'managers','')::integer,4),
+         6 + coalesce(nullif(settings->>'bench','')::integer,1)
+    into expected_count,rounds from public.leagues where id=p_league_id;
+  select count(*),array_agg(user_id order by joined_at,user_id)
+    into actual_count,ordering from public.league_members where league_id=p_league_id;
+  if actual_count<>expected_count then raise exception 'League needs % managers before drafting; currently has %',expected_count,actual_count; end if;
+  select count(*) into active_player_count from public.fantasy_players where active;
+  if active_player_count < expected_count*rounds then raise exception 'Not enough active fantasy players to fill every roster'; end if;
+  delete from public.draft_picks where league_id=p_league_id;
+  insert into public.league_drafts(league_id,status,manager_order,current_pick,total_rounds,started_at,updated_at)
+  values(p_league_id,'drafting',ordering,0,rounds,now(),now())
+  on conflict (league_id) do update
+    set status='drafting',manager_order=excluded.manager_order,current_pick=0,total_rounds=excluded.total_rounds,started_at=now(),updated_at=now()
+  returning * into result;
+  update public.leagues set status='drafting' where id=p_league_id;
+  return result;
+end;
+$$;
+
+create or replace function public.make_draft_pick(p_league_id uuid,p_player_id text,p_role text)
+returns public.draft_picks
+language plpgsql
+security definer
+set search_path=public
+as $$
+declare
+  d public.league_drafts;
+  result public.draft_picks;
+  manager_count integer;
+  round_idx integer;
+  within_round integer;
+  manager_pos integer;
+  expected_user uuid;
+  next_pick integer;
+  total_picks integer;
+  my_pick_count integer;
+  my_distinct_roles integer;
+  picks_left integer;
+  role_already_filled boolean;
+  canonical_role text;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  select role into canonical_role from public.fantasy_players where id=p_player_id and active;
+  if canonical_role is null then raise exception 'Player is invalid or inactive'; end if;
+  if p_role<>canonical_role then raise exception 'Player role does not match authoritative player data'; end if;
+  select * into d from public.league_drafts where league_id=p_league_id for update;
+  if d.league_id is null or d.status<>'drafting' then raise exception 'Draft is not active'; end if;
+  manager_count:=array_length(d.manager_order,1);
+  round_idx:=d.current_pick/manager_count;
+  within_round:=d.current_pick%manager_count;
+  manager_pos:=case when mod(round_idx,2)=0 then within_round+1 else manager_count-within_round end;
+  expected_user:=d.manager_order[manager_pos];
+  if expected_user<>auth.uid() then raise exception 'It is not your turn'; end if;
+  if exists(select 1 from public.draft_picks where league_id=p_league_id and player_id=p_player_id) then raise exception 'Player has already been drafted'; end if;
+  select count(*),count(distinct role) into my_pick_count,my_distinct_roles from public.draft_picks where league_id=p_league_id and user_id=auth.uid();
+  picks_left:=d.total_rounds-my_pick_count;
+  select exists(select 1 from public.draft_picks where league_id=p_league_id and user_id=auth.uid() and role=p_role) into role_already_filled;
+  if picks_left <= (5-my_distinct_roles) and role_already_filled then raise exception 'You must fill a missing starting role with this pick'; end if;
+  next_pick:=d.current_pick+1;
+  insert into public.draft_picks(league_id,pick_number,round_number,user_id,player_id,role)
+  values(p_league_id,next_pick,round_idx+1,auth.uid(),p_player_id,canonical_role)
+  returning * into result;
+  total_picks:=manager_count*d.total_rounds;
+  update public.league_drafts
+     set current_pick=next_pick,status=case when next_pick>=total_picks then 'complete' else 'drafting' end,updated_at=now()
+   where league_id=p_league_id;
+  if next_pick>=total_picks then
+    delete from public.rosters where league_id=p_league_id;
+    with ranked as (
+      select dp.*,row_number() over(partition by user_id,role order by pick_number) as role_rank
+      from public.draft_picks dp where league_id=p_league_id
+    ),
+    marked as (
+      select r.*,case when role_rank=1 then role else null end as starter_slot from ranked r
+    ),
+    extras as (
+      select m.*,
+             case when starter_slot is null then
+               sum(case when starter_slot is null then 1 else 0 end)
+               over(partition by user_id order by pick_number rows unbounded preceding)
+             else null end as extra_rank
+      from marked m
+    )
+    insert into public.rosters(league_id,user_id,player_id,slot)
+    select league_id,user_id,player_id,
+           case when starter_slot is not null then starter_slot when extra_rank=1 then 'FLEX' else 'BN' end
+    from extras;
+    update public.leagues set status='active' where id=p_league_id;
+  end if;
+  return result;
+end;
+$$;
+
+create or replace function public.replace_roster(p_league_id uuid,p_players jsonb)
+returns setof public.rosters
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  item jsonb;
+  roster_limit integer;
+  dropped_ids text[] := '{}';
+  added_ids text[] := '{}';
+  pid text;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if not public.is_league_member(p_league_id) then raise exception 'League membership required'; end if;
+  if not exists(select 1 from public.leagues where id=p_league_id and status='active') then raise exception 'Roster moves are only available after the draft is complete'; end if;
+  if jsonb_typeof(coalesce(p_players,'[]'::jsonb)) <> 'array' then raise exception 'Players must be an array'; end if;
+  select 6+coalesce(nullif(settings->>'bench','')::integer,1) into roster_limit from public.leagues where id=p_league_id;
+  if jsonb_array_length(coalesce(p_players,'[]'::jsonb)) > roster_limit then raise exception 'Roster exceeds league limit of %',roster_limit; end if;
+  if exists (select 1 from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x where nullif(trim(x->>'player_id'),'') is null) then raise exception 'Player is required'; end if;
+  if exists (
+    select 1 from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x
+    left join public.fantasy_players fp on fp.id=x->>'player_id' and fp.active where fp.id is null
+  ) then raise exception 'Roster contains an invalid or inactive player'; end if;
+  if exists (
+    select 1 from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x
+    join public.fantasy_players fp on fp.id=x->>'player_id'
+    where coalesce(x->>'slot','BN') not in ('TOP','JNG','MID','ADC','SUP','FLEX','BN')
+       or (coalesce(x->>'slot','BN') in ('TOP','JNG','MID','ADC','SUP') and x->>'slot'<>fp.role)
+  ) then raise exception 'Player is assigned to an invalid starting role'; end if;
+  if exists (
+    select 1 from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x
+    where coalesce(x->>'slot','BN')<>'BN'
+    group by x->>'slot' having count(*)>1
+  ) then raise exception 'Only one player is allowed in each starting slot'; end if;
+  perform 1 from public.leagues where id=p_league_id for update;
+  if exists (
+    select 1 from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x
+    group by x->>'player_id' having count(*)>1
+  ) then raise exception 'Duplicate player in roster'; end if;
+  if exists (
+    select 1 from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x
+    join public.rosters r on r.league_id=p_league_id and r.player_id=x->>'player_id' and r.user_id<>auth.uid()
+  ) then raise exception 'A submitted player is already rostered by another manager'; end if;
+  select coalesce(array_agg(r.player_id),'{}'::text[]) into dropped_ids
+    from public.rosters r where r.league_id=p_league_id and r.user_id=auth.uid()
+      and not exists (select 1 from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x where x->>'player_id'=r.player_id);
+  select coalesce(array_agg(x->>'player_id'),'{}'::text[]) into added_ids
+    from jsonb_array_elements(coalesce(p_players,'[]'::jsonb)) x
+    where not exists (select 1 from public.rosters r where r.league_id=p_league_id and r.user_id=auth.uid() and r.player_id=x->>'player_id');
+  foreach pid in array dropped_ids loop
+    insert into public.roster_transactions(league_id,user_id,action,player_id) values(p_league_id,auth.uid(),'drop',pid);
+  end loop;
+  foreach pid in array added_ids loop
+    insert into public.roster_transactions(league_id,user_id,action,player_id) values(p_league_id,auth.uid(),'add',pid);
+  end loop;
+  if cardinality(dropped_ids)=1 and cardinality(added_ids)=1 then
+    perform public.notify_league_members(p_league_id,auth.uid(),'roster_swap',jsonb_build_object('user_id',auth.uid(),'dropped_player_id',dropped_ids[1],'added_player_id',added_ids[1]),null);
+  else
+    foreach pid in array dropped_ids loop
+      perform public.notify_league_members(p_league_id,auth.uid(),'roster_drop',jsonb_build_object('user_id',auth.uid(),'player_id',pid),null);
+    end loop;
+    foreach pid in array added_ids loop
+      perform public.notify_league_members(p_league_id,auth.uid(),'roster_add',jsonb_build_object('user_id',auth.uid(),'player_id',pid),null);
+    end loop;
+  end if;
+  delete from public.rosters where league_id=p_league_id and user_id=auth.uid();
+  for item in select * from jsonb_array_elements(coalesce(p_players,'[]'::jsonb))
+  loop
+    insert into public.rosters(league_id,user_id,player_id,slot) values(p_league_id,auth.uid(),item->>'player_id',coalesce(item->>'slot','BN'));
+  end loop;
+  return query select * from public.rosters where league_id=p_league_id and user_id=auth.uid() order by created_at;
+end;
+$$;
+
+create or replace function public.accept_trade(p_trade_id uuid)
+returns public.trades
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  t public.trades;
+  send_id text;
+  receive_id text;
+  send_slot text;
+  receive_slot text;
+  send_role text;
+  receive_role text;
+  sender_new_slot text := 'BN';
+  receiver_new_slot text := 'BN';
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  select * into t from public.trades where id=p_trade_id for update;
+  if t.id is null then raise exception 'Trade not found'; end if;
+  if t.to_user<>auth.uid() then raise exception 'Only the receiving manager can accept this trade'; end if;
+  if t.status<>'pending' then raise exception 'Trade is no longer pending'; end if;
+  if not exists(select 1 from public.leagues where id=t.league_id and status='active') then raise exception 'League is not active'; end if;
+  send_id:=nullif(t.offer->>'send_player_id','');
+  receive_id:=nullif(t.offer->>'receive_player_id','');
+  if send_id is null or receive_id is null then raise exception 'Trade payload is invalid'; end if;
+  select slot into send_slot from public.rosters where league_id=t.league_id and user_id=t.from_user and player_id=send_id for update;
+  if send_slot is null then raise exception 'Offering manager no longer owns the offered player'; end if;
+  select slot into receive_slot from public.rosters where league_id=t.league_id and user_id=t.to_user and player_id=receive_id for update;
+  if receive_slot is null then raise exception 'Receiving manager no longer owns the requested player'; end if;
+  select role into send_role from public.fantasy_players where id=send_id and active;
+  select role into receive_role from public.fantasy_players where id=receive_id and active;
+  if send_role is null or receive_role is null then raise exception 'Trade contains an invalid or inactive player'; end if;
+  if send_slot='FLEX' then sender_new_slot:='FLEX'; elsif send_slot=receive_role then sender_new_slot:=receive_role; end if;
+  if receive_slot='FLEX' then receiver_new_slot:='FLEX'; elsif receive_slot=send_role then receiver_new_slot:=send_role; end if;
+  update public.rosters set user_id=t.to_user,slot=receiver_new_slot where league_id=t.league_id and user_id=t.from_user and player_id=send_id;
+  update public.rosters set user_id=t.from_user,slot=sender_new_slot where league_id=t.league_id and user_id=t.to_user and player_id=receive_id;
+  update public.trades set status='accepted',resolved_at=now() where id=t.id returning * into t;
+  perform public.notify_league_members(t.league_id,auth.uid(),'trade_accepted',jsonb_build_object('trade_id',t.id,'from_user',t.from_user,'to_user',t.to_user,'send_player_id',send_id,'receive_player_id',receive_id),null);
+  return t;
+end;
+$$;
+
