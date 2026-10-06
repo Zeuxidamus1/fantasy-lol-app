@@ -1876,8 +1876,8 @@ function render(view="home",options={}){
         if(rulesModal)rulesModal.hidden=true;
         if(cloudList)cloudList.hidden=true;
         cloudCard?.classList.add("empty-league-mode");
-        cloudTitle.textContent="Create or join a fantasy league to get started.";
-        cloudCopy.textContent="Choose one of the options below.";
+        cloudTitle.textContent="League";
+        cloudCopy.textContent="Create, join, or play with AI managers.";
         return;
       }
 
@@ -1951,7 +1951,11 @@ function render(view="home",options={}){
         document.querySelector("#leagueOverviewTeam").textContent=activeMembership?.team_name||"Your team";
         document.querySelector("#leagueOverviewRole").textContent=activeMembership?.role==="owner"?"Commissioner":"Manager";
         document.querySelector("#leagueOverviewInvite").textContent=activeLeague.invite_code||"—";
-        document.querySelector("#leagueOverviewCopy").textContent="This is the league currently used throughout the app.";
+        const botCount=Number(activeLeague.settings?.botManagers)||0;
+        const humanCount=Number(activeLeague.settings?.humanManagers)||Math.max(1,Number(activeLeague.settings?.managers||1)-botCount);
+        document.querySelector("#leagueOverviewCopy").textContent=activeLeague.settings?.botLeague
+          ?`Bot League · ${humanCount} human${humanCount===1?"":"s"} · ${botCount} bot${botCount===1?"":"s"} · ${String(activeLeague.settings?.botDifficulty||"competitive").replace(/^./,c=>c.toUpperCase())} difficulty`
+          :"Your active fantasy league.";
 
         const rulesToggle=document.querySelector("#leagueRulesToggle");
         const closeRules=()=>{
