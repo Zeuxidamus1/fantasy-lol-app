@@ -760,6 +760,9 @@ function render(view="home",options={}){
     return;
   }
   view=requested;
+  if(view==="home"&&cloudReady()&&!backend().readSession()?.access_token){
+    return render("login",{...options,replace:true});
+  }
   if(view!=="draft"&&draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
   if(!options.fromHistory){
     const hash="#"+view;
@@ -1064,11 +1067,6 @@ function render(view="home",options={}){
     document.querySelector("#signOutBtn").onclick=async()=>{await b?.signOut?.();showToast("Signed out");render("login",{replace:true});};
   }
   if(view==="home"){
-    if(cloudReady()){
-      backend().currentUser().then(user=>{
-        if(!user&&currentView==="home")render("login",{replace:true});
-      }).catch(()=>{});
-    }
     const upcomingList=document.querySelector("#homeUpcomingMatches");
     const tournamentList=document.querySelector("#homeTournamentList");
     const summary=document.querySelector("#homeEsportsSummary");
