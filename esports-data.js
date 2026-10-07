@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-07T15:43:54.715Z",
+  "updatedAt": "2026-10-07T15:45:06.643Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -1182,8 +1182,7 @@ window.ESPORTS_DATA = {
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -1198,8 +1197,7 @@ window.ESPORTS_DATA = {
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -1214,8 +1212,7 @@ window.ESPORTS_DATA = {
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -1230,8 +1227,7 @@ window.ESPORTS_DATA = {
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -1246,8 +1242,7 @@ window.ESPORTS_DATA = {
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -1262,9 +1257,7 @@ window.ESPORTS_DATA = {
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -1279,9 +1272,7 @@ window.ESPORTS_DATA = {
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -1296,9 +1287,7 @@ window.ESPORTS_DATA = {
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -1313,9 +1302,7 @@ window.ESPORTS_DATA = {
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -1330,9 +1317,7 @@ window.ESPORTS_DATA = {
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -1410,9 +1395,7 @@ window.ESPORTS_DATA = {
       "verified": true,
       "league": "lcs",
       "competitions": [
-        "lcs",
-        "msi",
-        "worlds"
+        "lcs"
       ]
     },
     {
@@ -1426,9 +1409,7 @@ window.ESPORTS_DATA = {
       "verified": true,
       "league": "lcs",
       "competitions": [
-        "lcs",
-        "msi",
-        "worlds"
+        "lcs"
       ]
     },
     {
@@ -1442,9 +1423,7 @@ window.ESPORTS_DATA = {
       "verified": true,
       "league": "lcs",
       "competitions": [
-        "lcs",
-        "msi",
-        "worlds"
+        "lcs"
       ]
     },
     {
@@ -1458,9 +1437,7 @@ window.ESPORTS_DATA = {
       "verified": true,
       "league": "lcs",
       "competitions": [
-        "lcs",
-        "msi",
-        "worlds"
+        "lcs"
       ]
     },
     {
@@ -1474,9 +1451,7 @@ window.ESPORTS_DATA = {
       "verified": true,
       "league": "lcs",
       "competitions": [
-        "lcs",
-        "msi",
-        "worlds"
+        "lcs"
       ]
     },
     {
@@ -1564,32 +1539,17 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "115258282165925302",
-      "role": "TOP",
-      "name": "1jw",
-      "team": "Inferno Esports",
-      "teamCode": "IE",
-      "rank": 26,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp"
-      ]
-    },
-    {
       "id": "110547595875608233",
       "role": "ADC",
       "name": "1xn",
       "team": "Suzhou LNG Esports",
       "teamCode": "LNG",
-      "rank": 27,
+      "rank": 26,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -1598,15 +1558,13 @@ window.ESPORTS_DATA = {
       "name": "369",
       "team": "TOP ESPORTS",
       "teamCode": "TES",
-      "rank": 28,
+      "rank": 27,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -1615,7 +1573,7 @@ window.ESPORTS_DATA = {
       "name": "About",
       "team": "Xi'an Team WE",
       "teamCode": "WE",
-      "rank": 29,
+      "rank": 28,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -1629,7 +1587,7 @@ window.ESPORTS_DATA = {
       "name": "Ackerman",
       "team": "LOS",
       "teamCode": "LOS",
-      "rank": 30,
+      "rank": 29,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -1643,7 +1601,7 @@ window.ESPORTS_DATA = {
       "name": "Aegis",
       "team": "RED Kalunga",
       "teamCode": "RED",
-      "rank": 31,
+      "rank": 30,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -1657,7 +1615,7 @@ window.ESPORTS_DATA = {
       "name": "Ahn",
       "team": "THUNDER TALK GAMING",
       "teamCode": "TT",
-      "rank": 32,
+      "rank": 31,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -1666,23 +1624,37 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "115258282399150331",
-      "role": "SUP",
-      "name": "Aiman",
-      "team": "Inferno Esports",
-      "teamCode": "IE",
-      "rank": 33,
+      "id": "99566404541006806",
+      "role": "ADC",
+      "name": "Aiming",
+      "team": "KRX Challengers",
+      "teamCode": "KRX",
+      "rank": 32,
       "projection": 20,
       "verified": true,
-      "league": "lcp",
+      "league": "lck",
       "competitions": [
-        "lcp"
+        "lck"
       ]
     },
     {
       "id": "99566404541006806",
       "role": "ADC",
       "name": "Aiming",
+      "team": "KIWOOM DRX",
+      "teamCode": "KRX",
+      "rank": 33,
+      "projection": 20,
+      "verified": true,
+      "league": "lck",
+      "competitions": [
+        "lck"
+      ]
+    },
+    {
+      "id": "114850386783533462",
+      "role": "MID",
+      "name": "AKaJe",
       "team": "KRX Challengers",
       "teamCode": "KRX",
       "rank": 34,
@@ -1694,40 +1666,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "99566404541006806",
-      "role": "ADC",
-      "name": "Aiming",
+      "id": "114850386783533462",
+      "role": "MID",
+      "name": "AKaJe",
       "team": "KIWOOM DRX",
       "teamCode": "KRX",
       "rank": 35,
-      "projection": 20,
-      "verified": true,
-      "league": "lck",
-      "competitions": [
-        "lck"
-      ]
-    },
-    {
-      "id": "114850386783533462",
-      "role": "MID",
-      "name": "AKaJe",
-      "team": "KRX Challengers",
-      "teamCode": "KRX",
-      "rank": 36,
-      "projection": 20,
-      "verified": true,
-      "league": "lck",
-      "competitions": [
-        "lck"
-      ]
-    },
-    {
-      "id": "114850386783533462",
-      "role": "MID",
-      "name": "AKaJe",
-      "team": "KIWOOM DRX",
-      "teamCode": "KRX",
-      "rank": 37,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -1741,14 +1685,12 @@ window.ESPORTS_DATA = {
       "name": "Alvaro",
       "team": "Movistar KOI",
       "teamCode": "MKOI",
-      "rank": 38,
+      "rank": 36,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "msi",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -1757,7 +1699,7 @@ window.ESPORTS_DATA = {
       "name": "Andil",
       "team": "KRX Challengers",
       "teamCode": "KRX",
-      "rank": 39,
+      "rank": 37,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -1771,7 +1713,7 @@ window.ESPORTS_DATA = {
       "name": "Andil",
       "team": "KIWOOM DRX",
       "teamCode": "KRX",
-      "rank": 40,
+      "rank": 38,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -1785,14 +1727,13 @@ window.ESPORTS_DATA = {
       "name": "Angel",
       "team": "Beijing JDG Esports",
       "teamCode": "JDG",
-      "rank": 41,
+      "rank": 39,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
-        "first_stand",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -1801,13 +1742,12 @@ window.ESPORTS_DATA = {
       "name": "APA",
       "team": "Cloud9 Kia",
       "teamCode": "C9",
-      "rank": 42,
+      "rank": 40,
       "projection": 20,
       "verified": true,
       "league": "lcs",
       "competitions": [
-        "lcs",
-        "worlds"
+        "lcs"
       ]
     },
     {
@@ -1816,67 +1756,7 @@ window.ESPORTS_DATA = {
       "name": "Aria",
       "team": "Fukuoka SoftBank HAWKS gaming",
       "teamCode": "SHG",
-      "rank": 43,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp",
-        "worlds"
-      ]
-    },
-    {
-      "id": "107251647709372417",
-      "role": "ADC",
-      "name": "Artemis",
-      "team": "GAM Esports",
-      "teamCode": "GAM",
-      "rank": 44,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp",
-        "msi",
-        "worlds"
-      ]
-    },
-    {
-      "id": "106368497875598272",
-      "role": "ADC",
-      "name": "Assum",
-      "team": "Invictus Gaming",
-      "teamCode": "IG",
-      "rank": 45,
-      "projection": 20,
-      "verified": true,
-      "league": "lpl",
-      "competitions": [
-        "lpl",
-        "worlds"
-      ]
-    },
-    {
-      "id": "103889952158815326",
-      "role": "SUP",
-      "name": "Attila",
-      "team": "GIANTX ITERO",
-      "teamCode": "GX",
-      "rank": 46,
-      "projection": 20,
-      "verified": true,
-      "league": "lec",
-      "competitions": [
-        "lec"
-      ]
-    },
-    {
-      "id": "115258282317023203",
-      "role": "ADC",
-      "name": "Austerity",
-      "team": "Inferno Esports",
-      "teamCode": "IE",
-      "rank": 47,
+      "rank": 41,
       "projection": 20,
       "verified": true,
       "league": "lcp",
@@ -1885,12 +1765,54 @@ window.ESPORTS_DATA = {
       ]
     },
     {
+      "id": "107251647709372417",
+      "role": "ADC",
+      "name": "Artemis",
+      "team": "GAM Esports",
+      "teamCode": "GAM",
+      "rank": 42,
+      "projection": 20,
+      "verified": true,
+      "league": "lcp",
+      "competitions": [
+        "lcp"
+      ]
+    },
+    {
+      "id": "106368497875598272",
+      "role": "ADC",
+      "name": "Assum",
+      "team": "Invictus Gaming",
+      "teamCode": "IG",
+      "rank": 43,
+      "projection": 20,
+      "verified": true,
+      "league": "lpl",
+      "competitions": [
+        "lpl"
+      ]
+    },
+    {
+      "id": "103889952158815326",
+      "role": "SUP",
+      "name": "Attila",
+      "team": "GIANTX ITERO",
+      "teamCode": "GX",
+      "rank": 44,
+      "projection": 20,
+      "verified": true,
+      "league": "lec",
+      "competitions": [
+        "lec"
+      ]
+    },
+    {
       "id": "108613483446049530",
       "role": "ADC",
       "name": "Ayu",
       "team": "FURIA",
       "teamCode": "FUR",
-      "rank": 48,
+      "rank": 45,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -1905,7 +1827,7 @@ window.ESPORTS_DATA = {
       "name": "BAO",
       "team": "Fluxo W7M",
       "teamCode": "FX",
-      "rank": 49,
+      "rank": 46,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -1919,7 +1841,7 @@ window.ESPORTS_DATA = {
       "name": "Baus",
       "team": "Los Ratones",
       "teamCode": "LR",
-      "rank": 50,
+      "rank": 47,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -1933,13 +1855,12 @@ window.ESPORTS_DATA = {
       "name": "Bdd",
       "team": "kt Challengers",
       "teamCode": "KT",
-      "rank": 51,
+      "rank": 48,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -1948,13 +1869,12 @@ window.ESPORTS_DATA = {
       "name": "Bdd",
       "team": "kt Rolster",
       "teamCode": "KT",
-      "rank": 52,
+      "rank": 49,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -1963,7 +1883,7 @@ window.ESPORTS_DATA = {
       "name": "Betty",
       "team": "Ground Zero Gaming",
       "teamCode": "GZ",
-      "rank": 53,
+      "rank": 50,
       "projection": 20,
       "verified": true,
       "league": "lcp",
@@ -1977,15 +1897,14 @@ window.ESPORTS_DATA = {
       "name": "Bie",
       "team": "Team Secret Whales",
       "teamCode": "TSW",
-      "rank": 54,
+      "rank": 51,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
         "lcp",
         "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -1994,15 +1913,14 @@ window.ESPORTS_DATA = {
       "name": "Bin",
       "team": "BILIBILI GAMING",
       "teamCode": "BLG",
-      "rank": 55,
+      "rank": 52,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
         "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -2011,13 +1929,12 @@ window.ESPORTS_DATA = {
       "name": "Blaber",
       "team": "Cloud9 Kia",
       "teamCode": "C9",
-      "rank": 56,
+      "rank": 53,
       "projection": 20,
       "verified": true,
       "league": "lcs",
       "competitions": [
-        "lcs",
-        "worlds"
+        "lcs"
       ]
     },
     {
@@ -2026,15 +1943,13 @@ window.ESPORTS_DATA = {
       "name": "Bluffing",
       "team": "Hanwha Life Esports",
       "teamCode": "HLE",
-      "rank": 57,
+      "rank": 54,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -2043,15 +1958,13 @@ window.ESPORTS_DATA = {
       "name": "Bluffing",
       "team": "HLE Challengers",
       "teamCode": "HLE",
-      "rank": 58,
+      "rank": 55,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -2060,22 +1973,7 @@ window.ESPORTS_DATA = {
       "name": "Boal",
       "team": "paiN Gaming",
       "teamCode": "PAIN",
-      "rank": 59,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol",
-        "worlds"
-      ]
-    },
-    {
-      "id": "114194572740209046",
-      "role": "JNG",
-      "name": "Booki",
-      "team": "LEVIATÁN",
-      "teamCode": "LEV",
-      "rank": 60,
+      "rank": 56,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -2084,17 +1982,17 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "107649222484165953",
+      "id": "114194572740209046",
       "role": "JNG",
-      "name": "BornThisWay",
-      "team": "Inferno Esports",
-      "teamCode": "IE",
-      "rank": 61,
+      "name": "Booki",
+      "team": "LEVIATÁN",
+      "teamCode": "LEV",
+      "rank": 57,
       "projection": 20,
       "verified": true,
-      "league": "lcp",
+      "league": "cblol",
       "competitions": [
-        "lcp"
+        "cblol"
       ]
     },
     {
@@ -2103,27 +2001,12 @@ window.ESPORTS_DATA = {
       "name": "Boukada",
       "team": "Shifters",
       "teamCode": "SHFT",
-      "rank": 62,
+      "rank": 58,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "worlds"
-      ]
-    },
-    {
-      "id": "105397249991107623",
-      "role": "ADC",
-      "name": "Brance",
-      "team": "Estral Esports",
-      "teamCode": "EST",
-      "rank": 63,
-      "projection": 20,
-      "verified": true,
-      "league": "msi",
-      "competitions": [
-        "msi"
+        "lec"
       ]
     },
     {
@@ -2132,14 +2015,12 @@ window.ESPORTS_DATA = {
       "name": "Breathe",
       "team": "Anyone's Legend",
       "teamCode": "AL",
-      "rank": 64,
+      "rank": 59,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "msi",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -2148,15 +2029,14 @@ window.ESPORTS_DATA = {
       "name": "BrokenBlade",
       "team": "G2 Esports",
       "teamCode": "G2",
-      "rank": 65,
+      "rank": 60,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
         "lec",
         "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -2165,13 +2045,12 @@ window.ESPORTS_DATA = {
       "name": "BUERO",
       "team": "Vivo Keyd Stars Academy",
       "teamCode": "VKS",
-      "rank": 66,
+      "rank": 61,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -2180,13 +2059,12 @@ window.ESPORTS_DATA = {
       "name": "BUERO",
       "team": "Vivo Keyd Stars",
       "teamCode": "VKS",
-      "rank": 67,
+      "rank": 62,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -2195,7 +2073,7 @@ window.ESPORTS_DATA = {
       "name": "BuLLDoG",
       "team": "EDWARD GAMING",
       "teamCode": "EDG",
-      "rank": 68,
+      "rank": 63,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -2209,7 +2087,7 @@ window.ESPORTS_DATA = {
       "name": "Burdol",
       "team": "LGD GAMING",
       "teamCode": "LGD",
-      "rank": 69,
+      "rank": 64,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -2223,13 +2101,12 @@ window.ESPORTS_DATA = {
       "name": "Busio",
       "team": "Karmine Corp",
       "teamCode": "KC",
-      "rank": 70,
+      "rank": 65,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
         "lec",
-        "first_stand",
         "msi"
       ]
     },
@@ -2239,7 +2116,7 @@ window.ESPORTS_DATA = {
       "name": "Bvoy",
       "team": "Shopify Rebellion",
       "teamCode": "SR",
-      "rank": 71,
+      "rank": 66,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -2248,32 +2125,17 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "99322214662601038",
-      "role": "TOP",
-      "name": "Bwipo",
-      "team": "Estral Esports",
-      "teamCode": "EST",
-      "rank": 72,
-      "projection": 20,
-      "verified": true,
-      "league": "msi",
-      "competitions": [
-        "msi"
-      ]
-    },
-    {
       "id": "109461265532592848",
       "role": "ADC",
       "name": "Caliste",
       "team": "Karmine Corp",
       "teamCode": "KC",
-      "rank": 73,
+      "rank": 67,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
         "lec",
-        "first_stand",
         "msi"
       ]
     },
@@ -2283,7 +2145,7 @@ window.ESPORTS_DATA = {
       "name": "Calix",
       "team": "NONGSHIM RED FORCE",
       "teamCode": "NS",
-      "rank": 74,
+      "rank": 68,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -2297,7 +2159,7 @@ window.ESPORTS_DATA = {
       "name": "Calix",
       "team": "NS Challengers",
       "teamCode": "NS",
-      "rank": 75,
+      "rank": 69,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -2311,7 +2173,7 @@ window.ESPORTS_DATA = {
       "name": "Calix",
       "team": "NS REDFORCE Academy",
       "teamCode": "NS",
-      "rank": 76,
+      "rank": 70,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -2325,7 +2187,7 @@ window.ESPORTS_DATA = {
       "name": "Callme",
       "team": "Disguised",
       "teamCode": "DSG",
-      "rank": 77,
+      "rank": 71,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -2339,7 +2201,22 @@ window.ESPORTS_DATA = {
       "name": "Canna",
       "team": "Karmine Corp",
       "teamCode": "KC",
-      "rank": 78,
+      "rank": 72,
+      "projection": 20,
+      "verified": true,
+      "league": "lec",
+      "competitions": [
+        "lec",
+        "msi"
+      ]
+    },
+    {
+      "id": "98767975968177297",
+      "role": "MID",
+      "name": "Caps",
+      "team": "G2 Esports",
+      "teamCode": "G2",
+      "rank": 73,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -2350,29 +2227,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "98767975968177297",
-      "role": "MID",
-      "name": "Caps",
-      "team": "G2 Esports",
-      "teamCode": "G2",
-      "rank": 79,
-      "projection": 20,
-      "verified": true,
-      "league": "lec",
-      "competitions": [
-        "lec",
-        "first_stand",
-        "msi",
-        "worlds"
-      ]
-    },
-    {
       "id": "108013460749990840",
       "role": "MID",
       "name": "Care",
       "team": "Shenzhen NINJAS IN PYJAMAS",
       "teamCode": "NIP",
-      "rank": 80,
+      "rank": 74,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -2386,13 +2246,12 @@ window.ESPORTS_DATA = {
       "name": "Career",
       "team": "Dplus KIA",
       "teamCode": "DK",
-      "rank": 81,
+      "rank": 75,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -2401,13 +2260,12 @@ window.ESPORTS_DATA = {
       "name": "Career",
       "team": "DK Challengers",
       "teamCode": "DK",
-      "rank": 82,
+      "rank": 76,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -2416,7 +2274,7 @@ window.ESPORTS_DATA = {
       "name": "Carim",
       "team": "NS REDFORCE Academy",
       "teamCode": "NS",
-      "rank": 83,
+      "rank": 77,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -2430,14 +2288,13 @@ window.ESPORTS_DATA = {
       "name": "Carim",
       "team": "T1",
       "teamCode": "T1",
-      "rank": 84,
+      "rank": 78,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -2446,37 +2303,7 @@ window.ESPORTS_DATA = {
       "name": "CarioK",
       "team": "paiN Gaming Academy",
       "teamCode": "PAIN",
-      "rank": 85,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol",
-        "worlds"
-      ]
-    },
-    {
-      "id": "100205576295412145",
-      "role": "JNG",
-      "name": "CarioK",
-      "team": "paiN Gaming",
-      "teamCode": "PAIN",
-      "rank": 86,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol",
-        "worlds"
-      ]
-    },
-    {
-      "id": "110434481071273383",
-      "role": "MID",
-      "name": "carlins",
-      "team": "Liberty Academy",
-      "teamCode": "LBR",
-      "rank": 87,
+      "rank": 79,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -2485,12 +2312,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "110434481071273383",
-      "role": "MID",
-      "name": "carlins",
-      "team": "Liberty",
-      "teamCode": "LBR",
-      "rank": 88,
+      "id": "100205576295412145",
+      "role": "JNG",
+      "name": "CarioK",
+      "team": "paiN Gaming",
+      "teamCode": "PAIN",
+      "rank": 80,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -2504,7 +2331,7 @@ window.ESPORTS_DATA = {
       "name": "Carzzy",
       "team": "Team Vitality",
       "teamCode": "VIT",
-      "rank": 89,
+      "rank": 81,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -2518,7 +2345,7 @@ window.ESPORTS_DATA = {
       "name": "Casting",
       "team": "HANJIN BRION",
       "teamCode": "BRO",
-      "rank": 90,
+      "rank": 82,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -2532,7 +2359,7 @@ window.ESPORTS_DATA = {
       "name": "Casting",
       "team": "BRO Challengers",
       "teamCode": "BRO",
-      "rank": 91,
+      "rank": 83,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -2541,32 +2368,17 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "115258282454976487",
-      "role": "MID",
-      "name": "Celest",
-      "team": "Inferno Esports",
-      "teamCode": "IE",
-      "rank": 92,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp"
-      ]
-    },
-    {
       "id": "101383793153915529",
       "role": "SUP",
       "name": "Ceos",
       "team": "paiN Gaming",
       "teamCode": "PAIN",
-      "rank": 93,
+      "rank": 84,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -2575,15 +2387,13 @@ window.ESPORTS_DATA = {
       "name": "Chang",
       "team": "HLE Academy",
       "teamCode": "HLE",
-      "rank": 94,
+      "rank": 85,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -2592,13 +2402,12 @@ window.ESPORTS_DATA = {
       "name": "Charley",
       "team": "SHG Academy",
       "teamCode": "SHG",
-      "rank": 95,
+      "rank": 86,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -2607,13 +2416,12 @@ window.ESPORTS_DATA = {
       "name": "Chika",
       "team": "MVK Esports",
       "teamCode": "MVK",
-      "rank": 96,
+      "rank": 87,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -2622,13 +2430,12 @@ window.ESPORTS_DATA = {
       "name": "Citrus",
       "team": "DetonatioN FocusMe",
       "teamCode": "DFM",
-      "rank": 97,
+      "rank": 88,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -2637,7 +2444,7 @@ window.ESPORTS_DATA = {
       "name": "Clear",
       "team": "BNK FEARX",
       "teamCode": "BFX",
-      "rank": 98,
+      "rank": 89,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -2652,7 +2459,7 @@ window.ESPORTS_DATA = {
       "name": "Clear",
       "team": "BNK FEARX Youth",
       "teamCode": "BFX",
-      "rank": 99,
+      "rank": 90,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -2667,14 +2474,13 @@ window.ESPORTS_DATA = {
       "name": "Cloud",
       "team": "T1",
       "teamCode": "T1",
-      "rank": 100,
+      "rank": 91,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -2683,7 +2489,7 @@ window.ESPORTS_DATA = {
       "name": "Clozer",
       "team": "DNS Challengers",
       "teamCode": "DNS",
-      "rank": 101,
+      "rank": 92,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -2697,7 +2503,7 @@ window.ESPORTS_DATA = {
       "name": "Clozer",
       "team": "DN SOOPers",
       "teamCode": "DNS",
-      "rank": 102,
+      "rank": 93,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -2711,7 +2517,7 @@ window.ESPORTS_DATA = {
       "name": "cody",
       "team": "Fluxo W7M",
       "teamCode": "FX",
-      "rank": 103,
+      "rank": 94,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -2725,7 +2531,7 @@ window.ESPORTS_DATA = {
       "name": "Contractz",
       "team": "Shopify Rebellion",
       "teamCode": "SR",
-      "rank": 104,
+      "rank": 95,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -2739,15 +2545,13 @@ window.ESPORTS_DATA = {
       "name": "CoreJJ",
       "team": "Team Liquid Alienware",
       "teamCode": "TLAW",
-      "rank": 105,
+      "rank": 96,
       "projection": 20,
       "verified": true,
       "league": "lcs",
       "competitions": [
         "lcs",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -2756,15 +2560,13 @@ window.ESPORTS_DATA = {
       "name": "Courage",
       "team": "Gen.G Esports",
       "teamCode": "GEN",
-      "rank": 106,
+      "rank": 97,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -2773,15 +2575,13 @@ window.ESPORTS_DATA = {
       "name": "Cracker",
       "team": "Hanwha Life Esports",
       "teamCode": "HLE",
-      "rank": 107,
+      "rank": 98,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -2790,15 +2590,13 @@ window.ESPORTS_DATA = {
       "name": "Cracker",
       "team": "HLE Challengers",
       "teamCode": "HLE",
-      "rank": 108,
+      "rank": 99,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -2807,15 +2605,13 @@ window.ESPORTS_DATA = {
       "name": "Creme",
       "team": "TOP ESPORTS",
       "teamCode": "TES",
-      "rank": 109,
+      "rank": 100,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -2824,7 +2620,7 @@ window.ESPORTS_DATA = {
       "name": "Crisp",
       "team": "LGD GAMING",
       "teamCode": "LGD",
-      "rank": 110,
+      "rank": 101,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -2838,13 +2634,12 @@ window.ESPORTS_DATA = {
       "name": "Croco",
       "team": "Suzhou LNG Esports",
       "teamCode": "LNG",
-      "rank": 111,
+      "rank": 102,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -2853,7 +2648,7 @@ window.ESPORTS_DATA = {
       "name": "Crownie",
       "team": "Los Ratones",
       "teamCode": "LR",
-      "rank": 112,
+      "rank": 103,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -2867,7 +2662,7 @@ window.ESPORTS_DATA = {
       "name": "Cube",
       "team": "Xi'an Team WE",
       "teamCode": "WE",
-      "rank": 113,
+      "rank": 104,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -2881,7 +2676,7 @@ window.ESPORTS_DATA = {
       "name": "Curse",
       "team": "LOS",
       "teamCode": "LOS",
-      "rank": 114,
+      "rank": 105,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -2895,7 +2690,7 @@ window.ESPORTS_DATA = {
       "name": "curty",
       "team": "Fluxo W7M",
       "teamCode": "FX",
-      "rank": 115,
+      "rank": 106,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -2909,13 +2704,12 @@ window.ESPORTS_DATA = {
       "name": "Cuzz",
       "team": "kt Challengers",
       "teamCode": "KT",
-      "rank": 116,
+      "rank": 107,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -2924,13 +2718,12 @@ window.ESPORTS_DATA = {
       "name": "Cuzz",
       "team": "kt Rolster",
       "teamCode": "KT",
-      "rank": 117,
+      "rank": 108,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -2939,14 +2732,13 @@ window.ESPORTS_DATA = {
       "name": "Cypher",
       "team": "T1",
       "teamCode": "T1",
-      "rank": 118,
+      "rank": 109,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -2955,7 +2747,7 @@ window.ESPORTS_DATA = {
       "name": "Daglas",
       "team": "Team Heretics",
       "teamCode": "TH",
-      "rank": 119,
+      "rank": 110,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -2969,14 +2761,13 @@ window.ESPORTS_DATA = {
       "name": "Dal",
       "team": "T1 Rookies",
       "teamCode": "T1",
-      "rank": 120,
+      "rank": 111,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -2985,7 +2776,7 @@ window.ESPORTS_DATA = {
       "name": "Daystar",
       "team": "BNK FEARX",
       "teamCode": "BFX",
-      "rank": 121,
+      "rank": 112,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3000,7 +2791,7 @@ window.ESPORTS_DATA = {
       "name": "Daystar",
       "team": "BNK FEARX Youth",
       "teamCode": "BFX",
-      "rank": 122,
+      "rank": 113,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3015,7 +2806,7 @@ window.ESPORTS_DATA = {
       "name": "DDahyuk",
       "team": "HANJIN BRION",
       "teamCode": "BRO",
-      "rank": 123,
+      "rank": 114,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3029,7 +2820,7 @@ window.ESPORTS_DATA = {
       "name": "DDahyuk",
       "team": "BRO Challengers",
       "teamCode": "BRO",
-      "rank": 124,
+      "rank": 115,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3043,7 +2834,7 @@ window.ESPORTS_DATA = {
       "name": "DDoiV",
       "team": "DNS Challengers",
       "teamCode": "DNS",
-      "rank": 125,
+      "rank": 116,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3057,7 +2848,7 @@ window.ESPORTS_DATA = {
       "name": "DDoiV",
       "team": "DN SOOPers",
       "teamCode": "DNS",
-      "rank": 126,
+      "rank": 117,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3071,15 +2862,13 @@ window.ESPORTS_DATA = {
       "name": "Delight",
       "team": "Hanwha Life Esports",
       "teamCode": "HLE",
-      "rank": 127,
+      "rank": 118,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -3088,15 +2877,13 @@ window.ESPORTS_DATA = {
       "name": "Delight",
       "team": "HLE Challengers",
       "teamCode": "HLE",
-      "rank": 128,
+      "rank": 119,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -3105,7 +2892,7 @@ window.ESPORTS_DATA = {
       "name": "Denathor",
       "team": "Dignitas",
       "teamCode": "DIG",
-      "rank": 129,
+      "rank": 120,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -3119,7 +2906,7 @@ window.ESPORTS_DATA = {
       "name": "deokdam",
       "team": "DNS Challengers",
       "teamCode": "DNS",
-      "rank": 130,
+      "rank": 121,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3133,7 +2920,7 @@ window.ESPORTS_DATA = {
       "name": "deokdam",
       "team": "DN SOOPers",
       "teamCode": "DNS",
-      "rank": 131,
+      "rank": 122,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3147,7 +2934,7 @@ window.ESPORTS_DATA = {
       "name": "Devost",
       "team": "LEVIATÁN",
       "teamCode": "LEV",
-      "rank": 132,
+      "rank": 123,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -3161,7 +2948,7 @@ window.ESPORTS_DATA = {
       "name": "Dhokla",
       "team": "LYON",
       "teamCode": "LYON",
-      "rank": 133,
+      "rank": 124,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -3177,7 +2964,7 @@ window.ESPORTS_DATA = {
       "name": "Diable",
       "team": "NONGSHIM RED FORCE",
       "teamCode": "NS",
-      "rank": 134,
+      "rank": 125,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3191,7 +2978,7 @@ window.ESPORTS_DATA = {
       "name": "Diable",
       "team": "BNK FEARX Youth",
       "teamCode": "BFX",
-      "rank": 135,
+      "rank": 126,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3206,7 +2993,7 @@ window.ESPORTS_DATA = {
       "name": "Diable",
       "team": "NS Challengers",
       "teamCode": "NS",
-      "rank": 136,
+      "rank": 127,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3220,7 +3007,7 @@ window.ESPORTS_DATA = {
       "name": "Dinai",
       "team": "HANJIN BRION",
       "teamCode": "BRO",
-      "rank": 137,
+      "rank": 128,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3234,7 +3021,7 @@ window.ESPORTS_DATA = {
       "name": "Dinai",
       "team": "BRO Challengers",
       "teamCode": "BRO",
-      "rank": 138,
+      "rank": 129,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3248,15 +3035,14 @@ window.ESPORTS_DATA = {
       "name": "Dire",
       "team": "Team Secret Whales",
       "teamCode": "TSW",
-      "rank": 139,
+      "rank": 130,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
         "lcp",
         "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -3265,13 +3051,12 @@ window.ESPORTS_DATA = {
       "name": "Disamis",
       "team": "Vivo Keyd Stars",
       "teamCode": "VKS",
-      "rank": 140,
+      "rank": 131,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -3280,24 +3065,7 @@ window.ESPORTS_DATA = {
       "name": "Doggo",
       "team": "CTBC Flying Oyster",
       "teamCode": "CFO",
-      "rank": 141,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp",
-        "first_stand",
-        "msi",
-        "worlds"
-      ]
-    },
-    {
-      "id": "111720042622049047",
-      "role": "TOP",
-      "name": "doraemon",
-      "team": "Saving OCE",
-      "teamCode": "SVO",
-      "rank": 142,
+      "rank": 132,
       "projection": 20,
       "verified": true,
       "league": "lcp",
@@ -3311,14 +3079,12 @@ window.ESPORTS_DATA = {
       "name": "Draktharr",
       "team": "GAM Esports",
       "teamCode": "GAM",
-      "rank": 143,
+      "rank": 133,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "msi",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -3327,7 +3093,7 @@ window.ESPORTS_DATA = {
       "name": "DuDu",
       "team": "DNS Challengers",
       "teamCode": "DNS",
-      "rank": 144,
+      "rank": 134,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3341,7 +3107,7 @@ window.ESPORTS_DATA = {
       "name": "DuDu",
       "team": "DN SOOPers",
       "teamCode": "DNS",
-      "rank": 145,
+      "rank": 135,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3355,7 +3121,7 @@ window.ESPORTS_DATA = {
       "name": "Duduhh",
       "team": "LOS",
       "teamCode": "LOS",
-      "rank": 146,
+      "rank": 136,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -3369,7 +3135,7 @@ window.ESPORTS_DATA = {
       "name": "Dyenn",
       "team": "GIANTX ITERO",
       "teamCode": "GX",
-      "rank": 147,
+      "rank": 137,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -3378,33 +3144,18 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "108242899618383167",
-      "role": "ADC",
-      "name": "Easylove",
-      "team": "Saigon 1TAP DINO",
-      "teamCode": "DINO",
-      "rank": 148,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp"
-      ]
-    },
-    {
       "id": "116884197729505782",
       "role": "ADC",
       "name": "Eclipse",
       "team": "T1",
       "teamCode": "T1",
-      "rank": 149,
+      "rank": 138,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -3413,15 +3164,14 @@ window.ESPORTS_DATA = {
       "name": "Eddie",
       "team": "Team Secret Whales",
       "teamCode": "TSW",
-      "rank": 150,
+      "rank": 139,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
         "lcp",
         "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -3430,13 +3180,12 @@ window.ESPORTS_DATA = {
       "name": "Effort",
       "team": "kt Challengers",
       "teamCode": "KT",
-      "rank": 151,
+      "rank": 140,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -3445,13 +3194,12 @@ window.ESPORTS_DATA = {
       "name": "Effort",
       "team": "kt Rolster",
       "teamCode": "KT",
-      "rank": 152,
+      "rank": 141,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -3460,13 +3208,12 @@ window.ESPORTS_DATA = {
       "name": "Elk",
       "team": "WeiboGaming",
       "teamCode": "WBG",
-      "rank": 153,
+      "rank": 142,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -3475,14 +3222,12 @@ window.ESPORTS_DATA = {
       "name": "Elyoya",
       "team": "Movistar KOI",
       "teamCode": "MKOI",
-      "rank": 154,
+      "rank": 143,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "msi",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -3491,13 +3236,12 @@ window.ESPORTS_DATA = {
       "name": "EMENES",
       "team": "Cloud9 Challengers",
       "teamCode": "C9",
-      "rank": 155,
+      "rank": 144,
       "projection": 20,
       "verified": true,
       "league": "lcs",
       "competitions": [
-        "lcs",
-        "worlds"
+        "lcs"
       ]
     },
     {
@@ -3506,14 +3250,12 @@ window.ESPORTS_DATA = {
       "name": "Empyros",
       "team": "Fnatic",
       "teamCode": "FNC",
-      "rank": 156,
+      "rank": 145,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "msi",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -3522,7 +3264,7 @@ window.ESPORTS_DATA = {
       "name": "Enga",
       "team": "LEVIATÁN",
       "teamCode": "LEV",
-      "rank": 157,
+      "rank": 146,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -3536,7 +3278,7 @@ window.ESPORTS_DATA = {
       "name": "Enosh",
       "team": "DNS Challengers",
       "teamCode": "DNS",
-      "rank": 158,
+      "rank": 147,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3550,7 +3292,7 @@ window.ESPORTS_DATA = {
       "name": "Enosh",
       "team": "DN SOOPers",
       "teamCode": "DNS",
-      "rank": 159,
+      "rank": 148,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3559,26 +3301,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "99566407784212776",
-      "role": "MID",
-      "name": "Envy",
-      "team": "Estral Esports",
-      "teamCode": "EST",
-      "rank": 160,
-      "projection": 20,
-      "verified": true,
-      "league": "msi",
-      "competitions": [
-        "msi"
-      ]
-    },
-    {
       "id": "111726064836555178",
       "role": "SUP",
       "name": "Erha",
       "team": "Xi'an Team WE",
       "teamCode": "WE",
-      "rank": 161,
+      "rank": 149,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -3587,46 +3315,17 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "105397244556008388",
-      "role": "ADC",
-      "name": "Eryon",
-      "team": "Liberty Academy",
-      "teamCode": "LBR",
-      "rank": 162,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
-      ]
-    },
-    {
-      "id": "105397244556008388",
-      "role": "ADC",
-      "name": "Eryon",
-      "team": "Liberty",
-      "teamCode": "LBR",
-      "rank": 163,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
-      ]
-    },
-    {
       "id": "98767975944639514",
       "role": "TOP",
       "name": "Evi",
       "team": "Fukuoka SoftBank HAWKS gaming",
       "teamCode": "SHG",
-      "rank": 164,
+      "rank": 150,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -3635,7 +3334,7 @@ window.ESPORTS_DATA = {
       "name": "eXyu",
       "team": "Dignitas",
       "teamCode": "DIG",
-      "rank": 165,
+      "rank": 151,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -3649,7 +3348,7 @@ window.ESPORTS_DATA = {
       "name": "FBI",
       "team": "Dignitas",
       "teamCode": "DIG",
-      "rank": 166,
+      "rank": 152,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -3663,7 +3362,7 @@ window.ESPORTS_DATA = {
       "name": "Feather",
       "team": "THUNDER TALK GAMING",
       "teamCode": "TT",
-      "rank": 167,
+      "rank": 153,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -3677,7 +3376,7 @@ window.ESPORTS_DATA = {
       "name": "Feisty",
       "team": "LOS",
       "teamCode": "LOS",
-      "rank": 168,
+      "rank": 154,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -3691,7 +3390,7 @@ window.ESPORTS_DATA = {
       "name": "Feng",
       "team": "Relove Deep Cross Gaming",
       "teamCode": "DCG",
-      "rank": 169,
+      "rank": 155,
       "projection": 20,
       "verified": true,
       "league": "lcp",
@@ -3706,7 +3405,7 @@ window.ESPORTS_DATA = {
       "name": "fengyue",
       "team": "Shenzhen NINJAS IN PYJAMAS",
       "teamCode": "NIP",
-      "rank": 170,
+      "rank": 156,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -3720,13 +3419,12 @@ window.ESPORTS_DATA = {
       "name": "FenRir",
       "team": "kt Challengers",
       "teamCode": "KT",
-      "rank": 171,
+      "rank": 157,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -3735,13 +3433,12 @@ window.ESPORTS_DATA = {
       "name": "FenRir",
       "team": "kt Rolster",
       "teamCode": "KT",
-      "rank": 172,
+      "rank": 158,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -3750,7 +3447,7 @@ window.ESPORTS_DATA = {
       "name": "FIESTA",
       "team": "Team Vitality",
       "teamCode": "VIT",
-      "rank": 173,
+      "rank": 159,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -3764,13 +3461,12 @@ window.ESPORTS_DATA = {
       "name": "Fisher",
       "team": "DetonatioN FocusMe",
       "teamCode": "DFM",
-      "rank": 174,
+      "rank": 160,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -3779,7 +3475,7 @@ window.ESPORTS_DATA = {
       "name": "Flakked",
       "team": "GIANTX",
       "teamCode": "GX",
-      "rank": 175,
+      "rank": 161,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -3793,7 +3489,7 @@ window.ESPORTS_DATA = {
       "name": "Flakked",
       "team": "GIANTX ITERO",
       "teamCode": "GX",
-      "rank": 176,
+      "rank": 162,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -3807,15 +3503,14 @@ window.ESPORTS_DATA = {
       "name": "Flandre",
       "team": "BILIBILI GAMING",
       "teamCode": "BLG",
-      "rank": 177,
+      "rank": 163,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
         "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -3824,7 +3519,7 @@ window.ESPORTS_DATA = {
       "name": "Flauren",
       "team": "Relove Deep Cross Gaming",
       "teamCode": "DCG",
-      "rank": 178,
+      "rank": 164,
       "projection": 20,
       "verified": true,
       "league": "lcp",
@@ -3839,7 +3534,7 @@ window.ESPORTS_DATA = {
       "name": "Fleshy",
       "team": "Team Vitality",
       "teamCode": "VIT",
-      "rank": 179,
+      "rank": 165,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -3853,7 +3548,7 @@ window.ESPORTS_DATA = {
       "name": "Flip",
       "team": "DNS Challengers",
       "teamCode": "DNS",
-      "rank": 180,
+      "rank": 166,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3867,7 +3562,7 @@ window.ESPORTS_DATA = {
       "name": "Flip",
       "team": "DN SOOPers",
       "teamCode": "DNS",
-      "rank": 181,
+      "rank": 167,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3876,26 +3571,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "107634941727734818",
-      "role": "JNG",
-      "name": "foreigner",
-      "team": "Saving OCE",
-      "teamCode": "SVO",
-      "rank": 182,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp"
-      ]
-    },
-    {
       "id": "108205130568869560",
       "role": "TOP",
       "name": "Frog",
       "team": "KRX Challengers",
       "teamCode": "KRX",
-      "rank": 183,
+      "rank": 168,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3909,7 +3590,7 @@ window.ESPORTS_DATA = {
       "name": "Frog",
       "team": "KIWOOM DRX",
       "teamCode": "KRX",
-      "rank": 184,
+      "rank": 169,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -3923,7 +3604,7 @@ window.ESPORTS_DATA = {
       "name": "frosty",
       "team": "RED Kalunga",
       "teamCode": "RED",
-      "rank": 185,
+      "rank": 170,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -3937,7 +3618,7 @@ window.ESPORTS_DATA = {
       "name": "Fudge",
       "team": "Shopify Rebellion",
       "teamCode": "SR",
-      "rank": 186,
+      "rank": 171,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -3951,7 +3632,7 @@ window.ESPORTS_DATA = {
       "name": "Fuuu",
       "team": "RED Kalunga",
       "teamCode": "RED",
-      "rank": 187,
+      "rank": 172,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -3965,14 +3646,13 @@ window.ESPORTS_DATA = {
       "name": "GALA",
       "team": "Beijing JDG Esports",
       "teamCode": "JDG",
-      "rank": 188,
+      "rank": 173,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
-        "first_stand",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -3981,13 +3661,12 @@ window.ESPORTS_DATA = {
       "name": "Garden",
       "team": "Dplus KIA",
       "teamCode": "DK",
-      "rank": 189,
+      "rank": 174,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -3996,13 +3675,12 @@ window.ESPORTS_DATA = {
       "name": "Garden",
       "team": "DK Challengers",
       "teamCode": "DK",
-      "rank": 190,
+      "rank": 175,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -4011,13 +3689,12 @@ window.ESPORTS_DATA = {
       "name": "Gatovisck",
       "team": "paiN Gaming Academy",
       "teamCode": "PAIN",
-      "rank": 191,
+      "rank": 176,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -4026,13 +3703,12 @@ window.ESPORTS_DATA = {
       "name": "Ghost",
       "team": "kt Challengers",
       "teamCode": "KT",
-      "rank": 192,
+      "rank": 177,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -4041,13 +3717,12 @@ window.ESPORTS_DATA = {
       "name": "Ghost",
       "team": "kt Rolster",
       "teamCode": "KT",
-      "rank": 193,
+      "rank": 178,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -4056,7 +3731,7 @@ window.ESPORTS_DATA = {
       "name": "GIDEON",
       "team": "HANJIN BRION",
       "teamCode": "BRO",
-      "rank": 194,
+      "rank": 179,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -4070,7 +3745,7 @@ window.ESPORTS_DATA = {
       "name": "GIDEON",
       "team": "BRO Challengers",
       "teamCode": "BRO",
-      "rank": 195,
+      "rank": 180,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -4084,14 +3759,12 @@ window.ESPORTS_DATA = {
       "name": "Gloryy",
       "team": "GAM Esports",
       "teamCode": "GAM",
-      "rank": 196,
+      "rank": 181,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "msi",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -4100,7 +3773,7 @@ window.ESPORTS_DATA = {
       "name": "GoWonBin",
       "team": "BRO Academy",
       "teamCode": "BRO",
-      "rank": 197,
+      "rank": 182,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -4109,26 +3782,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "103743619023893329",
-      "role": "MID",
-      "name": "Grevthar",
-      "team": "KaBuM! Eports",
-      "teamCode": "KBM",
-      "rank": 198,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
-      ]
-    },
-    {
       "id": "109523141015834041",
       "role": "JNG",
       "name": "Grizzly",
       "team": "BNK FEARX",
       "teamCode": "BFX",
-      "rank": 199,
+      "rank": 183,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -4143,7 +3802,7 @@ window.ESPORTS_DATA = {
       "name": "Grizzly",
       "team": "BNK FEARX Youth",
       "teamCode": "BFX",
-      "rank": 200,
+      "rank": 184,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -4158,14 +3817,13 @@ window.ESPORTS_DATA = {
       "name": "Guardian",
       "team": "T1",
       "teamCode": "T1",
-      "rank": 201,
+      "rank": 185,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -4174,7 +3832,7 @@ window.ESPORTS_DATA = {
       "name": "Guigo",
       "team": "FURIA",
       "teamCode": "FUR",
-      "rank": 202,
+      "rank": 186,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -4184,34 +3842,18 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "106276251959912540",
-      "role": "SUP",
-      "name": "Guigs",
-      "team": "KaBuM! Eports",
-      "teamCode": "KBM",
-      "rank": 203,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
-      ]
-    },
-    {
       "id": "103495716775975785",
       "role": "ADC",
       "name": "Gumayusi",
       "team": "Hanwha Life Esports",
       "teamCode": "HLE",
-      "rank": 204,
+      "rank": 187,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -4220,15 +3862,13 @@ window.ESPORTS_DATA = {
       "name": "Gumayusi",
       "team": "HLE Challengers",
       "teamCode": "HLE",
-      "rank": 205,
+      "rank": 188,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -4237,13 +3877,12 @@ window.ESPORTS_DATA = {
       "name": "Gury",
       "team": "MVK Esports",
       "teamCode": "MVK",
-      "rank": 206,
+      "rank": 189,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -4252,14 +3891,13 @@ window.ESPORTS_DATA = {
       "name": "Guti",
       "team": "T1",
       "teamCode": "T1",
-      "rank": 207,
+      "rank": 190,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -4268,7 +3906,7 @@ window.ESPORTS_DATA = {
       "name": "Guwon",
       "team": "Shenzhen NINJAS IN PYJAMAS",
       "teamCode": "NIP",
-      "rank": 208,
+      "rank": 191,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -4282,7 +3920,7 @@ window.ESPORTS_DATA = {
       "name": "Haenam",
       "team": "NS REDFORCE Academy",
       "teamCode": "NS",
-      "rank": 209,
+      "rank": 192,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -4296,14 +3934,13 @@ window.ESPORTS_DATA = {
       "name": "Haetae",
       "team": "T1",
       "teamCode": "T1",
-      "rank": 210,
+      "rank": 193,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -4312,15 +3949,14 @@ window.ESPORTS_DATA = {
       "name": "Hans Sama",
       "team": "G2 Esports",
       "teamCode": "G2",
-      "rank": 211,
+      "rank": 194,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
         "lec",
         "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -4329,13 +3965,12 @@ window.ESPORTS_DATA = {
       "name": "Harky",
       "team": "MVK Esports",
       "teamCode": "MVK",
-      "rank": 212,
+      "rank": 195,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -4344,7 +3979,7 @@ window.ESPORTS_DATA = {
       "name": "hauz",
       "team": "Fluxo W7M",
       "teamCode": "FX",
-      "rank": 213,
+      "rank": 196,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -4358,13 +3993,12 @@ window.ESPORTS_DATA = {
       "name": "Hena",
       "team": "paiN Gaming",
       "teamCode": "PAIN",
-      "rank": 214,
+      "rank": 197,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -4373,7 +4007,7 @@ window.ESPORTS_DATA = {
       "name": "Heng",
       "team": "LGD GAMING",
       "teamCode": "LGD",
-      "rank": 215,
+      "rank": 198,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -4387,7 +4021,7 @@ window.ESPORTS_DATA = {
       "name": "Heru",
       "team": "THUNDER TALK GAMING",
       "teamCode": "TT",
-      "rank": 216,
+      "rank": 199,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -4401,7 +4035,7 @@ window.ESPORTS_DATA = {
       "name": "HH",
       "team": "NS REDFORCE Academy",
       "teamCode": "NS",
-      "rank": 217,
+      "rank": 200,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -4415,15 +4049,14 @@ window.ESPORTS_DATA = {
       "name": "Hizto",
       "team": "Team Secret Whales",
       "teamCode": "TSW",
-      "rank": 218,
+      "rank": 201,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
         "lcp",
         "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -4432,14 +4065,13 @@ window.ESPORTS_DATA = {
       "name": "HongQ",
       "team": "Beijing JDG Esports",
       "teamCode": "JDG",
-      "rank": 219,
+      "rank": 202,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
-        "first_stand",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -4448,7 +4080,7 @@ window.ESPORTS_DATA = {
       "name": "HongSuo",
       "team": "Relove Deep Cross Gaming",
       "teamCode": "DCG",
-      "rank": 220,
+      "rank": 203,
       "projection": 20,
       "verified": true,
       "league": "lcp",
@@ -4463,14 +4095,12 @@ window.ESPORTS_DATA = {
       "name": "Hope",
       "team": "Anyone's Legend",
       "teamCode": "AL",
-      "rank": 221,
+      "rank": 204,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "msi",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -4479,13 +4109,12 @@ window.ESPORTS_DATA = {
       "name": "HowLa",
       "team": "SHG Academy",
       "teamCode": "SHG",
-      "rank": 222,
+      "rank": 205,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -4494,7 +4123,7 @@ window.ESPORTS_DATA = {
       "name": "Hoya",
       "team": "Shenzhen NINJAS IN PYJAMAS",
       "teamCode": "NIP",
-      "rank": 223,
+      "rank": 206,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -4508,7 +4137,7 @@ window.ESPORTS_DATA = {
       "name": "Humanoid",
       "team": "Team Vitality",
       "teamCode": "VIT",
-      "rank": 224,
+      "rank": 207,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -4522,7 +4151,7 @@ window.ESPORTS_DATA = {
       "name": "Husha",
       "team": "Ground Zero Gaming",
       "teamCode": "GZ",
-      "rank": 225,
+      "rank": 208,
       "projection": 20,
       "verified": true,
       "league": "lcp",
@@ -4536,13 +4165,12 @@ window.ESPORTS_DATA = {
       "name": "Hwichan",
       "team": "kt Challengers",
       "teamCode": "KT",
-      "rank": 226,
+      "rank": 209,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -4551,13 +4179,12 @@ window.ESPORTS_DATA = {
       "name": "Hwichan",
       "team": "kt Rolster",
       "teamCode": "KT",
-      "rank": 227,
+      "rank": 210,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -4566,7 +4193,7 @@ window.ESPORTS_DATA = {
       "name": "Hype",
       "team": "Team Heretics",
       "teamCode": "TH",
-      "rank": 228,
+      "rank": 211,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -4580,7 +4207,7 @@ window.ESPORTS_DATA = {
       "name": "Ice",
       "team": "Team Heretics",
       "teamCode": "TH",
-      "rank": 229,
+      "rank": 212,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -4594,7 +4221,7 @@ window.ESPORTS_DATA = {
       "name": "Iras",
       "team": "BRO Academy",
       "teamCode": "BRO",
-      "rank": 230,
+      "rank": 213,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -4608,7 +4235,7 @@ window.ESPORTS_DATA = {
       "name": "ISMA",
       "team": "GIANTX",
       "teamCode": "GX",
-      "rank": 231,
+      "rank": 214,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -4622,15 +4249,13 @@ window.ESPORTS_DATA = {
       "name": "Jackal",
       "team": "Hanwha Life Esports",
       "teamCode": "HLE",
-      "rank": 232,
+      "rank": 215,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -4639,15 +4264,13 @@ window.ESPORTS_DATA = {
       "name": "Jackal",
       "team": "HLE Challengers",
       "teamCode": "HLE",
-      "rank": 233,
+      "rank": 216,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -4656,15 +4279,13 @@ window.ESPORTS_DATA = {
       "name": "JackeyLove",
       "team": "TOP ESPORTS",
       "teamCode": "TES",
-      "rank": 234,
+      "rank": 217,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -4673,7 +4294,7 @@ window.ESPORTS_DATA = {
       "name": "Jackies",
       "team": "GIANTX",
       "teamCode": "GX",
-      "rank": 235,
+      "rank": 218,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -4687,13 +4308,12 @@ window.ESPORTS_DATA = {
       "name": "Jaehyuk",
       "team": "Dplus KIA",
       "teamCode": "DK",
-      "rank": 236,
+      "rank": 219,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -4702,13 +4322,12 @@ window.ESPORTS_DATA = {
       "name": "Jaehyuk",
       "team": "DK Challengers",
       "teamCode": "DK",
-      "rank": 237,
+      "rank": 220,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -4717,7 +4336,7 @@ window.ESPORTS_DATA = {
       "name": "Janus",
       "team": "NONGSHIM RED FORCE",
       "teamCode": "NS",
-      "rank": 238,
+      "rank": 221,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -4731,7 +4350,7 @@ window.ESPORTS_DATA = {
       "name": "Janus",
       "team": "NS Challengers",
       "teamCode": "NS",
-      "rank": 239,
+      "rank": 222,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -4745,13 +4364,12 @@ window.ESPORTS_DATA = {
       "name": "Jeskla",
       "team": "Vivo Keyd Stars",
       "teamCode": "VKS",
-      "rank": 240,
+      "rank": 223,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -4760,15 +4378,13 @@ window.ESPORTS_DATA = {
       "name": "Jg Test0",
       "team": "HLE Academy",
       "teamCode": "HLE",
-      "rank": 241,
+      "rank": 224,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -4777,13 +4393,12 @@ window.ESPORTS_DATA = {
       "name": "JiaQi",
       "team": "Invictus Gaming",
       "teamCode": "IG",
-      "rank": 242,
+      "rank": 225,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -4792,7 +4407,7 @@ window.ESPORTS_DATA = {
       "name": "Jiejie",
       "team": "EDWARD GAMING",
       "teamCode": "EDG",
-      "rank": 243,
+      "rank": 226,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -4806,14 +4421,13 @@ window.ESPORTS_DATA = {
       "name": "Jinbeom",
       "team": "T1",
       "teamCode": "T1",
-      "rank": 244,
+      "rank": 227,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -4822,13 +4436,12 @@ window.ESPORTS_DATA = {
       "name": "Jiwoo",
       "team": "kt Challengers",
       "teamCode": "KT",
-      "rank": 245,
+      "rank": 228,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -4837,7 +4450,7 @@ window.ESPORTS_DATA = {
       "name": "Jiwoo",
       "team": "NS REDFORCE Academy",
       "teamCode": "NS",
-      "rank": 246,
+      "rank": 229,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -4851,13 +4464,12 @@ window.ESPORTS_DATA = {
       "name": "Jiwoo",
       "team": "kt Rolster",
       "teamCode": "KT",
-      "rank": 247,
+      "rank": 230,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -4866,7 +4478,7 @@ window.ESPORTS_DATA = {
       "name": "jmz",
       "team": "RED Kalunga Academy",
       "teamCode": "RED",
-      "rank": 248,
+      "rank": 231,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -4880,7 +4492,7 @@ window.ESPORTS_DATA = {
       "name": "jmz",
       "team": "RED Kalunga",
       "teamCode": "RED",
-      "rank": 249,
+      "rank": 232,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -4894,7 +4506,7 @@ window.ESPORTS_DATA = {
       "name": "JoJo",
       "team": "FURIA",
       "teamCode": "FUR",
-      "rank": 250,
+      "rank": 233,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -4909,14 +4521,12 @@ window.ESPORTS_DATA = {
       "name": "Jojopyun",
       "team": "Movistar KOI",
       "teamCode": "MKOI",
-      "rank": 251,
+      "rank": 234,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "msi",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -4925,7 +4535,7 @@ window.ESPORTS_DATA = {
       "name": "Jopa",
       "team": "SK Gaming",
       "teamCode": "SK",
-      "rank": 252,
+      "rank": 235,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -4939,15 +4549,13 @@ window.ESPORTS_DATA = {
       "name": "Josedeodo",
       "team": "Team Liquid Alienware",
       "teamCode": "TLAW",
-      "rank": 253,
+      "rank": 236,
       "projection": 20,
       "verified": true,
       "league": "lcs",
       "competitions": [
         "lcs",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -4956,7 +4564,7 @@ window.ESPORTS_DATA = {
       "name": "Jun",
       "team": "GIANTX",
       "teamCode": "GX",
-      "rank": 254,
+      "rank": 237,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -4970,7 +4578,7 @@ window.ESPORTS_DATA = {
       "name": "Junhao",
       "team": "THUNDER TALK GAMING",
       "teamCode": "TT",
-      "rank": 255,
+      "rank": 238,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -4984,14 +4592,13 @@ window.ESPORTS_DATA = {
       "name": "JunJia",
       "team": "Beijing JDG Esports",
       "teamCode": "JDG",
-      "rank": 256,
+      "rank": 239,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
-        "first_stand",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -5000,13 +4607,12 @@ window.ESPORTS_DATA = {
       "name": "Jwei",
       "team": "WeiboGaming",
       "teamCode": "WBG",
-      "rank": 257,
+      "rank": 240,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -5015,14 +4621,12 @@ window.ESPORTS_DATA = {
       "name": "Kael",
       "team": "Anyone's Legend",
       "teamCode": "AL",
-      "rank": 258,
+      "rank": 241,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "msi",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -5031,13 +4635,12 @@ window.ESPORTS_DATA = {
       "name": "kaito",
       "team": "SHG Academy",
       "teamCode": "SHG",
-      "rank": 259,
+      "rank": 242,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -5046,7 +4649,7 @@ window.ESPORTS_DATA = {
       "name": "Kaiwing",
       "team": "Ground Zero Gaming",
       "teamCode": "GZ",
-      "rank": 260,
+      "rank": 243,
       "projection": 20,
       "verified": true,
       "league": "lcp",
@@ -5060,13 +4663,12 @@ window.ESPORTS_DATA = {
       "name": "Kakkun",
       "team": "DetonatioN FocusMe",
       "teamCode": "DFM",
-      "rank": 261,
+      "rank": 244,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -5075,7 +4677,7 @@ window.ESPORTS_DATA = {
       "name": "kamel",
       "team": "BRO Academy",
       "teamCode": "BRO",
-      "rank": 262,
+      "rank": 245,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5089,7 +4691,7 @@ window.ESPORTS_DATA = {
       "name": "Kamiloo",
       "team": "Karmine Corp Blue",
       "teamCode": "KCB",
-      "rank": 263,
+      "rank": 246,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -5103,15 +4705,13 @@ window.ESPORTS_DATA = {
       "name": "Kanavi",
       "team": "Hanwha Life Esports",
       "teamCode": "HLE",
-      "rank": 264,
+      "rank": 247,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -5120,15 +4720,13 @@ window.ESPORTS_DATA = {
       "name": "Kanavi",
       "team": "HLE Challengers",
       "teamCode": "HLE",
-      "rank": 265,
+      "rank": 248,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -5137,7 +4735,7 @@ window.ESPORTS_DATA = {
       "name": "Kangin",
       "team": "BNK FEARX",
       "teamCode": "BFX",
-      "rank": 266,
+      "rank": 249,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5152,7 +4750,7 @@ window.ESPORTS_DATA = {
       "name": "Kangin",
       "team": "BNK FEARX Youth",
       "teamCode": "BFX",
-      "rank": 267,
+      "rank": 250,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5167,7 +4765,7 @@ window.ESPORTS_DATA = {
       "name": "Karis",
       "team": "Xi'an Team WE",
       "teamCode": "WE",
-      "rank": 268,
+      "rank": 251,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -5181,7 +4779,7 @@ window.ESPORTS_DATA = {
       "name": "Kase",
       "team": "Lyon Academy",
       "teamCode": "LYON",
-      "rank": 269,
+      "rank": 252,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -5197,15 +4795,13 @@ window.ESPORTS_DATA = {
       "name": "Kaze",
       "team": "LOUD",
       "teamCode": "LOUD",
-      "rank": 270,
+      "rank": 253,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
         "cblol",
-        "first_stand",
-        "msi",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -5214,13 +4810,12 @@ window.ESPORTS_DATA = {
       "name": "Keine",
       "team": "paiN Gaming Academy",
       "teamCode": "PAIN",
-      "rank": 271,
+      "rank": 254,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -5229,13 +4824,12 @@ window.ESPORTS_DATA = {
       "name": "Keine",
       "team": "paiN Gaming",
       "teamCode": "PAIN",
-      "rank": 272,
+      "rank": 255,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -5244,7 +4838,7 @@ window.ESPORTS_DATA = {
       "name": "Kellin",
       "team": "BNK FEARX",
       "teamCode": "BFX",
-      "rank": 273,
+      "rank": 256,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5259,7 +4853,7 @@ window.ESPORTS_DATA = {
       "name": "Kellin",
       "team": "BNK FEARX Youth",
       "teamCode": "BFX",
-      "rank": 274,
+      "rank": 257,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5274,15 +4868,13 @@ window.ESPORTS_DATA = {
       "name": "Kemish",
       "team": "Gen.G Esports",
       "teamCode": "GEN",
-      "rank": 275,
+      "rank": 258,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -5291,7 +4883,7 @@ window.ESPORTS_DATA = {
       "name": "Keshi",
       "team": "THUNDER TALK GAMING",
       "teamCode": "TT",
-      "rank": 276,
+      "rank": 259,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -5300,61 +4892,17 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "104275744442588539",
-      "role": "TOP",
-      "name": "Kiari",
-      "team": "INTZ",
-      "teamCode": "INTZ",
-      "rank": 277,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
-      ]
-    },
-    {
       "id": "107330029738468255",
       "role": "TOP",
       "name": "Kiaya",
       "team": "GAM Esports",
       "teamCode": "GAM",
-      "rank": 278,
+      "rank": 260,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "msi",
-        "worlds"
-      ]
-    },
-    {
-      "id": "111734539751595793",
-      "role": "MID",
-      "name": "Kina",
-      "team": "Liberty Academy",
-      "teamCode": "LBR",
-      "rank": 279,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
-      ]
-    },
-    {
-      "id": "111734539751595793",
-      "role": "MID",
-      "name": "Kina",
-      "team": "Liberty",
-      "teamCode": "LBR",
-      "rank": 280,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
+        "lcp"
       ]
     },
     {
@@ -5363,7 +4911,7 @@ window.ESPORTS_DATA = {
       "name": "Kingen",
       "team": "NONGSHIM RED FORCE",
       "teamCode": "NS",
-      "rank": 281,
+      "rank": 261,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5377,7 +4925,7 @@ window.ESPORTS_DATA = {
       "name": "Kingen",
       "team": "NS Challengers",
       "teamCode": "NS",
-      "rank": 282,
+      "rank": 262,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5391,44 +4939,12 @@ window.ESPORTS_DATA = {
       "name": "Kino",
       "team": "CTBC Flying Oyster",
       "teamCode": "CFO",
-      "rank": 283,
+      "rank": 263,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "first_stand",
-        "msi",
-        "worlds"
-      ]
-    },
-    {
-      "id": "105709404500072628",
-      "role": "MID",
-      "name": "Kisee",
-      "team": "Estral Esports",
-      "teamCode": "EST",
-      "rank": 284,
-      "projection": 20,
-      "verified": true,
-      "league": "msi",
-      "competitions": [
-        "msi"
-      ]
-    },
-    {
-      "id": "109783448253640171",
-      "role": "JNG",
-      "name": "Kisno",
-      "team": "NRG",
-      "teamCode": "NRG",
-      "rank": 285,
-      "projection": 20,
-      "verified": true,
-      "league": "lcs",
-      "competitions": [
-        "lcs",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -5437,43 +4953,14 @@ window.ESPORTS_DATA = {
       "name": "Knight",
       "team": "BILIBILI GAMING",
       "teamCode": "BLG",
-      "rank": 286,
+      "rank": 264,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
         "first_stand",
-        "msi",
-        "worlds"
-      ]
-    },
-    {
-      "id": "109518621083964549",
-      "role": "ADC",
-      "name": "Kojima",
-      "team": "KaBuM! Eports",
-      "teamCode": "KBM",
-      "rank": 287,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
-      ]
-    },
-    {
-      "id": "111734812658909287",
-      "role": "SUP",
-      "name": "konseki",
-      "team": "INTZ",
-      "teamCode": "INTZ",
-      "rank": 288,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
+        "msi"
       ]
     },
     {
@@ -5482,22 +4969,7 @@ window.ESPORTS_DATA = {
       "name": "Kratos",
       "team": "MVK Esports",
       "teamCode": "MVK",
-      "rank": 289,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp",
-        "worlds"
-      ]
-    },
-    {
-      "id": "115258282224776634",
-      "role": "MID",
-      "name": "Krimson",
-      "team": "Inferno Esports",
-      "teamCode": "IE",
-      "rank": 290,
+      "rank": 265,
       "projection": 20,
       "verified": true,
       "league": "lcp",
@@ -5511,7 +4983,7 @@ window.ESPORTS_DATA = {
       "name": "KryRa",
       "team": "Disguised",
       "teamCode": "DSG",
-      "rank": 291,
+      "rank": 266,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -5525,7 +4997,22 @@ window.ESPORTS_DATA = {
       "name": "kyeahoo",
       "team": "Karmine Corp",
       "teamCode": "KC",
-      "rank": 292,
+      "rank": 267,
+      "projection": 20,
+      "verified": true,
+      "league": "lec",
+      "competitions": [
+        "lec",
+        "msi"
+      ]
+    },
+    {
+      "id": "102787200059605684",
+      "role": "SUP",
+      "name": "Labrov",
+      "team": "G2 Esports",
+      "teamCode": "G2",
+      "rank": 268,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -5536,43 +5023,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "105709374603178836",
-      "role": "MID",
-      "name": "Kyose",
-      "team": "Saving OCE",
-      "teamCode": "SVO",
-      "rank": 293,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp"
-      ]
-    },
-    {
-      "id": "102787200059605684",
-      "role": "SUP",
-      "name": "Labrov",
-      "team": "G2 Esports",
-      "teamCode": "G2",
-      "rank": 294,
-      "projection": 20,
-      "verified": true,
-      "league": "lec",
-      "competitions": [
-        "lec",
-        "first_stand",
-        "msi",
-        "worlds"
-      ]
-    },
-    {
       "id": "108205130029559792",
       "role": "TOP",
       "name": "Lancer",
       "team": "DNS Challengers",
       "teamCode": "DNS",
-      "rank": 295,
+      "rank": 269,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5586,7 +5042,7 @@ window.ESPORTS_DATA = {
       "name": "Lancer",
       "team": "DN SOOPers",
       "teamCode": "DNS",
-      "rank": 296,
+      "rank": 270,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5600,7 +5056,7 @@ window.ESPORTS_DATA = {
       "name": "Larssen",
       "team": "Natus Vincere",
       "teamCode": "NAVI",
-      "rank": 297,
+      "rank": 271,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -5614,7 +5070,7 @@ window.ESPORTS_DATA = {
       "name": "LazyFeel",
       "team": "KRX Challengers",
       "teamCode": "KRX",
-      "rank": 298,
+      "rank": 272,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5628,7 +5084,7 @@ window.ESPORTS_DATA = {
       "name": "LazyFeel",
       "team": "KIWOOM DRX",
       "teamCode": "KRX",
-      "rank": 299,
+      "rank": 273,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5637,40 +5093,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "111734539815360111",
-      "role": "ADC",
-      "name": "Leandrinn",
-      "team": "Liberty Academy",
-      "teamCode": "LBR",
-      "rank": 300,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
-      ]
-    },
-    {
-      "id": "111734539815360111",
-      "role": "ADC",
-      "name": "Leandrinn",
-      "team": "Liberty",
-      "teamCode": "LBR",
-      "rank": 301,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
-      ]
-    },
-    {
       "id": "109784344243547583",
       "role": "ADC",
       "name": "Leave",
       "team": "EDWARD GAMING",
       "teamCode": "EDG",
-      "rank": 302,
+      "rank": 274,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -5684,7 +5112,7 @@ window.ESPORTS_DATA = {
       "name": "Lehends",
       "team": "NONGSHIM RED FORCE",
       "teamCode": "NS",
-      "rank": 303,
+      "rank": 275,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5698,7 +5126,7 @@ window.ESPORTS_DATA = {
       "name": "Lehends",
       "team": "NS Challengers",
       "teamCode": "NS",
-      "rank": 304,
+      "rank": 276,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5707,40 +5135,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "105516558751291781",
-      "role": "SUP",
-      "name": "Lele",
-      "team": "Royal Never Give Up",
-      "teamCode": "RNG",
-      "rank": 305,
-      "projection": 20,
-      "verified": true,
-      "league": "lpl",
-      "competitions": [
-        "lpl"
-      ]
-    },
-    {
-      "id": "107560281476330464",
-      "role": "MID",
-      "name": "Leleko",
-      "team": "INTZ",
-      "teamCode": "INTZ",
-      "rank": 306,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
-      ]
-    },
-    {
       "id": "108205132634288198",
       "role": "SUP",
       "name": "Lepton",
       "team": "BRO Academy",
       "teamCode": "BRO",
-      "rank": 307,
+      "rank": 277,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5754,36 +5154,7 @@ window.ESPORTS_DATA = {
       "name": "Levizin",
       "team": "paiN Gaming Academy",
       "teamCode": "PAIN",
-      "rank": 308,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol",
-        "worlds"
-      ]
-    },
-    {
-      "id": "111734539646539371",
-      "role": "JNG",
-      "name": "Levizin",
-      "team": "Liberty Academy",
-      "teamCode": "LBR",
-      "rank": 309,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
-      ]
-    },
-    {
-      "id": "111734539646539371",
-      "role": "JNG",
-      "name": "Levizin",
-      "team": "Liberty",
-      "teamCode": "LBR",
-      "rank": 310,
+      "rank": 278,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -5797,7 +5168,7 @@ window.ESPORTS_DATA = {
       "name": "LIDER",
       "team": "SK Gaming",
       "teamCode": "SK",
-      "rank": 311,
+      "rank": 279,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -5811,7 +5182,7 @@ window.ESPORTS_DATA = {
       "name": "Life",
       "team": "DNS Challengers",
       "teamCode": "DNS",
-      "rank": 312,
+      "rank": 280,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5825,7 +5196,7 @@ window.ESPORTS_DATA = {
       "name": "Life",
       "team": "DN SOOPers",
       "teamCode": "DNS",
-      "rank": 313,
+      "rank": 281,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5839,15 +5210,13 @@ window.ESPORTS_DATA = {
       "name": "LJM",
       "team": "HLE Academy",
       "teamCode": "HLE",
-      "rank": 314,
+      "rank": 282,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -5856,13 +5225,12 @@ window.ESPORTS_DATA = {
       "name": "Loki",
       "team": "Cloud9 Kia",
       "teamCode": "C9",
-      "rank": 315,
+      "rank": 283,
       "projection": 20,
       "verified": true,
       "league": "lcs",
       "competitions": [
-        "lcs",
-        "worlds"
+        "lcs"
       ]
     },
     {
@@ -5871,7 +5239,7 @@ window.ESPORTS_DATA = {
       "name": "Looki",
       "team": "Karmine Corp Blue",
       "teamCode": "KCB",
-      "rank": 316,
+      "rank": 284,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -5885,13 +5253,12 @@ window.ESPORTS_DATA = {
       "name": "Loopy",
       "team": "Dplus KIA",
       "teamCode": "DK",
-      "rank": 317,
+      "rank": 285,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -5900,13 +5267,12 @@ window.ESPORTS_DATA = {
       "name": "Loopy",
       "team": "DK Challengers",
       "teamCode": "DK",
-      "rank": 318,
+      "rank": 286,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -5915,14 +5281,12 @@ window.ESPORTS_DATA = {
       "name": "Lospa",
       "team": "Fnatic",
       "teamCode": "FNC",
-      "rank": 319,
+      "rank": 287,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "msi",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -5931,7 +5295,7 @@ window.ESPORTS_DATA = {
       "name": "Lot",
       "team": "GIANTX",
       "teamCode": "GX",
-      "rank": 320,
+      "rank": 288,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -5945,13 +5309,12 @@ window.ESPORTS_DATA = {
       "name": "Lucid",
       "team": "Dplus KIA",
       "teamCode": "DK",
-      "rank": 321,
+      "rank": 289,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -5960,13 +5323,12 @@ window.ESPORTS_DATA = {
       "name": "Lucid",
       "team": "DK Challengers",
       "teamCode": "DK",
-      "rank": 322,
+      "rank": 290,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -5975,7 +5337,7 @@ window.ESPORTS_DATA = {
       "name": "Lucy",
       "team": "NONGSHIM RED FORCE",
       "teamCode": "NS",
-      "rank": 323,
+      "rank": 291,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -5989,7 +5351,7 @@ window.ESPORTS_DATA = {
       "name": "Lucy",
       "team": "NS Challengers",
       "teamCode": "NS",
-      "rank": 324,
+      "rank": 292,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -6003,15 +5365,13 @@ window.ESPORTS_DATA = {
       "name": "Lumos",
       "team": "Gen.G Esports",
       "teamCode": "GEN",
-      "rank": 325,
+      "rank": 293,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -6020,7 +5380,7 @@ window.ESPORTS_DATA = {
       "name": "Luon",
       "team": "BNK FEARX",
       "teamCode": "BFX",
-      "rank": 326,
+      "rank": 294,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -6035,7 +5395,7 @@ window.ESPORTS_DATA = {
       "name": "Luon",
       "team": "BNK FEARX Youth",
       "teamCode": "BFX",
-      "rank": 327,
+      "rank": 295,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -6050,7 +5410,7 @@ window.ESPORTS_DATA = {
       "name": "Lyncas",
       "team": "Team Vitality",
       "teamCode": "VIT",
-      "rank": 328,
+      "rank": 296,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -6064,7 +5424,7 @@ window.ESPORTS_DATA = {
       "name": "Lyonz",
       "team": "Disguised",
       "teamCode": "DSG",
-      "rank": 329,
+      "rank": 297,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -6078,15 +5438,13 @@ window.ESPORTS_DATA = {
       "name": "Mago",
       "team": "LOUD",
       "teamCode": "LOUD",
-      "rank": 330,
+      "rank": 298,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
         "cblol",
-        "first_stand",
-        "msi",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -6095,7 +5453,7 @@ window.ESPORTS_DATA = {
       "name": "Manel",
       "team": "RED Kalunga Academy",
       "teamCode": "RED",
-      "rank": 331,
+      "rank": 299,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -6109,7 +5467,7 @@ window.ESPORTS_DATA = {
       "name": "Manel",
       "team": "RED Kalunga",
       "teamCode": "RED",
-      "rank": 332,
+      "rank": 300,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -6123,13 +5481,12 @@ window.ESPORTS_DATA = {
       "name": "Marble",
       "team": "Fukuoka SoftBank HAWKS gaming",
       "teamCode": "SHG",
-      "rank": 333,
+      "rank": 301,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -6138,13 +5495,12 @@ window.ESPORTS_DATA = {
       "name": "Marvin",
       "team": "paiN Gaming Academy",
       "teamCode": "PAIN",
-      "rank": 334,
+      "rank": 302,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -6153,7 +5509,7 @@ window.ESPORTS_DATA = {
       "name": "Maynter",
       "team": "Natus Vincere",
       "teamCode": "NAVI",
-      "rank": 335,
+      "rank": 303,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -6167,13 +5523,12 @@ window.ESPORTS_DATA = {
       "name": "Meiko",
       "team": "Invictus Gaming",
       "teamCode": "IG",
-      "rank": 336,
+      "rank": 304,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -6182,7 +5537,7 @@ window.ESPORTS_DATA = {
       "name": "MG",
       "team": "BNK FEARX",
       "teamCode": "BFX",
-      "rank": 337,
+      "rank": 305,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -6197,7 +5552,7 @@ window.ESPORTS_DATA = {
       "name": "MG",
       "team": "BNK FEARX Youth",
       "teamCode": "BFX",
-      "rank": 338,
+      "rank": 306,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -6212,7 +5567,7 @@ window.ESPORTS_DATA = {
       "name": "Midir",
       "team": "NS REDFORCE Academy",
       "teamCode": "NS",
-      "rank": 339,
+      "rank": 307,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -6226,7 +5581,7 @@ window.ESPORTS_DATA = {
       "name": "MihawK",
       "team": "NONGSHIM RED FORCE",
       "teamCode": "NS",
-      "rank": 340,
+      "rank": 308,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -6240,7 +5595,7 @@ window.ESPORTS_DATA = {
       "name": "MihawK",
       "team": "NS Challengers",
       "teamCode": "NS",
-      "rank": 341,
+      "rank": 309,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -6254,7 +5609,7 @@ window.ESPORTS_DATA = {
       "name": "MihawK",
       "team": "NS REDFORCE Academy",
       "teamCode": "NS",
-      "rank": 342,
+      "rank": 310,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -6268,7 +5623,7 @@ window.ESPORTS_DATA = {
       "name": "Mikyx",
       "team": "SK Gaming",
       "teamCode": "SK",
-      "rank": 343,
+      "rank": 311,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -6282,7 +5637,7 @@ window.ESPORTS_DATA = {
       "name": "Minous",
       "team": "KRX Challengers",
       "teamCode": "KRX",
-      "rank": 344,
+      "rank": 312,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -6296,7 +5651,7 @@ window.ESPORTS_DATA = {
       "name": "Minous",
       "team": "KIWOOM DRX",
       "teamCode": "KRX",
-      "rank": 345,
+      "rank": 313,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -6310,13 +5665,12 @@ window.ESPORTS_DATA = {
       "name": "Mireu",
       "team": "Vivo Keyd Stars",
       "teamCode": "VKS",
-      "rank": 346,
+      "rank": 314,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -6325,28 +5679,12 @@ window.ESPORTS_DATA = {
       "name": "MISSING",
       "team": "Suzhou LNG Esports",
       "teamCode": "LNG",
-      "rank": 347,
+      "rank": 315,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
-      ]
-    },
-    {
-      "id": "110535933483977187",
-      "role": "SUP",
-      "name": "Mixtsure",
-      "team": "NRG",
-      "teamCode": "NRG",
-      "rank": 348,
-      "projection": 20,
-      "verified": true,
-      "league": "lcs",
-      "competitions": [
-        "lcs",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -6355,13 +5693,12 @@ window.ESPORTS_DATA = {
       "name": "Moham",
       "team": "WeiboGaming",
       "teamCode": "WBG",
-      "rank": 349,
+      "rank": 316,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -6370,13 +5707,12 @@ window.ESPORTS_DATA = {
       "name": "Momo",
       "team": "DetonatioN FocusMe",
       "teamCode": "DFM",
-      "rank": 350,
+      "rank": 317,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -6385,7 +5721,7 @@ window.ESPORTS_DATA = {
       "name": "Momochi",
       "team": "Fluxo W7M",
       "teamCode": "FX",
-      "rank": 351,
+      "rank": 318,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -6399,7 +5735,7 @@ window.ESPORTS_DATA = {
       "name": "Monki",
       "team": "Xi'an Team WE",
       "teamCode": "WE",
-      "rank": 352,
+      "rank": 319,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -6408,34 +5744,18 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "102787200020939341",
-      "role": "SUP",
-      "name": "Moopz",
-      "team": "Inferno Esports",
-      "teamCode": "IE",
-      "rank": 353,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp"
-      ]
-    },
-    {
       "id": "103103696693473944",
       "role": "TOP",
       "name": "Morgan",
       "team": "Team Liquid Alienware",
       "teamCode": "TLAW",
-      "rank": 354,
+      "rank": 320,
       "projection": 20,
       "verified": true,
       "league": "lcs",
       "competitions": [
         "lcs",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -6444,7 +5764,7 @@ window.ESPORTS_DATA = {
       "name": "Morttheus",
       "team": "RED Kalunga",
       "teamCode": "RED",
-      "rank": 355,
+      "rank": 321,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -6458,15 +5778,13 @@ window.ESPORTS_DATA = {
       "name": "MUDAI",
       "team": "Gen.G Esports",
       "teamCode": "GEN",
-      "rank": 356,
+      "rank": 322,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -6475,14 +5793,12 @@ window.ESPORTS_DATA = {
       "name": "Myrwn",
       "team": "Movistar KOI",
       "teamCode": "MKOI",
-      "rank": 357,
+      "rank": 323,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "msi",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -6491,7 +5807,7 @@ window.ESPORTS_DATA = {
       "name": "Naak Nako",
       "team": "Team Vitality",
       "teamCode": "VIT",
-      "rank": 358,
+      "rank": 324,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -6505,7 +5821,7 @@ window.ESPORTS_DATA = {
       "name": "Namgung",
       "team": "HANJIN BRION",
       "teamCode": "BRO",
-      "rank": 359,
+      "rank": 325,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -6519,7 +5835,7 @@ window.ESPORTS_DATA = {
       "name": "Namgung",
       "team": "BRO Challengers",
       "teamCode": "BRO",
-      "rank": 360,
+      "rank": 326,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -6533,13 +5849,12 @@ window.ESPORTS_DATA = {
       "name": "Namiru",
       "team": "paiN Gaming Academy",
       "teamCode": "PAIN",
-      "rank": 361,
+      "rank": 327,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -6548,13 +5863,12 @@ window.ESPORTS_DATA = {
       "name": "Namiru",
       "team": "paiN Gaming",
       "teamCode": "PAIN",
-      "rank": 362,
+      "rank": 328,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -6563,7 +5877,7 @@ window.ESPORTS_DATA = {
       "name": "Nanashi",
       "team": "RED Kalunga Academy",
       "teamCode": "RED",
-      "rank": 363,
+      "rank": 329,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -6577,7 +5891,7 @@ window.ESPORTS_DATA = {
       "name": "Nanashi",
       "team": "RED Kalunga",
       "teamCode": "RED",
-      "rank": 364,
+      "rank": 330,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -6586,26 +5900,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "112603524650868411",
-      "role": "TOP",
-      "name": "Nanaue",
-      "team": "Saigon 1TAP DINO",
-      "teamCode": "DINO",
-      "rank": 365,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp"
-      ]
-    },
-    {
       "id": "116843568067228246",
       "role": "ADC",
       "name": "NANINI",
       "team": "Lyon Academy",
       "teamCode": "LYON",
-      "rank": 366,
+      "rank": 331,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -6621,7 +5921,7 @@ window.ESPORTS_DATA = {
       "name": "Nemesis",
       "team": "Los Ratones",
       "teamCode": "LR",
-      "rank": 367,
+      "rank": 332,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -6630,32 +5930,17 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "105397181199735591",
-      "role": "ADC",
-      "name": "Netuno",
-      "team": "INTZ",
-      "teamCode": "INTZ",
-      "rank": 368,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
-      ]
-    },
-    {
       "id": "114697949393287385",
       "role": "TOP",
       "name": "Nevid",
       "team": "Dplus KIA",
       "teamCode": "DK",
-      "rank": 369,
+      "rank": 333,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -6664,13 +5949,12 @@ window.ESPORTS_DATA = {
       "name": "Nevid",
       "team": "DK Challengers",
       "teamCode": "DK",
-      "rank": 370,
+      "rank": 334,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -6679,13 +5963,12 @@ window.ESPORTS_DATA = {
       "name": "Nia1",
       "team": "Suzhou LNG Esports",
       "teamCode": "LNG",
-      "rank": 371,
+      "rank": 335,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -6694,14 +5977,12 @@ window.ESPORTS_DATA = {
       "name": "NightSlayer",
       "team": "Movistar KOI",
       "teamCode": "MKOI",
-      "rank": 372,
+      "rank": 336,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "msi",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -6710,7 +5991,7 @@ window.ESPORTS_DATA = {
       "name": "Noah",
       "team": "GIANTX",
       "teamCode": "GX",
-      "rank": 373,
+      "rank": 337,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -6724,13 +6005,12 @@ window.ESPORTS_DATA = {
       "name": "nuc",
       "team": "Shifters",
       "teamCode": "SHFT",
-      "rank": 374,
+      "rank": 338,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -6739,7 +6019,7 @@ window.ESPORTS_DATA = {
       "name": "Nukenin",
       "team": "RED Kalunga Academy",
       "teamCode": "RED",
-      "rank": 375,
+      "rank": 339,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -6753,7 +6033,7 @@ window.ESPORTS_DATA = {
       "name": "Nukenin",
       "team": "RED Kalunga",
       "teamCode": "RED",
-      "rank": 376,
+      "rank": 340,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -6767,7 +6047,7 @@ window.ESPORTS_DATA = {
       "name": "OddEye",
       "team": "HANJIN BRION",
       "teamCode": "BRO",
-      "rank": 377,
+      "rank": 341,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -6781,7 +6061,7 @@ window.ESPORTS_DATA = {
       "name": "OddEye",
       "team": "BRO Challengers",
       "teamCode": "BRO",
-      "rank": 378,
+      "rank": 342,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -6790,34 +6070,19 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "98767975971974446",
-      "role": "JNG",
-      "name": "Oddie",
-      "team": "Estral Esports",
-      "teamCode": "EST",
-      "rank": 379,
-      "projection": 20,
-      "verified": true,
-      "league": "msi",
-      "competitions": [
-        "msi"
-      ]
-    },
-    {
       "id": "110547957837987327",
       "role": "SUP",
       "name": "ON",
       "team": "BILIBILI GAMING",
       "teamCode": "BLG",
-      "rank": 380,
+      "rank": 343,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
         "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -6826,7 +6091,7 @@ window.ESPORTS_DATA = {
       "name": "Oscarinin",
       "team": "GIANTX",
       "teamCode": "GX",
-      "rank": 381,
+      "rank": 344,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -6840,13 +6105,12 @@ window.ESPORTS_DATA = {
       "name": "Paduck",
       "team": "Shifters",
       "teamCode": "SHFT",
-      "rank": 382,
+      "rank": 345,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -6855,14 +6119,13 @@ window.ESPORTS_DATA = {
       "name": "Painter",
       "team": "T1",
       "teamCode": "T1",
-      "rank": 383,
+      "rank": 346,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -6871,15 +6134,13 @@ window.ESPORTS_DATA = {
       "name": "Panther",
       "team": "Hanwha Life Esports",
       "teamCode": "HLE",
-      "rank": 384,
+      "rank": 347,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -6888,15 +6149,13 @@ window.ESPORTS_DATA = {
       "name": "Panther",
       "team": "HLE Challengers",
       "teamCode": "HLE",
-      "rank": 385,
+      "rank": 348,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -6905,7 +6164,7 @@ window.ESPORTS_DATA = {
       "name": "Parukia",
       "team": "EDWARD GAMING",
       "teamCode": "EDG",
-      "rank": 386,
+      "rank": 349,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -6919,7 +6178,7 @@ window.ESPORTS_DATA = {
       "name": "Parus",
       "team": "Natus Vincere",
       "teamCode": "NAVI",
-      "rank": 387,
+      "rank": 350,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -6933,7 +6192,7 @@ window.ESPORTS_DATA = {
       "name": "Peach",
       "team": "Fluxo W7M",
       "teamCode": "FX",
-      "rank": 388,
+      "rank": 351,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -6947,13 +6206,12 @@ window.ESPORTS_DATA = {
       "name": "PerfecT",
       "team": "kt Challengers",
       "teamCode": "KT",
-      "rank": 389,
+      "rank": 352,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -6962,13 +6220,12 @@ window.ESPORTS_DATA = {
       "name": "PerfecT",
       "team": "kt Rolster",
       "teamCode": "KT",
-      "rank": 390,
+      "rank": 353,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -6977,7 +6234,7 @@ window.ESPORTS_DATA = {
       "name": "Peter",
       "team": "DNS Challengers",
       "teamCode": "DNS",
-      "rank": 391,
+      "rank": 354,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -6991,7 +6248,7 @@ window.ESPORTS_DATA = {
       "name": "Peter",
       "team": "DN SOOPers",
       "teamCode": "DNS",
-      "rank": 392,
+      "rank": 355,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7005,14 +6262,13 @@ window.ESPORTS_DATA = {
       "name": "Peyz",
       "team": "T1 Rookies",
       "teamCode": "T1",
-      "rank": 393,
+      "rank": 356,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -7021,7 +6277,7 @@ window.ESPORTS_DATA = {
       "name": "Photic",
       "team": "Shenzhen NINJAS IN PYJAMAS",
       "teamCode": "NIP",
-      "rank": 394,
+      "rank": 357,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -7035,7 +6291,7 @@ window.ESPORTS_DATA = {
       "name": "Photon",
       "team": "Dignitas",
       "teamCode": "DIG",
-      "rank": 395,
+      "rank": 358,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -7044,27 +6300,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "114187981438173613",
-      "role": "MID",
-      "name": "Phymini",
-      "team": "NRG",
-      "teamCode": "NRG",
-      "rank": 396,
-      "projection": 20,
-      "verified": true,
-      "league": "lcs",
-      "competitions": [
-        "lcs",
-        "worlds"
-      ]
-    },
-    {
       "id": "109523135464568456",
       "role": "SUP",
       "name": "PlanB",
       "team": "HANJIN BRION",
       "teamCode": "BRO",
-      "rank": 397,
+      "rank": 359,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7078,7 +6319,7 @@ window.ESPORTS_DATA = {
       "name": "PlanB",
       "team": "BRO Challengers",
       "teamCode": "BRO",
-      "rank": 398,
+      "rank": 360,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7092,7 +6333,7 @@ window.ESPORTS_DATA = {
       "name": "Pleata",
       "team": "NONGSHIM RED FORCE",
       "teamCode": "NS",
-      "rank": 399,
+      "rank": 361,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7106,7 +6347,7 @@ window.ESPORTS_DATA = {
       "name": "Pleata",
       "team": "NS Challengers",
       "teamCode": "NS",
-      "rank": 400,
+      "rank": 362,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7120,7 +6361,7 @@ window.ESPORTS_DATA = {
       "name": "Poby",
       "team": "Natus Vincere",
       "teamCode": "NAVI",
-      "rank": 401,
+      "rank": 363,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -7134,13 +6375,12 @@ window.ESPORTS_DATA = {
       "name": "Pollu",
       "team": "kt Challengers",
       "teamCode": "KT",
-      "rank": 402,
+      "rank": 364,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -7149,7 +6389,7 @@ window.ESPORTS_DATA = {
       "name": "Pollu",
       "team": "BRO Academy",
       "teamCode": "BRO",
-      "rank": 403,
+      "rank": 365,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7163,13 +6403,12 @@ window.ESPORTS_DATA = {
       "name": "Pollu",
       "team": "kt Rolster",
       "teamCode": "KT",
-      "rank": 404,
+      "rank": 366,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -7178,15 +6417,13 @@ window.ESPORTS_DATA = {
       "name": "Poo",
       "team": "HLE Academy",
       "teamCode": "HLE",
-      "rank": 405,
+      "rank": 367,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -7195,7 +6432,7 @@ window.ESPORTS_DATA = {
       "name": "Pop9",
       "team": "Relove Deep Cross Gaming",
       "teamCode": "DCG",
-      "rank": 406,
+      "rank": 368,
       "projection": 20,
       "verified": true,
       "league": "lcp",
@@ -7210,15 +6447,12 @@ window.ESPORTS_DATA = {
       "name": "POUT",
       "team": "CTBC Flying Oyster",
       "teamCode": "CFO",
-      "rank": 407,
+      "rank": 369,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "first_stand",
-        "msi",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -7227,7 +6461,7 @@ window.ESPORTS_DATA = {
       "name": "Prime",
       "team": "Karmine Corp Blue",
       "teamCode": "KCB",
-      "rank": 408,
+      "rank": 370,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -7241,7 +6475,7 @@ window.ESPORTS_DATA = {
       "name": "ProDelta",
       "team": "Fluxo W7M",
       "teamCode": "FX",
-      "rank": 409,
+      "rank": 371,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -7255,15 +6489,14 @@ window.ESPORTS_DATA = {
       "name": "Pun",
       "team": "Team Secret Whales",
       "teamCode": "TSW",
-      "rank": 410,
+      "rank": 372,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
         "lcp",
         "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -7272,7 +6505,7 @@ window.ESPORTS_DATA = {
       "name": "Pungyeon",
       "team": "HANJIN BRION",
       "teamCode": "BRO",
-      "rank": 411,
+      "rank": 373,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7286,7 +6519,7 @@ window.ESPORTS_DATA = {
       "name": "Pungyeon",
       "team": "BRO Challengers",
       "teamCode": "BRO",
-      "rank": 412,
+      "rank": 374,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7300,15 +6533,13 @@ window.ESPORTS_DATA = {
       "name": "Pyeonsik",
       "team": "Hanwha Life Esports",
       "teamCode": "HLE",
-      "rank": 413,
+      "rank": 375,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -7317,15 +6548,13 @@ window.ESPORTS_DATA = {
       "name": "Pyeonsik",
       "team": "HLE Challengers",
       "teamCode": "HLE",
-      "rank": 414,
+      "rank": 376,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -7334,7 +6563,7 @@ window.ESPORTS_DATA = {
       "name": "Pyosik",
       "team": "DNS Challengers",
       "teamCode": "DNS",
-      "rank": 415,
+      "rank": 377,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7348,7 +6577,7 @@ window.ESPORTS_DATA = {
       "name": "Pyosik",
       "team": "DN SOOPers",
       "teamCode": "DNS",
-      "rank": 416,
+      "rank": 378,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7362,13 +6591,12 @@ window.ESPORTS_DATA = {
       "name": "Qats",
       "team": "Vivo Keyd Stars Academy",
       "teamCode": "VKS",
-      "rank": 417,
+      "rank": 379,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -7377,13 +6605,12 @@ window.ESPORTS_DATA = {
       "name": "Qats",
       "team": "Vivo Keyd Stars",
       "teamCode": "VKS",
-      "rank": 418,
+      "rank": 380,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -7392,7 +6619,7 @@ window.ESPORTS_DATA = {
       "name": "Quantum",
       "team": "DNS Challengers",
       "teamCode": "DNS",
-      "rank": 419,
+      "rank": 381,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7406,7 +6633,7 @@ window.ESPORTS_DATA = {
       "name": "Quantum",
       "team": "DN SOOPers",
       "teamCode": "DNS",
-      "rank": 420,
+      "rank": 382,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7420,15 +6647,13 @@ window.ESPORTS_DATA = {
       "name": "Quid",
       "team": "Team Liquid Alienware",
       "teamCode": "TLAW",
-      "rank": 421,
+      "rank": 383,
       "projection": 20,
       "verified": true,
       "league": "lcs",
       "competitions": [
         "lcs",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -7437,15 +6662,13 @@ window.ESPORTS_DATA = {
       "name": "Rabelo",
       "team": "LOUD",
       "teamCode": "LOUD",
-      "rank": 422,
+      "rank": 384,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
         "cblol",
-        "first_stand",
-        "msi",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -7454,15 +6677,13 @@ window.ESPORTS_DATA = {
       "name": "Raccoon",
       "team": "HLE Academy",
       "teamCode": "HLE",
-      "rank": 423,
+      "rank": 385,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -7471,7 +6692,7 @@ window.ESPORTS_DATA = {
       "name": "Raptor",
       "team": "BNK FEARX",
       "teamCode": "BFX",
-      "rank": 424,
+      "rank": 386,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7486,7 +6707,7 @@ window.ESPORTS_DATA = {
       "name": "Raptor",
       "team": "BNK FEARX Youth",
       "teamCode": "BFX",
-      "rank": 425,
+      "rank": 387,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7501,7 +6722,7 @@ window.ESPORTS_DATA = {
       "name": "Rayito",
       "team": "GIANTX ITERO",
       "teamCode": "GX",
-      "rank": 426,
+      "rank": 388,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -7515,14 +6736,12 @@ window.ESPORTS_DATA = {
       "name": "Razork",
       "team": "Fnatic",
       "teamCode": "FNC",
-      "rank": 427,
+      "rank": 389,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "msi",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -7531,7 +6750,7 @@ window.ESPORTS_DATA = {
       "name": "re0",
       "team": "Oh My God",
       "teamCode": "OMG",
-      "rank": 428,
+      "rank": 390,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -7545,7 +6764,7 @@ window.ESPORTS_DATA = {
       "name": "Rekkles",
       "team": "Los Ratones",
       "teamCode": "LR",
-      "rank": 429,
+      "rank": 391,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -7559,15 +6778,12 @@ window.ESPORTS_DATA = {
       "name": "Rest",
       "team": "CTBC Flying Oyster",
       "teamCode": "CFO",
-      "rank": 430,
+      "rank": 392,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "first_stand",
-        "msi",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -7576,7 +6792,7 @@ window.ESPORTS_DATA = {
       "name": "Revenge",
       "team": "DNS Challengers",
       "teamCode": "DNS",
-      "rank": 431,
+      "rank": 393,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7590,7 +6806,7 @@ window.ESPORTS_DATA = {
       "name": "Revenge",
       "team": "DN SOOPers",
       "teamCode": "DNS",
-      "rank": 432,
+      "rank": 394,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7604,7 +6820,7 @@ window.ESPORTS_DATA = {
       "name": "Rhilech",
       "team": "Natus Vincere",
       "teamCode": "NAVI",
-      "rank": 433,
+      "rank": 395,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -7618,7 +6834,7 @@ window.ESPORTS_DATA = {
       "name": "Rich",
       "team": "KRX Challengers",
       "teamCode": "KRX",
-      "rank": 434,
+      "rank": 396,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7632,7 +6848,7 @@ window.ESPORTS_DATA = {
       "name": "Rich",
       "team": "KIWOOM DRX",
       "teamCode": "KRX",
-      "rank": 435,
+      "rank": 397,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7646,15 +6862,13 @@ window.ESPORTS_DATA = {
       "name": "Ripple",
       "team": "Gen.G Esports",
       "teamCode": "GEN",
-      "rank": 436,
+      "rank": 398,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -7663,7 +6877,7 @@ window.ESPORTS_DATA = {
       "name": "Roamer",
       "team": "HANJIN BRION",
       "teamCode": "BRO",
-      "rank": 437,
+      "rank": 399,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7677,7 +6891,7 @@ window.ESPORTS_DATA = {
       "name": "Roamer",
       "team": "BRO Challengers",
       "teamCode": "BRO",
-      "rank": 438,
+      "rank": 400,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7691,13 +6905,12 @@ window.ESPORTS_DATA = {
       "name": "Rookie",
       "team": "Invictus Gaming",
       "teamCode": "IG",
-      "rank": 439,
+      "rank": 401,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -7706,13 +6919,12 @@ window.ESPORTS_DATA = {
       "name": "Rooster",
       "team": "Shifters",
       "teamCode": "SHFT",
-      "rank": 440,
+      "rank": 402,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -7721,7 +6933,7 @@ window.ESPORTS_DATA = {
       "name": "Saber",
       "team": "Ultra Prime",
       "teamCode": "UP",
-      "rank": 441,
+      "rank": 403,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -7735,7 +6947,7 @@ window.ESPORTS_DATA = {
       "name": "sajed",
       "team": "Disguised",
       "teamCode": "DSG",
-      "rank": 442,
+      "rank": 404,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -7749,7 +6961,7 @@ window.ESPORTS_DATA = {
       "name": "SamD",
       "team": "Natus Vincere",
       "teamCode": "NAVI",
-      "rank": 443,
+      "rank": 405,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -7763,13 +6975,12 @@ window.ESPORTS_DATA = {
       "name": "Samkz",
       "team": "paiN Gaming Academy",
       "teamCode": "PAIN",
-      "rank": 444,
+      "rank": 406,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -7778,13 +6989,12 @@ window.ESPORTS_DATA = {
       "name": "Samkz",
       "team": "paiN Gaming",
       "teamCode": "PAIN",
-      "rank": 445,
+      "rank": 407,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -7793,13 +7003,12 @@ window.ESPORTS_DATA = {
       "name": "SanSan",
       "team": "MVK Esports",
       "teamCode": "MVK",
-      "rank": 446,
+      "rank": 408,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -7808,13 +7017,12 @@ window.ESPORTS_DATA = {
       "name": "sarolu",
       "team": "Vivo Keyd Stars Academy",
       "teamCode": "VKS",
-      "rank": 447,
+      "rank": 409,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -7823,13 +7031,12 @@ window.ESPORTS_DATA = {
       "name": "sarolu",
       "team": "Vivo Keyd Stars",
       "teamCode": "VKS",
-      "rank": 448,
+      "rank": 410,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -7838,22 +7045,7 @@ window.ESPORTS_DATA = {
       "name": "scamber",
       "team": "Vivo Keyd Stars",
       "teamCode": "VKS",
-      "rank": 449,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol",
-        "worlds"
-      ]
-    },
-    {
-      "id": "105397130782159175",
-      "role": "JNG",
-      "name": "Scary",
-      "team": "KaBuM! Eports",
-      "teamCode": "KBM",
-      "rank": 450,
+      "rank": 411,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -7867,7 +7059,7 @@ window.ESPORTS_DATA = {
       "name": "Scout",
       "team": "NONGSHIM RED FORCE",
       "teamCode": "NS",
-      "rank": 451,
+      "rank": 412,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7881,7 +7073,7 @@ window.ESPORTS_DATA = {
       "name": "Scout",
       "team": "NS Challengers",
       "teamCode": "NS",
-      "rank": 452,
+      "rank": 413,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7890,26 +7082,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "110456598651174911",
-      "role": "SUP",
-      "name": "Scxtt",
-      "team": "Saving OCE",
-      "teamCode": "SVO",
-      "rank": 453,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp"
-      ]
-    },
-    {
       "id": "108205155114067733",
       "role": "TOP",
       "name": "Semin",
       "team": "BRO Academy",
       "teamCode": "BRO",
-      "rank": 454,
+      "rank": 414,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7923,7 +7101,7 @@ window.ESPORTS_DATA = {
       "name": "Serin",
       "team": "Team Heretics",
       "teamCode": "TH",
-      "rank": 455,
+      "rank": 415,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -7937,13 +7115,12 @@ window.ESPORTS_DATA = {
       "name": "Sero",
       "team": "kt Challengers",
       "teamCode": "KT",
-      "rank": 456,
+      "rank": 416,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -7952,13 +7129,12 @@ window.ESPORTS_DATA = {
       "name": "Sero",
       "team": "kt Rolster",
       "teamCode": "KT",
-      "rank": 457,
+      "rank": 417,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -7967,7 +7143,7 @@ window.ESPORTS_DATA = {
       "name": "SeTab",
       "team": "NONGSHIM RED FORCE",
       "teamCode": "NS",
-      "rank": 458,
+      "rank": 418,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7981,7 +7157,7 @@ window.ESPORTS_DATA = {
       "name": "SeTab",
       "team": "NS Challengers",
       "teamCode": "NS",
-      "rank": 459,
+      "rank": 419,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -7995,15 +7171,12 @@ window.ESPORTS_DATA = {
       "name": "Shad0w",
       "team": "CTBC Flying Oyster",
       "teamCode": "CFO",
-      "rank": 460,
+      "rank": 420,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "first_stand",
-        "msi",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -8012,14 +7185,12 @@ window.ESPORTS_DATA = {
       "name": "Shanks",
       "team": "Anyone's Legend",
       "teamCode": "AL",
-      "rank": 461,
+      "rank": 421,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "msi",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -8028,7 +7199,7 @@ window.ESPORTS_DATA = {
       "name": "Shaoye",
       "team": "LGD GAMING",
       "teamCode": "LGD",
-      "rank": 462,
+      "rank": 422,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -8042,7 +7213,7 @@ window.ESPORTS_DATA = {
       "name": "Sharvel",
       "team": "DNS Challengers",
       "teamCode": "DNS",
-      "rank": 463,
+      "rank": 423,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -8056,7 +7227,7 @@ window.ESPORTS_DATA = {
       "name": "Sharvel",
       "team": "DN SOOPers",
       "teamCode": "DNS",
-      "rank": 464,
+      "rank": 424,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -8070,13 +7241,12 @@ window.ESPORTS_DATA = {
       "name": "sheer",
       "team": "Suzhou LNG Esports",
       "teamCode": "LNG",
-      "rank": 465,
+      "rank": 425,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -8085,13 +7255,12 @@ window.ESPORTS_DATA = {
       "name": "Sheo",
       "team": "Shifters",
       "teamCode": "SHFT",
-      "rank": 466,
+      "rank": 426,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -8100,7 +7269,7 @@ window.ESPORTS_DATA = {
       "name": "ShiauC",
       "team": "Relove Deep Cross Gaming",
       "teamCode": "DCG",
-      "rank": 467,
+      "rank": 427,
       "projection": 20,
       "verified": true,
       "league": "lcp",
@@ -8115,7 +7284,7 @@ window.ESPORTS_DATA = {
       "name": "Shiku",
       "team": "LEVIATÁN",
       "teamCode": "LEV",
-      "rank": 468,
+      "rank": 428,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -8129,7 +7298,7 @@ window.ESPORTS_DATA = {
       "name": "Shini",
       "team": "FURIA",
       "teamCode": "FUR",
-      "rank": 469,
+      "rank": 429,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -8139,33 +7308,17 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "108359201876700017",
-      "role": "ADC",
-      "name": "Shogo",
-      "team": "NRG",
-      "teamCode": "NRG",
-      "rank": 470,
-      "projection": 20,
-      "verified": true,
-      "league": "lcs",
-      "competitions": [
-        "lcs",
-        "worlds"
-      ]
-    },
-    {
       "id": "100725844988653773",
       "role": "MID",
       "name": "ShowMaker",
       "team": "Dplus KIA",
       "teamCode": "DK",
-      "rank": 471,
+      "rank": 430,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -8174,13 +7327,12 @@ window.ESPORTS_DATA = {
       "name": "ShowMaker",
       "team": "DK Challengers",
       "teamCode": "DK",
-      "rank": 472,
+      "rank": 431,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -8189,15 +7341,13 @@ window.ESPORTS_DATA = {
       "name": "Sinatra",
       "team": "LOUD",
       "teamCode": "LOUD",
-      "rank": 473,
+      "rank": 432,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
         "cblol",
-        "first_stand",
-        "msi",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -8206,7 +7356,7 @@ window.ESPORTS_DATA = {
       "name": "sinian",
       "team": "EDWARD GAMING",
       "teamCode": "EDG",
-      "rank": 474,
+      "rank": 433,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -8220,30 +7370,13 @@ window.ESPORTS_DATA = {
       "name": "SIRIUSS",
       "team": "Gen.G Esports",
       "teamCode": "GEN",
-      "rank": 475,
+      "rank": 434,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
-      ]
-    },
-    {
-      "id": "116170438418216430",
-      "role": "MID",
-      "name": "Siroinai",
-      "team": "NRG",
-      "teamCode": "NRG",
-      "rank": 476,
-      "projection": 20,
-      "verified": true,
-      "league": "lcs",
-      "competitions": [
-        "lcs",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -8252,13 +7385,12 @@ window.ESPORTS_DATA = {
       "name": "SiuLoong",
       "team": "MVK Esports",
       "teamCode": "MVK",
-      "rank": 477,
+      "rank": 435,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -8267,13 +7399,12 @@ window.ESPORTS_DATA = {
       "name": "Siwoo",
       "team": "Dplus KIA",
       "teamCode": "DK",
-      "rank": 478,
+      "rank": 436,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -8282,41 +7413,12 @@ window.ESPORTS_DATA = {
       "name": "Siwoo",
       "team": "DK Challengers",
       "teamCode": "DK",
-      "rank": 479,
+      "rank": 437,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
-      ]
-    },
-    {
-      "id": "105397207118950800",
-      "role": "TOP",
-      "name": "SkB",
-      "team": "Liberty Academy",
-      "teamCode": "LBR",
-      "rank": 480,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
-      ]
-    },
-    {
-      "id": "105397207118950800",
-      "role": "TOP",
-      "name": "SkB",
-      "team": "Liberty",
-      "teamCode": "LBR",
-      "rank": 481,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
+        "lck"
       ]
     },
     {
@@ -8325,7 +7427,7 @@ window.ESPORTS_DATA = {
       "name": "Skeanz",
       "team": "SK Gaming",
       "teamCode": "SK",
-      "rank": 482,
+      "rank": 438,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -8339,15 +7441,14 @@ window.ESPORTS_DATA = {
       "name": "SkewMond",
       "team": "G2 Esports",
       "teamCode": "G2",
-      "rank": 483,
+      "rank": 439,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
         "lec",
         "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -8356,7 +7457,7 @@ window.ESPORTS_DATA = {
       "name": "Slayer",
       "team": "BNK FEARX",
       "teamCode": "BFX",
-      "rank": 484,
+      "rank": 440,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -8371,7 +7472,7 @@ window.ESPORTS_DATA = {
       "name": "Slayer",
       "team": "BNK FEARX Youth",
       "teamCode": "BFX",
-      "rank": 485,
+      "rank": 441,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -8386,7 +7487,7 @@ window.ESPORTS_DATA = {
       "name": "SlowQ",
       "team": "SK Gaming",
       "teamCode": "SK",
-      "rank": 486,
+      "rank": 442,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -8400,13 +7501,12 @@ window.ESPORTS_DATA = {
       "name": "Smash",
       "team": "Dplus KIA",
       "teamCode": "DK",
-      "rank": 487,
+      "rank": 443,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -8415,13 +7515,12 @@ window.ESPORTS_DATA = {
       "name": "Smash",
       "team": "DK Challengers",
       "teamCode": "DK",
-      "rank": 488,
+      "rank": 444,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -8430,7 +7529,7 @@ window.ESPORTS_DATA = {
       "name": "smooth",
       "team": "RED Kalunga Academy",
       "teamCode": "RED",
-      "rank": 489,
+      "rank": 445,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -8444,7 +7543,7 @@ window.ESPORTS_DATA = {
       "name": "smooth",
       "team": "RED Kalunga",
       "teamCode": "RED",
-      "rank": 490,
+      "rank": 446,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -8458,14 +7557,12 @@ window.ESPORTS_DATA = {
       "name": "Soboro",
       "team": "Fnatic",
       "teamCode": "FNC",
-      "rank": 491,
+      "rank": 447,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "msi",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -8474,37 +7571,7 @@ window.ESPORTS_DATA = {
       "name": "Solid",
       "team": "Dplus KIA",
       "teamCode": "DK",
-      "rank": 492,
-      "projection": 20,
-      "verified": true,
-      "league": "lck",
-      "competitions": [
-        "lck",
-        "worlds"
-      ]
-    },
-    {
-      "id": "116907472040667554",
-      "role": "JNG",
-      "name": "Solid",
-      "team": "DK Challengers",
-      "teamCode": "DK",
-      "rank": 493,
-      "projection": 20,
-      "verified": true,
-      "league": "lck",
-      "competitions": [
-        "lck",
-        "worlds"
-      ]
-    },
-    {
-      "id": "108205131143802891",
-      "role": "JNG",
-      "name": "Sounda",
-      "team": "NS REDFORCE Academy",
-      "teamCode": "NS",
-      "rank": 494,
+      "rank": 448,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -8513,18 +7580,31 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "99101098220080545",
-      "role": "SUP",
-      "name": "Spica",
-      "team": "NRG",
-      "teamCode": "NRG",
-      "rank": 495,
+      "id": "116907472040667554",
+      "role": "JNG",
+      "name": "Solid",
+      "team": "DK Challengers",
+      "teamCode": "DK",
+      "rank": 449,
       "projection": 20,
       "verified": true,
-      "league": "lcs",
+      "league": "lck",
       "competitions": [
-        "lcs",
-        "worlds"
+        "lck"
+      ]
+    },
+    {
+      "id": "108205131143802891",
+      "role": "JNG",
+      "name": "Sounda",
+      "team": "NS REDFORCE Academy",
+      "teamCode": "NS",
+      "rank": 450,
+      "projection": 20,
+      "verified": true,
+      "league": "lck",
+      "competitions": [
+        "lck"
       ]
     },
     {
@@ -8533,7 +7613,7 @@ window.ESPORTS_DATA = {
       "name": "Sponge",
       "team": "NONGSHIM RED FORCE",
       "teamCode": "NS",
-      "rank": 496,
+      "rank": 451,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -8547,7 +7627,7 @@ window.ESPORTS_DATA = {
       "name": "Sponge",
       "team": "NS Challengers",
       "teamCode": "NS",
-      "rank": 497,
+      "rank": 452,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -8561,7 +7641,7 @@ window.ESPORTS_DATA = {
       "name": "Srtty",
       "team": "Disguised",
       "teamCode": "DSG",
-      "rank": 498,
+      "rank": 453,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -8575,15 +7655,13 @@ window.ESPORTS_DATA = {
       "name": "star",
       "team": "HLE Academy",
       "teamCode": "HLE",
-      "rank": 499,
+      "rank": 454,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -8592,7 +7670,7 @@ window.ESPORTS_DATA = {
       "name": "Starhide",
       "team": "Lyon Academy",
       "teamCode": "LYON",
-      "rank": 500,
+      "rank": 455,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -8608,7 +7686,7 @@ window.ESPORTS_DATA = {
       "name": "Starry",
       "team": "Oh My God",
       "teamCode": "OMG",
-      "rank": 501,
+      "rank": 456,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -8622,13 +7700,12 @@ window.ESPORTS_DATA = {
       "name": "Stend",
       "team": "Shifters",
       "teamCode": "SHFT",
-      "rank": 502,
+      "rank": 457,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -8637,21 +7714,7 @@ window.ESPORTS_DATA = {
       "name": "STEPZ",
       "team": "RED Kalunga",
       "teamCode": "RED",
-      "rank": 503,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol"
-      ]
-    },
-    {
-      "id": "107559327426244686",
-      "role": "JNG",
-      "name": "StineR",
-      "team": "INTZ",
-      "teamCode": "INTZ",
-      "rank": 504,
+      "rank": 458,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -8665,7 +7728,7 @@ window.ESPORTS_DATA = {
       "name": "Strensh",
       "team": "LEVIATÁN",
       "teamCode": "LEV",
-      "rank": 505,
+      "rank": 459,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -8674,33 +7737,17 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "99566404538979273",
-      "role": "TOP",
-      "name": "Summit",
-      "team": "Movistar R7",
-      "teamCode": "R7",
-      "rank": 506,
-      "projection": 20,
-      "verified": true,
-      "league": "worlds",
-      "competitions": [
-        "worlds"
-      ]
-    },
-    {
       "id": "103536968833612789",
       "role": "ADC",
       "name": "Supa",
       "team": "Movistar KOI",
       "teamCode": "MKOI",
-      "rank": 507,
+      "rank": 460,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "msi",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -8709,13 +7756,12 @@ window.ESPORTS_DATA = {
       "name": "SUPERCLEBER",
       "team": "Vivo Keyd Stars Academy",
       "teamCode": "VKS",
-      "rank": 508,
+      "rank": 461,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -8724,28 +7770,12 @@ window.ESPORTS_DATA = {
       "name": "SUPERCLEBER",
       "team": "Vivo Keyd Stars",
       "teamCode": "VKS",
-      "rank": 509,
+      "rank": 462,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
-      ]
-    },
-    {
-      "id": "114197580274854230",
-      "role": "ADC",
-      "name": "Sushee",
-      "team": "NRG",
-      "teamCode": "NRG",
-      "rank": 510,
-      "projection": 20,
-      "verified": true,
-      "league": "lcs",
-      "competitions": [
-        "lcs",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -8754,7 +7784,7 @@ window.ESPORTS_DATA = {
       "name": "Sweeho",
       "team": "Lyon Academy",
       "teamCode": "LYON",
-      "rank": 511,
+      "rank": 463,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -8770,13 +7800,12 @@ window.ESPORTS_DATA = {
       "name": "Sylvie",
       "team": "kt Challengers",
       "teamCode": "KT",
-      "rank": 512,
+      "rank": 464,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -8785,13 +7814,12 @@ window.ESPORTS_DATA = {
       "name": "Sylvie",
       "team": "kt Rolster",
       "teamCode": "KT",
-      "rank": 513,
+      "rank": 465,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -8800,13 +7828,12 @@ window.ESPORTS_DATA = {
       "name": "Tactical",
       "team": "Cloud9 Kia",
       "teamCode": "C9",
-      "rank": 514,
+      "rank": 466,
       "projection": 20,
       "verified": true,
       "league": "lcs",
       "competitions": [
-        "lcs",
-        "worlds"
+        "lcs"
       ]
     },
     {
@@ -8815,7 +7842,7 @@ window.ESPORTS_DATA = {
       "name": "Taeyoon",
       "team": "BNK FEARX",
       "teamCode": "BFX",
-      "rank": 515,
+      "rank": 467,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -8830,7 +7857,7 @@ window.ESPORTS_DATA = {
       "name": "Taeyoon",
       "team": "BNK FEARX Youth",
       "teamCode": "BFX",
-      "rank": 516,
+      "rank": 468,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -8840,12 +7867,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "111697804753850920",
+      "id": "107251533987191201",
       "role": "SUP",
-      "name": "Tahahy",
-      "team": "Saigon 1TAP DINO",
-      "teamCode": "DINO",
-      "rank": 517,
+      "name": "Taki",
+      "team": "GAM Esports",
+      "teamCode": "GAM",
+      "rank": 469,
       "projection": 20,
       "verified": true,
       "league": "lcp",
@@ -8854,42 +7881,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "107251533987191201",
-      "role": "SUP",
-      "name": "Taki",
-      "team": "GAM Esports",
-      "teamCode": "GAM",
-      "rank": 518,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp",
-        "msi",
-        "worlds"
-      ]
-    },
-    {
-      "id": "109784590066548371",
-      "role": "MID",
-      "name": "Tangyuan",
-      "team": "Royal Never Give Up",
-      "teamCode": "RNG",
-      "rank": 519,
-      "projection": 20,
-      "verified": true,
-      "league": "lpl",
-      "competitions": [
-        "lpl"
-      ]
-    },
-    {
       "id": "109784590066548371",
       "role": "MID",
       "name": "Tangyuan",
       "team": "LGD GAMING",
       "teamCode": "LGD",
-      "rank": 520,
+      "rank": 470,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -8903,7 +7900,7 @@ window.ESPORTS_DATA = {
       "name": "Tao",
       "team": "Karmine Corp Blue",
       "teamCode": "KCB",
-      "rank": 521,
+      "rank": 471,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -8917,14 +7914,12 @@ window.ESPORTS_DATA = {
       "name": "Tarzan",
       "team": "Anyone's Legend",
       "teamCode": "AL",
-      "rank": 522,
+      "rank": 472,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "msi",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -8933,7 +7928,7 @@ window.ESPORTS_DATA = {
       "name": "Tatu",
       "team": "FURIA",
       "teamCode": "FUR",
-      "rank": 523,
+      "rank": 473,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -8948,7 +7943,7 @@ window.ESPORTS_DATA = {
       "name": "Teddy",
       "team": "HANJIN BRION",
       "teamCode": "BRO",
-      "rank": 524,
+      "rank": 474,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -8962,7 +7957,7 @@ window.ESPORTS_DATA = {
       "name": "Teddy",
       "team": "BRO Challengers",
       "teamCode": "BRO",
-      "rank": 525,
+      "rank": 475,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -8971,26 +7966,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "106276191141062603",
-      "role": "SUP",
-      "name": "Telas",
-      "team": "Estral Esports",
-      "teamCode": "EST",
-      "rank": 526,
-      "projection": 20,
-      "verified": true,
-      "league": "msi",
-      "competitions": [
-        "msi"
-      ]
-    },
-    {
       "id": "108284732073917232",
       "role": "MID",
       "name": "Tempester",
       "team": "HANJIN BRION",
       "teamCode": "BRO",
-      "rank": 527,
+      "rank": 476,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -9004,7 +7985,7 @@ window.ESPORTS_DATA = {
       "name": "Tempester",
       "team": "BRO Challengers",
       "teamCode": "BRO",
-      "rank": 528,
+      "rank": 477,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -9018,15 +7999,13 @@ window.ESPORTS_DATA = {
       "name": "Tempester",
       "team": "HLE Academy",
       "teamCode": "HLE",
-      "rank": 529,
+      "rank": 478,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -9035,14 +8014,13 @@ window.ESPORTS_DATA = {
       "name": "Test JG1",
       "team": "T1 Rookies",
       "teamCode": "T1",
-      "rank": 530,
+      "rank": 479,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -9051,14 +8029,13 @@ window.ESPORTS_DATA = {
       "name": "Test JG2",
       "team": "T1 Rookies",
       "teamCode": "T1",
-      "rank": 531,
+      "rank": 480,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -9067,14 +8044,13 @@ window.ESPORTS_DATA = {
       "name": "Test MID1",
       "team": "T1 Rookies",
       "teamCode": "T1",
-      "rank": 532,
+      "rank": 481,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -9083,7 +8059,7 @@ window.ESPORTS_DATA = {
       "name": "Th3Antonio",
       "team": "GIANTX ITERO",
       "teamCode": "GX",
-      "rank": 533,
+      "rank": 482,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -9097,13 +8073,12 @@ window.ESPORTS_DATA = {
       "name": "Thanatos",
       "team": "Cloud9 Kia",
       "teamCode": "C9",
-      "rank": 534,
+      "rank": 483,
       "projection": 20,
       "verified": true,
       "league": "lcs",
       "competitions": [
-        "lcs",
-        "worlds"
+        "lcs"
       ]
     },
     {
@@ -9112,13 +8087,12 @@ window.ESPORTS_DATA = {
       "name": "TheShy",
       "team": "Invictus Gaming",
       "teamCode": "IG",
-      "rank": 535,
+      "rank": 484,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -9127,15 +8101,13 @@ window.ESPORTS_DATA = {
       "name": "Tian",
       "team": "TOP ESPORTS",
       "teamCode": "TES",
-      "rank": 536,
+      "rank": 485,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -9144,7 +8116,7 @@ window.ESPORTS_DATA = {
       "name": "Time",
       "team": "GIANTX ITERO",
       "teamCode": "GX",
-      "rank": 537,
+      "rank": 486,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -9156,9 +8128,9 @@ window.ESPORTS_DATA = {
       "id": "114533956909173365",
       "role": "JNG",
       "name": "Tiphat",
-      "team": "Saigon 1TAP DINO",
-      "teamCode": "DINO",
-      "rank": 538,
+      "team": "GAM Esports",
+      "teamCode": "GAM",
+      "rank": 487,
       "projection": 20,
       "verified": true,
       "league": "lcp",
@@ -9167,28 +8139,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "114533956909173365",
-      "role": "JNG",
-      "name": "Tiphat",
-      "team": "GAM Esports",
-      "teamCode": "GAM",
-      "rank": 539,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp",
-        "msi",
-        "worlds"
-      ]
-    },
-    {
       "id": "107156544177574787",
       "role": "TOP",
       "name": "Tracyn",
       "team": "Team Heretics",
       "teamCode": "TH",
-      "rank": 540,
+      "rank": 488,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -9202,27 +8158,12 @@ window.ESPORTS_DATA = {
       "name": "Trymbi",
       "team": "Shifters",
       "teamCode": "SHFT",
-      "rank": 541,
+      "rank": 489,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "worlds"
-      ]
-    },
-    {
-      "id": "114029739357606959",
-      "role": "MID",
-      "name": "TT",
-      "team": "Saigon 1TAP DINO",
-      "teamCode": "DINO",
-      "rank": 542,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp"
+        "lec"
       ]
     },
     {
@@ -9231,7 +8172,7 @@ window.ESPORTS_DATA = {
       "name": "Tutsz",
       "team": "FURIA",
       "teamCode": "FUR",
-      "rank": 543,
+      "rank": 490,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -9246,7 +8187,7 @@ window.ESPORTS_DATA = {
       "name": "Tyrion",
       "team": "Xi'an Team WE",
       "teamCode": "WE",
-      "rank": 544,
+      "rank": 491,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -9260,7 +8201,7 @@ window.ESPORTS_DATA = {
       "name": "Ucal",
       "team": "KRX Challengers",
       "teamCode": "KRX",
-      "rank": 545,
+      "rank": 492,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -9274,7 +8215,7 @@ window.ESPORTS_DATA = {
       "name": "Ucal",
       "team": "KIWOOM DRX",
       "teamCode": "KRX",
-      "rank": 546,
+      "rank": 493,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -9288,7 +8229,7 @@ window.ESPORTS_DATA = {
       "name": "Uniboy",
       "team": "Ground Zero Gaming",
       "teamCode": "GZ",
-      "rank": 547,
+      "rank": 494,
       "projection": 20,
       "verified": true,
       "league": "lcp",
@@ -9302,14 +8243,12 @@ window.ESPORTS_DATA = {
       "name": "Upset",
       "team": "Fnatic",
       "teamCode": "FNC",
-      "rank": 548,
+      "rank": 495,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "msi",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -9318,15 +8257,13 @@ window.ESPORTS_DATA = {
       "name": "uZent",
       "team": "LOUD",
       "teamCode": "LOUD",
-      "rank": 549,
+      "rank": 496,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
         "cblol",
-        "first_stand",
-        "msi",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -9335,15 +8272,13 @@ window.ESPORTS_DATA = {
       "name": "Valiant",
       "team": "Hanwha Life Esports",
       "teamCode": "HLE",
-      "rank": 550,
+      "rank": 497,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -9352,15 +8287,13 @@ window.ESPORTS_DATA = {
       "name": "Valiant",
       "team": "HLE Challengers",
       "teamCode": "HLE",
-      "rank": 551,
+      "rank": 498,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -9369,14 +8302,13 @@ window.ESPORTS_DATA = {
       "name": "Vampire",
       "team": "Beijing JDG Esports",
       "teamCode": "JDG",
-      "rank": 552,
+      "rank": 499,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
-        "first_stand",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -9385,13 +8317,12 @@ window.ESPORTS_DATA = {
       "name": "Van1",
       "team": "Fukuoka SoftBank HAWKS gaming",
       "teamCode": "SHG",
-      "rank": 553,
+      "rank": 500,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -9400,7 +8331,7 @@ window.ESPORTS_DATA = {
       "name": "Velja",
       "team": "Los Ratones",
       "teamCode": "LR",
-      "rank": 554,
+      "rank": 501,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -9414,7 +8345,7 @@ window.ESPORTS_DATA = {
       "name": "VicLa",
       "team": "BNK FEARX",
       "teamCode": "BFX",
-      "rank": 555,
+      "rank": 502,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -9429,7 +8360,7 @@ window.ESPORTS_DATA = {
       "name": "VicLa",
       "team": "BNK FEARX Youth",
       "teamCode": "BFX",
-      "rank": 556,
+      "rank": 503,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -9439,26 +8370,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "107642470610994763",
-      "role": "ADC",
-      "name": "Vinboiz",
-      "team": "Saigon 1TAP DINO",
-      "teamCode": "DINO",
-      "rank": 557,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp"
-      ]
-    },
-    {
       "id": "108205131858552538",
       "role": "JNG",
       "name": "Vincenzo",
       "team": "KRX Challengers",
       "teamCode": "KRX",
-      "rank": 558,
+      "rank": 504,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -9472,7 +8389,7 @@ window.ESPORTS_DATA = {
       "name": "Vincenzo",
       "team": "KIWOOM DRX",
       "teamCode": "KRX",
-      "rank": 559,
+      "rank": 505,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -9481,34 +8398,19 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "103643243250697054",
-      "role": "ADC",
-      "name": "Violet",
-      "team": "Saving OCE",
-      "teamCode": "SVO",
-      "rank": 560,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp"
-      ]
-    },
-    {
       "id": "99871276340698623",
       "role": "ADC",
       "name": "Viper",
       "team": "BILIBILI GAMING",
       "teamCode": "BLG",
-      "rank": 561,
+      "rank": 506,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
         "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -9517,14 +8419,12 @@ window.ESPORTS_DATA = {
       "name": "Vladi",
       "team": "Fnatic",
       "teamCode": "FNC",
-      "rank": 562,
+      "rank": 507,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
-        "lec",
-        "msi",
-        "worlds"
+        "lec"
       ]
     },
     {
@@ -9533,37 +8433,7 @@ window.ESPORTS_DATA = {
       "name": "Vsta",
       "team": "Fukuoka SoftBank HAWKS gaming",
       "teamCode": "SHG",
-      "rank": 563,
-      "projection": 20,
-      "verified": true,
-      "league": "lcp",
-      "competitions": [
-        "lcp",
-        "worlds"
-      ]
-    },
-    {
-      "id": "99101098208825497",
-      "role": "SUP",
-      "name": "Vulcan",
-      "team": "Cloud9 Kia",
-      "teamCode": "C9",
-      "rank": 564,
-      "projection": 20,
-      "verified": true,
-      "league": "lcs",
-      "competitions": [
-        "lcs",
-        "worlds"
-      ]
-    },
-    {
-      "id": "117150969092119417",
-      "role": "JNG",
-      "name": "Wady",
-      "team": "Saigon 1TAP DINO",
-      "teamCode": "DINO",
-      "rank": 565,
+      "rank": 508,
       "projection": 20,
       "verified": true,
       "league": "lcp",
@@ -9572,12 +8442,26 @@ window.ESPORTS_DATA = {
       ]
     },
     {
+      "id": "99101098208825497",
+      "role": "SUP",
+      "name": "Vulcan",
+      "team": "Cloud9 Kia",
+      "teamCode": "C9",
+      "rank": 509,
+      "projection": 20,
+      "verified": true,
+      "league": "lcs",
+      "competitions": [
+        "lcs"
+      ]
+    },
+    {
       "id": "107492119089043087",
       "role": "SUP",
       "name": "Way",
       "team": "Team Heretics",
       "teamCode": "TH",
-      "rank": 566,
+      "rank": 510,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -9591,13 +8475,12 @@ window.ESPORTS_DATA = {
       "name": "Wayne",
       "team": "Dplus KIA",
       "teamCode": "DK",
-      "rank": 567,
+      "rank": 511,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -9606,13 +8489,12 @@ window.ESPORTS_DATA = {
       "name": "Wayne",
       "team": "DK Challengers",
       "teamCode": "DK",
-      "rank": 568,
+      "rank": 512,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
-        "lck",
-        "worlds"
+        "lck"
       ]
     },
     {
@@ -9621,13 +8503,12 @@ window.ESPORTS_DATA = {
       "name": "Wei",
       "team": "Invictus Gaming",
       "teamCode": "IG",
-      "rank": 569,
+      "rank": 513,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -9636,13 +8517,12 @@ window.ESPORTS_DATA = {
       "name": "Weiwei",
       "team": "Suzhou LNG Esports",
       "teamCode": "LNG",
-      "rank": 570,
+      "rank": 514,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -9651,15 +8531,14 @@ window.ESPORTS_DATA = {
       "name": "Wenbo",
       "team": "BILIBILI GAMING",
       "teamCode": "BLG",
-      "rank": 571,
+      "rank": 515,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
         "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -9668,7 +8547,7 @@ window.ESPORTS_DATA = {
       "name": "Willer",
       "team": "KRX Challengers",
       "teamCode": "KRX",
-      "rank": 572,
+      "rank": 516,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -9682,7 +8561,7 @@ window.ESPORTS_DATA = {
       "name": "Willer",
       "team": "KIWOOM DRX",
       "teamCode": "KRX",
-      "rank": 573,
+      "rank": 517,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -9696,7 +8575,7 @@ window.ESPORTS_DATA = {
       "name": "Winder",
       "team": "Lyon Academy",
       "teamCode": "LYON",
-      "rank": 574,
+      "rank": 518,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -9712,7 +8591,7 @@ window.ESPORTS_DATA = {
       "name": "Winner",
       "team": "KRX Challengers",
       "teamCode": "KRX",
-      "rank": 575,
+      "rank": 519,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -9726,7 +8605,7 @@ window.ESPORTS_DATA = {
       "name": "Winner",
       "team": "KIWOOM DRX",
       "teamCode": "KRX",
-      "rank": 576,
+      "rank": 520,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -9740,13 +8619,12 @@ window.ESPORTS_DATA = {
       "name": "Woody",
       "team": "DetonatioN FocusMe",
       "teamCode": "DFM",
-      "rank": 577,
+      "rank": 521,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -9755,7 +8633,7 @@ window.ESPORTS_DATA = {
       "name": "Wunder",
       "team": "SK Gaming",
       "teamCode": "SK",
-      "rank": 578,
+      "rank": 522,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -9769,14 +8647,13 @@ window.ESPORTS_DATA = {
       "name": "xiaofang",
       "team": "Beijing JDG Esports",
       "teamCode": "JDG",
-      "rank": 579,
+      "rank": 523,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
-        "first_stand",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -9785,13 +8662,12 @@ window.ESPORTS_DATA = {
       "name": "Xiaohao",
       "team": "WeiboGaming",
       "teamCode": "WBG",
-      "rank": 580,
+      "rank": 524,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -9800,13 +8676,12 @@ window.ESPORTS_DATA = {
       "name": "Xiaohu",
       "team": "WeiboGaming",
       "teamCode": "WBG",
-      "rank": 581,
+      "rank": 525,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -9815,7 +8690,7 @@ window.ESPORTS_DATA = {
       "name": "Xiaoxia",
       "team": "Ultra Prime",
       "teamCode": "UP",
-      "rank": 582,
+      "rank": 526,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -9829,7 +8704,7 @@ window.ESPORTS_DATA = {
       "name": "XiaoXiang",
       "team": "Relove Deep Cross Gaming",
       "teamCode": "DCG",
-      "rank": 583,
+      "rank": 527,
       "projection": 20,
       "verified": true,
       "league": "lcp",
@@ -9844,14 +8719,13 @@ window.ESPORTS_DATA = {
       "name": "Xiaoxu",
       "team": "Beijing JDG Esports",
       "teamCode": "JDG",
-      "rank": 584,
+      "rank": 528,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
-        "first_stand",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -9860,15 +8734,14 @@ window.ESPORTS_DATA = {
       "name": "Xun",
       "team": "BILIBILI GAMING",
       "teamCode": "BLG",
-      "rank": 585,
+      "rank": 529,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
         "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -9877,15 +8750,13 @@ window.ESPORTS_DATA = {
       "name": "Xyno",
       "team": "LOUD",
       "teamCode": "LOUD",
-      "rank": 586,
+      "rank": 530,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
         "cblol",
-        "first_stand",
-        "msi",
-        "worlds"
+        "first_stand"
       ]
     },
     {
@@ -9894,13 +8765,12 @@ window.ESPORTS_DATA = {
       "name": "Ycx",
       "team": "Suzhou LNG Esports",
       "teamCode": "LNG",
-      "rank": 587,
+      "rank": 531,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -9909,13 +8779,12 @@ window.ESPORTS_DATA = {
       "name": "YellowYoshi",
       "team": "SHG Academy",
       "teamCode": "SHG",
-      "rank": 588,
+      "rank": 532,
       "projection": 20,
       "verified": true,
       "league": "lcp",
       "competitions": [
-        "lcp",
-        "worlds"
+        "lcp"
       ]
     },
     {
@@ -9924,15 +8793,13 @@ window.ESPORTS_DATA = {
       "name": "Yeon",
       "team": "Team Liquid Alienware",
       "teamCode": "TLAW",
-      "rank": 589,
+      "rank": 533,
       "projection": 20,
       "verified": true,
       "league": "lcs",
       "competitions": [
         "lcs",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -9941,13 +8808,12 @@ window.ESPORTS_DATA = {
       "name": "Yike",
       "team": "Karmine Corp",
       "teamCode": "KC",
-      "rank": 590,
+      "rank": 534,
       "projection": 20,
       "verified": true,
       "league": "lec",
       "competitions": [
         "lec",
-        "first_stand",
         "msi"
       ]
     },
@@ -9957,7 +8823,7 @@ window.ESPORTS_DATA = {
       "name": "Yukino",
       "team": "Karmine Corp Blue",
       "teamCode": "KCB",
-      "rank": 591,
+      "rank": 535,
       "projection": 20,
       "verified": true,
       "league": "lec",
@@ -9966,12 +8832,12 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "104241655502826222",
-      "role": "TOP",
-      "name": "Yupps",
-      "team": "KaBuM! Eports",
-      "teamCode": "KBM",
-      "rank": 592,
+      "id": "107559356925533344",
+      "role": "SUP",
+      "name": "zay",
+      "team": "Vivo Keyd Stars Academy",
+      "teamCode": "VKS",
+      "rank": 536,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -9980,48 +8846,17 @@ window.ESPORTS_DATA = {
       ]
     },
     {
-      "id": "107577677538574806",
-      "role": "TOP",
-      "name": "Zamudo",
-      "team": "NRG",
-      "teamCode": "NRG",
-      "rank": 593,
-      "projection": 20,
-      "verified": true,
-      "league": "lcs",
-      "competitions": [
-        "lcs",
-        "worlds"
-      ]
-    },
-    {
-      "id": "107559356925533344",
-      "role": "SUP",
-      "name": "zay",
-      "team": "Vivo Keyd Stars Academy",
-      "teamCode": "VKS",
-      "rank": 594,
-      "projection": 20,
-      "verified": true,
-      "league": "cblol",
-      "competitions": [
-        "cblol",
-        "worlds"
-      ]
-    },
-    {
       "id": "107559356925533344",
       "role": "SUP",
       "name": "zay",
       "team": "Vivo Keyd Stars",
       "teamCode": "VKS",
-      "rank": 595,
+      "rank": 537,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -10030,7 +8865,7 @@ window.ESPORTS_DATA = {
       "name": "Zdz",
       "team": "EDWARD GAMING",
       "teamCode": "EDG",
-      "rank": 596,
+      "rank": 538,
       "projection": 20,
       "verified": true,
       "league": "lpl",
@@ -10044,15 +8879,13 @@ window.ESPORTS_DATA = {
       "name": "Zeka",
       "team": "Hanwha Life Esports",
       "teamCode": "HLE",
-      "rank": 597,
+      "rank": 539,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -10061,15 +8894,13 @@ window.ESPORTS_DATA = {
       "name": "Zeka",
       "team": "HLE Challengers",
       "teamCode": "HLE",
-      "rank": 598,
+      "rank": 540,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -10078,13 +8909,12 @@ window.ESPORTS_DATA = {
       "name": "zekas",
       "team": "Vivo Keyd Stars",
       "teamCode": "VKS",
-      "rank": 599,
+      "rank": 541,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -10093,7 +8923,7 @@ window.ESPORTS_DATA = {
       "name": "Zephyr",
       "team": "BNK FEARX",
       "teamCode": "BFX",
-      "rank": 600,
+      "rank": 542,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -10108,7 +8938,7 @@ window.ESPORTS_DATA = {
       "name": "Zephyr",
       "team": "BNK FEARX Youth",
       "teamCode": "BFX",
-      "rank": 601,
+      "rank": 543,
       "projection": 20,
       "verified": true,
       "league": "lck",
@@ -10123,7 +8953,7 @@ window.ESPORTS_DATA = {
       "name": "Zest",
       "team": "LOS",
       "teamCode": "LOS",
-      "rank": 602,
+      "rank": 544,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -10137,15 +8967,13 @@ window.ESPORTS_DATA = {
       "name": "Zeus",
       "team": "Hanwha Life Esports",
       "teamCode": "HLE",
-      "rank": 603,
+      "rank": 545,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -10154,15 +8982,13 @@ window.ESPORTS_DATA = {
       "name": "Zeus",
       "team": "HLE Challengers",
       "teamCode": "HLE",
-      "rank": 604,
+      "rank": 546,
       "projection": 20,
       "verified": true,
       "league": "lck",
       "competitions": [
         "lck",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -10171,7 +8997,7 @@ window.ESPORTS_DATA = {
       "name": "Zeyzal",
       "team": "Shopify Rebellion",
       "teamCode": "SR",
-      "rank": 605,
+      "rank": 547,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -10185,7 +9011,7 @@ window.ESPORTS_DATA = {
       "name": "Zhayend",
       "team": "Lyon Academy",
       "teamCode": "LYON",
-      "rank": 606,
+      "rank": 548,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -10201,15 +9027,13 @@ window.ESPORTS_DATA = {
       "name": "Zhuo",
       "team": "TOP ESPORTS",
       "teamCode": "TES",
-      "rank": 607,
+      "rank": 549,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -10218,13 +9042,12 @@ window.ESPORTS_DATA = {
       "name": "Zika",
       "team": "WeiboGaming",
       "teamCode": "WBG",
-      "rank": 608,
+      "rank": 550,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
-        "lpl",
-        "worlds"
+        "lpl"
       ]
     },
     {
@@ -10233,7 +9056,7 @@ window.ESPORTS_DATA = {
       "name": "Zinie",
       "team": "Shopify Rebellion",
       "teamCode": "SR",
-      "rank": 609,
+      "rank": 551,
       "projection": 20,
       "verified": true,
       "league": "lcs",
@@ -10247,13 +9070,12 @@ window.ESPORTS_DATA = {
       "name": "Zoen",
       "team": "paiN Gaming Academy",
       "teamCode": "PAIN",
-      "rank": 610,
+      "rank": 552,
       "projection": 20,
       "verified": true,
       "league": "cblol",
       "competitions": [
-        "cblol",
-        "worlds"
+        "cblol"
       ]
     },
     {
@@ -10262,7 +9084,7 @@ window.ESPORTS_DATA = {
       "name": "Zothve",
       "team": "Fluxo W7M",
       "teamCode": "FX",
-      "rank": 611,
+      "rank": 553,
       "projection": 20,
       "verified": true,
       "league": "cblol",
@@ -10276,15 +9098,13 @@ window.ESPORTS_DATA = {
       "name": "ZUIAN",
       "team": "TOP ESPORTS",
       "teamCode": "TES",
-      "rank": 612,
+      "rank": 554,
       "projection": 20,
       "verified": true,
       "league": "lpl",
       "competitions": [
         "lpl",
-        "first_stand",
-        "msi",
-        "worlds"
+        "msi"
       ]
     },
     {
@@ -10293,13 +9113,12 @@ window.ESPORTS_DATA = {
       "name": "Zven",
       "team": "Cloud9 Kia",
       "teamCode": "C9",
-      "rank": 613,
+      "rank": 555,
       "projection": 20,
       "verified": true,
       "league": "lcs",
       "competitions": [
-        "lcs",
-        "worlds"
+        "lcs"
       ]
     },
     {
@@ -10308,7 +9127,7 @@ window.ESPORTS_DATA = {
       "name": "zynts",
       "team": "RED Kalunga",
       "teamCode": "RED",
-      "rank": 614,
+      "rank": 556,
       "projection": 20,
       "verified": true,
       "league": "cblol",
