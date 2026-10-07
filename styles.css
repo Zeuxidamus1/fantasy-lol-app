@@ -541,3 +541,18 @@ body{background:
   .active-league-entry-actions{grid-template-columns:1fr}
   .active-league-entry-actions .bot-entry-btn{grid-column:auto}
 }
+
+
+/* Personal roster schedule */
+.schedule-title-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.schedule-title-actions .text-btn{white-space:nowrap}
+.my-schedule-link{color:#a995ff}
+.schedule-view-active{border-bottom:2px solid currentColor;padding-bottom:3px}
+.schedule-scope-copy{margin:-4px 0 0;color:#8095b1;font-size:11px;line-height:1.5}
+.roster-match{border-color:#28596a}
+.my-roster-team .team-mark{box-shadow:0 0 0 1px #2bd9b8 inset;background:#10342f;color:#58efd0}
+@media(max-width:430px){
+  .section-title:has(.schedule-title-actions){align-items:flex-start}
+  .schedule-title-actions{gap:7px}
+  .schedule-title-actions .text-btn{font-size:11px}
+}
