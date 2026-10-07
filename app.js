@@ -136,6 +136,9 @@ function playerEligibleForCompetition(player,competition){
   const code=normalizeCompetitionCode(competition);
   return !!code && playerCompetitionCodes(player).includes(code);
 }
+function playerIsDraftable(player){
+  return player?.draftable!==false && String(player?.rosterStatus||"starter").toLowerCase()!=="reserve";
+}
 function competitionHelpText(value){
   const code=normalizeCompetitionCode(value);
   const name=competitionName(code);
@@ -148,7 +151,7 @@ const draftPool = ((window.ESPORTS_DATA && window.ESPORTS_DATA.players) || []).m
 });
 function eligibleDraftPool(settings=getLeagueSettings()){
   const code=normalizeCompetitionCode(settings?.competition);
-  return draftPool.filter(p=>playerEligibleForCompetition(p,code));
+  return draftPool.filter(p=>playerEligibleForCompetition(p,code)&&playerIsDraftable(p));
 }
 
 const draftManagerNames = ["Baron Bandits","Zeuxidamus","Rift Raiders","Pentakill Club","Nexus Breakers","Blue Buff Boys","Dragon Slayers","Iron V","Red Side","First Blood","Scuttle Club","Elder Enjoyers"];
@@ -1557,13 +1560,14 @@ function render(view="home",options={}){
         const other=ownership&&!mine;
         const leagueCompetition=normalizeCompetitionCode(league?.settings?.competition)||"worlds";
         const eligible=playerEligibleForCompetition(p,leagueCompetition);
+        const draftable=playerIsDraftable(p);
 
-        document.querySelector("#profileStatus").textContent=mine?"On your roster":other?"Rostered by another manager":eligible?"Available":`Not eligible for ${competitionName(leagueCompetition)}`;
-        if(!eligible&&!mine&&!other){
+        document.querySelector("#profileStatus").textContent=mine?"On your roster":other?"Rostered by another manager":!eligible?`Not eligible for ${competitionName(leagueCompetition)}`:!draftable?"Reserve · Not currently draftable":"Available";
+        if((!eligible||!draftable)&&!mine&&!other){
           addBtn.disabled=true;
-          addBtn.textContent="Not Eligible";
+          addBtn.textContent=!eligible?"Not Eligible":"Reserve";
           waiverBtn.disabled=true;
-          waiverBtn.textContent="Not Eligible";
+          waiverBtn.textContent=!eligible?"Not Eligible":"Reserve";
           tradeBtn.disabled=true;
           return;
         }
