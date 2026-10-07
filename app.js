@@ -720,6 +720,23 @@ function eligibleFantasyPlayers(settings=getLeagueSettings()){
   const code=normalizeCompetitionCode(settings?.competition);
   return allFantasyPlayers().filter(p=>playerEligibleForCompetition(p,code));
 }
+function competitionCapacity(competition,bench=1){
+  const code=normalizeCompetitionCode(competition);
+  const benchCount=Math.max(0,Number(bench)||0);
+  const pool=allFantasyPlayers().filter(p=>playerEligibleForCompetition(p,code)&&playerIsDraftable(p));
+  const roleCounts=Object.fromEntries(["TOP","JNG","MID","ADC","SUP"].map(role=>[role,pool.filter(p=>p.role===role).length]));
+  const roleLimit=Math.min(...Object.values(roleCounts));
+  const rosterSize=6+benchCount;
+  const totalLimit=Math.floor(pool.length/rosterSize);
+  const maxManagers=Math.max(0,Math.min(10,roleLimit,totalLimit));
+  return {code,poolSize:pool.length,roleCounts,rosterSize,maxManagers};
+}
+function capacityMessage(competition,bench=1){
+  const cap=competitionCapacity(competition,bench);
+  const name=competitionName(cap.code);
+  if(cap.maxManagers<1)return `${name} is not open for fantasy drafting yet because there is no complete eligible player pool.`;
+  return `${name}: ${cap.poolSize} draftable players · up to ${cap.maxManagers} manager${cap.maxManagers===1?"":"s"} with ${Number(bench)||0} bench spot${Number(bench)===1?"":"s"}.`;
+}
 
 function watchlistIds(){
   try{return new Set(JSON.parse(storageGet("riftWatchlist")||"[]"));}catch{return new Set();}
@@ -2353,21 +2370,46 @@ function render(view="home",options={}){
       const teamInput=document.querySelector("#createTeamName");
       const createBtn=document.querySelector("#confirmCreateLeagueBtn");
       const defaults=getLeagueSettings();
-      competition.value=normalizeCompetitionCode(defaults.competition)||"worlds";
+      competition.value=normalizeCompetitionCode(defaults.competition)||"lcs";
+      if(competitionCapacity(competition.value,benchSelect.value).maxManagers<1)competition.value="lcs";
       const competitionHelp=document.querySelector("#createCompetitionHelp");
-      const updateCompetitionHelp=()=>{if(competitionHelp)competitionHelp.textContent=competitionHelpText(competition.value);};
-      competition.addEventListener("change",updateCompetitionHelp);
-      updateCompetitionHelp();
+      const capacityHelp=document.querySelector("#createManagerCapacityHelp");
+      const capacityCard=document.querySelector("#createPoolCapacity");
+      const updateCreateCapacity=()=>{
+        const cap=competitionCapacity(competition.value,benchSelect.value);
+        if(competitionHelp)competitionHelp.textContent=competitionHelpText(competition.value);
+        if(capacityHelp)capacityHelp.textContent=capacityMessage(competition.value,benchSelect.value);
+        if(capacityCard)capacityCard.innerHTML=cap.maxManagers
+          ? `<strong>${cap.maxManagers} max managers</strong><small>${cap.poolSize} eligible draftable players · ${cap.rosterSize} roster spots per team</small>`
+          : `<strong>Draft unavailable</strong><small>No complete eligible ${competitionName(competition.value)} player pool is available yet.</small>`;
+        document.querySelectorAll("[data-create-managers]").forEach(btn=>{
+          const value=Number(btn.dataset.createManagers);
+          btn.disabled=value>cap.maxManagers||cap.maxManagers<1;
+          btn.classList.toggle("capacity-disabled",btn.disabled);
+        });
+        const current=Number(managerSelect.value)||1;
+        if(cap.maxManagers>0&&current>cap.maxManagers)managerSelect.value=String(cap.maxManagers);
+        if(cap.maxManagers<1)managerSelect.value="";
+        document.querySelectorAll("[data-create-managers]").forEach(btn=>btn.classList.toggle("active",Number(btn.dataset.createManagers)===Number(managerSelect.value)));
+        createBtn.disabled=cap.maxManagers<1;
+      };
+      competition.addEventListener("change",updateCreateCapacity);
+      benchSelect.addEventListener("change",updateCreateCapacity);
       document.querySelectorAll("[data-create-managers]").forEach(btn=>btn.onclick=()=>{
+        if(btn.disabled)return;
         managerSelect.value=btn.dataset.createManagers;
         document.querySelectorAll("[data-create-managers]").forEach(x=>x.classList.toggle("active",x===btn));
       });
+      updateCreateCapacity();
 
       createBtn.onclick=async()=>{
         const name=nameInput.value.trim();
         const teamName=teamInput.value.trim();
         if(!name)return showToast("Enter a league name.");
         if(!teamName)return showToast("Enter your team name.");
+        const capacity=competitionCapacity(competition.value,benchSelect.value);
+        if(capacity.maxManagers<1)return showToast(`${competitionName(competition.value)} is not open for fantasy drafting yet.`);
+        if(Number(managerSelect.value)>capacity.maxManagers)return showToast(`This ${competitionName(competition.value)} league supports up to ${capacity.maxManagers} managers with the current roster size.`);
 
         const numberOr=(id,fallback)=>{const n=Number(document.querySelector(id).value);return Number.isFinite(n)?n:fallback;};
         const next={
@@ -2447,27 +2489,54 @@ function render(view="home",options={}){
 
   if(view==="bot-league"){
     const stored=(()=>{try{return JSON.parse(sessionStorage.getItem("riftBotLeagueSetup")||"{}");}catch{return {};}})();
-    let total=Number(stored.totalManagers)||8;
+    let total=Number(stored.totalManagers)||4;
     let humans=Number(stored.humanManagers)||1;
     let difficulty=stored.difficulty||"competitive";
+    const competition=document.querySelector("#botSetupCompetition");
+    competition.value=normalizeCompetitionCode(stored.competition)||"lcs";
+    if(competitionCapacity(competition.value,1).maxManagers<1)competition.value="lcs";
     const botCountEl=document.querySelector("#botManagerCount");
+    const capacityEl=document.querySelector("#botPoolCapacity");
+    const competitionHelp=document.querySelector("#botSetupCompetitionHelp");
+    const nextBtn=document.querySelector("#botSetupNext");
     const update=()=>{
-      humans=Math.min(humans,total);
-      document.querySelectorAll("[data-bot-size]").forEach(btn=>btn.classList.toggle("active",Number(btn.dataset.botSize)===total));
+      const cap=competitionCapacity(competition.value,1);
+      if(total>cap.maxManagers&&cap.maxManagers>0)total=cap.maxManagers;
+      if(cap.maxManagers<1)total=0;
+      humans=Math.min(humans,total||1);
+      document.querySelectorAll("[data-bot-size]").forEach(btn=>{
+        const value=Number(btn.dataset.botSize);
+        btn.disabled=value>cap.maxManagers||cap.maxManagers<1;
+        btn.classList.toggle("capacity-disabled",btn.disabled);
+        btn.classList.toggle("active",value===total);
+      });
       document.querySelectorAll("[data-human-count]").forEach(btn=>{
         const value=Number(btn.dataset.humanCount);
-        btn.disabled=value>total;
-        btn.classList.toggle("active",value===humans);
+        btn.disabled=value>total||total<1;
+        btn.classList.toggle("active",value===humans&&total>0);
       });
       document.querySelectorAll("[data-bot-difficulty]").forEach(btn=>btn.classList.toggle("active",btn.dataset.botDifficulty===difficulty));
       const bots=Math.max(0,total-humans);
-      botCountEl.textContent=`${bots} Bot Manager${bots===1?"":"s"}`;
+      botCountEl.textContent=total>0?`${bots} Bot Manager${bots===1?"":"s"}`:"No league size available";
+      if(competitionHelp)competitionHelp.textContent=capacityMessage(competition.value,1);
+      if(capacityEl)capacityEl.innerHTML=cap.maxManagers
+        ? `<strong>${cap.maxManagers} max managers</strong><small>${cap.poolSize} eligible draftable players · 7 roster spots per team</small>`
+        : `<strong>Draft unavailable</strong><small>${competitionName(competition.value)} does not have a complete eligible fantasy pool yet.</small>`;
+      nextBtn.disabled=cap.maxManagers<1||total<1;
     };
-    document.querySelectorAll("[data-bot-size]").forEach(btn=>btn.onclick=()=>{total=Number(btn.dataset.botSize);humans=Math.min(humans,total);update();});
-    document.querySelectorAll("[data-human-count]").forEach(btn=>btn.onclick=()=>{humans=Number(btn.dataset.humanCount);update();});
+    competition.addEventListener("change",update);
+    document.querySelectorAll("[data-bot-size]").forEach(btn=>btn.onclick=()=>{if(btn.disabled)return;total=Number(btn.dataset.botSize);humans=Math.min(humans,total);update();});
+    document.querySelectorAll("[data-human-count]").forEach(btn=>btn.onclick=()=>{if(btn.disabled)return;humans=Number(btn.dataset.humanCount);update();});
     document.querySelectorAll("[data-bot-difficulty]").forEach(btn=>btn.onclick=()=>{difficulty=btn.dataset.botDifficulty;update();});
-    document.querySelector("#botSetupNext").onclick=()=>{
-      sessionStorage.setItem("riftBotLeagueSetup",JSON.stringify({totalManagers:total,humanManagers:humans,difficulty}));
+    nextBtn.onclick=()=>{
+      const cap=competitionCapacity(competition.value,1);
+      if(total<1||total>cap.maxManagers)return showToast("Choose an available league size.");
+      sessionStorage.setItem("riftBotLeagueSetup",JSON.stringify({
+        totalManagers:total,
+        humanManagers:humans,
+        difficulty,
+        competition:normalizeCompetitionCode(competition.value)||"lcs"
+      }));
       render("bot-settings");
     };
     update();
@@ -2477,13 +2546,6 @@ function render(view="home",options={}){
     const setup=(()=>{try{return JSON.parse(sessionStorage.getItem("riftBotLeagueSetup")||"{}");}catch{return {};}})();
     if(!setup.totalManagers)return render("bot-league",{replace:true});
     let timer=30;
-    const botCompetition=document.querySelector("#botCompetition");
-    const storedConfig=(()=>{try{return JSON.parse(sessionStorage.getItem("riftBotLeagueSettings")||"{}");}catch{return {};}})();
-    if(botCompetition)botCompetition.value=normalizeCompetitionCode(storedConfig.competition)||"worlds";
-    const botCompetitionHelp=document.querySelector("#botCompetitionHelp");
-    const updateBotCompetitionHelp=()=>{if(botCompetitionHelp&&botCompetition)botCompetitionHelp.textContent=competitionHelpText(botCompetition.value);};
-    botCompetition?.addEventListener("change",updateBotCompetitionHelp);
-    updateBotCompetitionHelp();
     document.querySelectorAll("[data-bot-timer]").forEach(btn=>btn.onclick=()=>{
       timer=Number(btn.dataset.botTimer);
       document.querySelectorAll("[data-bot-timer]").forEach(x=>x.classList.toggle("active",x===btn));
@@ -2495,7 +2557,7 @@ function render(view="home",options={}){
       if(!teamName)return showToast("Enter your team name.");
       sessionStorage.setItem("riftBotLeagueSettings",JSON.stringify({
         name,teamName,draftTimer:timer,
-        competition:normalizeCompetitionCode(document.querySelector("#botCompetition").value)||"worlds",
+        competition:normalizeCompetitionCode(setup.competition)||"lcs",
         waivers:document.querySelector("#botWaivers").checked,
         trades:document.querySelector("#botTrades").checked,
         autoBotLineups:document.querySelector("#botAutoLineups").checked
@@ -2587,6 +2649,16 @@ function render(view="home",options={}){
       document.querySelector("#scoreCs").value=settings.scoring.cs;
       document.querySelector("#scoreWin").value=settings.scoring.win;
       document.querySelector("#scoreFb").value=settings.scoring.firstBlood;
+      const applyCapacity=()=>{
+        const cap=competitionCapacity(competitionSelect.value,document.querySelector("#benchCount").value);
+        const help=document.querySelector("#managerCapacityHelp");
+        if(help)help.textContent=capacityMessage(competitionSelect.value,document.querySelector("#benchCount").value);
+        [...managerSelect.options].forEach(option=>{option.disabled=Number(option.value)>cap.maxManagers||cap.maxManagers<1;});
+        if(cap.maxManagers>0&&Number(managerSelect.value)>cap.maxManagers)managerSelect.value=String(cap.maxManagers);
+      };
+      competitionSelect.onchange=applyCapacity;
+      document.querySelector("#benchCount").onchange=applyCapacity;
+      applyCapacity();
     };
 
     (async()=>{
@@ -2677,6 +2749,9 @@ function render(view="home",options={}){
 
       document.querySelector("#saveLeagueBtn").onclick=async()=>{
         const numberOr=(id,fallback)=>{const n=Number(document.querySelector(id).value);return Number.isFinite(n)?n:fallback;};
+        const capacity=competitionCapacity(document.querySelector("#competition").value,document.querySelector("#benchCount").value);
+        if(capacity.maxManagers<1)return showToast(`${competitionName(document.querySelector("#competition").value)} is not open for fantasy drafting yet.`);
+        if(Number(document.querySelector("#managerCount").value)>capacity.maxManagers)return showToast(`This competition supports up to ${capacity.maxManagers} managers with the current roster size.`);
         const next={
           name:document.querySelector("#leagueName").value.trim()||"Fantasy League",
           managers:document.querySelector("#managerCount").value,
