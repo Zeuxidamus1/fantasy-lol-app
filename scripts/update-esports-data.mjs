@@ -148,62 +148,138 @@ async function fetchAllSchedule() {
   return deduped.slice(0,200);
 }
 
-async function fetchLeaguesAndPlayers(existing) {
-  const leaguesPayload = await api("getLeagues");
-  const leagues = leaguesPayload?.data?.leagues || [];
-  const selected = leagues.filter(l => canonicalCompetition(l));
-
-  const oldByKey = new Map((existing.players||[]).map(p=>[`${clean(p.name).toLowerCase()}|${clean(p.team).toLowerCase()}`, p]));
-  const players = [];
-  const playerByKey = new Map();
-
-  for (const league of selected.slice(0,18)) {
-    try {
-      const payload = await api("getTeams", {id: league.id});
-      const teams = payload?.data?.teams || [];
-      for (const team of teams) {
-        const teamName = clean(team.name || team.code || "Unknown");
-        for (const p of (team.players || [])) {
-          const role = normalizeRole(p.role);
-          const name = clean(p.summonerName || p.name);
-          if (!role || !name) continue;
-          const key = `${name.toLowerCase()}|${teamName.toLowerCase()}`;
-          const competition=canonicalCompetition(league);
-          if (!competition) continue;
-          const existingPlayer=playerByKey.get(key);
-          if (existingPlayer) {
-            if (!existingPlayer.competitions.includes(competition.code)) existingPlayer.competitions.push(competition.code);
-            continue;
-          }
-          const old = oldByKey.get(key);
-          const record={
-            id: clean(p.id || `${team.code||codeFor(teamName)}-${name}`).toLowerCase().replace(/[^a-z0-9]+/g,"-"),
-            role,
-            name,
-            team: teamName,
-            teamCode: clean(team.code || codeFor(teamName)),
-            rank: 999,
-            projection: Number(old?.projection ?? old?.fp ?? 20),
-            verified: true,
-            league: competition.code,
-            competitions: [competition.code]
-          };
-          playerByKey.set(key,record);
-          players.push(record);
-        }
+async function fetchCompetitionTeamKeys(league) {
+  const keys=new Set();
+  const seenTokens=new Set();
+  const collect=schedule=>{
+    for (const event of (schedule?.events||[])) {
+      if (event?.type!=="match" || !event?.match) continue;
+      for (const team of (event.match.teams||[])) {
+        const name=clean(team?.name||team?.team?.name);
+        const code=clean(team?.code||team?.team?.code);
+        if (name) keys.add("name:"+name.toLowerCase());
+        if (code) keys.add("code:"+code.toLowerCase());
       }
-    } catch (err) {
-      console.warn(`Skipping teams for ${league.name}: ${err.message}`);
+    }
+  };
+
+  try {
+    const first=await api("getSchedule",{leagueId:league.id});
+    const schedule=first?.data?.schedule||{};
+    collect(schedule);
+
+    // Walk both directions so offseason leagues still resolve their most recent
+    // participants instead of returning an empty roster.
+    for (const direction of ["older","newer"]) {
+      let token=schedule?.pages?.[direction]||null;
+      for (let i=0;i<8 && token && !seenTokens.has(direction+":"+token);i++) {
+        seenTokens.add(direction+":"+token);
+        const page=await api("getSchedule",{leagueId:league.id,pageToken:token});
+        const next=page?.data?.schedule||{};
+        collect(next);
+        token=next?.pages?.[direction]||null;
+      }
+    }
+  } catch (err) {
+    console.warn(`Could not resolve team list for ${league.name}: ${err.message}`);
+  }
+  return keys;
+}
+
+function teamDirectoryKeys(team) {
+  const keys=new Set();
+  const name=clean(team?.name);
+  const code=clean(team?.code);
+  const slug=clean(team?.slug);
+  if(name)keys.add("name:"+name.toLowerCase());
+  if(code)keys.add("code:"+code.toLowerCase());
+  if(slug)keys.add("slug:"+slug.toLowerCase());
+  return keys;
+}
+
+async function fetchLeaguesAndPlayers(existing) {
+  const leaguesPayload=await api("getLeagues");
+  const leagues=leaguesPayload?.data?.leagues||[];
+  const selected=leagues.filter(l=>canonicalCompetition(l));
+
+  const competitionTeamKeys=new Map();
+  for (const league of selected) {
+    const competition=canonicalCompetition(league);
+    if(!competition)continue;
+    const keys=await fetchCompetitionTeamKeys(league);
+    const current=competitionTeamKeys.get(competition.code)||new Set();
+    for(const key of keys)current.add(key);
+    competitionTeamKeys.set(competition.code,current);
+  }
+
+  let allTeams=[];
+  try {
+    const payload=await api("getTeams");
+    allTeams=payload?.data?.teams||[];
+  } catch (err) {
+    console.warn(`Could not fetch the LoL Esports team directory: ${err.message}`);
+  }
+
+  const oldByKey=new Map((existing.players||[]).map(p=>[`${clean(p.name).toLowerCase()}|${clean(p.team).toLowerCase()}`,p]));
+  const players=[];
+  const playerByKey=new Map();
+
+  for (const team of allTeams) {
+    const teamName=clean(team.name||team.code||"Unknown");
+    const teamCode=clean(team.code||codeFor(teamName));
+    const directoryKeys=teamDirectoryKeys(team);
+    const competitions=[];
+
+    for (const competition of COMPETITIONS) {
+      const eligibleKeys=competitionTeamKeys.get(competition.code);
+      if(!eligibleKeys)continue;
+      const matched=[...directoryKeys].some(key=>eligibleKeys.has(key))
+        || eligibleKeys.has("name:"+teamName.toLowerCase())
+        || eligibleKeys.has("code:"+teamCode.toLowerCase());
+      if(matched)competitions.push(competition.code);
+    }
+
+    if(!competitions.length)continue;
+
+    for (const p of (team.players||[])) {
+      const role=normalizeRole(p.role);
+      const name=clean(p.summonerName||p.name);
+      if(!role||!name)continue;
+      const key=`${name.toLowerCase()}|${teamName.toLowerCase()}`;
+      const existingPlayer=playerByKey.get(key);
+      if(existingPlayer){
+        for(const code of competitions){
+          if(!existingPlayer.competitions.includes(code))existingPlayer.competitions.push(code);
+        }
+        continue;
+      }
+      const old=oldByKey.get(key);
+      const record={
+        id:clean(p.id||`${teamCode}-${name}`).toLowerCase().replace(/[^a-z0-9]+/g,"-"),
+        role,
+        name,
+        team:teamName,
+        teamCode,
+        rank:999,
+        projection:Number(old?.projection??old?.fp??20),
+        verified:true,
+        league:competitions[0],
+        competitions:[...competitions]
+      };
+      playerByKey.set(key,record);
+      players.push(record);
     }
   }
 
-  // Keep stable fantasy ordering, but prefer any previously established rank.
   players.sort((a,b)=>{
-    const aOld = oldByKey.get(`${a.name.toLowerCase()}|${a.team.toLowerCase()}`);
-    const bOld = oldByKey.get(`${b.name.toLowerCase()}|${b.team.toLowerCase()}`);
-    return Number(aOld?.rank ?? 999) - Number(bOld?.rank ?? 999) || b.projection-a.projection || a.name.localeCompare(b.name);
+    const aOld=oldByKey.get(`${a.name.toLowerCase()}|${a.team.toLowerCase()}`);
+    const bOld=oldByKey.get(`${b.name.toLowerCase()}|${b.team.toLowerCase()}`);
+    return Number(aOld?.rank??999)-Number(bOld?.rank??999)
+      || b.projection-a.projection
+      || a.name.localeCompare(b.name);
   });
   players.forEach((p,i)=>p.rank=i+1);
+
   return {
     leagues:selected.map(l=>{
       const competition=canonicalCompetition(l);
@@ -224,15 +300,15 @@ const [schedule, rosterData] = await Promise.all([
 
 if (schedule.length < 1) throw new Error("No schedule events returned; refusing to overwrite good schedule data.");
 
-const refreshedPlayers = rosterData.players.length >= 10
+const refreshedPlayers = rosterData.players.length >= 40
   ? rosterData.players
   : (existing.players || []);
 const refreshedLeagues = rosterData.leagues.length
   ? rosterData.leagues
   : (existing.leagues || []);
 
-if (rosterData.players.length < 10) {
-  console.warn(`Only ${rosterData.players.length} players returned by the roster endpoint; preserving the existing player pool while still refreshing the official schedule.`);
+if (rosterData.players.length < 40) {
+  console.warn(`Only ${rosterData.players.length} eligible Tier 1 players were resolved; preserving the existing player pool while still refreshing the official schedule.`);
 }
 
 const next = {
