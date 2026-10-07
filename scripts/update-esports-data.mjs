@@ -212,6 +212,9 @@ async function fetchLeaguesAndPlayers(existing) {
     console.warn(`Could not fetch the LoL Esports team directory: ${err.message}`);
   }
 
+  const sampleTeam=allTeams.find(t=>clean(t.name)==="T1")||allTeams[0];
+  if(sampleTeam)console.log("TEAM_PAYLOAD_SAMPLE "+JSON.stringify(sampleTeam));
+
   const oldByKey=new Map((existing.players||[]).map(p=>[`${clean(p.name).toLowerCase()}|${clean(p.team).toLowerCase()}`,p]));
   const players=[];
   const playerByKey=new Map();
