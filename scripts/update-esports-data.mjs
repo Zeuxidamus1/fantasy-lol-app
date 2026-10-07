@@ -65,6 +65,9 @@ async function api(path, params = {}) {
 }
 
 function clean(s) { return String(s ?? "").trim(); }
+function teamMatchKey(s) {
+  return clean(s).toLowerCase().replace(/[^a-z0-9]/g,"");
+}
 function codeFor(name) {
   const words = clean(name).replace(/[^A-Za-z0-9 ]/g," ").split(/\s+/).filter(Boolean);
   if (!words.length) return "TBD";
@@ -158,9 +161,7 @@ async function fetchCompetitionTeamKeys(league) {
       if(!Number.isFinite(eventDate.getTime()) || eventDate.getUTCFullYear()!==2026) continue;
       for (const team of (event.match.teams||[])) {
         const name=clean(team?.name||team?.team?.name);
-        const code=clean(team?.code||team?.team?.code);
-        if (name) keys.add("name:"+name.toLowerCase());
-        if (code) keys.add("code:"+code.toLowerCase());
+        if (name) keys.add(teamMatchKey(name));
       }
     }
   };
@@ -185,17 +186,6 @@ async function fetchCompetitionTeamKeys(league) {
   } catch (err) {
     console.warn(`Could not resolve team list for ${league.name}: ${err.message}`);
   }
-  return keys;
-}
-
-function teamDirectoryKeys(team) {
-  const keys=new Set();
-  const name=clean(team?.name);
-  const code=clean(team?.code);
-  const slug=clean(team?.slug);
-  if(name)keys.add("name:"+name.toLowerCase());
-  if(code)keys.add("code:"+code.toLowerCase());
-  if(slug)keys.add("slug:"+slug.toLowerCase());
   return keys;
 }
 
@@ -225,20 +215,17 @@ async function fetchLeaguesAndPlayers(existing) {
   const oldByKey=new Map((existing.players||[]).map(p=>[`${clean(p.name).toLowerCase()}|${clean(p.team).toLowerCase()}`,p]));
   const players=[];
   const playerByKey=new Map();
+  const playerById=new Map();
 
   for (const team of allTeams) {
     const teamName=clean(team.name||team.code||"Unknown");
     const teamCode=clean(team.code||codeFor(teamName));
-    const directoryKeys=teamDirectoryKeys(team);
+    const teamKey=teamMatchKey(teamName);
     const competitions=[];
 
     for (const competition of COMPETITIONS) {
       const eligibleKeys=competitionTeamKeys.get(competition.code);
-      if(!eligibleKeys)continue;
-      const matched=[...directoryKeys].some(key=>eligibleKeys.has(key))
-        || eligibleKeys.has("name:"+teamName.toLowerCase())
-        || eligibleKeys.has("code:"+teamCode.toLowerCase());
-      if(matched)competitions.push(competition.code);
+      if(eligibleKeys?.has(teamKey))competitions.push(competition.code);
     }
 
     if(!competitions.length)continue;
@@ -248,16 +235,23 @@ async function fetchLeaguesAndPlayers(existing) {
       const name=clean(p.summonerName||p.name);
       if(!role||!name)continue;
       const key=`${name.toLowerCase()}|${teamName.toLowerCase()}`;
-      const existingPlayer=playerByKey.get(key);
+      const stableId=clean(p.id||`${teamCode}-${name}`).toLowerCase().replace(/[^a-z0-9]+/g,"-");
+      const existingPlayer=playerById.get(stableId)||playerByKey.get(key);
       if(existingPlayer){
         for(const code of competitions){
           if(!existingPlayer.competitions.includes(code))existingPlayer.competitions.push(code);
         }
+        // Prefer the Tier 1 team record currently being processed over any
+        // duplicate directory alias for the same Riot player identity.
+        existingPlayer.name=name;
+        existingPlayer.team=teamName;
+        existingPlayer.teamCode=teamCode;
+        existingPlayer.role=role;
         continue;
       }
       const old=oldByKey.get(key);
       const record={
-        id:clean(p.id||`${teamCode}-${name}`).toLowerCase().replace(/[^a-z0-9]+/g,"-"),
+        id:stableId,
         role,
         name,
         team:teamName,
@@ -269,6 +263,7 @@ async function fetchLeaguesAndPlayers(existing) {
         competitions:[...competitions]
       };
       playerByKey.set(key,record);
+      playerById.set(stableId,record);
       players.push(record);
     }
   }
