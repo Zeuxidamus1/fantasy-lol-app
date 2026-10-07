@@ -154,6 +154,8 @@ async function fetchCompetitionTeamKeys(league) {
   const collect=schedule=>{
     for (const event of (schedule?.events||[])) {
       if (event?.type!=="match" || !event?.match) continue;
+      const eventDate=new Date(event.startTime||"");
+      if(!Number.isFinite(eventDate.getTime()) || eventDate.getUTCFullYear()!==2026) continue;
       for (const team of (event.match.teams||[])) {
         const name=clean(team?.name||team?.team?.name);
         const code=clean(team?.code||team?.team?.code);
