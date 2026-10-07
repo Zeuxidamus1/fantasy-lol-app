@@ -212,9 +212,6 @@ async function fetchLeaguesAndPlayers(existing) {
     console.warn(`Could not fetch the LoL Esports team directory: ${err.message}`);
   }
 
-  const sampleTeam=allTeams.find(t=>clean(t.name)==="T1")||allTeams[0];
-  if(sampleTeam)console.log("TEAM_PAYLOAD_SAMPLE "+JSON.stringify(sampleTeam));
-
   const oldByKey=new Map((existing.players||[]).map(p=>[`${clean(p.name).toLowerCase()}|${clean(p.team).toLowerCase()}`,p]));
   const players=[];
   const playerByKey=new Map();
@@ -233,8 +230,14 @@ async function fetchLeaguesAndPlayers(existing) {
 
     if(!competitions.length)continue;
 
-    const seenStartingRoles=new Set();
-    for (const p of (team.players||[])) {
+    const teamPlayers=Array.isArray(team.players)?team.players:[];
+    const lastRoleIndex=new Map();
+    teamPlayers.forEach((candidate,index)=>{
+      const candidateRole=normalizeRole(candidate?.role);
+      if(candidateRole)lastRoleIndex.set(candidateRole,index);
+    });
+    for (let playerIndex=0; playerIndex<teamPlayers.length; playerIndex++) {
+      const p=teamPlayers[playerIndex];
       const role=normalizeRole(p.role);
       const name=clean(p.summonerName||p.name);
       if(!role||!name)continue;
@@ -251,17 +254,15 @@ async function fetchLeaguesAndPlayers(existing) {
         existingPlayer.team=teamName;
         existingPlayer.teamCode=teamCode;
         existingPlayer.role=role;
-        const isStarter=!seenStartingRoles.has(role);
+        const isStarter=lastRoleIndex.get(role)===playerIndex;
         if(isStarter){
-          seenStartingRoles.add(role);
           existingPlayer.draftable=true;
           existingPlayer.rosterStatus="starter";
         }
         continue;
       }
       const old=oldByKey.get(key);
-      const isStarter=!seenStartingRoles.has(role);
-      if(isStarter)seenStartingRoles.add(role);
+      const isStarter=lastRoleIndex.get(role)===playerIndex;
       const record={
         id:stableId,
         role,
