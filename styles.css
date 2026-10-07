@@ -556,3 +556,24 @@ body{background:
   .schedule-title-actions{gap:7px}
   .schedule-title-actions .text-btn{font-size:11px}
 }
+
+
+/* Dynamic player-pool capacity */
+.pool-capacity-card{
+  margin-top:10px;
+  padding:12px 14px;
+  border:1px solid rgba(36,231,195,.18);
+  border-radius:12px;
+  background:rgba(36,231,195,.05);
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.pool-capacity-card strong{font-size:13px;color:var(--rf-teal,#24e7c3)}
+.pool-capacity-card small{font-size:11px;line-height:1.45;color:#8ca2bd}
+.number-choice.capacity-disabled,
+.number-choice:disabled{
+  opacity:.28;
+  cursor:not-allowed;
+  filter:saturate(.45);
+}
