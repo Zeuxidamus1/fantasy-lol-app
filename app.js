@@ -60,10 +60,96 @@ function localScheduleRow(g){
     time:timestamp?d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}):(g.time||"TBD")
   };
 }
+const COMPETITION_META = Object.freeze({
+  lcs:{name:"LCS",type:"regional",region:"North America"},
+  cblol:{name:"CBLOL",type:"regional",region:"Brazil"},
+  lec:{name:"LEC",type:"regional",region:"EMEA"},
+  lck:{name:"LCK",type:"regional",region:"Korea"},
+  lpl:{name:"LPL",type:"regional",region:"China"},
+  lcp:{name:"LCP",type:"regional",region:"Asia Pacific"},
+  first_stand:{name:"First Stand",type:"international",region:"International"},
+  msi:{name:"MSI",type:"international",region:"International"},
+  worlds:{name:"Worlds",type:"international",region:"International"}
+});
+
+function normalizeCompetitionCode(value){
+  const raw=String(value||"worlds").trim().toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");
+  const aliases={
+    "world_championship":"worlds","worlds":"worlds",
+    "mid_season_invitational":"msi","mid_season":"msi","msi":"msi",
+    "firststand":"first_stand","first_stand":"first_stand",
+    "cblol_brazil":"cblol","cblol":"cblol",
+    "lta":"lcs","lta_n":"lcs","lta_s":"cblol","lta_cross":"lcs",
+    "lcs":"lcs","lec":"lec","lck":"lck","lpl":"lpl","lcp":"lcp"
+  };
+  return aliases[raw] || (COMPETITION_META[raw]?raw:null);
+}
+function competitionName(value){
+  const code=normalizeCompetitionCode(value);
+  return COMPETITION_META[code]?.name || String(value||"Worlds");
+}
+function competitionType(value){
+  const code=normalizeCompetitionCode(value);
+  return COMPETITION_META[code]?.type || "international";
+}
+function scheduleCompetitionCode(game){
+  return normalizeCompetitionCode(game?.leagueCode||game?.league||"");
+}
+function normalizeTeamKey(value){return String(value||"").toLowerCase().replace(/[^a-z0-9]/g,"");}
+
+// Transitional eligibility for the small legacy snapshot. Fresh roster refreshes attach
+// competition codes directly to each player and supersede these mappings.
+const LEGACY_TEAM_COMPETITIONS=Object.freeze({
+  "flyquest":["lcs"],
+  "sentinels":["lcs"],
+  "lyon":["lcs","first_stand","msi","worlds"],
+  "gengesports":["lck","first_stand","worlds"],
+  "geng":["lck","first_stand","worlds"],
+  "t1":["lck","msi","worlds"]
+});
+function playerCompetitionCodes(player){
+  const codes=new Set();
+  const values=[
+    ...(Array.isArray(player?.competitions)?player.competitions:[]),
+    player?.competition,
+    player?.league
+  ];
+  for(const value of values){
+    const code=normalizeCompetitionCode(value);
+    if(code)codes.add(code);
+  }
+  for(const code of (LEGACY_TEAM_COMPETITIONS[normalizeTeamKey(player?.team)]||[]))codes.add(code);
+  const teamName=normalizeTeamKey(player?.team);
+  const teamCode=normalizeTeamKey(player?.teamCode);
+  if(teamName||teamCode){
+    for(const game of proSchedule){
+      const teams=[normalizeTeamKey(game?.a),normalizeTeamKey(game?.aCode),normalizeTeamKey(game?.b),normalizeTeamKey(game?.bCode)];
+      if((teamName&&teams.includes(teamName))||(teamCode&&teams.includes(teamCode))){
+        const code=scheduleCompetitionCode(game);
+        if(code)codes.add(code);
+      }
+    }
+  }
+  return [...codes];
+}
+function playerEligibleForCompetition(player,competition){
+  const code=normalizeCompetitionCode(competition);
+  return !!code && playerCompetitionCodes(player).includes(code);
+}
+function competitionHelpText(value){
+  const code=normalizeCompetitionCode(value);
+  const name=competitionName(code);
+  return `Only players eligible for ${name} can be drafted, added as free agents, or claimed on waivers. ${name} games are the scoring scope for this league.`;
+}
+
 const draftPool = ((window.ESPORTS_DATA && window.ESPORTS_DATA.players) || []).map(p=>{
   const n=Number(p.projection??p.fp??20);
   return {...p,fp:Number.isFinite(n)?n:20};
 });
+function eligibleDraftPool(settings=getLeagueSettings()){
+  const code=normalizeCompetitionCode(settings?.competition);
+  return draftPool.filter(p=>playerEligibleForCompetition(p,code));
+}
 
 const draftManagerNames = ["Baron Bandits","Zeuxidamus","Rift Raiders","Pentakill Club","Nexus Breakers","Blue Buff Boys","Dragon Slayers","Iron V","Red Side","First Blood","Scuttle Club","Elder Enjoyers"];
 let draftTimerId=null;
@@ -133,8 +219,9 @@ function canDraftPlayer(state,managerIndex,player){
 function bestAvailableDraftPlayer(state,managerIndex=draftOrderForPick(state.pickIndex,state.managerCount)){
   const taken=new Set(state.picks.map(p=>p.playerId));
   const needs=rosterNeedsForManager(state,managerIndex);
-  return draftPool.find(p=>!taken.has(p.id)&&canDraftPlayer(state,managerIndex,p)&&(needs.length===0||needs.includes(p.role)))
-      || draftPool.find(p=>!taken.has(p.id)&&canDraftPlayer(state,managerIndex,p));
+  const pool=eligibleDraftPool();
+  return pool.find(p=>!taken.has(p.id)&&canDraftPlayer(state,managerIndex,p)&&(needs.length===0||needs.includes(p.role)))
+      || pool.find(p=>!taken.has(p.id)&&canDraftPlayer(state,managerIndex,p));
 }
 
 function makeDraftPick(state,player,managerIndex){
@@ -143,13 +230,13 @@ function makeDraftPick(state,player,managerIndex){
   state.seconds=30;
   const settings=getLeagueSettings();
   const rounds=6+Number(settings.bench||3);
-  state.complete=state.pickIndex>=Math.min(rounds*state.managerCount,draftPool.length);
+  state.complete=state.pickIndex>=Math.min(rounds*state.managerCount,eligibleDraftPool().length);
   saveDraftState(state);
 }
 
 function runCpuPicks(state){
   let guard=0;
-  const maxSteps=Math.max(50,draftPool.length+state.managerCount*2);
+  const maxSteps=Math.max(50,eligibleDraftPool().length+state.managerCount*2);
   while(state.started&&!state.complete&&draftOrderForPick(state.pickIndex,state.managerCount)!==state.userIndex&&guard<maxSteps){
     const managerIndex=draftOrderForPick(state.pickIndex,state.managerCount);
     const p=bestAvailableDraftPlayer(state,managerIndex);
@@ -166,7 +253,9 @@ const defaultLeagueSettings = {
   bench:"1",
   draftType:"Snake",
   scoringFormat:"Head-to-head",
-  competition:"Worlds",
+  competition:"worlds",
+  competitionSeason:2026,
+  competitionType:"international",
   teamSlot:false,
   scoring:{kills:3,deaths:-1,assists:2,cs:0.02,win:5,firstBlood:2}
 };
@@ -174,9 +263,13 @@ const defaultLeagueSettings = {
 function getLeagueSettings(){
   try{
     const saved=JSON.parse(storageGet("riftLeagueSettings")||"{}")||{};
+    const competition=normalizeCompetitionCode(saved.competition||defaultLeagueSettings.competition)||"worlds";
     return {
       ...defaultLeagueSettings,
       ...saved,
+      competition,
+      competitionSeason:Number(saved.competitionSeason)||2026,
+      competitionType:competitionType(competition),
       draftType:"Snake",
       teamSlot:false,
       scoringFormat:"Head-to-head",
@@ -619,6 +712,10 @@ function openDropChooser(incoming){
 
 function allFantasyPlayers(){
   return ((window.ESPORTS_DATA&&window.ESPORTS_DATA.players)||[]).map(p=>({...p,fp:Number(p.projection??p.fp??0)}));
+}
+function eligibleFantasyPlayers(settings=getLeagueSettings()){
+  const code=normalizeCompetitionCode(settings?.competition);
+  return allFantasyPlayers().filter(p=>playerEligibleForCompetition(p,code));
 }
 
 function watchlistIds(){
@@ -2025,7 +2122,7 @@ function render(view="home",options={}){
       <div><span>Teams</span><strong>${settings.managers}</strong></div>
       <div><span>Draft</span><strong>${settings.draftType}</strong></div>
       <div><span>Scoring</span><strong>${settings.scoringFormat}</strong></div>
-      <div><span>Competition</span><strong>${settings.competition}</strong></div>
+      <div><span>Competition</span><strong>${competitionName(settings.competition)}</strong></div>
       <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP · FLEX · ${settings.bench} BN</strong></div>`;
     const signedScore=value=>{
       const n=Number(value);
@@ -2158,7 +2255,7 @@ function render(view="home",options={}){
         const missingRoleSet=new Set(draftValidation.missingStarterPositions);
         const mustFillMissingRole=picksRemaining<=missingRoleSet.size;
 
-        const filtered=draftPool.filter(p=>!taken.has(String(p.id))&&(role==="ALL"||p.role===role)&&(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)));
+        const filtered=eligibleDraftPool(activeDraftSettings).filter(p=>!taken.has(String(p.id))&&(role==="ALL"||p.role===role)&&(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)));
         list.innerHTML=filtered.map(p=>{
           const blockedForCompletion=myTurn&&mustFillMissingRole&&!missingRoleSet.has(p.role);
           const disabled=!myTurn||blockedForCompletion;
