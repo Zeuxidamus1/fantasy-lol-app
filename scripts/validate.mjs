@@ -46,7 +46,11 @@ const routeTargets=new Set([
   ...[...html.matchAll(/data-view="([^"]+)"/g)].map(m=>m[1]),
   ...[...html.matchAll(/data-jump="([^"]+)"/g)].map(m=>m[1])
 ]);
-for(const target of routeTargets) check(templates.has(target),`route target has template: ${target}`);
+const routeTemplateAliases=new Map([["my-schedule","schedule"]]);
+for(const target of routeTargets){
+  const templateTarget=routeTemplateAliases.get(target)||target;
+  check(templates.has(templateTarget),`route target has template: ${target}`);
+}
 
 const localAssetPath=value=>String(value||"").split(/[?#]/,1)[0];
 for(const src of [...html.matchAll(/<script\s+src="([^"]+)"/g)].map(m=>m[1])){
