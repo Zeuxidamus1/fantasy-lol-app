@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-07T15:51:47.681Z",
+  "updatedAt": "2026-10-07T15:52:45.403Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -1180,8 +1180,8 @@ window.ESPORTS_DATA = {
       "projection": 24.4,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -1198,8 +1198,8 @@ window.ESPORTS_DATA = {
       "projection": 26.7,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -1216,8 +1216,8 @@ window.ESPORTS_DATA = {
       "projection": 28.6,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -1234,8 +1234,8 @@ window.ESPORTS_DATA = {
       "projection": 29.7,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -1252,8 +1252,8 @@ window.ESPORTS_DATA = {
       "projection": 22.8,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -1270,8 +1270,8 @@ window.ESPORTS_DATA = {
       "projection": 25,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -1288,8 +1288,8 @@ window.ESPORTS_DATA = {
       "projection": 31.2,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -1306,8 +1306,8 @@ window.ESPORTS_DATA = {
       "projection": 36.7,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -1324,8 +1324,8 @@ window.ESPORTS_DATA = {
       "projection": 30.1,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -1342,8 +1342,8 @@ window.ESPORTS_DATA = {
       "projection": 19.8,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -1640,8 +1640,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lpl",
       "competitions": [
         "lpl",
@@ -1692,8 +1692,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -1726,8 +1726,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -1743,8 +1743,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -1777,8 +1777,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -1794,8 +1794,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lpl",
       "competitions": [
         "lpl",
@@ -1812,8 +1812,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lcs",
       "competitions": [
         "lcs"
@@ -1863,8 +1863,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lpl",
       "competitions": [
         "lpl"
@@ -1932,8 +1932,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -1985,8 +1985,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lpl",
       "competitions": [
         "lpl",
@@ -2021,8 +2021,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -2073,8 +2073,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lec",
       "competitions": [
         "lec"
@@ -2126,8 +2126,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -2143,8 +2143,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lpl",
       "competitions": [
         "lpl"
@@ -2230,8 +2230,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -2318,8 +2318,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -2335,8 +2335,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -2353,8 +2353,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -2387,8 +2387,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -2455,8 +2455,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -2473,8 +2473,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -2491,8 +2491,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -2508,8 +2508,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -2560,8 +2560,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -2578,8 +2578,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -2631,8 +2631,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lpl",
       "competitions": [
         "lpl"
@@ -2699,8 +2699,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -2716,8 +2716,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -2733,8 +2733,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -2786,8 +2786,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -2820,8 +2820,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -2838,8 +2838,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lcs",
       "competitions": [
         "lcs"
@@ -2855,8 +2855,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -2908,8 +2908,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -2925,8 +2925,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -2961,8 +2961,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -2995,8 +2995,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lcp",
       "competitions": [
         "lcp"
@@ -3012,8 +3012,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -3083,8 +3083,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -3134,8 +3134,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lec",
       "competitions": [
         "lec"
@@ -3322,8 +3322,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -3339,8 +3339,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lec",
       "competitions": [
         "lec"
@@ -3373,8 +3373,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lec",
       "competitions": [
         "lec"
@@ -3390,8 +3390,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lpl",
       "competitions": [
         "lpl",
@@ -3444,8 +3444,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -3461,8 +3461,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -3478,8 +3478,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -3512,8 +3512,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -3547,8 +3547,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -3564,8 +3564,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -3581,8 +3581,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -3615,8 +3615,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -3633,8 +3633,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -3669,8 +3669,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -3687,8 +3687,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lcp",
       "competitions": [
         "lcp"
@@ -3704,8 +3704,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -3793,8 +3793,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -3880,8 +3880,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lpl",
       "competitions": [
         "lpl",
@@ -3898,8 +3898,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lcp",
       "competitions": [
         "lcp",
@@ -3950,8 +3950,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lec",
       "competitions": [
         "lec"
@@ -3984,8 +3984,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -4001,8 +4001,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lec",
       "competitions": [
         "lec"
@@ -4018,8 +4018,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lec",
       "competitions": [
         "lec"
@@ -4052,8 +4052,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -4105,8 +4105,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -4122,8 +4122,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -4139,8 +4139,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -4156,8 +4156,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lpl",
       "competitions": [
         "lpl"
@@ -4208,8 +4208,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -4225,8 +4225,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -4346,8 +4346,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lpl",
       "competitions": [
         "lpl",
@@ -4364,8 +4364,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lpl",
       "competitions": [
         "lpl"
@@ -4449,8 +4449,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -4467,8 +4467,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -4502,8 +4502,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol",
@@ -4520,8 +4520,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -4537,8 +4537,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -4555,8 +4555,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -4607,8 +4607,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -4731,8 +4731,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -4748,8 +4748,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lec",
       "competitions": [
         "lec"
@@ -4765,8 +4765,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -4799,8 +4799,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -4816,8 +4816,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lec",
       "competitions": [
         "lec"
@@ -4833,8 +4833,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -4850,8 +4850,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lcs",
       "competitions": [
         "lcs"
@@ -4884,8 +4884,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -4918,8 +4918,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lec",
       "competitions": [
         "lec"
@@ -4935,8 +4935,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -4952,8 +4952,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -4987,8 +4987,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -5039,8 +5039,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol",
@@ -5057,8 +5057,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -5125,8 +5125,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -5143,8 +5143,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -5177,8 +5177,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -5194,8 +5194,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -5211,8 +5211,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lpl",
       "competitions": [
         "lpl"
@@ -5228,8 +5228,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lpl",
       "competitions": [
         "lpl"
@@ -5262,8 +5262,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -5279,8 +5279,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lpl",
       "competitions": [
         "lpl"
@@ -5314,8 +5314,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -5331,8 +5331,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -5349,8 +5349,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lec",
       "competitions": [
         "lec"
@@ -5383,8 +5383,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -5400,8 +5400,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -5417,8 +5417,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -5485,8 +5485,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lec",
       "competitions": [
         "lec"
@@ -5502,8 +5502,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lec",
       "competitions": [
         "lec"
@@ -5536,8 +5536,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -5553,8 +5553,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -5589,8 +5589,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lec",
       "competitions": [
         "lec"
@@ -5641,8 +5641,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -5710,8 +5710,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -5761,8 +5761,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lcs",
       "competitions": [
         "lcs"
@@ -5778,8 +5778,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -5795,8 +5795,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -5812,8 +5812,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lec",
       "competitions": [
         "lec"
@@ -5898,8 +5898,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -5934,8 +5934,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -5951,8 +5951,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -5969,8 +5969,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -5986,8 +5986,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -6003,8 +6003,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -6142,8 +6142,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -6176,8 +6176,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -6193,8 +6193,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -6313,8 +6313,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -6330,8 +6330,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lcp",
       "competitions": [
         "lcp"
@@ -6347,8 +6347,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -6364,8 +6364,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -6415,8 +6415,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -6432,8 +6432,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -6500,8 +6500,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -6534,8 +6534,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lec",
       "competitions": [
         "lec"
@@ -6586,8 +6586,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol",
@@ -6604,8 +6604,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -6639,8 +6639,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lpl",
       "competitions": [
         "lpl"
@@ -6656,8 +6656,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -6691,8 +6691,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -6744,8 +6744,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -6762,8 +6762,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lec",
       "competitions": [
         "lec"
@@ -6779,8 +6779,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -6813,8 +6813,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lec",
       "competitions": [
         "lec"
@@ -6830,8 +6830,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -6847,8 +6847,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -6898,8 +6898,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lec",
       "competitions": [
         "lec"
@@ -6915,8 +6915,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -6966,8 +6966,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -6983,8 +6983,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -7000,8 +7000,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lcs",
       "competitions": [
         "lcs"
@@ -7017,8 +7017,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck",
@@ -7103,8 +7103,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol",
@@ -7121,8 +7121,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -7138,8 +7138,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -7207,8 +7207,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lcp",
       "competitions": [
         "lcp"
@@ -7241,8 +7241,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lec",
       "competitions": [
         "lec"
@@ -7276,8 +7276,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lpl",
       "competitions": [
         "lpl"
@@ -7293,8 +7293,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -7432,8 +7432,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -7450,8 +7450,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -7554,8 +7554,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lck",
       "competitions": [
         "lck"
@@ -7588,8 +7588,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lpl",
       "competitions": [
         "lpl"
@@ -7641,8 +7641,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck"
@@ -7692,8 +7692,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lpl",
       "competitions": [
         "lpl",
@@ -7761,8 +7761,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lcp",
       "competitions": [
         "lcp",
@@ -7834,8 +7834,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lpl",
       "competitions": [
         "lpl"
@@ -7904,8 +7904,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -7938,8 +7938,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -7956,8 +7956,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -7973,8 +7973,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -8008,8 +8008,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lck",
       "competitions": [
         "lck",
@@ -8095,8 +8095,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -8112,8 +8112,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lpl",
       "competitions": [
         "lpl",
@@ -8130,8 +8130,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lcs",
       "competitions": [
         "lcs"
@@ -8147,8 +8147,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol"
