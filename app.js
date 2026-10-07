@@ -1555,8 +1555,18 @@ function render(view="home",options={}){
         const ownership=rosters.find(r=>String(r.player_id)===playerKey(p));
         const mine=ownership&&String(ownership.user_id)===String(user?.id);
         const other=ownership&&!mine;
+        const leagueCompetition=normalizeCompetitionCode(league?.settings?.competition)||"worlds";
+        const eligible=playerEligibleForCompetition(p,leagueCompetition);
 
-        document.querySelector("#profileStatus").textContent=mine?"On your roster":other?"Rostered by another manager":"Available";
+        document.querySelector("#profileStatus").textContent=mine?"On your roster":other?"Rostered by another manager":eligible?"Available":`Not eligible for ${competitionName(leagueCompetition)}`;
+        if(!eligible&&!mine&&!other){
+          addBtn.disabled=true;
+          addBtn.textContent="Not Eligible";
+          waiverBtn.disabled=true;
+          waiverBtn.textContent="Not Eligible";
+          tradeBtn.disabled=true;
+          return;
+        }
 
         if(league?.status!=="active"){
           addBtn.disabled=true;
@@ -1727,7 +1737,7 @@ function render(view="home",options={}){
 
     const draw=()=>{
       const q=search.value.trim().toLowerCase();
-      const source=allFantasyPlayers();
+      const source=getActiveLeagueId()?eligibleFantasyPlayers():allFantasyPlayers();
       const filtered=source.filter(p=>(role==="ALL"||p.role===role)&&(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)));
       list.innerHTML=filtered.map(p=>playerRow(p,true)).join("") || '<div class="empty-state"><strong>No players found</strong><small>Try a different name, team, or role.</small></div>';
 
@@ -2058,6 +2068,15 @@ function render(view="home",options={}){
         const activeLeague=leagues.find(l=>String(l.id)===String(activeId))||leagues[0];
         const activeIndex=leagues.findIndex(l=>String(l.id)===String(activeLeague.id));
         const activeMembership=memberships[activeIndex]||null;
+        const activeSettings={
+          ...defaultLeagueSettings,
+          ...(activeLeague.settings||{}),
+          competition:normalizeCompetitionCode(activeLeague.settings?.competition)||"worlds",
+          competitionSeason:Number(activeLeague.settings?.competitionSeason)||2026,
+          competitionType:competitionType(activeLeague.settings?.competition),
+          scoring:{...defaultLeagueSettings.scoring,...(activeLeague.settings?.scoring||{})}
+        };
+        storageSet("riftLeagueSettings",JSON.stringify(activeSettings));
 
         if(overviewCard)overviewCard.hidden=false;
         if(activeLeagueEntryCard)activeLeagueEntryCard.hidden=false;
@@ -2330,6 +2349,11 @@ function render(view="home",options={}){
       const teamInput=document.querySelector("#createTeamName");
       const createBtn=document.querySelector("#confirmCreateLeagueBtn");
       const defaults=getLeagueSettings();
+      competition.value=normalizeCompetitionCode(defaults.competition)||"worlds";
+      const competitionHelp=document.querySelector("#createCompetitionHelp");
+      const updateCompetitionHelp=()=>{if(competitionHelp)competitionHelp.textContent=competitionHelpText(competition.value);};
+      competition.addEventListener("change",updateCompetitionHelp);
+      updateCompetitionHelp();
       document.querySelectorAll("[data-create-managers]").forEach(btn=>btn.onclick=()=>{
         managerSelect.value=btn.dataset.createManagers;
         document.querySelectorAll("[data-create-managers]").forEach(x=>x.classList.toggle("active",x===btn));
@@ -2349,7 +2373,9 @@ function render(view="home",options={}){
           bench:benchSelect.value,
           draftType:"Snake",
           scoringFormat:"Head-to-head",
-          competition:competition.value,
+          competition:normalizeCompetitionCode(competition.value)||"worlds",
+          competitionSeason:2026,
+          competitionType:competitionType(competition.value),
           teamSlot:false,
           scoring:{
             kills:numberOr("#createScoreKills",defaultLeagueSettings.scoring.kills),
@@ -2447,6 +2473,13 @@ function render(view="home",options={}){
     const setup=(()=>{try{return JSON.parse(sessionStorage.getItem("riftBotLeagueSetup")||"{}");}catch{return {};}})();
     if(!setup.totalManagers)return render("bot-league",{replace:true});
     let timer=30;
+    const botCompetition=document.querySelector("#botCompetition");
+    const storedConfig=(()=>{try{return JSON.parse(sessionStorage.getItem("riftBotLeagueSettings")||"{}");}catch{return {};}})();
+    if(botCompetition)botCompetition.value=normalizeCompetitionCode(storedConfig.competition)||"worlds";
+    const botCompetitionHelp=document.querySelector("#botCompetitionHelp");
+    const updateBotCompetitionHelp=()=>{if(botCompetitionHelp&&botCompetition)botCompetitionHelp.textContent=competitionHelpText(botCompetition.value);};
+    botCompetition?.addEventListener("change",updateBotCompetitionHelp);
+    updateBotCompetitionHelp();
     document.querySelectorAll("[data-bot-timer]").forEach(btn=>btn.onclick=()=>{
       timer=Number(btn.dataset.botTimer);
       document.querySelectorAll("[data-bot-timer]").forEach(x=>x.classList.toggle("active",x===btn));
@@ -2458,6 +2491,7 @@ function render(view="home",options={}){
       if(!teamName)return showToast("Enter your team name.");
       sessionStorage.setItem("riftBotLeagueSettings",JSON.stringify({
         name,teamName,draftTimer:timer,
+        competition:normalizeCompetitionCode(document.querySelector("#botCompetition").value)||"worlds",
         waivers:document.querySelector("#botWaivers").checked,
         trades:document.querySelector("#botTrades").checked,
         autoBotLineups:document.querySelector("#botAutoLineups").checked
@@ -2476,6 +2510,7 @@ function render(view="home",options={}){
     document.querySelector("#botConfirmDifficulty").textContent=`${String(setup.difficulty||"competitive").replace(/^./,c=>c.toUpperCase())} Difficulty`;
     document.querySelector("#botConfirmSettings").innerHTML=`
       <div><span>League Size</span><strong>${setup.totalManagers} managers</strong></div>
+      <div><span>Competition</span><strong>${competitionName(config.competition)}</strong></div>
       <div><span>Draft Type</span><strong>Snake Draft</strong></div>
       <div><span>Draft Timer</span><strong>${config.draftTimer}s</strong></div>
       <div><span>Waivers</span><strong>${config.waivers?"Enabled":"Disabled"}</strong></div>
@@ -2493,6 +2528,9 @@ function render(view="home",options={}){
           bench:"1",
           draftType:"Snake",
           scoringFormat:"Head-to-head",
+          competition:normalizeCompetitionCode(config.competition)||"worlds",
+          competitionSeason:2026,
+          competitionType:competitionType(config.competition),
           draftTimer:Number(config.draftTimer)||30,
           waivers:!!config.waivers,
           trades:!!config.trades,
@@ -2534,7 +2572,10 @@ function render(view="home",options={}){
       if([...managerSelect.options].some(o=>o.value===String(settings.managers)))managerSelect.value=String(settings.managers);
       else managerSelect.value="4";
       document.querySelector("#benchCount").value=settings.bench;
-      document.querySelector("#competition").value=settings.competition;
+      const competitionSelect=document.querySelector("#competition");
+      competitionSelect.value=normalizeCompetitionCode(settings.competition)||"worlds";
+      const competitionHelp=document.querySelector("#competitionHelp");
+      if(competitionHelp)competitionHelp.textContent=competitionHelpText(competitionSelect.value)+" Competition cannot be changed after the draft starts.";
       document.querySelector("#teamSlot").checked=false;
       document.querySelector("#scoreKills").value=settings.scoring.kills;
       document.querySelector("#scoreDeaths").value=settings.scoring.deaths;
@@ -2588,7 +2629,7 @@ function render(view="home",options={}){
             return;
           }
           const editable=league?.status==="pre_draft";
-          settings={...defaultLeagueSettings,...(league?.settings||{}),name:league?.name||settings.name,scoring:{...defaultLeagueSettings.scoring,...(league?.settings?.scoring||{})}};
+          settings={...defaultLeagueSettings,...(league?.settings||{}),name:league?.name||settings.name,competition:normalizeCompetitionCode(league?.settings?.competition)||"worlds",competitionSeason:Number(league?.settings?.competitionSeason)||2026,competitionType:competitionType(league?.settings?.competition),scoring:{...defaultLeagueSettings.scoring,...(league?.settings?.scoring||{})}};
           storageSet("riftLeagueSettings",JSON.stringify(settings));
           setupScreen.hidden=false;
 
@@ -2638,7 +2679,9 @@ function render(view="home",options={}){
           bench:document.querySelector("#benchCount").value,
           draftType:"Snake",
           scoringFormat:"Head-to-head",
-          competition:document.querySelector("#competition").value,
+          competition:normalizeCompetitionCode(document.querySelector("#competition").value)||"worlds",
+          competitionSeason:2026,
+          competitionType:competitionType(document.querySelector("#competition").value),
           teamSlot:false,
           scoring:{
             kills:numberOr("#scoreKills",defaultLeagueSettings.scoring.kills),
