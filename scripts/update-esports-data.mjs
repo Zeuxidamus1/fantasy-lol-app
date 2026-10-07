@@ -230,6 +230,7 @@ async function fetchLeaguesAndPlayers(existing) {
 
     if(!competitions.length)continue;
 
+    const seenStartingRoles=new Set();
     for (const p of (team.players||[])) {
       const role=normalizeRole(p.role);
       const name=clean(p.summonerName||p.name);
@@ -247,9 +248,17 @@ async function fetchLeaguesAndPlayers(existing) {
         existingPlayer.team=teamName;
         existingPlayer.teamCode=teamCode;
         existingPlayer.role=role;
+        const isStarter=!seenStartingRoles.has(role);
+        if(isStarter){
+          seenStartingRoles.add(role);
+          existingPlayer.draftable=true;
+          existingPlayer.rosterStatus="starter";
+        }
         continue;
       }
       const old=oldByKey.get(key);
+      const isStarter=!seenStartingRoles.has(role);
+      if(isStarter)seenStartingRoles.add(role);
       const record={
         id:stableId,
         role,
@@ -259,6 +268,9 @@ async function fetchLeaguesAndPlayers(existing) {
         rank:999,
         projection:Number(old?.projection??old?.fp??20),
         verified:true,
+        active:true,
+        draftable:isStarter,
+        rosterStatus:isStarter?"starter":"reserve",
         league:competitions[0],
         competitions:[...competitions]
       };
