@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261005-42" />
+  <link rel="stylesheet" href="styles.css?v=20261005-43" />
 </head>
 <body>
   <noscript><div class="no-js-message">Rift Fantasy requires JavaScript to run. Enable JavaScript and reload the page.</div></noscript>
@@ -187,7 +187,10 @@
     <section class="stack home-esports">
       <div class="section-title">
         <div><div class="eyebrow">PRO LEAGUE OF LEGENDS</div><h2>Home</h2></div>
-        <button class="text-btn" data-jump="schedule">Full Schedule</button>
+        <div class="schedule-title-actions">
+          <button class="text-btn" data-jump="schedule">Full Schedule</button>
+          <button class="text-btn my-schedule-link" data-jump="my-schedule">My Schedule</button>
+        </div>
       </div>
 
       <section class="card home-esports-hero">
@@ -326,8 +329,14 @@
   <template id="schedule-template">
     <section class="stack">
       <div class="section-title">
-        <div><div class="eyebrow">PRO MATCHES</div><h2>Schedule</h2></div>
+        <div><div class="eyebrow">PRO MATCHES</div><h2 id="schedulePageTitle">Schedule</h2></div>
+        <div class="schedule-title-actions schedule-view-switch">
+          <button class="text-btn" data-jump="schedule" id="fullScheduleBtn">Full Schedule</button>
+          <button class="text-btn my-schedule-link" data-jump="my-schedule" id="myScheduleBtn">My Schedule</button>
+        </div>
       </div>
+
+      <p class="schedule-scope-copy" id="scheduleScopeCopy">All scheduled professional matches in the current feed.</p>
 
       <div class="filter-row schedule-filters">
         <button class="chip active" data-day="all">All</button>
@@ -1059,10 +1068,10 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="esports-data.js?v=20261005-42"></script>
-  <script src="backend-config.js?v=20261005-42"></script>
-  <script src="backend.js?v=20261005-42"></script>
-  <script src="player-stats.js?v=20261005-42"></script>
-  <script src="app.js?v=20261005-42"></script>
+  <script src="esports-data.js?v=20261005-43"></script>
+  <script src="backend-config.js?v=20261005-43"></script>
+  <script src="backend.js?v=20261005-43"></script>
+  <script src="player-stats.js?v=20261005-43"></script>
+  <script src="app.js?v=20261005-43"></script>
 </body>
 </html>
