@@ -9,10 +9,26 @@ const API_KEY = process.env.LOL_ESPORTS_API_KEY || SITE_API_KEY;
 const HL = "en-US";
 const OUT = "esports-data.js";
 
-const wantedLeagueTokens = [
-  "worlds","world championship","msi","mid-season",
-  "lck","lpl","lec","lcs","lta","cblol","pcs","vcs","ljl"
+const COMPETITIONS = [
+  {code:"lcs",name:"LCS",type:"regional",tokens:["lcs"]},
+  {code:"cblol",name:"CBLOL",type:"regional",tokens:["cblol"]},
+  {code:"lec",name:"LEC",type:"regional",tokens:["lec"]},
+  {code:"lck",name:"LCK",type:"regional",tokens:["lck"]},
+  {code:"lpl",name:"LPL",type:"regional",tokens:["lpl"]},
+  {code:"lcp",name:"LCP",type:"regional",tokens:["lcp"]},
+  {code:"first_stand",name:"First Stand",type:"international",tokens:["first stand","first_stand"]},
+  {code:"msi",name:"MSI",type:"international",tokens:["msi","mid-season"]},
+  {code:"worlds",name:"Worlds",type:"international",tokens:["worlds","world championship"]}
 ];
+
+function canonicalCompetition(league) {
+  const name=clean(league?.name).toLowerCase();
+  const slug=clean(league?.slug).toLowerCase();
+  const hay=`${name} ${slug}`;
+  // Exclude promotion, challengers and qualifying leagues from Tier 1 fantasy pools.
+  if (/promotion|challenger|qualif|academy|masters/.test(hay)) return null;
+  return COMPETITIONS.find(c=>c.tokens.some(t=>hay===t || name===t || slug===t || hay.includes(` ${t}`) || hay.startsWith(t+" "))) || null;
+}
 
 const roleMap = new Map([
   ["top","TOP"],["t","TOP"],
@@ -135,14 +151,11 @@ async function fetchAllSchedule() {
 async function fetchLeaguesAndPlayers(existing) {
   const leaguesPayload = await api("getLeagues");
   const leagues = leaguesPayload?.data?.leagues || [];
-  const selected = leagues.filter(l => {
-    const hay = `${l.name||""} ${l.slug||""} ${l.region||""}`.toLowerCase();
-    return wantedLeagueTokens.some(t => hay.includes(t));
-  });
+  const selected = leagues.filter(l => canonicalCompetition(l));
 
   const oldByKey = new Map((existing.players||[]).map(p=>[`${clean(p.name).toLowerCase()}|${clean(p.team).toLowerCase()}`, p]));
   const players = [];
-  const seen = new Set();
+  const playerByKey = new Map();
 
   for (const league of selected.slice(0,18)) {
     try {
@@ -155,10 +168,15 @@ async function fetchLeaguesAndPlayers(existing) {
           const name = clean(p.summonerName || p.name);
           if (!role || !name) continue;
           const key = `${name.toLowerCase()}|${teamName.toLowerCase()}`;
-          if (seen.has(key)) continue;
-          seen.add(key);
+          const competition=canonicalCompetition(league);
+          if (!competition) continue;
+          const existingPlayer=playerByKey.get(key);
+          if (existingPlayer) {
+            if (!existingPlayer.competitions.includes(competition.code)) existingPlayer.competitions.push(competition.code);
+            continue;
+          }
           const old = oldByKey.get(key);
-          players.push({
+          const record={
             id: clean(p.id || `${team.code||codeFor(teamName)}-${name}`).toLowerCase().replace(/[^a-z0-9]+/g,"-"),
             role,
             name,
@@ -167,8 +185,11 @@ async function fetchLeaguesAndPlayers(existing) {
             rank: 999,
             projection: Number(old?.projection ?? old?.fp ?? 20),
             verified: true,
-            league: clean(league.slug || league.name)
-          });
+            league: competition.code,
+            competitions: [competition.code]
+          };
+          playerByKey.set(key,record);
+          players.push(record);
         }
       }
     } catch (err) {
@@ -183,7 +204,14 @@ async function fetchLeaguesAndPlayers(existing) {
     return Number(aOld?.rank ?? 999) - Number(bOld?.rank ?? 999) || b.projection-a.projection || a.name.localeCompare(b.name);
   });
   players.forEach((p,i)=>p.rank=i+1);
-  return {leagues:selected.map(l=>({id:l.id,name:l.name,slug:l.slug,region:l.region})), players};
+  return {
+    leagues:selected.map(l=>{
+      const competition=canonicalCompetition(l);
+      return {id:l.id,name:l.name,slug:l.slug,region:l.region,competition:competition?.code||null,type:competition?.type||null};
+    }),
+    competitions:COMPETITIONS,
+    players
+  };
 }
 
 const existingText = await fs.readFile(OUT, "utf8");
@@ -215,6 +243,7 @@ const next = {
   autoUpdated: true,
   dataMode: "live-refresh",
   leagues: refreshedLeagues,
+  competitions: rosterData.competitions || COMPETITIONS,
   schedule,
   players: refreshedPlayers
 };
