@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261005-43" />
+  <link rel="stylesheet" href="styles.css?v=20261005-44" />
 </head>
 <body>
   <noscript><div class="no-js-message">Rift Fantasy requires JavaScript to run. Enable JavaScript and reload the page.</div></noscript>
@@ -762,13 +762,21 @@
         <div class="form-group">
           <label for="createCompetition">Competition Focus</label>
           <select id="createCompetition" class="form-control">
-            <option selected>Worlds</option>
-            <option>MSI</option>
-            <option>LCK</option>
-            <option>LPL</option>
-            <option>LEC</option>
-            <option>LTA</option>
+            <optgroup label="International">
+              <option value="worlds" selected>Worlds</option>
+              <option value="msi">MSI</option>
+              <option value="first_stand">First Stand</option>
+            </optgroup>
+            <optgroup label="Regional">
+              <option value="lcs">LCS — North America</option>
+              <option value="cblol">CBLOL — Brazil</option>
+              <option value="lec">LEC — EMEA</option>
+              <option value="lck">LCK — Korea</option>
+              <option value="lpl">LPL — China</option>
+              <option value="lcp">LCP — Asia Pacific</option>
+            </optgroup>
           </select>
+          <small class="field-help" id="createCompetitionHelp">Only eligible Worlds players will appear in this league's draft, free agents, and waivers.</small>
         </div>
 
         <div class="form-group">
@@ -876,6 +884,26 @@
         <div class="form-group"><label for="botTeamName">Your Team Name</label><input id="botTeamName" class="form-control" maxlength="40" value="My Team" /></div>
 
         <div class="form-group">
+          <label for="botCompetition">Competition</label>
+          <select id="botCompetition" class="form-control">
+            <optgroup label="International">
+              <option value="worlds" selected>Worlds</option>
+              <option value="msi">MSI</option>
+              <option value="first_stand">First Stand</option>
+            </optgroup>
+            <optgroup label="Regional">
+              <option value="lcs">LCS — North America</option>
+              <option value="cblol">CBLOL — Brazil</option>
+              <option value="lec">LEC — EMEA</option>
+              <option value="lck">LCK — Korea</option>
+              <option value="lpl">LPL — China</option>
+              <option value="lcp">LCP — Asia Pacific</option>
+            </optgroup>
+          </select>
+          <small class="field-help" id="botCompetitionHelp">Bots and human managers draft only players eligible for this competition.</small>
+        </div>
+
+        <div class="form-group">
           <label>Scoring Format</label>
           <div class="setting-choice active"><span class="setting-choice-icon">🏆</span><div><strong>Standard</strong><small>Default scoring (recommended)</small></div></div>
         </div>
@@ -970,14 +998,21 @@
         <div class="form-group">
           <label for="competition">Competition focus</label>
           <select id="competition" class="form-control">
-            <option selected>Worlds</option>
-            <option>MSI</option>
-            <option>LCK</option>
-            <option>LPL</option>
-            <option>LEC</option>
-            <option>LTA</option>
+            <optgroup label="International">
+              <option value="worlds" selected>Worlds</option>
+              <option value="msi">MSI</option>
+              <option value="first_stand">First Stand</option>
+            </optgroup>
+            <optgroup label="Regional">
+              <option value="lcs">LCS — North America</option>
+              <option value="cblol">CBLOL — Brazil</option>
+              <option value="lec">LEC — EMEA</option>
+              <option value="lck">LCK — Korea</option>
+              <option value="lpl">LPL — China</option>
+              <option value="lcp">LCP — Asia Pacific</option>
+            </optgroup>
           </select>
-          <small class="field-help">Saved as a league preference. Competition-specific player filtering is not active yet.</small>
+          <small class="field-help" id="competitionHelp">Competition controls the eligible player pool. This setting locks when the draft starts.</small>
         </div>
 
         <div class="form-group">
@@ -1068,10 +1103,10 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="esports-data.js?v=20261005-43"></script>
-  <script src="backend-config.js?v=20261005-43"></script>
-  <script src="backend.js?v=20261005-43"></script>
-  <script src="player-stats.js?v=20261005-43"></script>
-  <script src="app.js?v=20261005-43"></script>
+  <script src="esports-data.js?v=20261005-44"></script>
+  <script src="backend-config.js?v=20261005-44"></script>
+  <script src="backend.js?v=20261005-44"></script>
+  <script src="player-stats.js?v=20261005-44"></script>
+  <script src="app.js?v=20261005-44"></script>
 </body>
 </html>
