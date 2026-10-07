@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-07T10:11:45.152Z",
+  "updatedAt": "2026-10-07T14:59:35.516Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -124,11 +124,11 @@ window.ESPORTS_DATA = {
       "league": "DCGI",
       "leagueCode": "demacia_cup",
       "stage": "Swiss",
-      "a": "FlyQuest",
-      "aCode": "FLY",
-      "b": "Shopify Rebellion",
-      "bCode": "SR",
-      "status": "INPROGRESS",
+      "a": "Shopify Rebellion",
+      "aCode": "SR",
+      "b": "FlyQuest",
+      "bCode": "FLY",
+      "status": "COMPLETED",
       "strategy": "bestOf",
       "count": 3
     },
@@ -208,10 +208,10 @@ window.ESPORTS_DATA = {
       "league": "DCGI",
       "leagueCode": "demacia_cup",
       "stage": "Swiss",
-      "a": "TBD",
-      "aCode": "TBD",
-      "b": "TBD",
-      "bCode": "TBD",
+      "a": "FlyQuest",
+      "aCode": "FLY",
+      "b": "RED Kalunga",
+      "bCode": "RED",
       "status": "UNSTARTED",
       "strategy": "bestOf",
       "count": 3
@@ -222,10 +222,10 @@ window.ESPORTS_DATA = {
       "league": "DCGI",
       "leagueCode": "demacia_cup",
       "stage": "Swiss",
-      "a": "TBD",
-      "aCode": "TBD",
-      "b": "TBD",
-      "bCode": "TBD",
+      "a": "Natus Vincere",
+      "aCode": "NAVI",
+      "b": "Beijing JDG Esports",
+      "bCode": "JDG",
       "status": "UNSTARTED",
       "strategy": "bestOf",
       "count": 3
@@ -1401,103 +1401,150 @@ window.ESPORTS_DATA = {
       "id": "98767975604431411",
       "name": "Worlds",
       "slug": "worlds",
-      "region": "INTERNATIONAL"
+      "region": "INTERNATIONAL",
+      "competition": "worlds",
+      "type": "international"
     },
     {
       "id": "98767991325878492",
       "name": "MSI",
       "slug": "msi",
-      "region": "INTERNATIONAL"
+      "region": "INTERNATIONAL",
+      "competition": "msi",
+      "type": "international"
+    },
+    {
+      "id": "113464388705111224",
+      "name": "First Stand",
+      "slug": "first_stand",
+      "region": "INTERNATIONAL",
+      "competition": "first_stand",
+      "type": "international"
     },
     {
       "id": "98767991299243165",
       "name": "LCS",
       "slug": "lcs",
-      "region": "NORTH AMERICA"
+      "region": "NORTH AMERICA",
+      "competition": "lcs",
+      "type": "regional"
     },
     {
       "id": "98767991332355509",
       "name": "CBLOL",
       "slug": "cblol-brazil",
-      "region": "BRAZIL"
-    },
-    {
-      "id": "117370069134032321",
-      "name": "LCS Promotion",
-      "slug": "lcs_promotion",
-      "region": "NORTH AMERICA"
-    },
-    {
-      "id": "117370077081924460",
-      "name": "CBLOL Promotion",
-      "slug": "cblol_promotion",
-      "region": "BRAZIL"
+      "region": "BRAZIL",
+      "competition": "cblol",
+      "type": "regional"
     },
     {
       "id": "98767991302996019",
       "name": "LEC",
       "slug": "lec",
-      "region": "EMEA"
+      "region": "EMEA",
+      "competition": "lec",
+      "type": "regional"
     },
     {
       "id": "98767991310872058",
       "name": "LCK",
       "slug": "lck",
-      "region": "KOREA"
+      "region": "KOREA",
+      "competition": "lck",
+      "type": "regional"
     },
     {
       "id": "98767991314006698",
       "name": "LPL",
       "slug": "lpl",
-      "region": "CHINA"
+      "region": "CHINA",
+      "competition": "lpl",
+      "type": "regional"
     },
     {
-      "id": "98767991349978712",
-      "name": "LJL",
-      "slug": "ljl-japan",
-      "region": "JAPAN"
+      "id": "113476371197627891",
+      "name": "LCP",
+      "slug": "lcp",
+      "region": "PACIFIC",
+      "competition": "lcp",
+      "type": "regional"
+    }
+  ],
+  "competitions": [
+    {
+      "code": "lcs",
+      "name": "LCS",
+      "type": "regional",
+      "tokens": [
+        "lcs"
+      ]
     },
     {
-      "id": "98767991335774713",
-      "name": "LCK Challengers",
-      "slug": "lck_challengers_league",
-      "region": "KOREA"
+      "code": "cblol",
+      "name": "CBLOL",
+      "type": "regional",
+      "tokens": [
+        "cblol"
+      ]
     },
     {
-      "id": "104366947889790212",
-      "name": "PCS",
-      "slug": "pcs",
-      "region": "HONG KONG, MACAU, TAIWAN"
+      "code": "lec",
+      "name": "LEC",
+      "type": "regional",
+      "tokens": [
+        "lec"
+      ]
     },
     {
-      "id": "107213827295848783",
-      "name": "VCS",
-      "slug": "vcs",
-      "region": "VIETNAM"
+      "code": "lck",
+      "name": "LCK",
+      "type": "regional",
+      "tokens": [
+        "lck"
+      ]
     },
     {
-      "id": "113475149040947852",
-      "name": "LTA Cross-Conference",
-      "slug": "lta_cross",
-      "region": "AMERICAS"
+      "code": "lpl",
+      "name": "LPL",
+      "type": "regional",
+      "tokens": [
+        "lpl"
+      ]
     },
     {
-      "id": "110988878756156222",
-      "name": "Worlds Qualifying Series",
-      "slug": "wqs",
-      "region": "INTERNATIONAL"
+      "code": "lcp",
+      "name": "LCP",
+      "type": "regional",
+      "tokens": [
+        "lcp"
+      ]
     },
     {
-      "id": "113470291645289904",
-      "name": "LTA North",
-      "slug": "lta_n",
-      "region": "AMERICAS"
+      "code": "first_stand",
+      "name": "First Stand",
+      "type": "international",
+      "tokens": [
+        "first stand",
+        "first_stand"
+      ]
     },
     {
-      "id": "113475181634818701",
-      "name": "LTA South",
-      "slug": "lta_s",
-      "region": "AMERICAS"
+      "code": "msi",
+      "name": "MSI",
+      "type": "international",
+      "tokens": [
+        "msi",
+        "mid-season"
+      ]
+    },
+    {
+      "code": "worlds",
+      "name": "Worlds",
+      "type": "international",
+      "tokens": [
+        "worlds",
+        "world championship"
+      ]
     }
   ]
 };
