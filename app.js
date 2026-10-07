@@ -755,13 +755,14 @@ function goBack(fallback="home"){
 
 function render(view="home",options={}){
   const requested=String(view||"home").replace(/[^a-z-]/g,"");
-  const template=document.querySelector(`#${requested}-template`);
+  const templateName=requested==="my-schedule"?"schedule":requested;
+  const template=document.querySelector(`#${templateName}-template`);
   if(!template){
     if(requested!=="home") return render("home",{...options,replace:true});
     return;
   }
   view=requested;
-  if(["home","league","create-league","join-league","bot-league","bot-settings","bot-confirm","bot-success"].includes(view)&&!backend()?.readSession?.()?.access_token){
+  if(["home","league","create-league","join-league","bot-league","bot-settings","bot-confirm","bot-success","my-schedule"].includes(view)&&!backend()?.readSession?.()?.access_token){
     return render("login",{...options,replace:true});
   }
   if(view!=="draft"&&draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
@@ -779,7 +780,7 @@ function render(view="home",options={}){
   currentView=view;
   app.innerHTML="";
   app.appendChild(template.content.cloneNode(true));
-  const titles={login:"Sign In",signup:"Create Account",verify:"Verify Email",home:"Home",account:"Account",team:"My Team",matchup:"Matchup",standings:"Standings",schedule:"Schedule",players:"Players",player:"Player",league:"League","create-league":"Create League","join-league":"Join League","bot-league":"Create Bot League","bot-settings":"Bot League Settings","bot-confirm":"Confirm Bot League","bot-success":"League Created",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup"};
+  const titles={login:"Sign In",signup:"Create Account",verify:"Verify Email",home:"Home",account:"Account",team:"My Team",matchup:"Matchup",standings:"Standings",schedule:"Schedule","my-schedule":"My Schedule",players:"Players",player:"Player",league:"League","create-league":"Create League","join-league":"Join League","bot-league":"Create Bot League","bot-settings":"Bot League Settings","bot-confirm":"Confirm Bot League","bot-success":"League Created",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup"};
   document.title=`${titles[view]||"Rift Fantasy"} · Rift Fantasy`;
   document.body.classList.toggle("login-view",["login","signup","verify"].includes(view));
   const primaryView={
@@ -797,6 +798,7 @@ function render(view="home",options={}){
     "bot-confirm":"league",
     "bot-success":"league",
     schedule:"home",
+    "my-schedule":"home",
     player:"players"
   }[view]||view;
   document.querySelectorAll(".nav-item").forEach(b=>{
@@ -1532,10 +1534,21 @@ function render(view="home",options={}){
       })();
     }
   }
-  if(view==="schedule"){
+  if(view==="schedule"||view==="my-schedule"){
     const list=document.querySelector("#scheduleList");
+    const rosterOnly=view==="my-schedule";
     let day="all";
     let rosterPlayers=[];
+    const title=document.querySelector("#schedulePageTitle");
+    const copy=document.querySelector("#scheduleScopeCopy");
+    const fullBtn=document.querySelector("#fullScheduleBtn");
+    const myBtn=document.querySelector("#myScheduleBtn");
+    if(title)title.textContent=rosterOnly?"My Schedule":"Schedule";
+    if(copy)copy.textContent=rosterOnly
+      ?"Only matches involving teams represented by players on your current fantasy roster."
+      :"All scheduled professional matches in the current feed.";
+    if(fullBtn)fullBtn.classList.toggle("schedule-view-active",!rosterOnly);
+    if(myBtn)myBtn.classList.toggle("schedule-view-active",rosterOnly);
 
     const normalizeTeam=value=>String(value||"").toLowerCase().replace(/[^a-z0-9]/g,"");
     const rosterMatchForTeam=(teamName,teamCode)=>{
@@ -1556,7 +1569,12 @@ function render(view="home",options={}){
         if(Number.isFinite(ta)&&Number.isFinite(tb))return ta-tb;
         return 0;
       });
-      const filtered=rows.filter(g=>day==="all"||g.day===day||(day==="upcoming"&&g.day==="upcoming"));
+      const filtered=rows.filter(g=>{
+        const dayMatches=day==="all"||g.day===day||(day==="upcoming"&&g.day==="upcoming");
+        if(!dayMatches)return false;
+        if(!rosterOnly)return true;
+        return rosterMatchForTeam(g.a,g.aCode).length>0 || rosterMatchForTeam(g.b,g.bCode).length>0;
+      });
       let lastLabel="";
       list.innerHTML=filtered.length?filtered.map(g=>{
         const heading=g.label!==lastLabel ? `<div class="schedule-day">${h(g.label||"Upcoming")}</div>` : "";
@@ -1572,7 +1590,9 @@ function render(view="home",options={}){
           <div class="game-meta"><span class="game-time">${h(g.time||"TBD")}</span><span class="game-league">${h(g.league||"LoL Esports")}</span><span class="game-stage">${h(g.stage||"")}</span><span class="game-status ${String(g.status||"").toUpperCase().includes("PROGRESS")?"live":""}">${h(g.status||"UPCOMING")}</span></div>
           <div class="game-team right ${bOwned?"my-roster-team":""}"><div><strong>${h(g.b||"TBD")}</strong><small>${h(bNote)}</small></div><span class="team-mark">${h(g.bCode||"TBD")}</span></div>
         </div>`;
-      }).join(""):'<div class="empty-state"><strong>No matches found</strong><small>Try another filter or check back after the next data refresh.</small></div>';
+      }).join(""):(rosterOnly
+        ? '<div class="empty-state"><strong>No roster games found</strong><small>There are no scheduled matches for players on your current roster in this time filter.</small></div>'
+        : '<div class="empty-state"><strong>No matches found</strong><small>Try another filter or check back after the next data refresh.</small></div>');
     };
 
     document.querySelectorAll("[data-day]").forEach(c=>c.onclick=()=>{day=c.dataset.day;document.querySelectorAll("[data-day]").forEach(x=>x.classList.remove("active"));c.classList.add("active");drawSchedule();});
