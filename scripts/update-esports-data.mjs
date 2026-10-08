@@ -88,6 +88,7 @@ function parseExisting(text) {
 function teamFromParticipant(x) {
   const name = clean(x?.name || x?.team?.name || x?.code || "TBD");
   return {
+    id: clean(x?.id || x?.team?.id || ""),
     name,
     code: clean(x?.code || x?.team?.code || codeFor(name)),
     result: x?.result?.outcome || x?.result || null
@@ -121,14 +122,25 @@ async function fetchAllSchedule() {
       const teams = Array.isArray(e.match.teams) ? e.match.teams : [];
       const a = teamFromParticipant(teams[0]);
       const b = teamFromParticipant(teams[1]);
+      const competition=canonicalCompetition(e.league);
+      const leagueCode=clean(e.league?.slug || e.league?.name || "");
+      const matchId=clean(e.match?.id || e.id) || [
+        competition?.code||leagueCode,
+        e.startTime||"tbd",
+        a.id||teamMatchKey(a.name),
+        b.id||teamMatchKey(b.name)
+      ].join("|");
       return {
+        matchId,
         eventId: clean(e.id),
+        competition: competition?.code || null,
+        competitionType: competition?.type || null,
         startTime: e.startTime || null,
         league: clean(e.league?.name || e.league?.slug || "LoL Esports"),
-        leagueCode: clean(e.league?.slug || e.league?.name || ""),
+        leagueCode,
         stage: clean(e.blockName || e.match?.strategy?.type || ""),
-        a: a.name, aCode: a.code,
-        b: b.name, bCode: b.code,
+        aId:a.id||null, a:a.name, aCode:a.code,
+        bId:b.id||null, b:b.name, bCode:b.code,
         status: clean(e.state || "unstarted").toUpperCase(),
         strategy: clean(e.match?.strategy?.type || ""),
         count: e.match?.strategy?.count ?? null
@@ -136,14 +148,14 @@ async function fetchAllSchedule() {
     })
     .filter(g => {
       const t = Date.parse(g.startTime || "");
-      return Number.isFinite(t) && t >= now - 12*60*60*1000 && t <= horizon;
+      return !!g.competition && Number.isFinite(t) && t >= now - 12*60*60*1000 && t <= horizon;
     })
     .sort((x,y)=>Date.parse(x.startTime)-Date.parse(y.startTime));
 
   const deduped = [];
   const seen = new Set();
   for (const event of mapped) {
-    const key = event.eventId || [event.startTime,event.a,event.b].join("|");
+    const key = event.matchId || event.eventId || [event.startTime,event.aId||event.a,event.bId||event.b].join("|");
     if (seen.has(key)) continue;
     seen.add(key);
     deduped.push(event);
@@ -252,6 +264,7 @@ async function fetchLeaguesAndPlayers(existing) {
         // duplicate directory alias for the same Riot player identity.
         existingPlayer.name=name;
         existingPlayer.team=teamName;
+        existingPlayer.teamId=clean(team.id)||null;
         existingPlayer.teamCode=teamCode;
         existingPlayer.role=role;
         const isStarter=lastRoleIndex.get(role)===playerIndex;
@@ -268,6 +281,7 @@ async function fetchLeaguesAndPlayers(existing) {
         role,
         name,
         team:teamName,
+        teamId:clean(team.id)||null,
         teamCode,
         rank:999,
         projection:Number(old?.projection??old?.fp??20),
