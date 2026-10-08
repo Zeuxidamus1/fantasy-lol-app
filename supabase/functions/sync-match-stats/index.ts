@@ -297,7 +297,8 @@ Deno.serve(async(req:Request)=>{
           const blueSide=(game?.teams||[]).find((t:any)=>String(t.side).toLowerCase()==="blue");
           const redSide=(game?.teams||[]).find((t:any)=>String(t.side).toLowerCase()==="red");
 
-          await supabase.from("pro_games").upsert({
+          const normalizedGameState=gameState.toLowerCase();
+          const baseGameRow:any={
             id:gameId,
             match_id:match.id,
             game_number:Number(game?.number)||null,
@@ -305,9 +306,15 @@ Deno.serve(async(req:Request)=>{
             blue_team_id:blueSide?.id||null,
             red_team_id:redSide?.id||null,
             updated_at:new Date().toISOString()
-          },{onConflict:"id"});
+          };
+          if(normalizedGameState==="unneeded"){
+            baseGameRow.stats_status="final";
+            baseGameRow.first_blood_status="unavailable";
+            baseGameRow.ingest_error=null;
+          }
+          await supabase.from("pro_games").upsert(baseGameRow,{onConflict:"id"});
 
-          if(gameState.toLowerCase()!=="completed")continue;
+          if(normalizedGameState!=="completed")continue;
           if(finalizedGameIds.has(gameId)){finalGames++;continue;}
 
           const matchStart=Date.parse(match.start_time||"");
@@ -396,9 +403,17 @@ Deno.serve(async(req:Request)=>{
             const winnerRow=rows.find(r=>r.win===true);
             if(winnerRow?.team_id)winnerTeamId=winnerRow.team_id;
           }
+          if(winnerTeamId){
+            for(const row of rows){
+              if(row.team_id)row.win=String(row.team_id)===String(winnerTeamId);
+            }
+          }
           if(firstBloodId===null){
             const fbRow=rows.find(r=>r.first_blood===true);
             if(fbRow)firstBloodId=fbRow.participant_id;
+          }
+          if(firstBloodId!==null){
+            for(const row of rows)row.first_blood=Number(row.participant_id)===Number(firstBloodId);
           }
 
           if(rows.length){
