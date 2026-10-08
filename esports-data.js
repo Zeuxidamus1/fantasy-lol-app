@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-08T08:55:26.154Z",
+  "updatedAt": "2026-10-08T16:26:55.416Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "117155436343202190",
-      "eventId": "",
-      "competition": "lpl",
-      "competitionType": "regional",
-      "startTime": "2026-09-08T09:00:00Z",
-      "league": "LPL",
-      "leagueCode": "lpl",
-      "stage": "Playoffs",
-      "aId": "99566404846951820",
-      "a": "LGD GAMING",
-      "aCode": "LGD",
-      "bId": "99566404848691211",
-      "b": "Invictus Gaming",
-      "bCode": "IG",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "115548681803406309",
       "eventId": "",
