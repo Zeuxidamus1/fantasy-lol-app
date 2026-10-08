@@ -83,6 +83,10 @@ try{
   };
 
   await send("Runtime.enable");
+  await send("Page.enable");
+  await send("Page.navigate",{url:"http://127.0.0.1:4174/#home"});
+  await sleep(700);
+  await expect("test page loaded","location.origin === 'http://127.0.0.1:4174' && document.readyState !== 'loading'");
   await evaluate("localStorage.clear()");
   await route("home");
 
