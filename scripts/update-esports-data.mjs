@@ -327,6 +327,24 @@ const [schedule, rosterData] = await Promise.all([
 
 if (schedule.length < 1) throw new Error("No schedule events returned; refusing to overwrite good schedule data.");
 
+// Reconcile schedule participants with the canonical Riot team IDs already
+// attached to roster records. The schedule endpoint sometimes omits team IDs
+// even when the team name/code is known.
+const teamByName=new Map();
+const teamByCode=new Map();
+for(const player of (rosterData.players||[])){
+  if(player.teamId&&player.team)teamByName.set(teamMatchKey(player.team),player.teamId);
+  if(player.teamId&&player.teamCode)teamByCode.set(clean(player.teamCode).toLowerCase(),player.teamId);
+}
+for(const match of schedule){
+  if(!match.aId&&match.a&&match.a!=="TBD"){
+    match.aId=teamByName.get(teamMatchKey(match.a))||teamByCode.get(clean(match.aCode).toLowerCase())||null;
+  }
+  if(!match.bId&&match.b&&match.b!=="TBD"){
+    match.bId=teamByName.get(teamMatchKey(match.b))||teamByCode.get(clean(match.bCode).toLowerCase())||null;
+  }
+}
+
 const refreshedPlayers = rosterData.players.length >= 40
   ? rosterData.players
   : (existing.players || []);
