@@ -2,7 +2,7 @@ name: Refresh LoL Esports Data
 
 on:
   schedule:
-    - cron: "17 */3 * * *"
+    - cron: "17 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
