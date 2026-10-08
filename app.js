@@ -369,15 +369,25 @@ function renderFantasyBreakdown(score){
 }
 function aggregateFantasyScores(scores=[]){
   const map=new Map();
+  const keys=["kills","deaths","assists","cs","win","firstBlood"];
   for(const score of scores){
     const key=String(score.player_id);
-    const current=map.get(key)||{player_id:key,total:0,live:false,finalized:true,games:0,latest:null,rows:[]};
+    const current=map.get(key)||{
+      player_id:key,total:0,live:false,finalized:true,games:0,latest:null,rows:[],
+      breakdown:Object.fromEntries(keys.map(k=>[k,{stat:0,multiplier:null,points:0}]))
+    };
     current.total+=Number(score.fantasy_points)||0;
     current.games+=1;
     current.live=current.live||!score.finalized;
     current.finalized=current.finalized&&!!score.finalized;
     current.latest=!current.latest||Date.parse(score.updated_at||"")>Date.parse(current.latest.updated_at||"")?score:current.latest;
     current.rows.push(score);
+    for(const k of keys){
+      const part=score?.breakdown?.[k]||{};
+      current.breakdown[k].stat+=Number(part.stat)||0;
+      current.breakdown[k].points+=Number(part.points)||0;
+      if(Number.isFinite(Number(part.multiplier)))current.breakdown[k].multiplier=Number(part.multiplier);
+    }
     map.set(key,current);
   }
   return map;
@@ -1783,7 +1793,7 @@ function render(view="home",options={}){
                   <div><strong>${h(player.name||roster.player_id)}</strong><small>${h(player.team||"")}</small></div>
                 </div>
                 <div class="fantasy-score-total"><span class="${score.live?"live":""}">${state}</span><strong>${formatFantasyPoints(score.total)} FP</strong></div>
-                ${latest?renderFantasyBreakdown(latest):'<small class="fantasy-no-score">No scored professional games yet.</small>'}
+                ${score.games?renderFantasyBreakdown(score):'<small class="fantasy-no-score">No scored professional games yet.</small>'}
               </article>`;
             })
           ].join(""):'<div class="empty-state"><strong>No starters found</strong><small>Complete your starting lineup to see live fantasy scoring.</small></div>';
