@@ -280,6 +280,24 @@
     return request(path,{session:current});
   }
 
+  async function listProGames(matchId){
+    const current=await session();
+    if(!current)return [];
+    return request("/rest/v1/pro_games?match_id=eq."+encodeURIComponent(matchId)
+      +"&select=id,match_id,game_number,state,blue_team_id,red_team_id,winner_team_id,patch_version,started_at,completed_at,source_timestamp,stats_status,first_blood_player_id,first_blood_status,stats_ingested_at,updated_at"
+      +"&order=game_number.asc",{session:current});
+  }
+
+  async function listPlayerGameStats({matchId=null,playerId=null,limit=100}={}){
+    const current=await session();
+    if(!current)return [];
+    let path="/rest/v1/player_game_stats?select=game_id,match_id,player_id,participant_id,team_id,opponent_team_id,role,summoner_name,champion_id,kills,deaths,assists,cs,win,first_blood,total_gold,total_gold_earned,wards_placed,wards_destroyed,kill_participation,champion_damage_share,source_timestamp,finalized,updated_at"
+      +"&order=source_timestamp.desc&limit="+Math.max(1,Math.min(500,Number(limit)||100));
+    if(matchId)path+="&match_id=eq."+encodeURIComponent(String(matchId));
+    if(playerId)path+="&player_id=eq."+encodeURIComponent(String(playerId));
+    return request(path,{session:current});
+  }
+
   async function saveRoster(leagueId,players){
     const current=await session();
     const userId=current?.user?.id;
@@ -363,7 +381,7 @@
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
     listLeagues,createLeague,createBotLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,makeBotDraftPick,
-    listRosters,listProMatches,saveRoster,listTransactions,
+    listRosters,listProMatches,listProGames,listPlayerGameStats,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
     listNotifications,markNotificationsRead,
     listTrades,createTrade,updateTrade,acceptTrade,
