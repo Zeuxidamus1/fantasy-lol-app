@@ -1472,10 +1472,10 @@ function render(view="home",options={}){
         }
 
         const eligibleTargets=[];
-        if(normalOccupied)eligibleTargets.push(normalOccupied);
-        if(flexOccupied&&isFlexEligible(player))eligibleTargets.push(flexOccupied);
+        if(normalOccupied&&!activeLineupLocks.has(playerKey(normalOccupied)))eligibleTargets.push(normalOccupied);
+        if(flexOccupied&&isFlexEligible(player)&&!activeLineupLocks.has(playerKey(flexOccupied)))eligibleTargets.push(flexOccupied);
         btn.disabled=false;
-        if(!eligibleTargets.length)return showToast("No eligible starting slot is available.");
+        if(!eligibleTargets.length)return showToast("No eligible unlocked starting slot is available.");
         openLineupSwapChooser(player,currentNow,eligibleTargets,refreshTeam);
       });
     };
