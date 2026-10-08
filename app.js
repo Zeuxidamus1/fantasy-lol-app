@@ -1,45 +1,3 @@
-const roster = [
-  {role:"TOP",name:"Bin",team:"Bilibili Gaming",opp:"vs T1",fp:24.8},
-  {role:"JNG",name:"Canyon",team:"Gen.G",opp:"vs HLE",fp:31.2},
-  {role:"MID",name:"Chovy",team:"Gen.G",opp:"vs HLE",fp:36.7},
-  {role:"ADC",name:"Gumayusi",team:"T1",opp:"vs BLG",fp:29.5},
-  {role:"SUP",name:"Keria",team:"T1",opp:"vs BLG",fp:18.4},
-  {role:"BN",position:"MID",name:"Caps",team:"G2 Esports",opp:"vs FNC",fp:27.9},
-  {role:"BN",position:"JNG",name:"Inspired",team:"FlyQuest",opp:"vs TL",fp:25.1},
-  {role:"BN",position:"ADC",name:"Massu",team:"FlyQuest",opp:"vs TL",fp:24.3}
-];
-
-const freeAgents = [
-  {role:"MID",name:"Faker",team:"T1",trend:"21.8 avg",fp:21.8},
-  {role:"ADC",name:"Viper",team:"Hanwha Life",trend:"26.4 avg",fp:26.4},
-  {role:"TOP",name:"Zeus",team:"Hanwha Life",trend:"23.2 avg",fp:23.2},
-  {role:"JNG",name:"Oner",team:"T1",trend:"24.9 avg",fp:24.9},
-  {role:"SUP",name:"Lehends",team:"Nongshim",trend:"17.6 avg",fp:17.6},
-  {role:"MID",name:"Humanoid",team:"Fnatic",trend:"19.4 avg",fp:19.4},
-  {role:"ADC",name:"Hans Sama",team:"G2 Esports",trend:"22.7 avg",fp:22.7}
-];
-
-const opponents = [
-  {role:"TOP",name:"369",score:20.7},
-  {role:"JNG",name:"Oner",score:27.1},
-  {role:"MID",name:"Faker",score:29.9},
-  {role:"ADC",name:"Viper",score:32.0},
-  {role:"SUP",name:"Delight",score:16.4}
-];
-
-const standings = [
-  ["1","Baron Bandits","2-0","271.4"],
-  ["2","Zeuxidamus","2-0","263.8"],
-  ["3","Rift Raiders","1-1","248.2"],
-  ["4","Pentakill Club","1-1","239.9"],
-  ["5","Nexus Breakers","1-1","227.6"],
-  ["6","Blue Buff Boys","1-1","219.1"],
-  ["7","Dragon Slayers","0-2","205.8"],
-  ["8","Iron V","0-2","194.5"]
-];
-
-
-
 const proSchedule = (window.ESPORTS_DATA && window.ESPORTS_DATA.schedule) || [];
 
 function localScheduleRow(g){
@@ -2781,6 +2739,8 @@ function render(view="home",options={}){
           competitionSeason:2026,
           competitionType:competitionType(competition.value),
           teamSlot:false,
+          waivers:document.querySelector("#leagueWaivers")?.checked!==false,
+          trades:document.querySelector("#leagueTrades")?.checked!==false,
           scoring:{
             kills:numberOr("#createScoreKills",defaultLeagueSettings.scoring.kills),
             deaths:numberOr("#createScoreDeaths",defaultLeagueSettings.scoring.deaths),
@@ -3001,6 +2961,10 @@ function render(view="home",options={}){
       const competitionHelp=document.querySelector("#competitionHelp");
       if(competitionHelp)competitionHelp.textContent=competitionHelpText(competitionSelect.value)+" Competition cannot be changed after the draft starts.";
       document.querySelector("#teamSlot").checked=false;
+      const waiversToggle=document.querySelector("#leagueWaivers");
+      const tradesToggle=document.querySelector("#leagueTrades");
+      if(waiversToggle)waiversToggle.checked=settings.waivers!==false;
+      if(tradesToggle)tradesToggle.checked=settings.trades!==false;
       document.querySelector("#scoreKills").value=settings.scoring.kills;
       document.querySelector("#scoreDeaths").value=settings.scoring.deaths;
       document.querySelector("#scoreAssists").value=settings.scoring.assists;
@@ -3075,6 +3039,8 @@ function render(view="home",options={}){
           managementPill.textContent=String(league?.status||"pre_draft").replace("_"," ").toUpperCase();
           managementCopy.textContent="Permanently delete this league and all league-specific data.";
 
+          const lockNotice=document.querySelector("#commissionerLockNotice");
+          if(lockNotice)lockNotice.hidden=editable;
           if(!editable){
             document.querySelectorAll("#setupScreen input:not([type=button]), #setupScreen select, #setupScreen .choice").forEach(el=>{el.disabled=true;el.setAttribute("aria-disabled","true");});
             if(saveBtn){saveBtn.disabled=true;saveBtn.textContent="League Settings Locked";}
@@ -3225,6 +3191,17 @@ async function loadNotifications({open=false}={}){
         case "roster_add": return {title:`${actor} added ${rosterPlayer}`,body:"League roster move",view:"transactions"};
         case "roster_drop": return {title:`${actor} dropped ${rosterPlayer}`,body:"League roster move",view:"transactions"};
         case "roster_swap": return {title:`${actor} made a roster move`,body:"Roster swap",view:"transactions",swap:{dropped:playerName(p.dropped_player_id),added:playerName(p.added_player_id)}};
+        case "waiver_submitted": return {title:`Waiver claim submitted: ${rosterPlayer}`,body:`Priority ${p.priority||1}. The claim remains subject to league lock rules.`,view:"transactions"};
+        case "lineup_lock_warning": {
+          const start=p.starts_at?new Date(p.starts_at):null;
+          const when=start&&!Number.isNaN(start.getTime())?start.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}):"soon";
+          return {title:`${rosterPlayer} locks soon`,body:`Lineup locks at ${when}. Check your starter/bench decision now.`,view:"team"};
+        }
+        case "fantasy_period_started": return {title:p.label||`Fantasy Round ${p.round_number||""} started`,body:`${p.match_count||0} pro match${Number(p.match_count)===1?"":"es"} in this scoring period.`,view:"matchup"};
+        case "matchup_final": {
+          const outcome=String(p.outcome||"").toUpperCase();
+          return {title:`Matchup final · ${outcome}`,body:`${formatFantasyPoints(p.your_score)} - ${formatFantasyPoints(p.opponent_score)} FP`,view:"matchup"};
+        }
         default:return {title:"League update",body:"New activity in your league.",view:"league"};
       }
     };
@@ -3237,7 +3214,7 @@ async function loadNotifications({open=false}={}){
         ? `<span class="notification-swap"><span class="swap-drop">${h(d.swap.dropped)}</span><span class="swap-arrow">→</span><span class="swap-add">${h(d.swap.added)}</span></span><small>Dropped one player and added another.</small>`
         : `<small>${h(d.body)}</small>`;
       return `<button class="notification-item ${n.read_at?"":"unread"}" data-notification-view="${h(d.view)}" data-notification-id="${h(n.id)}"><span class="notification-dot"></span><span class="notification-copy"><strong>${h(d.title)}</strong>${detail}<em>${h(league?.name||"League")} · ${h(fmt(n.created_at))}</em></span></button>`;
-    }).join(""):'<div class="empty-state"><strong>No notifications yet</strong><small>Trades and league roster changes will appear here.</small></div>';
+    }).join(""):'<div class="empty-state"><strong>No notifications yet</strong><small>Lineup locks, fantasy periods, matchup results, trades, and roster activity will appear here.</small></div>';
 
     notificationList.querySelectorAll("[data-notification-view]").forEach(item=>item.onclick=async()=>{
       if(!item.classList.contains("unread")){closeNotifications();render(item.dataset.notificationView);return;}
