@@ -42,6 +42,89 @@ function lastFrame(frames:any[]){
   return [...(Array.isArray(frames)?frames:[])].sort((a,b)=>Date.parse(a?.rfc460Timestamp||"")-Date.parse(b?.rfc460Timestamp||"")).at(-1)||null;
 }
 function normalizeId(v:any){return String(v||"").toLowerCase().replace(/[^a-z0-9]+/g,"-");}
+function normalizeName(v:any){return String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");}
+function parseCsvLine(line:string){
+  const out:string[]=[];
+  let field="",quoted=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(quoted){
+      if(ch==='"'&&line[i+1]==='"'){field+='"';i++;}
+      else if(ch==='"')quoted=false;
+      else field+=ch;
+    }else{
+      if(ch==='"')quoted=true;
+      else if(ch===','){out.push(field);field="";}
+      else field+=ch;
+    }
+  }
+  out.push(field);
+  return out;
+}
+async function loadChainccRows(targetDates:Set<string>){
+  const year=new Date().getUTCFullYear();
+  const url=`https://chaincc.lol/data/chaincc-players-${year}.csv.gz`;
+  const res=await fetch(url,{headers:{
+    "user-agent":"Mozilla/5.0",
+    "referer":"https://chaincc.lol/free/data",
+    "accept":"application/gzip, application/octet-stream;q=0.9, */*;q=0.8"
+  },signal:AbortSignal.timeout(30000)});
+  if(!res.ok)throw new Error("ChainCC download failed: "+res.status);
+  const stream=res.body?.pipeThrough(new DecompressionStream("gzip"));
+  if(!stream)throw new Error("ChainCC gzip stream unavailable");
+  const text=await new Response(stream).text();
+  const lines=text.split(/\r?\n/);
+  if(lines.length<2)return [];
+  const headers=parseCsvLine(lines[0]).map(h=>h.trim().toLowerCase());
+  const ix=(name:string)=>headers.indexOf(name);
+  const idx={
+    game:ix("game_id"),date:ix("date"),league:ix("league"),
+    team:ix("team_name"),opp:ix("opponent_team_name"),
+    player:ix("playername"),result:ix("result"),
+    kills:ix("kills"),deaths:ix("deaths"),assists:ix("assists"),
+    cs:ix("total_cs"),fb:ix("firstbloodkill")
+  };
+  const rows:any[]=[];
+  for(let i=1;i<lines.length;i++){
+    const line=lines[i];
+    if(!line)continue;
+    const values=parseCsvLine(line);
+    const date=idx.date>=0?String(values[idx.date]||"").slice(0,10):"";
+    if(!targetDates.has(date))continue;
+    const bool=(v:any)=>{
+      const x=String(v||"").trim().toLowerCase();
+      if(x==="true"||x==="1")return true;
+      if(x==="false"||x==="0")return false;
+      return null;
+    };
+    rows.push({
+      gameId:idx.game>=0?values[idx.game]:null,
+      date,
+      league:idx.league>=0?values[idx.league]:null,
+      team:idx.team>=0?values[idx.team]:null,
+      opponent:idx.opp>=0?values[idx.opp]:null,
+      player:idx.player>=0?values[idx.player]:null,
+      result:idx.result>=0?bool(values[idx.result]):null,
+      firstBlood:idx.fb>=0?bool(values[idx.fb]):null,
+      kills:idx.kills>=0?Number(values[idx.kills]):null,
+      deaths:idx.deaths>=0?Number(values[idx.deaths]):null,
+      assists:idx.assists>=0?Number(values[idx.assists]):null,
+      cs:idx.cs>=0?Number(values[idx.cs]):null
+    });
+  }
+  return rows;
+}
+function findChainccStat(chainRows:any[],playerName:string,kills:number,deaths:number,assists:number,cs:number){
+  const nameKey=normalizeName(playerName);
+  const candidates=chainRows.filter(r=>
+    normalizeName(r.player)===nameKey &&
+    Number(r.kills)===Number(kills) &&
+    Number(r.deaths)===Number(deaths) &&
+    Number(r.assists)===Number(assists) &&
+    Number(r.cs)===Number(cs)
+  );
+  return candidates.length===1?candidates[0]:null;
+}
 
 async function firstBloodParticipant(gameId:string){
   let payload:any;
@@ -88,24 +171,6 @@ Deno.serve(async(req:Request)=>{
     const serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if(!supabaseUrl||!serviceKey)throw new Error("Supabase service credentials unavailable");
     const supabase=createClient(supabaseUrl,serviceKey,{auth:{persistSession:false}});
-
-    if(body?.debugChaincc){
-      const year=new Date().getUTCFullYear();
-      const url=`https://chaincc.lol/data/chaincc-players-${year}.csv.gz`;
-      const res=await fetch(url,{headers:{
-        "user-agent":"Mozilla/5.0",
-        "referer":"https://chaincc.lol/free/data",
-        "accept":"application/gzip, application/octet-stream;q=0.9, */*;q=0.8"
-      },signal:AbortSignal.timeout(30000)});
-      const bytes=new Uint8Array(await res.arrayBuffer());
-      let sample="";
-      if(res.ok&&bytes.length){
-        const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
-        const text=await new Response(stream).text();
-        sample=text.slice(0,1000);
-      }
-      return new Response(JSON.stringify({status:res.status,bytes:bytes.length,sample}),{headers:{"content-type":"application/json"}});
-    }
 
     if(body?.debugMatch){
       const event=await eventDetails(String(body.debugMatch));
@@ -164,6 +229,25 @@ Deno.serve(async(req:Request)=>{
     if(body?.matchId)query=query.eq("id",String(body.matchId));
     const {data:matches,error:matchError}=await query;
     if(matchError)throw matchError;
+
+    const chainDates=new Set<string>();
+    for(const m of (matches||[])){
+      const t=Date.parse(m.start_time||"");
+      if(Number.isFinite(t)){
+        for(const delta of [-1,0,1]){
+          chainDates.add(new Date(t+delta*86400000).toISOString().slice(0,10));
+        }
+      }
+    }
+    let chainRows:any[]|null=null;
+    const getChainRows=async()=>{
+      if(chainRows!==null)return chainRows;
+      try{chainRows=await loadChainccRows(chainDates);}catch(err){
+        console.warn("ChainCC enrichment unavailable",err);
+        chainRows=[];
+      }
+      return chainRows;
+    };
 
     const {data:players,error:playerError}=await supabase
       .from("fantasy_players")
@@ -245,7 +329,7 @@ Deno.serve(async(req:Request)=>{
           ];
           const metaByParticipant=new Map(metaPlayers.map((p:any)=>[Number(p.participantId),p]));
           const statByParticipant=new Map((df?.participants||[]).map((p:any)=>[Number(p.participantId),p]));
-          const firstBloodId=null;
+          let firstBloodId:any=null;
 
           let winnerTeamId:any=null;
           for(const t of (game?.teams||[])){
@@ -261,6 +345,7 @@ Deno.serve(async(req:Request)=>{
 
           const rows:any[]=[];
           const unmapped:string[]=[];
+          const chaincc=await getChainRows();
           for(const [participantId,meta] of metaByParticipant){
             const stat:any=statByParticipant.get(participantId);
             if(!stat)continue;
@@ -272,6 +357,13 @@ Deno.serve(async(req:Request)=>{
             const opponentTeamId=teamId===String(blueMeta?.esportsTeamId||blueSide?.id||"")
               ? String(redMeta?.esportsTeamId||redSide?.id||"")||null
               : String(blueMeta?.esportsTeamId||blueSide?.id||"")||null;
+            const k=Number(stat.kills)||0;
+            const d=Number(stat.deaths)||0;
+            const a=Number(stat.assists)||0;
+            const cs=Number(stat.creepScore)||0;
+            const chainStat=findChainccStat(chaincc,String(fp.name||meta.summonerName||""),k,d,a,cs);
+            if(chainStat?.firstBlood===true)firstBloodId=participantId;
+            const rowWin=winnerTeamId?teamId===winnerTeamId:(chainStat?.result??null);
             rows.push({
               game_id:gameId,
               match_id:match.id,
@@ -282,12 +374,12 @@ Deno.serve(async(req:Request)=>{
               role:roleMap(meta.role)||fp.role,
               summoner_name:String(meta.summonerName||fp.name),
               champion_id:String(meta.championId||"")||null,
-              kills:Number(stat.kills)||0,
-              deaths:Number(stat.deaths)||0,
-              assists:Number(stat.assists)||0,
-              cs:Number(stat.creepScore)||0,
-              win:winnerTeamId?teamId===winnerTeamId:null,
-              first_blood:firstBloodId===null?null:firstBloodId===participantId,
+              kills:k,
+              deaths:d,
+              assists:a,
+              cs,
+              win:rowWin,
+              first_blood:chainStat?.firstBlood??null,
               total_gold:Number(stat.totalGold)||null,
               total_gold_earned:Number(stat.totalGoldEarned)||null,
               wards_placed:Number(stat.wardsPlaced)||null,
@@ -300,11 +392,22 @@ Deno.serve(async(req:Request)=>{
             });
           }
 
+          if(!winnerTeamId){
+            const winnerRow=rows.find(r=>r.win===true);
+            if(winnerRow?.team_id)winnerTeamId=winnerRow.team_id;
+          }
+          if(firstBloodId===null){
+            const fbRow=rows.find(r=>r.first_blood===true);
+            if(fbRow)firstBloodId=fbRow.participant_id;
+          }
+
           if(rows.length){
             const {error:statsError}=await supabase.from("player_game_stats").upsert(rows,{onConflict:"game_id,player_id"});
             if(statsError)throw statsError;
           }
-          const complete=rows.length===10&&unmapped.length===0;
+          const winComplete=rows.length===10&&rows.every(r=>r.win===true||r.win===false);
+          const firstBloodComplete=rows.filter(r=>r.first_blood===true).length===1;
+          const complete=rows.length===10&&unmapped.length===0&&winComplete&&firstBloodComplete;
           const {error:gameError}=await supabase.from("pro_games").update({
             state:"completed",
             blue_team_id:String(blueMeta?.esportsTeamId||blueSide?.id||"")||null,
@@ -315,9 +418,15 @@ Deno.serve(async(req:Request)=>{
             source_timestamp:df?.rfc460Timestamp||wf?.rfc460Timestamp||null,
             stats_status:complete?"final":"error",
             first_blood_player_id:firstBloodId?String((rows.find(r=>r.participant_id===firstBloodId)||{}).player_id||"")||null:null,
-            first_blood_status:firstBloodId?"final":"unavailable",
+            first_blood_status:firstBloodComplete?"final":"pending",
             stats_ingested_at:new Date().toISOString(),
-            ingest_error:complete?null:(unmapped.length?"Unmapped players: "+unmapped.join(", "):"Expected 10 player stat rows, received "+rows.length),
+            ingest_error:complete?null:(
+              unmapped.length?"Unmapped players: "+unmapped.join(", "):
+              rows.length!==10?"Expected 10 player stat rows, received "+rows.length:
+              !winComplete?"Game winner not yet resolved":
+              !firstBloodComplete?"First Blood not yet resolved":
+              "Stat finalization incomplete"
+            ),
             updated_at:new Date().toISOString()
           }).eq("id",gameId);
           if(gameError)throw gameError;
