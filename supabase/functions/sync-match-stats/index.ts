@@ -89,6 +89,24 @@ Deno.serve(async(req:Request)=>{
     if(!supabaseUrl||!serviceKey)throw new Error("Supabase service credentials unavailable");
     const supabase=createClient(supabaseUrl,serviceKey,{auth:{persistSession:false}});
 
+    if(body?.debugChaincc){
+      const year=new Date().getUTCFullYear();
+      const url=`https://chaincc.lol/data/chaincc-players-${year}.csv.gz`;
+      const res=await fetch(url,{headers:{
+        "user-agent":"Mozilla/5.0",
+        "referer":"https://chaincc.lol/free/data",
+        "accept":"application/gzip, application/octet-stream;q=0.9, */*;q=0.8"
+      },signal:AbortSignal.timeout(30000)});
+      const bytes=new Uint8Array(await res.arrayBuffer());
+      let sample="";
+      if(res.ok&&bytes.length){
+        const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+        const text=await new Response(stream).text();
+        sample=text.slice(0,1000);
+      }
+      return new Response(JSON.stringify({status:res.status,bytes:bytes.length,sample}),{headers:{"content-type":"application/json"}});
+    }
+
     if(body?.debugMatch){
       const event=await eventDetails(String(body.debugMatch));
       const match=event?.data?.event?.match||{};
