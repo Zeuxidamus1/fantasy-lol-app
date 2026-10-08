@@ -345,6 +345,43 @@ function getUserRoster(){
   }
 }
 
+function formatFantasyPoints(value){
+  const n=Number(value);
+  return Number.isFinite(n)?n.toFixed(2):"0.00";
+}
+function fantasyBreakdownRows(breakdown={}){
+  const labels={kills:"Kills",deaths:"Deaths",assists:"Assists",cs:"CS",win:"Win",firstBlood:"First Blood"};
+  return Object.entries(labels).map(([key,label])=>{
+    const row=breakdown?.[key]||{};
+    const stat=Number(row.stat)||0;
+    const mult=Number(row.multiplier)||0;
+    const pts=Number(row.points)||0;
+    return {key,label,stat,mult,pts};
+  });
+}
+function renderFantasyBreakdown(score){
+  const rows=fantasyBreakdownRows(score?.breakdown||{});
+  return `<details class="fantasy-score-breakdown">
+    <summary>View score breakdown</summary>
+    <div class="fantasy-score-math">${rows.map(r=>`
+      <div><span>${h(r.label)}</span><strong>${h(String(r.stat))} × ${h(String(r.mult))} = ${r.pts>=0?"+":""}${h(formatFantasyPoints(r.pts))}</strong></div>`).join("")}</div>
+  </details>`;
+}
+function aggregateFantasyScores(scores=[]){
+  const map=new Map();
+  for(const score of scores){
+    const key=String(score.player_id);
+    const current=map.get(key)||{player_id:key,total:0,live:false,finalized:true,games:0,latest:null,rows:[]};
+    current.total+=Number(score.fantasy_points)||0;
+    current.games+=1;
+    current.live=current.live||!score.finalized;
+    current.finalized=current.finalized&&!!score.finalized;
+    current.latest=!current.latest||Date.parse(score.updated_at||"")>Date.parse(current.latest.updated_at||"")?score:current.latest;
+    current.rows.push(score);
+    map.set(key,current);
+  }
+  return map;
+}
 function getActiveLeagueId(){
   return storageGet("riftActiveLeagueId")||null;
 }
@@ -1663,14 +1700,30 @@ function render(view="home",options={}){
       (async()=>{
         try{
           const b=backend();
-          const [members,bots,leagues,user]=await Promise.all([b.listLeagueMembers(leagueId),b.listLeagueBots(leagueId),b.listLeagues(),b.currentUser()]);
+          const [members,bots,leagues,user,rosters,scores]=await Promise.all([
+            b.listLeagueMembers(leagueId),
+            b.listLeagueBots(leagueId),
+            b.listLeagues(),
+            b.currentUser(),
+            b.listRosters(leagueId),
+            b.listFantasyGameScores(leagueId)
+          ]);
           const league=leagues.find(l=>String(l.id)===String(leagueId));
           const name=document.querySelector("#standingsLeagueName");
           if(name)name.textContent=String(league?.name||"League").toUpperCase();
+          const scoreByPlayer=aggregateFantasyScores(scores);
+          const pointsByManager=new Map();
+          for(const rosterRow of rosters){
+            if(String(rosterRow.slot||"").toUpperCase()==="BN")continue;
+            const managerId=String(rosterRow.user_id);
+            const playerScore=scoreByPlayer.get(String(rosterRow.player_id));
+            pointsByManager.set(managerId,(pointsByManager.get(managerId)||0)+(playerScore?.total||0));
+          }
           const managers=[
             ...members.map(m=>({...m,managerType:"human"})),
             ...bots.map(bot=>({user_id:bot.id,team_name:bot.team_name,role:"bot",managerType:"bot"}))
-          ];
+          ].map(m=>({...m,points:pointsByManager.get(String(m.user_id))||0}))
+           .sort((a,b)=>b.points-a.points||String(a.team_name||"").localeCompare(String(b.team_name||"")));
           list.innerHTML=managers.length?managers.map((m,index)=>{
             const mine=m.managerType==="human"&&String(m.user_id)===String(user?.id);
             const detail=m.managerType==="bot"?"🤖 Bot":(m.role==="owner"?"Commissioner":"Manager")+(mine?" · You":"");
@@ -1678,11 +1731,65 @@ function render(view="home",options={}){
               <span class="rank">${index+1}</span>
               <div class="standing-live-team"><strong>${h(m.team_name||"Unnamed Team")}</strong><small>${h(detail)}</small></div>
               <div class="standing-live-record"><strong>—</strong><small>Record</small></div>
-              <div class="standing-live-points"><strong>—</strong><small>FP</small></div>
+              <div class="standing-live-points"><strong>${formatFantasyPoints(m.points)}</strong><small>FP</small></div>
             </div>`;
           }).join(""):'<div class="empty-state"><strong>No managers found</strong><small>League members will appear here.</small></div>';
         }catch(err){
           list.innerHTML='<div class="empty-state"><strong>Could not load standings</strong><small>'+h(err.message||"Try again later.")+'</small></div>';
+        }
+      })();
+    }
+  }
+  if(view==="matchup"){
+    const leagueId=getActiveLeagueId();
+    const list=document.querySelector("#matchupScoreList");
+    const title=document.querySelector("#matchupLeagueName");
+    const status=document.querySelector("#matchupScoreStatus");
+    if(!leagueId||!cloudReady()){
+      list.innerHTML='<div class="empty-state"><strong>No active league</strong><small>Select a league to view live fantasy scoring.</small></div>';
+      status.textContent="OFFLINE";
+    }else{
+      (async()=>{
+        try{
+          const b=backend();
+          const [user,leagues,rosters,scores]=await Promise.all([
+            b.currentUser(),
+            b.listLeagues(),
+            b.listRosters(leagueId),
+            b.listFantasyGameScores(leagueId)
+          ]);
+          const league=leagues.find(l=>String(l.id)===String(leagueId));
+          if(title)title.textContent=String(league?.name||"League");
+          const mine=rosters.filter(r=>String(r.user_id)===String(user?.id)&&String(r.slot||"").toUpperCase()!=="BN");
+          const source=allFantasyPlayers();
+          const byPlayer=aggregateFantasyScores(scores);
+          const rows=mine.map(r=>{
+            const p=source.find(x=>playerKey(x)===String(r.player_id)||String(x.id||"")===String(r.player_id))||{name:r.player_id,team:"",role:r.slot};
+            const score=byPlayer.get(String(r.player_id))||{total:0,live:false,finalized:true,latest:null,rows:[]};
+            return {roster:r,player:p,score};
+          });
+          const anyLive=rows.some(x=>x.score.live);
+          const total=rows.reduce((sum,x)=>sum+x.score.total,0);
+          status.textContent=anyLive?"LIVE":"UPDATED";
+          status.classList.toggle("live",anyLive);
+          list.innerHTML=rows.length?[
+            `<div class="fantasy-team-total"><span>Starting lineup total</span><strong>${formatFantasyPoints(total)} FP</strong></div>`,
+            ...rows.map(({roster,player,score})=>{
+              const latest=score.latest;
+              const state=score.live?"LIVE":(score.games?"FINAL":"NO GAMES");
+              return `<article class="fantasy-score-row">
+                <div class="fantasy-score-player">
+                  <span class="role">${h(roster.slot||player.role||"")}</span>
+                  <div><strong>${h(player.name||roster.player_id)}</strong><small>${h(player.team||"")}</small></div>
+                </div>
+                <div class="fantasy-score-total"><span class="${score.live?"live":""}">${state}</span><strong>${formatFantasyPoints(score.total)} FP</strong></div>
+                ${latest?renderFantasyBreakdown(latest):'<small class="fantasy-no-score">No scored professional games yet.</small>'}
+              </article>`;
+            })
+          ].join(""):'<div class="empty-state"><strong>No starters found</strong><small>Complete your starting lineup to see live fantasy scoring.</small></div>';
+        }catch(err){
+          status.textContent="ERROR";
+          list.innerHTML='<div class="empty-state"><strong>Could not load scoring</strong><small>'+h(err.message||"Try again later.")+'</small></div>';
         }
       })();
     }
