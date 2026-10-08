@@ -505,6 +505,12 @@
     return request("/rest/v1/rpc/accept_trade",{method:"POST",body:{p_trade_id:id},session:current});
   }
 
+  async function reviewTrade(id,approve){
+    const current=await session();
+    if(!current)throw new Error("Sign in before reviewing a trade.");
+    return request("/rest/v1/rpc/review_trade",{method:"POST",body:{p_trade_id:id,p_approve:!!approve},session:current});
+  }
+
   captureAuthCallback();
 
   window.RiftBackend=Object.freeze({
@@ -517,7 +523,7 @@
     listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,listLineupLocks,listPlayerCompetitionStatus,listPlayerProjections,listPlayoffs,getLeagueChampion,listLeagueActivity,listLeagueHistory,listScoreCorrections,listWaiverPriority,listDataSourceHealth,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
     listNotifications,markNotificationsRead,
-    listTrades,createTrade,updateTrade,acceptTrade,
+    listTrades,createTrade,updateTrade,acceptTrade,reviewTrade,
     getOpsSnapshot,logClientError,
     request
   });
