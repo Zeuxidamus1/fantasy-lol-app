@@ -109,7 +109,7 @@ function competitionType(value){
   return COMPETITION_META[code]?.type || "international";
 }
 function scheduleCompetitionCode(game){
-  return normalizeCompetitionCode(game?.leagueCode||game?.league||"");
+  return normalizeCompetitionCode(game?.competition||game?.leagueCode||game?.league||"");
 }
 function normalizeTeamKey(value){return String(value||"").toLowerCase().replace(/[^a-z0-9]/g,"");}
 
