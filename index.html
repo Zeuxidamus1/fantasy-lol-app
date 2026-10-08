@@ -316,17 +316,29 @@
   <template id="matchup-template">
     <section class="stack">
       <div class="section-title">
-        <div><div class="eyebrow">HEAD TO HEAD</div><h2>Live Fantasy Scoring</h2></div>
+        <div><div class="eyebrow" id="matchupLeagueEyebrow">HEAD TO HEAD</div><h2 id="matchupLeagueName">Matchup</h2></div>
         <button class="text-btn" data-jump="standings">Standings</button>
       </div>
-      <section class="card">
-        <div class="section-head">
-          <div><div class="eyebrow">YOUR ROSTER</div><h3 id="matchupLeagueName">Current scoring</h3></div>
-          <span class="status-pill" id="matchupScoreStatus">UPDATING</span>
+
+      <section class="card matchup-round-card">
+        <div class="matchup-round-nav">
+          <button class="secondary-btn compact-btn" id="matchupPrevRound" aria-label="Previous fantasy round">←</button>
+          <div>
+            <div class="eyebrow" id="matchupRoundStatus">FANTASY ROUND</div>
+            <h3 id="matchupRoundLabel">Round —</h3>
+            <small id="matchupRoundDates">Loading scoring period…</small>
+          </div>
+          <button class="secondary-btn compact-btn" id="matchupNextRound" aria-label="Next fantasy round">→</button>
         </div>
-        <p class="profile-copy" id="matchupScoreCopy">Fantasy points update from official game stats about every five minutes. Completed games are locked as final.</p>
-        <div id="matchupScoreList" class="fantasy-score-list"></div>
       </section>
+
+      <section class="card" id="matchupMainCard">
+        <div id="matchupScoreList" class="fantasy-matchup-board">
+          <div class="empty-state"><strong>Loading matchup…</strong><small>Syncing fantasy round, opponent, lineups, and scoring.</small></div>
+        </div>
+      </section>
+
+      <p class="profile-disclaimer">Only starting players and FLEX score. Bench players do not count. Live professional stats refresh about every five minutes; completed games are final.</p>
     </section>
   </template>
 
