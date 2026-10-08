@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="styles.css?v=20261005-45" />
 </head>
 <body>
+  <a class="skip-link" href="#app">Skip to main content</a>
   <noscript><div class="no-js-message">Rift Fantasy requires JavaScript to run. Enable JavaScript and reload the page.</div></noscript>
   <div class="app-shell">
     <header class="topbar">
@@ -180,11 +181,29 @@
         <div class="section-head"><div><div class="eyebrow">SIGNED IN</div><h3 id="signedInEmail">Manager</h3></div><span class="verified-badge">CLOUD</span></div>
         <button class="secondary-btn" id="signOutBtn">Sign Out</button>
       </section>
+      <section class="card setup-card" id="opsCard" hidden>
+        <div class="section-head"><div><div class="eyebrow">PLATFORM OPERATIONS</div><h3>System health</h3></div><span class="status-pill" id="opsStatus">CHECKING</span></div>
+        <div id="opsSummary" class="profile-stats"></div>
+        <div id="opsDetails" class="stack tight"></div>
+      </section>
     </section>
   </template>
 
   <template id="home-template">
     <section class="stack home-esports">
+      <section class="card onboarding-card" id="onboardingCard" hidden>
+        <div class="section-head">
+          <div><div class="eyebrow">START HERE</div><h3>Fantasy LoL in four steps</h3></div>
+          <button class="text-btn" id="dismissOnboarding" type="button">Dismiss</button>
+        </div>
+        <div class="onboarding-steps">
+          <div><strong>1</strong><span>Create or join a league</span></div>
+          <div><strong>2</strong><span>Draft professional players</span></div>
+          <div><strong>3</strong><span>Set starters before their matches lock</span></div>
+          <div><strong>4</strong><span>Real LoL stats become fantasy points</span></div>
+        </div>
+        <button class="primary-btn" data-jump="league">Go to League</button>
+      </section>
       <div class="section-title">
         <div><div class="eyebrow">PRO LEAGUE OF LEGENDS</div><h2>Home</h2></div>
         <div class="schedule-title-actions">
@@ -436,6 +455,17 @@
         <div class="profile-projection"><small>Season KDA</small><strong id="profileProjection">—</strong></div>
       </section>
 
+      <section class="card player-live-outlook" id="playerLiveOutlook">
+        <div class="section-head"><div><div class="eyebrow">CURRENT FANTASY WINDOW</div><h3>Availability & projection</h3></div><span class="status-pill" id="profileAvailability">CHECKING</span></div>
+        <div class="profile-stats">
+          <div class="profile-stat"><small>Projected FP</small><strong id="profileProjectedFp">—</strong></div>
+          <div class="profile-stat"><small>Expected matches</small><strong id="profileExpectedGames">—</strong></div>
+          <div class="profile-stat"><small>Recent FP/game</small><strong id="profileRecentFp">—</strong></div>
+          <div class="profile-stat"><small>Next match</small><strong id="profileNextMatch">—</strong></div>
+        </div>
+        <p class="profile-disclaimer">Projection only. Actual fantasy points always come from verified professional match stats.</p>
+      </section>
+
       <div class="profile-actions three-actions">
         <button class="primary-btn" id="profileAddBtn">Add Player</button>
         <button class="secondary-btn" id="profileWaiverBtn">Waiver Claim</button>
@@ -557,6 +587,21 @@
         </div>
       </section>
 
+      <section class="card" id="leaguePlayoffCard" hidden>
+        <div class="section-head"><div><div class="eyebrow">POSTSEASON</div><h3>Playoffs & Championship</h3></div><span class="status-pill" id="leagueChampionPill">PLAYOFFS</span></div>
+        <div id="leaguePlayoffContent" class="stack tight"></div>
+      </section>
+
+      <section class="card" id="leagueActivityCard" hidden>
+        <div class="section-head"><div><div class="eyebrow">LEAGUE FEED</div><h3>Recent activity</h3></div></div>
+        <div id="leagueActivityContent" class="stack tight"></div>
+      </section>
+
+      <section class="card" id="leagueHistoryCard" hidden>
+        <div class="section-head"><div><div class="eyebrow">HISTORY</div><h3>Completed seasons & events</h3></div></div>
+        <div id="leagueHistoryContent" class="stack tight"></div>
+      </section>
+
       <section class="card cloud-league-card" id="cloudLeagueCard">
         <div class="section-head">
           <div>
@@ -631,7 +676,7 @@
         <button class="chip" data-transaction-tab="history">My History</button>
         <button class="chip" data-transaction-tab="activity">League Activity</button>
       </div>
-      <section class="card waiver-info"><div class="section-head"><div><div class="eyebrow">WAIVERS</div><h3>League claims</h3></div></div><p>Claims are shared with your league. Automatic scheduled waiver processing is not enabled yet.</p></section>
+      <section class="card waiver-info"><div class="section-head"><div><div class="eyebrow">WAIVERS</div><h3>League claims</h3></div><span class="status-pill">AUTOMATIC</span></div><p>Claims process automatically. Higher waiver priority wins competing claims; successful managers move to the back of the priority order.</p><small id="waiverPriorityCopy"></small></section>
       <div id="transactionContent" class="stack tight"></div>
       <div class="grid-two">
         <button class="wide-link-btn" data-jump="players">Browse players →</button>
