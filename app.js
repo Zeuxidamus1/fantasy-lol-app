@@ -1679,12 +1679,30 @@ function render(view="home",options={}){
       }
       try{
         const b=backend();
-        const [user,rosters,leagues]=await Promise.all([b.currentUser(),b.listRosters(leagueId),b.listLeagues()]);
+        const [user,rosters,leagues,statusRows,projectionRows,rounds]=await Promise.all([
+          b.currentUser(),b.listRosters(leagueId),b.listLeagues(),
+          b.listPlayerCompetitionStatus().catch(()=>[]),
+          b.listPlayerProjections(leagueId).catch(()=>[]),
+          b.listFantasyRounds(leagueId).catch(()=>[])
+        ]);
         const league=leagues.find(l=>String(l.id)===String(leagueId));
+        const leagueCompetition=normalizeCompetitionCode(league?.settings?.competition)||"worlds";
+        const playerStatus=statusRows.find(x=>String(x.player_id)===playerKey(p)&&normalizeCompetitionCode(x.competition)===leagueCompetition);
+        const currentRound=rounds.find(r=>r.status==="live")||rounds.find(r=>r.status==="upcoming");
+        const projection=projectionRows.find(x=>String(x.player_id)===playerKey(p)&&(!currentRound||Number(x.round_number)===Number(currentRound.round_number)));
+        const availability=document.querySelector("#profileAvailability");
+        if(availability)availability.textContent=String(playerStatus?.status||"unknown").replaceAll("_"," ").toUpperCase();
+        const projected=document.querySelector("#profileProjectedFp");
+        const expected=document.querySelector("#profileExpectedGames");
+        const recent=document.querySelector("#profileRecentFp");
+        const nextMatch=document.querySelector("#profileNextMatch");
+        if(projected)projected.textContent=projection?formatFantasyPoints(projection.projected_fp):"—";
+        if(expected)expected.textContent=projection?String(projection.expected_games):String(playerStatus?.remaining_matches??"—");
+        if(recent)recent.textContent=projection?formatFantasyPoints(projection.recent_avg_fp):"—";
+        if(nextMatch){const d=playerStatus?.next_match_at?new Date(playerStatus.next_match_at):null;nextMatch.textContent=d&&!Number.isNaN(d.getTime())?d.toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}):"—";}
         const ownership=rosters.find(r=>String(r.player_id)===playerKey(p));
         const mine=ownership&&String(ownership.user_id)===String(user?.id);
         const other=ownership&&!mine;
-        const leagueCompetition=normalizeCompetitionCode(league?.settings?.competition)||"worlds";
         const eligible=playerEligibleForCompetition(p,leagueCompetition);
         const draftable=playerIsDraftable(p);
 
