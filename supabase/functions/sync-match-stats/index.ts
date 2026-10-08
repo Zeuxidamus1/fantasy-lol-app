@@ -12,7 +12,7 @@ async function sha256(value:string){
   return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");
 }
 async function jsonFetch(url:string){
-  const res=await fetch(url,{headers:{"x-api-key":API_KEY,"accept":"application/json"},signal:AbortSignal.timeout(15000)});
+  const res=await fetch(url,{headers:{"x-api-key":API_KEY,"accept":"application/json"},signal:AbortSignal.timeout(12000)});
   if(!res.ok)throw new Error(url+" -> "+res.status);
   const body=await res.text();
   if(!body.trim())return {};
@@ -171,6 +171,26 @@ Deno.serve(async(req:Request)=>{
     const serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if(!supabaseUrl||!serviceKey)throw new Error("Supabase service credentials unavailable");
     const supabase=createClient(supabaseUrl,serviceKey,{auth:{persistSession:false}});
+    const markHealth=async(source:string,ok:boolean,error:any=null,details:any={})=>{
+      const now=new Date().toISOString();
+      const {data:current}=await supabase.from("data_source_health")
+        .select("consecutive_errors,last_success_at")
+        .eq("source",source).maybeSingle();
+      const nextErrors=ok?0:(Number(current?.consecutive_errors)||0)+1;
+      const lastSuccess=current?.last_success_at?Date.parse(current.last_success_at):0;
+      const delayed=!ok&&lastSuccess&&Date.now()-lastSuccess<10*60*1000;
+      await supabase.from("data_source_health").upsert({
+        source,
+        status:ok?"healthy":(delayed?"delayed":"error"),
+        last_attempt_at:now,
+        last_success_at:ok?now:(current?.last_success_at||null),
+        last_error_at:ok?null:now,
+        consecutive_errors:nextErrors,
+        last_error:ok?null:String(error instanceof Error?error.message:error||"Unknown error").slice(0,500),
+        details:{...details,last_mode:String(body?.mode||"all")},
+        updated_at:now
+      },{onConflict:"source"});
+    };
 
     if(body?.debugMatch){
       const event=await eventDetails(String(body.debugMatch));
@@ -220,10 +240,16 @@ Deno.serve(async(req:Request)=>{
       }),{headers:{"content-type":"application/json"}});
     }
 
+    const mode=String(body?.mode||"all").toLowerCase();
+    const statuses=mode==="live"
+      ? ["INPROGRESS","IN_PROGRESS"]
+      : mode==="settle"
+        ? ["COMPLETED"]
+        : ["COMPLETED","INPROGRESS","IN_PROGRESS"];
     let query=supabase.from("pro_matches")
       .select("id,competition,start_time,status,team_a_id,team_b_id")
       .lte("start_time",new Date().toISOString())
-      .in("status",["COMPLETED","INPROGRESS","IN_PROGRESS"])
+      .in("status",statuses)
       .order("start_time",{ascending:false})
       .limit(Math.max(1,Math.min(20,Number(body?.limit)||8)));
     if(body?.matchId)query=query.eq("id",String(body.matchId));
@@ -242,8 +268,12 @@ Deno.serve(async(req:Request)=>{
     let chainRows:any[]|null=null;
     const getChainRows=async()=>{
       if(chainRows!==null)return chainRows;
-      try{chainRows=await loadChainccRows(chainDates);}catch(err){
+      try{
+        chainRows=await loadChainccRows(chainDates);
+        await markHealth("chaincc",true,null,{rows:chainRows.length});
+      }catch(err){
         console.warn("ChainCC enrichment unavailable",err);
+        await markHealth("chaincc",false,err);
         chainRows=[];
       }
       return chainRows;
@@ -257,9 +287,12 @@ Deno.serve(async(req:Request)=>{
     const byTeamName=new Map((players||[]).map((p:any)=>[String(p.team_id||"")+"|"+String(p.name||"").toLowerCase(),p]));
 
     const summary:any[]=[];
+    let riotSuccesses=0;
+    let riotFailures=0;
     for(const match of (matches||[])){
       try{
         const event=await eventDetails(match.id);
+        riotSuccesses++;
         const evt=event?.data?.event;
         const games=evt?.match?.games||[];
 
@@ -476,11 +509,25 @@ Deno.serve(async(req:Request)=>{
         }
         summary.push({matchId:match.id,games:games.length,finalized:finalGames});
       }catch(err){
+        riotFailures++;
         summary.push({matchId:match.id,error:err instanceof Error?err.message:String(err)});
       }
     }
 
-    return new Response(JSON.stringify({ok:true,matches:summary}),{headers:{"content-type":"application/json"}});
+    if(riotFailures===0){
+      await markHealth("riot_esports",true,null,{matches:summary.length,successful_matches:riotSuccesses});
+    }else if(riotSuccesses>0){
+      await markHealth("riot_esports",true,null,{matches:summary.length,successful_matches:riotSuccesses});
+      await markHealth("riot_esports",false,"Partial Riot esports sync failure",{
+        matches:summary.length,successful_matches:riotSuccesses,failed_matches:riotFailures,partial_failure:true
+      });
+    }else if(summary.length){
+      await markHealth("riot_esports",false,summary.find(x=>x.error)?.error||"Riot esports sync failed",{
+        matches:summary.length,failed_matches:riotFailures
+      });
+    }
+
+    return new Response(JSON.stringify({ok:true,mode,matches:summary}),{headers:{"content-type":"application/json"}});
   }catch(err){
     return new Response(JSON.stringify({error:err instanceof Error?err.message:String(err)}),{status:500,headers:{"content-type":"application/json"}});
   }
