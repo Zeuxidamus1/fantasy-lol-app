@@ -2319,6 +2319,7 @@ function render(view="home",options={}){
     let selectedTheirs=tradePrefill.side==="theirs"?tradePrefill.id:null;
     tradePrefill={id:null,side:null};
     let user=null,members=[],rosters=[],trades=[];
+    let isCommissioner=false;
     const playerFromId=id=>playerById(id)||{id,name:id,team:"",role:""};
 
     const partnerName=id=>members.find(m=>String(m.user_id)===String(id))?.team_name||"Manager";
@@ -2336,6 +2337,7 @@ function render(view="home",options={}){
         b.listTrades(leagueId)
       ]);
       if(!user)throw new Error("Sign in before trading.");
+      isCommissioner=members.some(m=>String(m.user_id)===String(user.id)&&m.role==="owner");
     };
 
     const renderBuilder=()=>{
@@ -2371,17 +2373,34 @@ function render(view="home",options={}){
     const renderTabs=()=>{
       const outgoing=trades.filter(t=>String(t.from_user)===String(user?.id)&&t.status==="pending");
       const incoming=trades.filter(t=>String(t.to_user)===String(user?.id)&&t.status==="pending");
-      const history=trades.filter(t=>t.status!=="pending"&&(String(t.from_user)===String(user?.id)||String(t.to_user)===String(user?.id)));
+      const history=trades.filter(t=>t.status!=="pending"&&(
+        String(t.from_user)===String(user?.id)||
+        String(t.to_user)===String(user?.id)||
+        (isCommissioner&&t.status==="review_pending")
+      ));
       const renderCard=t=>{
         const sent=playerFromId(t.offer?.send_player_id);
         const received=playerFromId(t.offer?.receive_player_id);
         const isOutgoing=String(t.from_user)===String(user?.id);
         const counterpart=isOutgoing?partnerName(t.to_user):partnerName(t.from_user);
         const status=String(t.status||"pending");
+        const commissionerQueue=isCommissioner&&status==="review_pending";
+        const userParty=String(t.from_user)===String(user?.id)||String(t.to_user)===String(user?.id);
+        const swapMarkup=commissionerQueue&&!userParty
+          ?`<div class="trade-swap"><div class="trade-side"><span>${h(partnerName(t.from_user))} SENDS</span><strong>${h(sent.name)}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>${h(partnerName(t.to_user))} SENDS</span><strong>${h(received.name)}</strong></div></div>`
+          :`<div class="trade-swap"><div class="trade-side"><span>YOU SEND</span><strong>${h(isOutgoing?sent.name:received.name)}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>YOU RECEIVE</span><strong>${h(isOutgoing?received.name:sent.name)}</strong></div></div>`;
+        const actions=status==="pending"
+          ?(isOutgoing
+            ?`<div class="trade-card-actions"><button class="secondary-btn" data-cancel-trade="${h(t.id)}">Cancel Offer</button></div>`
+            :`<div class="trade-card-actions"><button class="primary-btn" data-accept-trade="${h(t.id)}">Accept</button><button class="secondary-btn" data-decline-trade="${h(t.id)}">Decline</button></div>`)
+          :(commissionerQueue
+            ?`<div class="trade-card-actions"><button class="primary-btn" data-approve-trade="${h(t.id)}">Approve</button><button class="secondary-btn" data-reject-trade="${h(t.id)}">Reject</button></div>`
+            :"");
         return `<div class="trade-card">
-          <div class="trade-card-head"><div><h4>${h(counterpart)}</h4><small>${new Date(t.created_at).toLocaleString()}</small></div><span class="trade-status ${h(status)}">${h(status.toUpperCase())}</span></div>
-          <div class="trade-swap"><div class="trade-side"><span>YOU SEND</span><strong>${h(isOutgoing?sent.name:received.name)}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>YOU RECEIVE</span><strong>${h(isOutgoing?received.name:sent.name)}</strong></div></div>
-          ${status==="pending"?(isOutgoing?`<div class="trade-card-actions"><button class="secondary-btn" data-cancel-trade="${h(t.id)}">Cancel Offer</button></div>`:`<div class="trade-card-actions"><button class="primary-btn" data-accept-trade="${h(t.id)}">Accept</button><button class="secondary-btn" data-decline-trade="${h(t.id)}">Decline</button></div>`):""}
+          <div class="trade-card-head"><div><h4>${h(commissionerQueue?"Commissioner Review":counterpart)}</h4><small>${new Date(t.created_at).toLocaleString()}</small></div><span class="trade-status ${h(status)}">${h(status.replaceAll("_"," ").toUpperCase())}</span></div>
+          ${swapMarkup}
+          ${status==="review_pending"?'<small class="trade-review-copy">Recipient accepted. Rosters do not change until commissioner approval.</small>':""}
+          ${actions}
         </div>`;
       };
       const rows=tab==="offers"?outgoing:tab==="incoming"?incoming:history;
@@ -2396,8 +2415,20 @@ function render(view="home",options={}){
         catch(err){showToast(err.message||"Could not decline trade");}
       });
       content.querySelectorAll("[data-accept-trade]").forEach(btn=>btn.onclick=async()=>{
-        try{await backend().acceptTrade(btn.dataset.acceptTrade);await loadRosterFromCloud(leagueId);showToast("Trade accepted");await init();}
-        catch(err){showToast(err.message||"Could not accept trade");}
+        try{
+          const result=await backend().acceptTrade(btn.dataset.acceptTrade);
+          await loadRosterFromCloud(leagueId);
+          showToast(result?.status==="review_pending"?"Trade accepted · Awaiting commissioner review":"Trade accepted");
+          await init();
+        }catch(err){showToast(err.message||"Could not accept trade");}
+      });
+      content.querySelectorAll("[data-approve-trade]").forEach(btn=>btn.onclick=async()=>{
+        try{await backend().reviewTrade(btn.dataset.approveTrade,true);await loadRosterFromCloud(leagueId);showToast("Trade approved");await init();}
+        catch(err){showToast(err.message||"Could not approve trade");}
+      });
+      content.querySelectorAll("[data-reject-trade]").forEach(btn=>btn.onclick=async()=>{
+        try{await backend().reviewTrade(btn.dataset.rejectTrade,false);showToast("Trade rejected");await init();}
+        catch(err){showToast(err.message||"Could not reject trade");}
       });
     };
 
@@ -2950,6 +2981,7 @@ function render(view="home",options={}){
           teamSlot:false,
           waivers:document.querySelector("#leagueWaivers")?.checked!==false,
           trades:document.querySelector("#leagueTrades")?.checked!==false,
+          tradeReview:document.querySelector("#leagueTradeReview")?.checked===true,
           scoring:{
             kills:numberOr("#createScoreKills",defaultLeagueSettings.scoring.kills),
             deaths:numberOr("#createScoreDeaths",defaultLeagueSettings.scoring.deaths),
@@ -3186,8 +3218,10 @@ function render(view="home",options={}){
       document.querySelector("#teamSlot").checked=false;
       const waiversToggle=document.querySelector("#leagueWaivers");
       const tradesToggle=document.querySelector("#leagueTrades");
+      const tradeReviewToggle=document.querySelector("#leagueTradeReview");
       if(waiversToggle)waiversToggle.checked=settings.waivers!==false;
       if(tradesToggle)tradesToggle.checked=settings.trades!==false;
+      if(tradeReviewToggle)tradeReviewToggle.checked=settings.tradeReview===true;
       document.querySelector("#scoreKills").value=settings.scoring.kills;
       document.querySelector("#scoreDeaths").value=settings.scoring.deaths;
       document.querySelector("#scoreAssists").value=settings.scoring.assists;
@@ -3428,6 +3462,9 @@ async function loadNotifications({open=false}={}){
         case "trade_accepted": return {title:"Trade completed",body:`${actor} accepted a trade: ${send} ↔ ${receive}.`,view:"trade"};
         case "trade_declined": return {title:"Trade declined",body:`${actor} declined a trade offer.`,view:"trade"};
         case "trade_canceled": return {title:"Trade canceled",body:`${actor} canceled a trade offer.`,view:"trade"};
+        case "trade_review_required": return {title:"Trade awaiting commissioner review",body:`${actor} accepted a trade. Review it before rosters change.`,view:"trade"};
+        case "trade_approved": return {title:"Trade approved",body:"The commissioner approved the trade and rosters were updated.",view:"trade"};
+        case "trade_rejected": return {title:"Trade rejected",body:"The commissioner rejected the trade.",view:"trade"};
         case "roster_add": return {title:`${actor} added ${rosterPlayer}`,body:"League roster move",view:"transactions"};
         case "roster_drop": return {title:`${actor} dropped ${rosterPlayer}`,body:"League roster move",view:"transactions"};
         case "roster_swap": return {title:`${actor} made a roster move`,body:"Roster swap",view:"transactions",swap:{dropped:playerName(p.dropped_player_id),added:playerName(p.added_player_id)}};
