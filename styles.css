@@ -676,3 +676,11 @@ body{background:
   .real-standings-row .standing-stat-cell{display:inline-block;text-align:right;margin-left:14px}
   .real-standings-row .standing-stat-cell:nth-of-type(1){grid-area:stats}
 }
+
+/* Esports source health */
+.data-health-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.data-health-badge{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font-size:.66rem;font-weight:900;letter-spacing:.06em;background:var(--surface-2)}
+.data-health-badge.healthy{opacity:.9}
+.data-health-badge.delayed{outline:1px solid currentColor}
+.data-health-copy{display:block;margin-top:8px;opacity:.68}
+@media(max-width:520px){.data-health-wrap{justify-content:flex-start}}
