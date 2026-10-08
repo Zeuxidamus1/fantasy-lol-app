@@ -94,6 +94,16 @@ check(duplicateFns.length===0,`no duplicate function declarations${duplicateFns.
 check(html.includes('meta name="description"'),"page has a meta description");
 check(html.includes('aria-label="Primary navigation"'),"primary navigation is labeled");
 check(html.includes('aria-live="polite"'),"toast uses an ARIA live region");
+check(html.includes('class="skip-link"'),"page has a keyboard skip link");
+check(css.includes("prefers-reduced-motion"),"reduced-motion accessibility is supported");
+check(html.includes('id="profileProjectedFp"'),"player projection UI exists");
+check(html.includes('id="teamNextLock"'),"team lock dashboard exists");
+check(html.includes('id="leaguePlayoffCard"'),"playoff UI exists");
+check(!html.includes("Fantasy scoring is not live yet"),"obsolete fake-scoring placeholder is removed");
+check(backend.includes("listPlayerProjections"),"backend exposes player projections");
+check(backend.includes("listPlayoffs"),"backend exposes playoffs");
+check(backend.includes("listWaiverPriority"),"backend exposes waiver priority");
+check(backend.includes("getOpsSnapshot"),"backend exposes secure ops snapshot");
 
 console.log("\nValidation checks:");
 for(const msg of pass) console.log("  PASS",msg);
