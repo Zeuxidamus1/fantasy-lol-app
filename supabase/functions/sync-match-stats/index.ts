@@ -265,10 +265,16 @@ Deno.serve(async(req:Request)=>{
 
         const {data:existingGameRows}=await supabase
           .from("pro_games")
-          .select("id,stats_status")
+          .select("id,stats_status,winner_team_id,first_blood_status,state")
           .eq("match_id",match.id);
         const finalizedGameIds=new Set((existingGameRows||[])
-          .filter((g:any)=>g.stats_status==="final")
+          .filter((g:any)=>
+            g.stats_status==="final" &&
+            (
+              String(g.state||"").toLowerCase()==="unneeded" ||
+              (!!g.winner_team_id && g.first_blood_status==="final")
+            )
+          )
           .map((g:any)=>String(g.id)));
 
         const seriesTeams=Array.isArray(evt?.match?.teams)?evt.match.teams:[];
