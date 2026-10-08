@@ -100,20 +100,22 @@ async function fetchAllSchedule() {
   const schedule = first?.data?.schedule || {};
   let events = Array.isArray(schedule.events) ? [...schedule.events] : [];
   const seenTokens = new Set();
-  let token = schedule?.pages?.newer || null;
 
-  // Follow future pages far enough to cover the next 45 days. The LoL Esports
-  // schedule page often publishes lower-tier and promotion events before they
-  // appear in our previously saved snapshot.
-  for (let i=0; i<12 && token && !seenTokens.has(token); i++) {
-    seenTokens.add(token);
-    const next = await api("getSchedule", {pageToken: token});
-    const s = next?.data?.schedule || {};
-    if (Array.isArray(s.events)) events.push(...s.events);
-    token = s?.pages?.newer || null;
+  // Keep enough history to ingest/finalize recently completed fantasy games,
+  // while also retaining the next 45 days of published fixtures.
+  for (const direction of ["older","newer"]) {
+    let token=schedule?.pages?.[direction]||null;
+    for (let i=0; i<16 && token && !seenTokens.has(direction+":"+token); i++) {
+      seenTokens.add(direction+":"+token);
+      const next=await api("getSchedule",{pageToken:token});
+      const page=next?.data?.schedule||{};
+      if(Array.isArray(page.events))events.push(...page.events);
+      token=page?.pages?.[direction]||null;
+    }
   }
 
   const now = Date.now();
+  const history = now - 30*24*60*60*1000;
   const horizon = now + 45*24*60*60*1000;
 
   const mapped = events
@@ -148,7 +150,7 @@ async function fetchAllSchedule() {
     })
     .filter(g => {
       const t = Date.parse(g.startTime || "");
-      return !!g.competition && Number.isFinite(t) && t >= now - 12*60*60*1000 && t <= horizon;
+      return !!g.competition && Number.isFinite(t) && t >= history && t <= horizon;
     })
     .sort((x,y)=>Date.parse(x.startTime)-Date.parse(y.startTime));
 
@@ -160,7 +162,7 @@ async function fetchAllSchedule() {
     seen.add(key);
     deduped.push(event);
   }
-  return deduped.slice(0,200);
+  return deduped.slice(0,600);
 }
 
 async function fetchCompetitionTeamKeys(league) {
