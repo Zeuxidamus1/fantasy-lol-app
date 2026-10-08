@@ -1053,6 +1053,18 @@
             <input id="teamSlot" type="checkbox" disabled aria-disabled="true" />
           </label>
         </div>
+
+        <div class="form-group">
+          <label>Transactions</label>
+          <label class="toggle-row">
+            <span><strong>Enable Waivers</strong><small>Managers can submit waiver claims before a player's match locks.</small></span>
+            <input id="leagueWaivers" type="checkbox" checked />
+          </label>
+          <label class="toggle-row">
+            <span><strong>Enable Trades</strong><small>Managers can trade unlocked players.</small></span>
+            <input id="leagueTrades" type="checkbox" checked />
+          </label>
+        </div>
       </div>
 
       <div class="card setup-card">
@@ -1065,7 +1077,7 @@
           <label>Win <input class="score-input" id="scoreWin" type="number" step="0.5" value="5"></label>
           <label>First Blood <input class="score-input" id="scoreFb" type="number" step="0.5" value="2"></label>
         </div>
-        <small class="field-help">These scoring rules are shared with every manager in this league. Live game-stat scoring will use them once the scoring feed is connected.</small>
+        <small class="field-help">These scoring rules are shared with every manager and power live fantasy scoring. They lock when the draft starts.</small>
       </div>
 
       <div class="card setup-card">
@@ -1084,6 +1096,10 @@
         <small class="field-help">Permanent deletion cannot be undone. League rosters, draft data, transactions, waivers, trades, notifications, and memberships for this league will be removed.</small>
       </div>
 
+      <div class="card setup-card commissioner-lock-notice" id="commissionerLockNotice" hidden>
+        <div class="section-head"><div><div class="eyebrow">SETTINGS LOCKED</div><h3>Competition is underway</h3></div><span class="status-pill">LOCKED</span></div>
+        <p class="profile-copy">Structural league settings and scoring cannot change after the draft begins. This protects completed and live fantasy results.</p>
+      </div>
       <button class="primary-btn" id="saveLeagueBtn">Save League Settings</button>
       <p class="setup-footnote">Commissioner changes are shared with every manager. Settings lock when the league draft begins.</p>
     </section>
