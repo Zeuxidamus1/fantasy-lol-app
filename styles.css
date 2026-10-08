@@ -608,3 +608,51 @@ body{background:
   .fantasy-score-total{text-align:left;padding-left:56px}
   .fantasy-score-breakdown,.fantasy-no-score{grid-column:1}
 }
+
+/* Head-to-head matchup */
+.matchup-round-card{padding:14px 16px}
+.matchup-round-nav{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;text-align:center}
+.matchup-round-nav h3{margin:2px 0}
+.matchup-round-nav small{opacity:.72}
+.compact-btn{min-width:42px;padding:8px 10px}
+.fantasy-matchup-board{display:grid;gap:18px}
+.matchup-scoreboard{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;padding:8px 0 18px;border-bottom:1px solid var(--border)}
+.matchup-scoreboard>div:not(.matchup-versus){display:grid;gap:3px;text-align:center}
+.matchup-scoreboard>div:not(.matchup-versus)>strong{font-size:1.02rem}
+.matchup-scoreboard>div:not(.matchup-versus)>span{font-size:1.45rem;font-weight:900}
+.matchup-scoreboard .mine{padding:10px;border-radius:12px;background:var(--surface-2)}
+.matchup-versus{text-align:center}
+.matchup-versus span{display:block;font-size:.68rem;font-weight:800;letter-spacing:.06em;opacity:.68;margin-bottom:3px}
+.matchup-versus strong{font-size:.85rem}
+.matchup-lineups-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.matchup-side{min-width:0}
+.matchup-side.mine{border-radius:12px}
+.matchup-team-heading{display:flex;justify-content:space-between;align-items:end;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.matchup-team-heading small,.matchup-team-heading strong{display:block}
+.matchup-team-score{text-align:right}
+.matchup-team-score strong{font-size:1.1rem}
+.matchup-progress{display:flex;justify-content:space-between;gap:8px;font-size:.72rem;opacity:.7;padding:7px 0}
+.matchup-lineup{display:grid;gap:7px}
+.matchup-player-row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+.matchup-player-row>.role{font-size:.7rem;font-weight:900;letter-spacing:.04em}
+.matchup-player-main{min-width:0}
+.matchup-player-main strong,.matchup-player-main small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.matchup-player-main small{opacity:.65}
+.matchup-player-state{text-align:right}
+.matchup-player-state span{display:block;font-size:.62rem;font-weight:900;letter-spacing:.05em;opacity:.65}
+.matchup-player-state span.live{opacity:1}
+.matchup-player-state strong{font-size:.88rem}
+.matchup-player-row .fantasy-score-breakdown{grid-column:1/-1}
+.matchup-bye-banner{text-align:center;padding:16px;border-radius:14px;background:var(--surface-2)}
+.matchup-bye-banner span,.matchup-bye-banner strong,.matchup-bye-banner small{display:block}
+.matchup-bye-banner span{font-size:.72rem;font-weight:900;letter-spacing:.1em}
+.matchup-bye-banner strong{font-size:1.2rem;margin:4px 0}
+.matchup-bye-banner small{opacity:.7}
+@media(max-width:720px){
+  .matchup-lineups-grid{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .matchup-scoreboard{grid-template-columns:1fr auto 1fr;gap:8px}
+  .matchup-scoreboard>div:not(.matchup-versus)>span{font-size:1.15rem}
+  .matchup-player-row{grid-template-columns:36px minmax(0,1fr) auto}
+}
