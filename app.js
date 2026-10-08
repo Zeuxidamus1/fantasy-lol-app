@@ -1705,47 +1705,65 @@ function render(view="home",options={}){
   if(view==="standings"){
     const list=document.querySelector("#standingsList");
     const leagueId=getActiveLeagueId();
+    const status=document.querySelector("#standingsStatus");
     if(!leagueId||!cloudReady()){
       list.innerHTML='<div class="empty-state"><strong>No active league</strong><small>Select a league before viewing standings.</small><button class="primary-btn" data-jump="league">Go to League</button></div>';
+      if(status)status.textContent="OFFLINE";
     }else{
       (async()=>{
         try{
           const b=backend();
-          const [members,bots,leagues,user,rosters,scores]=await Promise.all([
+          const [members,bots,leagues,user,standings,rounds]=await Promise.all([
             b.listLeagueMembers(leagueId),
             b.listLeagueBots(leagueId),
             b.listLeagues(),
             b.currentUser(),
-            b.listRosters(leagueId),
-            b.listFantasyGameScores(leagueId)
+            b.listLeagueStandings(leagueId),
+            b.listFantasyRounds(leagueId)
           ]);
           const league=leagues.find(l=>String(l.id)===String(leagueId));
           const name=document.querySelector("#standingsLeagueName");
           if(name)name.textContent=String(league?.name||"League").toUpperCase();
-          const scoreByPlayer=aggregateFantasyScores(scores);
-          const pointsByManager=new Map();
-          for(const rosterRow of rosters){
-            if(String(rosterRow.slot||"").toUpperCase()==="BN")continue;
-            const managerId=String(rosterRow.user_id);
-            const playerScore=scoreByPlayer.get(String(rosterRow.player_id));
-            pointsByManager.set(managerId,(pointsByManager.get(managerId)||0)+(playerScore?.total||0));
+
+          const managerNames=new Map();
+          members.forEach(m=>managerNames.set("human:"+String(m.user_id),m));
+          bots.forEach(bot=>managerNames.set("bot:"+String(bot.id),bot));
+
+          const currentRound=rounds.find(r=>r.status==="live");
+          if(status){
+            status.textContent=currentRound?"ROUND "+currentRound.round_number+" LIVE":"OFFICIAL";
+            status.classList.toggle("live",!!currentRound);
           }
-          const managers=[
-            ...members.map(m=>({...m,managerType:"human"})),
-            ...bots.map(bot=>({user_id:bot.id,team_name:bot.team_name,role:"bot",managerType:"bot"}))
-          ].map(m=>({...m,points:pointsByManager.get(String(m.user_id))||0}))
-           .sort((a,b)=>b.points-a.points||String(a.team_name||"").localeCompare(String(b.team_name||"")));
-          list.innerHTML=managers.length?managers.map((m,index)=>{
-            const mine=m.managerType==="human"&&String(m.user_id)===String(user?.id);
-            const detail=m.managerType==="bot"?"🤖 Bot":(m.role==="owner"?"Commissioner":"Manager")+(mine?" · You":"");
-            return `<div class="standing-live-row ${mine?"mine":""} ${m.managerType==="bot"?"bot-manager-row":""}">
-              <span class="rank">${index+1}</span>
-              <div class="standing-live-team"><strong>${h(m.team_name||"Unnamed Team")}</strong><small>${h(detail)}</small></div>
-              <div class="standing-live-record"><strong>—</strong><small>Record</small></div>
-              <div class="standing-live-points"><strong>${formatFantasyPoints(m.points)}</strong><small>FP</small></div>
+
+          const rows=(standings||[]).map(s=>{
+            const manager=managerNames.get(String(s.manager_type)+":"+String(s.manager_id))||{};
+            const mine=s.manager_type==="human"&&String(s.manager_id)===String(user?.id);
+            const isBot=s.manager_type==="bot";
+            const record=`${Number(s.wins)||0}-${Number(s.losses)||0}-${Number(s.ties)||0}`;
+            const games=Number(s.completed_matchups)||0;
+            const pct=games?((Number(s.wins)+(Number(s.ties)||0)*0.5)/games):0;
+            return {...s,manager,mine,isBot,record,pct};
+          });
+
+          list.innerHTML=rows.length?rows.map(s=>{
+            const detail=s.isBot?"🤖 Bot":(s.manager.role==="owner"?"Commissioner":"Manager")+(s.mine?" · You":"");
+            return `<div class="standing-live-row real-standings-row ${s.mine?"mine":""} ${s.isBot?"bot-manager-row":""}">
+              <span class="rank">${Number(s.rank)||"—"}</span>
+              <div class="standing-live-team">
+                <strong>${h(s.manager.team_name||"Unnamed Team")}</strong>
+                <small>${h(detail)}</small>
+              </div>
+              <div class="standing-live-record">
+                <strong>${h(s.record)}</strong>
+                <small>${s.completed_matchups?((s.pct*100).toFixed(1)+"%"):"No finals"}</small>
+              </div>
+              <div class="standing-stat-cell"><strong>${formatFantasyPoints(s.points_for)}</strong><small>PF</small></div>
+              <div class="standing-stat-cell"><strong>${formatFantasyPoints(s.points_against)}</strong><small>PA</small></div>
+              <div class="standing-stat-cell"><strong>${Number(s.byes)||0}</strong><small>BYE</small></div>
             </div>`;
-          }).join(""):'<div class="empty-state"><strong>No managers found</strong><small>League members will appear here.</small></div>';
+          }).join(""):'<div class="empty-state"><strong>No standings yet</strong><small>Standings are created automatically after the league draft.</small></div>';
         }catch(err){
+          if(status)status.textContent="ERROR";
           list.innerHTML='<div class="empty-state"><strong>Could not load standings</strong><small>'+h(err.message||"Try again later.")+'</small></div>';
         }
       })();
