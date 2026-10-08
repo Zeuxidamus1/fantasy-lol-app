@@ -104,6 +104,8 @@ Deno.serve(async(req:Request)=>{
       const gameId=String(body.debugGame);
       const noTime=await liveWindow(gameId);
       const aroundMatch=body?.startingTime?await liveWindow(gameId,String(body.startingTime)):null;
+      const detailsNoTime=await liveDetails(gameId);
+      const detailsAround=body?.startingTime?await liveDetails(gameId,String(body.startingTime)):null;
       const summarize=(payload:any)=>{
         const rawFrames=payload?.frames||[];
         const lf=rawFrames.at(-1)||{};
@@ -127,7 +129,12 @@ Deno.serve(async(req:Request)=>{
           redParticipants:(f.redTeam?.participants||[]).map((p:any)=>({id:p.participantId,k:p.kills,d:p.deaths,a:p.assists,cs:p.creepScore}))
         }))
       }};
-      return new Response(JSON.stringify({noTime:summarize(noTime),aroundMatch:aroundMatch?summarize(aroundMatch):null}),{headers:{"content-type":"application/json"}});
+      return new Response(JSON.stringify({
+        noTime:summarize(noTime),
+        aroundMatch:aroundMatch?summarize(aroundMatch):null,
+        detailsNoTime:summarize(detailsNoTime),
+        detailsAround:detailsAround?summarize(detailsAround):null
+      }),{headers:{"content-type":"application/json"}});
     }
 
     let query=supabase.from("pro_matches")
