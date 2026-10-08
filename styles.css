@@ -689,3 +689,40 @@ body{background:
 .roster-slot.lineup-locked{opacity:.92}
 .lineup-lock-badge{display:inline-flex;align-items:center;margin-top:4px;padding:3px 7px;border-radius:999px;font-size:.62rem;font-weight:900;letter-spacing:.06em;background:var(--surface-2)}
 .locked-action{font-size:.72rem;font-weight:800;opacity:.7;white-space:nowrap}
+
+
+/* Launch-readiness accessibility, onboarding, postseason and ops */
+.skip-link{
+  position:fixed;left:12px;top:12px;z-index:9999;transform:translateY(-160%);
+  padding:10px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--border);
+}
+.skip-link:focus{transform:translateY(0)}
+:where(button,a,input,select,textarea,[tabindex]):focus-visible{
+  outline:3px solid currentColor;outline-offset:3px;
+}
+.onboarding-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.onboarding-steps>div{display:flex;gap:8px;align-items:center;padding:10px;border-radius:12px;background:var(--surface-2)}
+.onboarding-steps strong{display:grid;place-items:center;min-width:28px;height:28px;border-radius:999px;background:var(--surface)}
+.ops-list{display:grid;gap:6px;padding:10px 0}
+.ops-list small{display:block}
+.playoff-row,.activity-row,.history-row{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.playoff-row>div,.activity-row>div,.history-row>div{min-width:0}
+.playoff-row strong,.playoff-row small,.activity-row strong,.activity-row small,.history-row strong,.history-row small{display:block}
+.champion-banner{text-align:center;padding:18px;border-radius:14px;background:var(--surface-2)}
+.champion-banner strong{display:block;font-size:1.2rem}
+.champion-banner small{display:block;margin-top:4px}
+@media(max-width:760px){
+  .onboarding-steps{grid-template-columns:1fr 1fr}
+  .playoff-row,.activity-row,.history-row{align-items:flex-start}
+}
+@media(max-width:480px){
+  .onboarding-steps{grid-template-columns:1fr}
+  .profile-actions.three-actions{grid-template-columns:1fr}
+  .grid-two{grid-template-columns:1fr}
+  .league-overview-grid{grid-template-columns:1fr}
+  .transaction-summary{grid-template-columns:1fr}
+  .playoff-row,.activity-row,.history-row{display:grid}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
