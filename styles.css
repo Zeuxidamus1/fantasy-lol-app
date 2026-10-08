@@ -656,3 +656,23 @@ body{background:
   .matchup-scoreboard>div:not(.matchup-versus)>span{font-size:1.15rem}
   .matchup-player-row{grid-template-columns:36px minmax(0,1fr) auto}
 }
+
+/* Real league standings */
+.standings-head{align-items:flex-start}
+.standings-column-headings{display:grid;grid-template-columns:42px minmax(150px,1.6fr) minmax(82px,.7fr) minmax(72px,.55fr) minmax(72px,.55fr) minmax(52px,.4fr);gap:10px;padding:8px 10px;font-size:.66rem;font-weight:900;letter-spacing:.08em;opacity:.55}
+.real-standings-row{display:grid;grid-template-columns:42px minmax(150px,1.6fr) minmax(82px,.7fr) minmax(72px,.55fr) minmax(72px,.55fr) minmax(52px,.4fr);gap:10px;align-items:center}
+.real-standings-row .rank{font-size:1rem;font-weight:900;text-align:center}
+.standing-stat-cell{text-align:right}
+.standing-stat-cell strong,.standing-stat-cell small{display:block}
+.standing-stat-cell small{font-size:.66rem;opacity:.6}
+@media(max-width:680px){
+  .standings-column-headings{display:none}
+  .real-standings-row{grid-template-columns:34px minmax(0,1fr) auto;grid-template-areas:
+    "rank team record"
+    ". stats stats";padding:12px 4px}
+  .real-standings-row .rank{grid-area:rank}
+  .real-standings-row .standing-live-team{grid-area:team}
+  .real-standings-row .standing-live-record{grid-area:record;text-align:right}
+  .real-standings-row .standing-stat-cell{display:inline-block;text-align:right;margin-left:14px}
+  .real-standings-row .standing-stat-cell:nth-of-type(1){grid-area:stats}
+}
