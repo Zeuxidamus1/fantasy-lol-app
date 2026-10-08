@@ -1855,7 +1855,7 @@ function render(view="home",options={}){
       if(score?.games)return "COMPLETE";
       return "NO GAME";
     };
-    const lineupFor=(rosters,managerId,managerType,players,scoreMap,matches)=>{
+    const lineupFor=(rosters,managerId,managerType,players,scoreMap,matches,lockMap)=>{
       const order={TOP:0,JNG:1,MID:2,ADC:3,SUP:4,FLEX:5};
       return rosters
         .filter(r=>String(r.user_id)===String(managerId)&&String(r.manager_type||"human")===String(managerType||"human")&&String(r.slot||"").toUpperCase()!=="BN")
@@ -1864,7 +1864,7 @@ function render(view="home",options={}){
           const player=players.find(p=>playerKey(p)===String(r.player_id)||String(p.id||"")===String(r.player_id))
             ||{id:r.player_id,name:r.player_id,team:"",role:r.slot};
           const score=scoreMap.get(String(r.player_id))||{total:0,live:false,games:0,breakdown:{}};
-          return {roster:r,player,score,state:playerRoundState(player,score,matches)};
+          return {roster:r,player,score,state:playerRoundState(player,score,matches),locked:lockMap.has(String(r.player_id))};
         });
     };
     const renderLineup=(label,name,items,total,isMine)=>{
@@ -1876,11 +1876,11 @@ function render(view="home",options={}){
           <div class="matchup-team-score"><strong>${formatFantasyPoints(total)}</strong><small>FP</small></div>
         </div>
         <div class="matchup-progress"><span>${complete} complete</span><span>${remaining} remaining</span></div>
-        <div class="matchup-lineup">${items.length?items.map(({roster,player,score,state})=>`
+        <div class="matchup-lineup">${items.length?items.map(({roster,player,score,state,locked})=>`
           <article class="matchup-player-row">
             <span class="role">${h(String(roster.slot||player.role||""))}</span>
             <div class="matchup-player-main"><strong>${h(player.name||roster.player_id)}</strong><small>${h(player.team||"")}</small></div>
-            <div class="matchup-player-state"><span class="${state==="LIVE"?"live":""}">${h(state)}</span><strong>${formatFantasyPoints(score.total)}</strong></div>
+            <div class="matchup-player-state"><span class="${state==="LIVE"?"live":""}">${locked?"🔒 ":""}${h(state)}</span><strong>${formatFantasyPoints(score.total)}</strong></div>
             ${score.games?renderFantasyBreakdown(score):""}
           </article>`).join(""):'<div class="empty-state"><strong>No starters</strong><small>This lineup is incomplete.</small></div>'}</div>
       </section>`;
@@ -1926,10 +1926,15 @@ function render(view="home",options={}){
           const matchText=Number(round.match_count)>0?" · "+Number(round.match_count)+" pro match"+(Number(round.match_count)===1?"":"es"):"";
           roundDates.textContent=formatRoundDate(round.starts_at)+" – "+formatRoundDate(new Date(Date.parse(round.ends_at)-1))+matchText;
           
-          const [matchups,proMatches]=await Promise.all([
+          const [matchups,proMatches,lineupLocks]=await Promise.all([
             b.listLeagueMatchups(leagueId,round.round_number),
-            b.listProMatches(league?.settings?.competition||null,round.starts_at,round.ends_at)
+            b.listProMatches(league?.settings?.competition||null,round.starts_at,round.ends_at),
+            b.listLineupLocks(leagueId,round.round_number)
           ]);
+          const lockMap=new Map(lineupLocks.map(lock=>[
+            String(lock.manager_type)+":"+String(lock.manager_id)+":"+String(lock.player_id),
+            lock
+          ]));
           const myMatchup=matchups.find(m=>
             (String(m.home_manager_id||"")===String(user?.id))||
             (String(m.away_manager_id||"")===String(user?.id))
@@ -1961,15 +1966,23 @@ function render(view="home",options={}){
             const myId=homeId||awayId;
             const myType=homeId?homeType:awayType;
             const myName=homeId?homeName:awayName;
-            const lineup=lineupFor(rosters,myId,myType,source,byPlayer,proMatches);
+            const lineup=lineupFor(rosters,myId,myType,source,byPlayer,proMatches,new Map(
+              [...lockMap.entries()].filter(([key])=>key.startsWith(String(myType)+":"+String(myId)+":")).map(([key,value])=>[key.split(":").at(-1),value])
+            ));
             const total=lineup.reduce((sum,x)=>sum+x.score.total,0);
             board.innerHTML=`<div class="matchup-bye-banner"><span>BYE WEEK</span><strong>No opponent this round</strong><small>Your lineup can still be viewed, but no head-to-head result is contested.</small></div>
               ${renderLineup("YOUR TEAM",myName,lineup,total,true)}`;
             return;
           }
 
-          const homeLineup=lineupFor(rosters,homeId,homeType,source,byPlayer,proMatches);
-          const awayLineup=lineupFor(rosters,awayId,awayType,source,byPlayer,proMatches);
+          const homeLocks=new Map(lineupLocks
+            .filter(lock=>String(lock.manager_id)===String(homeId)&&String(lock.manager_type)===String(homeType))
+            .map(lock=>[String(lock.player_id),lock]));
+          const awayLocks=new Map(lineupLocks
+            .filter(lock=>String(lock.manager_id)===String(awayId)&&String(lock.manager_type)===String(awayType))
+            .map(lock=>[String(lock.player_id),lock]));
+          const homeLineup=lineupFor(rosters,homeId,homeType,source,byPlayer,proMatches,homeLocks);
+          const awayLineup=lineupFor(rosters,awayId,awayType,source,byPlayer,proMatches,awayLocks);
           const homeTotal=homeLineup.reduce((sum,x)=>sum+x.score.total,0);
           const awayTotal=awayLineup.reduce((sum,x)=>sum+x.score.total,0);
           const resultLabel=myMatchup.result==="home_win"?"FINAL · "+homeName+" WINS":
