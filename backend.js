@@ -305,6 +305,16 @@
       +"&order=rank.asc",{session:current});
   }
 
+  async function listLineupLocks(leagueId,roundNumber=null){
+    const current=await session();
+    if(!current)return [];
+    let path="/rest/v1/fantasy_lineup_locks?league_id=eq."+encodeURIComponent(leagueId)
+      +"&select=league_id,round_number,manager_id,manager_type,player_id,slot,locked_at,match_id,created_at"
+      +"&order=locked_at.asc";
+    if(roundNumber!==null)path+="&round_number=eq."+encodeURIComponent(String(roundNumber));
+    return request(path,{session:current});
+  }
+
   async function listDataSourceHealth(){
     const current=await session();
     if(!current)return [];
@@ -424,7 +434,7 @@
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
     listLeagues,createLeague,createBotLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,makeBotDraftPick,
-    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,listDataSourceHealth,saveRoster,listTransactions,
+    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,listLineupLocks,listDataSourceHealth,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
     listNotifications,markNotificationsRead,
     listTrades,createTrade,updateTrade,acceptTrade,
