@@ -284,7 +284,7 @@
     const current=await session();
     if(!current)return [];
     return request("/rest/v1/fantasy_rounds?league_id=eq."+encodeURIComponent(leagueId)
-      +"&select=league_id,round_number,starts_at,ends_at,status,updated_at&order=round_number.asc",{session:current});
+      +"&select=league_id,round_number,starts_at,ends_at,status,competition,stage,label,match_count,period_source,updated_at&order=round_number.asc",{session:current});
   }
 
   async function listLeagueMatchups(leagueId,roundNumber=null){
