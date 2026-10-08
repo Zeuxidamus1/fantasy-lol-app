@@ -87,6 +87,7 @@ try{
   await send("Page.navigate",{url:"http://127.0.0.1:4174/#home"});
   await sleep(700);
   await expect("test page loaded","location.origin === 'http://127.0.0.1:4174' && document.readyState !== 'loading'");
+  await expect("skip link exists","!!document.querySelector('.skip-link')");
   await evaluate("localStorage.clear()");
   await route("home");
 
@@ -103,6 +104,7 @@ try{
   await expect("player search filters","document.querySelectorAll('#freeAgentList .player-row').length >= 1");
   await evaluate("document.querySelector('#freeAgentList [data-open-player]').click()");
   await expect("player profile opens","document.title.includes('Player') && !!document.querySelector('#profileName')");
+  await expect("player profile has projection panel","!!document.querySelector('#profileProjectedFp') && !!document.querySelector('#profileAvailability')");
   await evaluate("document.querySelector('#watchPlayerBtn').click()");
   await expect("watchlist persists","JSON.parse(localStorage.getItem('riftWatchlist')||'[]').length === 1");
 
@@ -128,7 +130,8 @@ try{
   await expect("draft page fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
 
   await route("matchup");
-  await expect("matchup avoids fake scores","document.body.innerText.includes('Fantasy scoring is not live yet')");
+  await expect("matchup uses real scoring surface","!!document.querySelector('#matchupScoreList') && !document.body.innerText.includes('Fantasy scoring is not live yet')");
+  await expect("matchup fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
 
   await route("schedule");
   await evaluate("document.querySelector('[data-day=today]').click()");
