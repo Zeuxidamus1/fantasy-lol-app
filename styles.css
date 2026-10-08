@@ -577,3 +577,9 @@ body{background:
   cursor:not-allowed;
   filter:saturate(.45);
 }
+
+
+.game-status.canceled{
+  opacity:.82;
+  border-style:dashed;
+}
