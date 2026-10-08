@@ -684,3 +684,8 @@ body{background:
 .data-health-badge.delayed{outline:1px solid currentColor}
 .data-health-copy{display:block;margin-top:8px;opacity:.68}
 @media(max-width:520px){.data-health-wrap{justify-content:flex-start}}
+
+/* Per-player fantasy lineup locks */
+.roster-slot.lineup-locked{opacity:.92}
+.lineup-lock-badge{display:inline-flex;align-items:center;margin-top:4px;padding:3px 7px;border-radius:999px;font-size:.62rem;font-weight:900;letter-spacing:.06em;background:var(--surface-2)}
+.locked-action{font-size:.72rem;font-weight:800;opacity:.7;white-space:nowrap}
