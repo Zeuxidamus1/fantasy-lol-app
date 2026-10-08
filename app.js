@@ -1892,7 +1892,8 @@ function render(view="home",options={}){
           if(eyebrow)eyebrow.textContent="HEAD TO HEAD · "+competitionName(league?.settings?.competition||"");
 
           if(!rounds.length){
-            board.innerHTML='<div class="empty-state"><strong>No fantasy rounds yet</strong><small>Rounds are created automatically when the league draft finishes.</small></div>';
+            const compName=competitionName(league?.settings?.competition||"");
+            board.innerHTML='<div class="empty-state"><strong>No active fantasy scoring period</strong><small>'+h(compName)+' has no scheduled matches after this league\'s draft. Rift Fantasy will create the next scoring period automatically when the pro schedule contains eligible matches.</small></div>';
             prevBtn.disabled=true;nextBtn.disabled=true;return;
           }
 
@@ -1907,10 +1908,11 @@ function render(view="home",options={}){
           prevBtn.onclick=()=>{if(roundIndex>0){selectedMatchupRound=Number(rounds[roundIndex-1].round_number);render("matchup",{replace:true});}};
           nextBtn.onclick=()=>{if(roundIndex<rounds.length-1){selectedMatchupRound=Number(rounds[roundIndex+1].round_number);render("matchup",{replace:true});}};
 
-          roundLabel.textContent="Round "+round.round_number;
-          roundStatus.textContent=round.status==="live"?"LIVE FANTASY ROUND":round.status==="final"?"FINAL":"UPCOMING";
+          roundLabel.textContent=round.label||((round.stage?round.stage+" · ":"")+"Round "+round.round_number);
+          roundStatus.textContent=round.status==="live"?"LIVE FANTASY PERIOD":round.status==="final"?"FINAL":"UPCOMING";
           roundStatus.classList.toggle("live",round.status==="live");
-          roundDates.textContent=formatRoundDate(round.starts_at)+" – "+formatRoundDate(new Date(Date.parse(round.ends_at)-1));
+          const matchText=Number(round.match_count)>0?" · "+Number(round.match_count)+" pro match"+(Number(round.match_count)===1?"":"es"):"";
+          roundDates.textContent=formatRoundDate(round.starts_at)+" – "+formatRoundDate(new Date(Date.parse(round.ends_at)-1))+matchText;
           
           const [matchups,proMatches]=await Promise.all([
             b.listLeagueMatchups(leagueId,round.round_number),
