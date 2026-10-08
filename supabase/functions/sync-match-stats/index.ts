@@ -320,14 +320,18 @@ Deno.serve(async(req:Request)=>{
           }
           await supabase.from("pro_games").upsert(baseGameRow,{onConflict:"id"});
 
-          if(normalizedGameState!=="completed")continue;
-          if(finalizedGameIds.has(gameId)){finalGames++;continue;}
+          const isCompleted=normalizedGameState==="completed";
+          const isLive=["inprogress","in_progress","in progress"].includes(normalizedGameState);
+          if(!isCompleted&&!isLive)continue;
+          if(isCompleted&&finalizedGameIds.has(gameId)){finalGames++;continue;}
 
           const matchStart=Date.parse(match.start_time||"");
-          const finalLookupTime=new Date((Number.isFinite(matchStart)?matchStart:Date.now())+12*60*60*1000).toISOString();
+          const lookupTime=isCompleted
+            ? new Date((Number.isFinite(matchStart)?matchStart:Date.now())+12*60*60*1000).toISOString()
+            : undefined;
           const [windowPayload,detailsPayload]=await Promise.all([
-            liveWindow(gameId,finalLookupTime),
-            liveDetails(gameId,finalLookupTime)
+            liveWindow(gameId,lookupTime),
+            liveDetails(gameId,lookupTime)
           ]);
           const wf=lastFrame(windowPayload?.frames||[]);
           const df=lastFrame(detailsPayload?.frames||[]);
@@ -359,7 +363,10 @@ Deno.serve(async(req:Request)=>{
 
           const rows:any[]=[];
           const unmapped:string[]=[];
-          const chaincc=await getChainRows();
+          const chaincc=isCompleted?await getChainRows():[];
+          if(!isCompleted){
+            firstBloodId=await firstBloodParticipant(gameId);
+          }
           for(const [participantId,meta] of metaByParticipant){
             const stat:any=statByParticipant.get(participantId);
             if(!stat)continue;
@@ -375,9 +382,9 @@ Deno.serve(async(req:Request)=>{
             const d=Number(stat.deaths)||0;
             const a=Number(stat.assists)||0;
             const cs=Number(stat.creepScore)||0;
-            const chainStat=findChainccStat(chaincc,String(fp.name||meta.summonerName||""),k,d,a,cs);
+            const chainStat=isCompleted?findChainccStat(chaincc,String(fp.name||meta.summonerName||""),k,d,a,cs):null;
             if(chainStat?.firstBlood===true)firstBloodId=participantId;
-            const rowWin=winnerTeamId?teamId===winnerTeamId:(chainStat?.result??null);
+            const rowWin=isCompleted?(winnerTeamId?teamId===winnerTeamId:(chainStat?.result??null)):null;
             rows.push({
               game_id:gameId,
               match_id:match.id,
@@ -393,7 +400,7 @@ Deno.serve(async(req:Request)=>{
               assists:a,
               cs,
               win:rowWin,
-              first_blood:chainStat?.firstBlood??null,
+              first_blood:firstBloodId!==null?Number(participantId)===Number(firstBloodId):(chainStat?.firstBlood??null),
               stats_source:"riot_lolesports",
               result_source:rowWin===null?null:(winnerSource||"chaincc"),
               first_blood_source:chainStat?.firstBlood===null||chainStat?.firstBlood===undefined?null:"chaincc",
@@ -404,7 +411,7 @@ Deno.serve(async(req:Request)=>{
               kill_participation:Number.isFinite(Number(stat.killParticipation))?Number(stat.killParticipation):null,
               champion_damage_share:Number.isFinite(Number(stat.championDamageShare))?Number(stat.championDamageShare):null,
               source_timestamp:df?.rfc460Timestamp||wf?.rfc460Timestamp||null,
-              finalized:true,
+              finalized:isCompleted,
               updated_at:new Date().toISOString()
             });
           }
@@ -441,25 +448,26 @@ Deno.serve(async(req:Request)=>{
           }
           const winComplete=rows.length===10&&rows.every(r=>r.win===true||r.win===false);
           const firstBloodComplete=rows.filter(r=>r.first_blood===true).length===1;
-          const complete=rows.length===10&&unmapped.length===0&&winComplete&&firstBloodComplete;
+          const complete=isCompleted&&rows.length===10&&unmapped.length===0&&winComplete&&firstBloodComplete;
+          const liveComplete=!isCompleted&&rows.length===10&&unmapped.length===0;
           const {error:gameError}=await supabase.from("pro_games").update({
-            state:"completed",
+            state:isCompleted?"completed":"inProgress",
             blue_team_id:String(blueMeta?.esportsTeamId||blueSide?.id||"")||null,
             red_team_id:String(redMeta?.esportsTeamId||redSide?.id||"")||null,
             winner_team_id:winnerTeamId,
             patch_version:String(metadata?.patchVersion||"")||null,
-            completed_at:wf?.rfc460Timestamp||null,
+            completed_at:isCompleted?(wf?.rfc460Timestamp||null):null,
             source_timestamp:df?.rfc460Timestamp||wf?.rfc460Timestamp||null,
-            stats_status:complete?"final":"error",
+            stats_status:isCompleted?(complete?"final":"error"):(liveComplete?"processing":"error"),
             first_blood_player_id:firstBloodId?String((rows.find(r=>r.participant_id===firstBloodId)||{}).player_id||"")||null:null,
             first_blood_status:firstBloodComplete?"final":"pending",
             stats_ingested_at:new Date().toISOString(),
-            ingest_error:complete?null:(
+            ingest_error:(complete||liveComplete)?null:(
               unmapped.length?"Unmapped players: "+unmapped.join(", "):
               rows.length!==10?"Expected 10 player stat rows, received "+rows.length:
-              !winComplete?"Game winner not yet resolved":
-              !firstBloodComplete?"First Blood not yet resolved":
-              "Stat finalization incomplete"
+              isCompleted&&!winComplete?"Game winner not yet resolved":
+              isCompleted&&!firstBloodComplete?"First Blood not yet resolved":
+              "Stat ingestion incomplete"
             ),
             updated_at:new Date().toISOString()
           }).eq("id",gameId);
