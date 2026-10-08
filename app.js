@@ -3332,6 +3332,9 @@ async function loadNotifications({open=false}={}){
         case "roster_drop": return {title:`${actor} dropped ${rosterPlayer}`,body:"League roster move",view:"transactions"};
         case "roster_swap": return {title:`${actor} made a roster move`,body:"Roster swap",view:"transactions",swap:{dropped:playerName(p.dropped_player_id),added:playerName(p.added_player_id)}};
         case "waiver_submitted": return {title:`Waiver claim submitted: ${rosterPlayer}`,body:`Priority ${p.priority||1}. The claim remains subject to league lock rules.`,view:"transactions"};
+        case "waiver_won": return {title:`Waiver won: ${rosterPlayer}`,body:"The player has been added to your bench and your waiver priority moved to the back.",view:"transactions"};
+        case "waiver_lost": return {title:`Waiver not awarded: ${rosterPlayer}`,body:"Another manager had higher waiver priority.",view:"transactions"};
+        case "roster_incomplete_warning": return {title:"Lineup incomplete",body:`Missing: ${Array.isArray(p.missing_slots)?p.missing_slots.join(", "):"starter slots"}. Fix it before the scoring period begins.`,view:"team"};
         case "lineup_lock_warning": {
           const start=p.starts_at?new Date(p.starts_at):null;
           const when=start&&!Number.isNaN(start.getTime())?start.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}):"soon";
