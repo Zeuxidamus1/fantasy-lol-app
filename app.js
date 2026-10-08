@@ -1139,6 +1139,29 @@ function render(view="home",options={}){
         recoveryCard.hidden=true;
         signedInCard.hidden=false;
         document.querySelector("#signedInEmail").textContent=cloudUserEmail(user);
+        const opsCard=document.querySelector("#opsCard");
+        if(opsCard){
+          try{
+            const ops=await b.getOpsSnapshot();
+            opsCard.hidden=false;
+            const critical=Number(ops?.critical_anomalies)||0;
+            const open=Number(ops?.open_anomalies)||0;
+            const opsStatus=document.querySelector("#opsStatus");
+            opsStatus.textContent=critical?"ATTENTION":"HEALTHY";
+            const summary=document.querySelector("#opsSummary");
+            summary.innerHTML=[
+              ["Active leagues",ops?.active_leagues??0],
+              ["Managers",ops?.active_users??0],
+              ["Open anomalies",open],
+              ["Critical",critical]
+            ].map(function(row){return '<div class="profile-stat"><small>'+h(row[0])+'</small><strong>'+h(row[1])+'</strong></div>';}).join("");
+            const sources=Array.isArray(ops?.data_sources)?ops.data_sources:[];
+            const jobs=Array.isArray(ops?.cron)?ops.cron:[];
+            document.querySelector("#opsDetails").innerHTML=
+              '<div class="ops-list"><strong>Data sources</strong>'+(sources.map(function(x){return "<small>"+h(x.source)+" · "+h(String(x.status||"unknown").toUpperCase())+"</small>";}).join("")||"<small>No source telemetry.</small>")+"</div>"+
+              '<div class="ops-list"><strong>Background jobs</strong>'+(jobs.map(function(x){return "<small>"+h(x.jobname)+" · "+h(String(x.status||"unknown").toUpperCase())+"</small>";}).join("")||"<small>No cron telemetry.</small>")+"</div>";
+          }catch{opsCard.hidden=true;}
+        }
       }else{
         authCard.hidden=false;
         recoveryCard.hidden=true;
@@ -1226,6 +1249,14 @@ function render(view="home",options={}){
     const summary=document.querySelector("#homeEsportsSummary");
     const healthBadge=document.querySelector("#homeDataHealth");
     const healthCopy=document.querySelector("#homeDataHealthCopy");
+    const onboardingCard=document.querySelector("#onboardingCard");
+    if(onboardingCard){
+      let dismissed=false;
+      try{dismissed=localStorage.getItem("riftOnboardingDismissed")==="1";}catch{}
+      onboardingCard.hidden=dismissed;
+      const dismiss=document.querySelector("#dismissOnboarding");
+      if(dismiss)dismiss.onclick=function(){try{localStorage.setItem("riftOnboardingDismissed","1");}catch{} onboardingCard.hidden=true;};
+    }
 
     const rows=proSchedule.map(localScheduleRow).sort((a,b)=>{
       const ta=Date.parse(a.startTime||a.date||"");
