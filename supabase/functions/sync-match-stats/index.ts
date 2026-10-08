@@ -339,14 +339,15 @@ Deno.serve(async(req:Request)=>{
           let firstBloodId:any=null;
 
           let winnerTeamId:any=null;
+          let winnerSource:any=null;
           for(const t of (game?.teams||[])){
             const outcome=String(t?.result?.outcome||t?.outcome||"").toLowerCase();
-            if(["win","won","victory"].includes(outcome))winnerTeamId=String(t.id);
+            if(["win","won","victory"].includes(outcome)){winnerTeamId=String(t.id);winnerSource="riot_lolesports";}
           }
           if(!winnerTeamId && games.length===1){
             for(const t of (evt?.match?.teams||[])){
               const outcome=String(t?.result?.outcome||"").toLowerCase();
-              if(["win","won","victory"].includes(outcome))winnerTeamId=String(t.id);
+              if(["win","won","victory"].includes(outcome)){winnerTeamId=String(t.id);winnerSource="riot_lolesports";}
             }
           }
 
@@ -387,6 +388,9 @@ Deno.serve(async(req:Request)=>{
               cs,
               win:rowWin,
               first_blood:chainStat?.firstBlood??null,
+              stats_source:"riot_lolesports",
+              result_source:rowWin===null?null:(winnerSource||"chaincc"),
+              first_blood_source:chainStat?.firstBlood===null||chainStat?.firstBlood===undefined?null:"chaincc",
               total_gold:Number(stat.totalGold)||null,
               total_gold_earned:Number(stat.totalGoldEarned)||null,
               wards_placed:Number(stat.wardsPlaced)||null,
@@ -401,11 +405,17 @@ Deno.serve(async(req:Request)=>{
 
           if(!winnerTeamId){
             const winnerRow=rows.find(r=>r.win===true);
-            if(winnerRow?.team_id)winnerTeamId=winnerRow.team_id;
+            if(winnerRow?.team_id){
+              winnerTeamId=winnerRow.team_id;
+              winnerSource=winnerRow.result_source||"chaincc";
+            }
           }
           if(winnerTeamId){
             for(const row of rows){
-              if(row.team_id)row.win=String(row.team_id)===String(winnerTeamId);
+              if(row.team_id){
+                row.win=String(row.team_id)===String(winnerTeamId);
+                row.result_source=winnerSource||row.result_source||"chaincc";
+              }
             }
           }
           if(firstBloodId===null){
@@ -413,7 +423,10 @@ Deno.serve(async(req:Request)=>{
             if(fbRow)firstBloodId=fbRow.participant_id;
           }
           if(firstBloodId!==null){
-            for(const row of rows)row.first_blood=Number(row.participant_id)===Number(firstBloodId);
+            for(const row of rows){
+              row.first_blood=Number(row.participant_id)===Number(firstBloodId);
+              row.first_blood_source=row.first_blood_source||"chaincc";
+            }
           }
 
           if(rows.length){
