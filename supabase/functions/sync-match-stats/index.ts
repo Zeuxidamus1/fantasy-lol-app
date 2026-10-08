@@ -403,7 +403,7 @@ Deno.serve(async(req:Request)=>{
               first_blood:firstBloodId!==null?Number(participantId)===Number(firstBloodId):(chainStat?.firstBlood??null),
               stats_source:"riot_lolesports",
               result_source:rowWin===null?null:(winnerSource||"chaincc"),
-              first_blood_source:chainStat?.firstBlood===null||chainStat?.firstBlood===undefined?null:"chaincc",
+              first_blood_source:firstBloodId!==null?(isCompleted?"chaincc":"riot_lolesports"):(chainStat?.firstBlood===null||chainStat?.firstBlood===undefined?null:"chaincc"),
               total_gold:Number(stat.totalGold)||null,
               total_gold_earned:Number(stat.totalGoldEarned)||null,
               wards_placed:Number(stat.wardsPlaced)||null,
@@ -438,7 +438,7 @@ Deno.serve(async(req:Request)=>{
           if(firstBloodId!==null){
             for(const row of rows){
               row.first_blood=Number(row.participant_id)===Number(firstBloodId);
-              row.first_blood_source=row.first_blood_source||"chaincc";
+              row.first_blood_source=row.first_blood_source||(isCompleted?"chaincc":"riot_lolesports");
             }
           }
 
