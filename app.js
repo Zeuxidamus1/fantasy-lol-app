@@ -60,6 +60,15 @@ function localScheduleRow(g){
     time:timestamp?d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}):(g.time||"TBD")
   };
 }
+function displayMatchStatus(value){
+  const status=String(value||"UNSTARTED").toUpperCase();
+  if(status.includes("PROGRESS"))return "LIVE";
+  if(status.includes("COMPLETE"))return "FINAL";
+  if(status.includes("POSTPON"))return "POSTPONED";
+  if(status.includes("CANCEL"))return "CANCELED";
+  if(status.includes("UNSTART")||status.includes("SCHEDULE"))return "UPCOMING";
+  return status;
+}
 function databaseMatchToSchedule(row){
   return {
     matchId:row?.id||"",
@@ -1737,7 +1746,7 @@ function render(view="home",options={}){
         const bNote=bOwned?bRoster.map(p=>p.name).filter(Boolean).join(", "):"";
         return heading+`<div class="game-card ${aOwned||bOwned?"roster-match":""}">
           <div class="game-team ${aOwned?"my-roster-team":""}"><span class="team-mark">${h(g.aCode||"TBD")}</span><div><strong>${h(g.a||"TBD")}</strong><small>${h(aNote)}</small></div></div>
-          <div class="game-meta"><span class="game-time">${h(g.time||"TBD")}</span><span class="game-league">${h(competitionName(g.competition||g.leagueCode)||g.league||"LoL Esports")}</span><span class="game-stage">${h([g.stage,Number(g.count)>0?"BO"+g.count:""].filter(Boolean).join(" · "))}</span><span class="game-status ${String(g.status||"").toUpperCase().includes("PROGRESS")?"live":""}">${h(g.status||"UNSTARTED")}</span></div>
+          <div class="game-meta"><span class="game-time">${h(g.time||"TBD")}</span><span class="game-league">${h(competitionName(g.competition||g.leagueCode)||g.league||"LoL Esports")}</span><span class="game-stage">${h([g.stage,Number(g.count)>0?"BO"+g.count:""].filter(Boolean).join(" · "))}</span><span class="game-status ${displayMatchStatus(g.status)==="LIVE"?"live":""} ${["POSTPONED","CANCELED"].includes(displayMatchStatus(g.status))?"canceled":""}">${h(displayMatchStatus(g.status))}</span></div>
           <div class="game-team right ${bOwned?"my-roster-team":""}"><div><strong>${h(g.b||"TBD")}</strong><small>${h(bNote)}</small></div><span class="team-mark">${h(g.bCode||"TBD")}</span></div>
         </div>`;
       }).join(""):(rosterOnly
