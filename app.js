@@ -1264,6 +1264,8 @@ function render(view="home",options={}){
     const upcomingList=document.querySelector("#homeUpcomingMatches");
     const tournamentList=document.querySelector("#homeTournamentList");
     const summary=document.querySelector("#homeEsportsSummary");
+    const healthBadge=document.querySelector("#homeDataHealth");
+    const healthCopy=document.querySelector("#homeDataHealthCopy");
 
     const rows=proSchedule.map(localScheduleRow).sort((a,b)=>{
       const ta=Date.parse(a.startTime||a.date||"");
@@ -1300,6 +1302,39 @@ function render(view="home",options={}){
       tournamentList.innerHTML=tournaments.length
         ?tournaments.map(name=>`<div class="home-tournament-chip">${h(name)}</div>`).join("")
         :'<div class="empty-state"><strong>Tournament feed unavailable</strong><small>Rift Fantasy will continue using the existing local esports data when it becomes available.</small></div>';
+    }
+
+    if(healthBadge&&healthCopy&&cloudReady()){
+      (async()=>{
+        try{
+          const health=await backend().listDataSourceHealth();
+          const riot=health.find(x=>x.source==="riot_esports");
+          const chain=health.find(x=>x.source==="chaincc");
+          const successAt=riot?.last_success_at?Date.parse(riot.last_success_at):0;
+          const ageMs=successAt?Date.now()-successAt:Infinity;
+          const stale=ageMs>2*60*1000;
+          const delayed=riot?.status==="delayed"||riot?.status==="error"||stale;
+          healthBadge.textContent=delayed?"DATA DELAYED":"LIVE DATA HEALTHY";
+          healthBadge.classList.toggle("delayed",delayed);
+          healthBadge.classList.toggle("healthy",!delayed);
+          if(delayed){
+            const mins=Number.isFinite(ageMs)?Math.max(1,Math.round(ageMs/60000)):null;
+            healthCopy.textContent=mins
+              ?`Primary live feed delayed. Last good update about ${mins} minute${mins===1?"":"s"} ago; stored scores are being preserved.`
+              :"Primary live feed is delayed; stored scores are being preserved until current data returns.";
+          }else{
+            const secondary=chain?.status==="healthy"?" Historical validation source available.":"";
+            healthCopy.textContent="Primary LoL Esports feed is responding normally."+secondary;
+          }
+        }catch{
+          healthBadge.textContent="DATA STATUS UNKNOWN";
+          healthBadge.classList.add("delayed");
+          healthCopy.textContent="Could not read source-health telemetry. Existing stored fantasy data remains available.";
+        }
+      })();
+    }else if(healthBadge&&healthCopy){
+      healthBadge.textContent="LOCAL DATA";
+      healthCopy.textContent="Cloud source-health telemetry is available after sign-in.";
     }
   }
   if(view==="team"){
