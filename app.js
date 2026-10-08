@@ -2229,6 +2229,8 @@ function render(view="home",options={}){
     let leagueRosters=[];
     let currentUser=null;
     let leagueStatus=null;
+    let leagueCompetition=null;
+    let playerStatusMap=new Map();
 
     const draw=()=>{
       const q=search.value.trim().toLowerCase();
@@ -2241,6 +2243,8 @@ function render(view="home",options={}){
         const pid=playerKey(p);
         const ownership=leagueRosters.find(r=>String(r.player_id)===String(pid));
         const state=b.closest(".player-fantasy-state")?.querySelector(".player-status-label");
+        const availability=playerStatusMap.get(String(pid));
+        const unavailable=availability&&["inactive","eliminated","season_complete"].includes(String(availability.status));
         if(ownership){
           if(String(ownership.user_id)===String(currentUser?.id)){
             b.textContent="OWNED";
@@ -2251,6 +2255,11 @@ function render(view="home",options={}){
             if(state)state.textContent="Rostered";
           }
           b.disabled=true;
+        }else if(unavailable){
+          const label=String(availability.status).replaceAll("_"," ").toUpperCase();
+          b.textContent="UNAVAILABLE";
+          if(state)state.textContent=label;
+          b.disabled=true;
         }else if(leagueStatus&&leagueStatus!=="active"){
           b.textContent=leagueStatus==="drafting"?"DRAFTING":"LOCKED";
           if(state)state.textContent=leagueStatus==="drafting"?"Drafting":"Unavailable";
@@ -2259,7 +2268,11 @@ function render(view="home",options={}){
           if(state)state.textContent="Free agent";
           b.hidden=true;
         }else{
-          if(state)state.textContent="Free agent";
+          if(state){
+            state.textContent=availability
+              ?String(availability.status).replaceAll("_"," ")
+              :"Free agent";
+          }
           b.onclick=async e=>{e.stopPropagation();b.disabled=true;await addPlayerToRoster(p);await refreshOwnership();};
         }
       });
@@ -2278,7 +2291,11 @@ function render(view="home",options={}){
         const [user,rosters,leagues]=await Promise.all([b.currentUser(),b.listRosters(leagueId),b.listLeagues()]);
         currentUser=user;
         leagueRosters=rosters;
-        leagueStatus=leagues.find(l=>String(l.id)===String(leagueId))?.status||null;
+        const activeLeague=leagues.find(l=>String(l.id)===String(leagueId));
+        leagueStatus=activeLeague?.status||null;
+        leagueCompetition=normalizeCompetitionCode(activeLeague?.settings?.competition)||null;
+        const statuses=leagueCompetition?await b.listPlayerCompetitionStatus(leagueCompetition).catch(()=>[]):[];
+        playerStatusMap=new Map(statuses.map(x=>[String(x.player_id),x]));
       }catch{
         leagueRosters=[];
       }
