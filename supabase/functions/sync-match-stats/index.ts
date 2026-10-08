@@ -107,13 +107,17 @@ Deno.serve(async(req:Request)=>{
       const summarize=(payload:any)=>{
         const rawFrames=payload?.frames||[];
         const lf=rawFrames.at(-1)||{};
+        const firstParticipant=(lf?.participants||[])[0]||{};
         return {
         gameId:payload?.esportsGameId||null,
         matchId:payload?.esportsMatchId||null,
+        topLevelKeys:Object.keys(payload||{}),
         metadata:payload?.gameMetadata||null,
         lastFrameKeys:Object.keys(lf),
         lastBlueKeys:Object.keys(lf?.blueTeam||{}),
         lastRedKeys:Object.keys(lf?.redTeam||{}),
+        lastParticipantKeys:Object.keys(firstParticipant),
+        lastParticipantSample:firstParticipant,
         frames:rawFrames.map((f:any)=>({
           ts:f.rfc460Timestamp,
           state:f.gameState,
