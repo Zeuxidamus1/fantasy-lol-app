@@ -34,7 +34,7 @@ select cron.schedule(
       'Content-Type','application/json',
       'x-sync-token',(select decrypted_secret from vault.decrypted_secrets where name='fantasy_player_sync_token')
     ),
-    body:=jsonb_build_object('limit',8)
+    body:=jsonb_build_object('limit',3)
   );
   $$
 );
