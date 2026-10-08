@@ -52,7 +52,7 @@ smoke_route "transactions" "Waivers &amp; Transactions"
 smoke_route "trade" "Trades"
 smoke_route "draft" "Draft Room"
 smoke_route "setup" "League Setup"
-smoke_route "matchup" "Fantasy scoring is not live yet"
+smoke_route "matchup" "Matchup"
 smoke_route "not-a-real-route" "Welcome back"
 
 echo "Browser smoke tests passed."
