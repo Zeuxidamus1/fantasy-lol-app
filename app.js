@@ -2330,7 +2330,7 @@ function render(view="home",options={}){
     const moveCount=document.querySelector("#transactionMoveCount");
     const leagueName=document.querySelector("#transactionLeagueName");
     const leagueId=getActiveLeagueId();
-    let user=null,claims=[],moves=[],members=[],leagues=[];
+    let user=null,claims=[],moves=[],members=[],leagues=[],priorities=[];
     const fmt=iso=>{const d=new Date(iso);return Number.isNaN(d.getTime())?"":d.toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});};
     const memberName=id=>members.find(m=>String(m.user_id)===String(id))?.team_name||"Manager";
     const playerFromId=id=>playerById(id)||{id,name:id,team:"",role:""};
@@ -2340,7 +2340,7 @@ function render(view="home",options={}){
       count.textContent=mineClaims.length;
       moveCount.textContent=moves.length;
       if(tab==="pending"){
-        content.innerHTML=mineClaims.length?mineClaims.map(c=>{const p=playerFromId(c.player_id);return `<div class="transaction-item"><span class="transaction-icon claim">W</span><div class="transaction-info"><strong>${h(p.name)}<span class="status-pill pending">PENDING</span></strong><small>${h(p.team)} · Priority ${h(c.priority)}</small><div class="claim-actions"><button class="claim-btn cancel" data-cancel-claim="${h(c.id)}">Cancel</button></div></div><span class="transaction-time">${fmt(c.created_at)}</span></div>`;}).join(""):'<div class="empty-state"><strong>No pending waiver claims</strong><small>Open a player profile and tap Waiver Claim to submit one.</small></div>';
+        content.innerHTML=mineClaims.length?mineClaims.map(c=>{const p=playerFromId(c.player_id);return `<div class="transaction-item"><span class="transaction-icon claim">W</span><div class="transaction-info"><strong>${h(p.name)}<span class="status-pill pending">PENDING</span></strong><small>${h(p.team)} · Priority ${h(c.priority)}${c.process_after?" · Processes "+h(fmt(c.process_after)):""}</small><div class="claim-actions"><button class="claim-btn cancel" data-cancel-claim="${h(c.id)}">Cancel</button></div></div><span class="transaction-time">${fmt(c.created_at)}</span></div>`;}).join(""):'<div class="empty-state"><strong>No pending waiver claims</strong><small>Open a player profile and tap Waiver Claim to submit one.</small></div>';
         content.querySelectorAll("[data-cancel-claim]").forEach(btn=>btn.onclick=async()=>{try{await backend().cancelWaiver(btn.dataset.cancelClaim);showToast("Waiver claim canceled");await init();}catch(err){showToast(err.message||"Could not cancel claim");}});
       }else if(tab==="history"){
         const mine=moves.filter(m=>String(m.user_id)===String(user?.id));
@@ -2357,8 +2357,14 @@ function render(view="home",options={}){
       }
       try{
         const b=backend();
-        [user,claims,moves,members,leagues]=await Promise.all([b.currentUser(),b.listWaivers(leagueId),b.listTransactions(leagueId),b.listLeagueMembers(leagueId),b.listLeagues()]);
+        [user,claims,moves,members,leagues,priorities]=await Promise.all([
+          b.currentUser(),b.listWaivers(leagueId),b.listTransactions(leagueId),
+          b.listLeagueMembers(leagueId),b.listLeagues(),b.listWaiverPriority(leagueId).catch(()=>[])
+        ]);
         leagueName.textContent=leagues.find(l=>String(l.id)===String(leagueId))?.name||"League";
+        const minePriority=priorities.find(x=>String(x.manager_id)===String(user?.id)&&x.manager_type==="human");
+        const priorityCopy=document.querySelector("#waiverPriorityCopy");
+        if(priorityCopy)priorityCopy.textContent=minePriority?"Your current waiver priority: #"+minePriority.priority:"Waiver priority initializes automatically.";
         draw();
       }catch(err){content.innerHTML=`<div class="empty-state cloud-error"><strong>Could not load transactions</strong><small>${h(err.message||"Please try again.")}</small></div>`;}
     };
@@ -2477,6 +2483,34 @@ function render(view="home",options={}){
         document.querySelector("#leagueOverviewTeam").textContent=activeMembership?.team_name||"Your team";
         document.querySelector("#leagueOverviewRole").textContent=activeMembership?.role==="owner"?"Commissioner":"Manager";
         document.querySelector("#leagueOverviewInvite").textContent=activeLeague.invite_code||"—";
+        try{
+          const [playoffs,champion,activity,history,membersNow,botsNow]=await Promise.all([
+            b.listPlayoffs(activeId),b.getLeagueChampion(activeId),b.listLeagueActivity(activeId,12),
+            b.listLeagueHistory(activeId),b.listLeagueMembers(activeId),b.listLeagueBots(activeId)
+          ]);
+          const managerName=function(id,type){
+            if(type==="bot")return botsNow.find(x=>String(x.id)===String(id))?.team_name||"Bot Manager";
+            return membersNow.find(x=>String(x.user_id)===String(id))?.team_name||"Manager";
+          };
+          const playoffCard=document.querySelector("#leaguePlayoffCard");
+          const playoffContent=document.querySelector("#leaguePlayoffContent");
+          if(playoffCard&&playoffContent&&(playoffs.length||champion)){
+            playoffCard.hidden=false;
+            const pill=document.querySelector("#leagueChampionPill");
+            if(champion){
+              pill.textContent="CHAMPION";
+              playoffContent.innerHTML='<div class="champion-banner"><strong>🏆 '+h(managerName(champion.manager_id,champion.manager_type))+'</strong><small>League Champion · Seed #'+h(champion.seed||"—")+'</small></div>';
+            }else{
+              playoffContent.innerHTML=playoffs.map(function(x){return '<div class="playoff-row"><div><strong>'+h(x.stage==="championship"?"Championship":"Semifinal "+x.bracket_slot)+'</strong><small>Seed '+h(x.home_seed??"—")+' vs Seed '+h(x.away_seed??"—")+'</small></div><div><strong>'+formatFantasyPoints(x.home_score)+' - '+formatFantasyPoints(x.away_score)+'</strong><small>'+h(String(x.status||"upcoming").toUpperCase())+'</small></div></div>';}).join("");
+            }
+          }
+          const activityCard=document.querySelector("#leagueActivityCard");
+          const activityContent=document.querySelector("#leagueActivityContent");
+          if(activityCard&&activityContent&&activity.length){activityCard.hidden=false;activityContent.innerHTML=activity.map(function(x){return '<div class="activity-row"><div><strong>'+h(String(x.kind||"League activity").replaceAll("_"," "))+'</strong><small>'+h(x.payload?.player_id?playerById(x.payload.player_id)?.name||x.payload.player_id:"")+'</small></div><small>'+new Date(x.created_at).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+'</small></div>';}).join("");}
+          const historyCard=document.querySelector("#leagueHistoryCard");
+          const historyContent=document.querySelector("#leagueHistoryContent");
+          if(historyCard&&historyContent&&history.length){historyCard.hidden=false;historyContent.innerHTML=history.map(function(x){return '<div class="history-row"><div><strong>'+h(String(x.season_key||x.competition))+'</strong><small>'+h(competitionName(x.competition))+'</small></div><div><strong>'+(x.champion_manager_id?h(managerName(x.champion_manager_id,x.champion_manager_type)):"—")+'</strong><small>Champion</small></div></div>';}).join("");}
+        }catch{}
 
         const rulesToggle=document.querySelector("#leagueRulesToggle");
         const closeRules=()=>{
@@ -3165,6 +3199,18 @@ function render(view="home",options={}){
   document.querySelectorAll("[data-jump]").forEach(b=>b.onclick=()=>render(b.dataset.jump));
 }
 
+let reportingClientError=false;
+window.addEventListener("error",event=>{
+  if(reportingClientError)return;
+  reportingClientError=true;
+  Promise.resolve(backend()?.logClientError?.(event.message,event.error?.stack||"",{filename:event.filename||"",lineno:event.lineno||0,colno:event.colno||0})).catch(()=>{}).finally(()=>{reportingClientError=false;});
+});
+window.addEventListener("unhandledrejection",event=>{
+  if(reportingClientError)return;
+  reportingClientError=true;
+  const reason=event.reason;
+  Promise.resolve(backend()?.logClientError?.(reason?.message||String(reason||"Unhandled rejection"),reason?.stack||"",{type:"unhandledrejection"})).catch(()=>{}).finally(()=>{reportingClientError=false;});
+});
 document.querySelectorAll(".nav-item").forEach(b=>b.addEventListener("click",()=>render(b.dataset.view)));
 document.querySelectorAll("[data-close-transaction]").forEach(el=>el.addEventListener("click",closeTransactionModal));
 document.querySelectorAll("[data-close-lineup-swap]").forEach(el=>el.addEventListener("click",closeLineupSwapModal));
