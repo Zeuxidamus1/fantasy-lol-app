@@ -60,6 +60,22 @@ function localScheduleRow(g){
     time:timestamp?d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}):(g.time||"TBD")
   };
 }
+function databaseMatchToSchedule(row){
+  return {
+    matchId:row?.id||"",
+    eventId:row?.event_id||"",
+    competition:row?.competition||null,
+    startTime:row?.start_time||null,
+    league:row?.league_name||row?.competition||"LoL Esports",
+    leagueCode:row?.league_code||row?.competition||"",
+    stage:row?.stage||"",
+    aId:row?.team_a_id||null, a:row?.team_a_name||"TBD", aCode:row?.team_a_code||"TBD",
+    bId:row?.team_b_id||null, b:row?.team_b_name||"TBD", bCode:row?.team_b_code||"TBD",
+    status:row?.status||"UNSTARTED",
+    strategy:row?.strategy||"",
+    count:row?.game_count??null
+  };
+}
 const COMPETITION_META = Object.freeze({
   lcs:{name:"LCS",type:"regional",region:"North America"},
   cblol:{name:"CBLOL",type:"regional",region:"Brazil"},
@@ -1667,6 +1683,8 @@ function render(view="home",options={}){
     const rosterOnly=view==="my-schedule";
     let day="all";
     let rosterPlayers=[];
+    let scheduleRows=proSchedule.filter(g=>!!scheduleCompetitionCode(g));
+    let leagueCompetition=null;
     const title=document.querySelector("#schedulePageTitle");
     const copy=document.querySelector("#scheduleScopeCopy");
     const fullBtn=document.querySelector("#fullScheduleBtn");
@@ -1679,10 +1697,13 @@ function render(view="home",options={}){
     if(myBtn)myBtn.classList.toggle("schedule-view-active",rosterOnly);
 
     const normalizeTeam=value=>String(value||"").toLowerCase().replace(/[^a-z0-9]/g,"");
-    const rosterMatchForTeam=(teamName,teamCode)=>{
+    const rosterMatchForTeam=(teamId,teamName,teamCode)=>{
+      const idKey=String(teamId||"");
       const nameKey=normalizeTeam(teamName);
       const codeKey=normalizeTeam(teamCode);
       return rosterPlayers.filter(p=>{
+        const playerTeamId=String(p.teamId||p.team_id||"");
+        if(idKey&&playerTeamId&&idKey===playerTeamId)return true;
         const pName=normalizeTeam(p.team);
         const pCode=normalizeTeam(p.teamCode);
         return (nameKey&&(pName===nameKey||pCode===nameKey)) ||
@@ -1691,7 +1712,7 @@ function render(view="home",options={}){
     };
 
     const drawSchedule=()=>{
-      const rows=proSchedule.map(localScheduleRow).sort((a,b)=>{
+      const rows=scheduleRows.map(localScheduleRow).sort((a,b)=>{
         const ta=Date.parse(a.startTime||"");
         const tb=Date.parse(b.startTime||"");
         if(Number.isFinite(ta)&&Number.isFinite(tb))return ta-tb;
@@ -1700,22 +1721,23 @@ function render(view="home",options={}){
       const filtered=rows.filter(g=>{
         const dayMatches=day==="all"||g.day===day||(day==="upcoming"&&g.day==="upcoming");
         if(!dayMatches)return false;
+        if(leagueCompetition&&scheduleCompetitionCode(g)!==leagueCompetition)return false;
         if(!rosterOnly)return true;
-        return rosterMatchForTeam(g.a,g.aCode).length>0 || rosterMatchForTeam(g.b,g.bCode).length>0;
+        return rosterMatchForTeam(g.aId,g.a,g.aCode).length>0 || rosterMatchForTeam(g.bId,g.b,g.bCode).length>0;
       });
       let lastLabel="";
       list.innerHTML=filtered.length?filtered.map(g=>{
         const heading=g.label!==lastLabel ? `<div class="schedule-day">${h(g.label||"Upcoming")}</div>` : "";
         lastLabel=g.label;
-        const aRoster=rosterMatchForTeam(g.a,g.aCode);
-        const bRoster=rosterMatchForTeam(g.b,g.bCode);
+        const aRoster=rosterMatchForTeam(g.aId,g.a,g.aCode);
+        const bRoster=rosterMatchForTeam(g.bId,g.b,g.bCode);
         const aOwned=aRoster.length>0;
         const bOwned=bRoster.length>0;
-        const aNote=aOwned?`${aRoster.length} roster player${aRoster.length===1?"":"s"}`:"Team 1";
-        const bNote=bOwned?`${bRoster.length} roster player${bRoster.length===1?"":"s"}`:"Team 2";
+        const aNote=aOwned?aRoster.map(p=>p.name).filter(Boolean).join(", "):"";
+        const bNote=bOwned?bRoster.map(p=>p.name).filter(Boolean).join(", "):"";
         return heading+`<div class="game-card ${aOwned||bOwned?"roster-match":""}">
           <div class="game-team ${aOwned?"my-roster-team":""}"><span class="team-mark">${h(g.aCode||"TBD")}</span><div><strong>${h(g.a||"TBD")}</strong><small>${h(aNote)}</small></div></div>
-          <div class="game-meta"><span class="game-time">${h(g.time||"TBD")}</span><span class="game-league">${h(g.league||"LoL Esports")}</span><span class="game-stage">${h(g.stage||"")}</span><span class="game-status ${String(g.status||"").toUpperCase().includes("PROGRESS")?"live":""}">${h(g.status||"UPCOMING")}</span></div>
+          <div class="game-meta"><span class="game-time">${h(g.time||"TBD")}</span><span class="game-league">${h(competitionName(g.competition||g.leagueCode)||g.league||"LoL Esports")}</span><span class="game-stage">${h([g.stage,Number(g.count)>0?"BO"+g.count:""].filter(Boolean).join(" · "))}</span><span class="game-status ${String(g.status||"").toUpperCase().includes("PROGRESS")?"live":""}">${h(g.status||"UNSTARTED")}</span></div>
           <div class="game-team right ${bOwned?"my-roster-team":""}"><div><strong>${h(g.b||"TBD")}</strong><small>${h(bNote)}</small></div><span class="team-mark">${h(g.bCode||"TBD")}</span></div>
         </div>`;
       }).join(""):(rosterOnly
@@ -1731,8 +1753,17 @@ function render(view="home",options={}){
           const leagues=await backend().listLeagues();
           const league=leagues.find(l=>String(l.id)===String(leagueId));
           if(league){
-            const loaded=await loadRosterFromCloud(leagueId);
+            leagueCompetition=normalizeCompetitionCode(league.settings?.competition)||null;
+            if(title&&leagueCompetition)title.textContent=rosterOnly?"My "+competitionName(leagueCompetition)+" Schedule":competitionName(leagueCompetition)+" Schedule";
+            if(copy&&leagueCompetition)copy.textContent=rosterOnly
+              ?"Only "+competitionName(leagueCompetition)+" matches involving players on your current fantasy roster."
+              :"Official "+competitionName(leagueCompetition)+" matches in the current schedule window.";
+            const [loaded,matches]=await Promise.all([
+              loadRosterFromCloud(leagueId),
+              backend().listProMatches?.(leagueCompetition)
+            ]);
             rosterPlayers=loaded?getUserRoster():[];
+            if(Array.isArray(matches)&&matches.length)scheduleRows=matches.map(databaseMatchToSchedule);
           }else{
             rosterPlayers=[];
           }
