@@ -39,6 +39,20 @@ const first=(obj,names)=>{
   }
   return null;
 };
+const canonicalCompetition=(value)=>{
+  const raw=String(value||"").trim().toLowerCase();
+  if(!raw)return null;
+  if(raw==="lcs"||raw.includes("league championship series"))return "lcs";
+  if(raw==="cblol"||raw.includes("cblol"))return "cblol";
+  if(raw==="lec"||raw.includes("european championship"))return "lec";
+  if(raw==="lck"||raw.includes("champions korea"))return "lck";
+  if(raw==="lpl"||raw.includes("pro league"))return "lpl";
+  if(raw==="lcp"||raw.includes("league of legends championship pacific"))return "lcp";
+  if(raw.includes("first stand")||raw==="fst")return "first_stand";
+  if(raw==="msi"||raw.includes("mid-season"))return "msi";
+  if(raw==="wlds"||raw==="worlds"||raw.includes("world championship"))return "worlds";
+  return null;
+};
 
 const response=await fetch(DATA_URL,{headers:{
   "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
@@ -57,6 +71,7 @@ if(parsed.length<2)throw new Error("ChainCC CSV was empty");
 
 const headers=parsed[0].map(h=>String(h).trim().toLowerCase());
 const byName=new Map();
+const gameRows=[];
 
 for(let i=1;i<parsed.length;i++){
   const values=parsed[i];
@@ -68,15 +83,19 @@ for(let i=1;i<parsed.length;i++){
   const position=first(row,["position","role"]);
   if(!player||!position)continue;
 
+  const league=first(row,["league","league_name"]);
+  const competition=canonicalCompetition(league);
   const entry={
     gameId:first(row,["game_id","gameid","game"]),
     date:first(row,["date","game_date"]),
-    league:first(row,["league","league_name"]),
+    league,
+    competition,
     split:first(row,["split"]),
     patch:first(row,["patch"]),
     player:String(player),
     team:first(row,["team_name","team","teamname"]),
     opponent:first(row,["opponent_name","opponent","opp_team","opponent_team"]),
+    side:first(row,["side"]),
     position:String(position).toUpperCase(),
     champion:first(row,["champion","pick"]),
     win:bool(first(row,["result","win","won"])),
@@ -96,6 +115,12 @@ for(let i=1;i<parsed.length;i++){
   if(!key)continue;
   if(!byName.has(key))byName.set(key,[]);
   byName.get(key).push(entry);
+
+  const gameDate=Date.parse(entry.date||"");
+  const cutoff=Date.now()-60*24*60*60*1000;
+  if(entry.competition&&entry.gameId&&Number.isFinite(gameDate)&&gameDate>=cutoff){
+    gameRows.push(entry);
+  }
 }
 
 for(const rows of byName.values()){
@@ -142,7 +167,8 @@ const payload={
   season:YEAR,
   updatedAt:new Date().toISOString(),
   datasetUrl:DATA_URL,
+  games:gameRows,
   players
 };
 await writeFile(OUT,`window.PLAYER_STATS = ${JSON.stringify(payload)};\n`,"utf8");
-console.log(`Wrote ${OUT} with ${Object.keys(players).length} players from ChainCC ${YEAR}`);
+console.log(`Wrote ${OUT} with ${Object.keys(players).length} players and ${gameRows.length} recent supported Tier 1 game rows from ChainCC ${YEAR}`);
