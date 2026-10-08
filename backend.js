@@ -297,6 +297,14 @@
     return request(path,{session:current});
   }
 
+  async function listLeagueStandings(leagueId){
+    const current=await session();
+    if(!current)return [];
+    return request("/rest/v1/league_standings?league_id=eq."+encodeURIComponent(leagueId)
+      +"&select=league_id,manager_id,manager_type,wins,losses,ties,byes,points_for,points_against,live_points_for,completed_matchups,rank,updated_at"
+      +"&order=rank.asc",{session:current});
+  }
+
   async function listProGames(matchId){
     const current=await session();
     if(!current)return [];
@@ -410,7 +418,7 @@
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
     listLeagues,createLeague,createBotLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,makeBotDraftPick,
-    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,saveRoster,listTransactions,
+    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
     listNotifications,markNotificationsRead,
     listTrades,createTrade,updateTrade,acceptTrade,
