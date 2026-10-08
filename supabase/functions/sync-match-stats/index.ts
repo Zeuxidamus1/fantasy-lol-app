@@ -216,7 +216,7 @@ Deno.serve(async(req:Request)=>{
           ];
           const metaByParticipant=new Map(metaPlayers.map((p:any)=>[Number(p.participantId),p]));
           const statByParticipant=new Map((df?.participants||[]).map((p:any)=>[Number(p.participantId),p]));
-          const firstBloodId=await firstBloodParticipant(gameId);
+          const firstBloodId=null;
 
           let winnerTeamId:any=null;
           for(const t of (game?.teams||[])){
