@@ -309,6 +309,7 @@ function getLeagueSettings(){
 }
 
 let selectedPlayerId=null;
+let selectedMatchupRound=null;
 let tradePrefill={id:null,side:null};
 let modalReturnFocus=null;
 
@@ -1752,54 +1753,174 @@ function render(view="home",options={}){
   }
   if(view==="matchup"){
     const leagueId=getActiveLeagueId();
-    const list=document.querySelector("#matchupScoreList");
-    const title=document.querySelector("#matchupLeagueName");
-    const status=document.querySelector("#matchupScoreStatus");
+    const board=document.querySelector("#matchupScoreList");
+    const leagueTitle=document.querySelector("#matchupLeagueName");
+    const eyebrow=document.querySelector("#matchupLeagueEyebrow");
+    const roundStatus=document.querySelector("#matchupRoundStatus");
+    const roundLabel=document.querySelector("#matchupRoundLabel");
+    const roundDates=document.querySelector("#matchupRoundDates");
+    const prevBtn=document.querySelector("#matchupPrevRound");
+    const nextBtn=document.querySelector("#matchupNextRound");
+
+    const managerKey=(id,type)=>String(type||"human")+":"+String(id||"");
+    const formatRoundDate=value=>{
+      const d=new Date(value);
+      return Number.isNaN(d.getTime())?"—":d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
+    };
+    const teamMatchesPlayer=(player,match)=>{
+      const playerTeamId=String(player?.teamId||player?.team_id||"");
+      if(playerTeamId&&(playerTeamId===String(match?.team_a_id||"")||playerTeamId===String(match?.team_b_id||"")))return true;
+      const pName=normalizeTeamKey(player?.team);
+      const pCode=normalizeTeamKey(player?.teamCode);
+      const teams=[
+        normalizeTeamKey(match?.team_a_name),normalizeTeamKey(match?.team_a_code),
+        normalizeTeamKey(match?.team_b_name),normalizeTeamKey(match?.team_b_code)
+      ];
+      return !!((pName&&teams.includes(pName))||(pCode&&teams.includes(pCode)));
+    };
+    const playerRoundState=(player,score,matches)=>{
+      if(score?.live)return "LIVE";
+      const related=matches.filter(m=>teamMatchesPlayer(player,m));
+      const upcoming=related.some(m=>{
+        const state=displayMatchStatus(m.status);
+        return state==="UPCOMING"||Date.parse(m.start_time||"")>Date.now();
+      });
+      if(score?.games&&upcoming)return "MORE GAMES";
+      if(upcoming)return "UPCOMING";
+      if(score?.games)return "COMPLETE";
+      return "NO GAME";
+    };
+    const lineupFor=(rosters,managerId,managerType,players,scoreMap,matches)=>{
+      const order={TOP:0,JNG:1,MID:2,ADC:3,SUP:4,FLEX:5};
+      return rosters
+        .filter(r=>String(r.user_id)===String(managerId)&&String(r.manager_type||"human")===String(managerType||"human")&&String(r.slot||"").toUpperCase()!=="BN")
+        .sort((a,b)=>(order[String(a.slot).toUpperCase()]??99)-(order[String(b.slot).toUpperCase()]??99))
+        .map(r=>{
+          const player=players.find(p=>playerKey(p)===String(r.player_id)||String(p.id||"")===String(r.player_id))
+            ||{id:r.player_id,name:r.player_id,team:"",role:r.slot};
+          const score=scoreMap.get(String(r.player_id))||{total:0,live:false,games:0,breakdown:{}};
+          return {roster:r,player,score,state:playerRoundState(player,score,matches)};
+        });
+    };
+    const renderLineup=(label,name,items,total,isMine)=>{
+      const remaining=items.filter(x=>["LIVE","UPCOMING","MORE GAMES"].includes(x.state)).length;
+      const complete=items.filter(x=>x.state==="COMPLETE").length;
+      return `<section class="matchup-side ${isMine?"mine":""}">
+        <div class="matchup-team-heading">
+          <div><small>${h(label)}</small><strong>${h(name)}</strong></div>
+          <div class="matchup-team-score"><strong>${formatFantasyPoints(total)}</strong><small>FP</small></div>
+        </div>
+        <div class="matchup-progress"><span>${complete} complete</span><span>${remaining} remaining</span></div>
+        <div class="matchup-lineup">${items.length?items.map(({roster,player,score,state})=>`
+          <article class="matchup-player-row">
+            <span class="role">${h(String(roster.slot||player.role||""))}</span>
+            <div class="matchup-player-main"><strong>${h(player.name||roster.player_id)}</strong><small>${h(player.team||"")}</small></div>
+            <div class="matchup-player-state"><span class="${state==="LIVE"?"live":""}">${h(state)}</span><strong>${formatFantasyPoints(score.total)}</strong></div>
+            ${score.games?renderFantasyBreakdown(score):""}
+          </article>`).join(""):'<div class="empty-state"><strong>No starters</strong><small>This lineup is incomplete.</small></div>'}</div>
+      </section>`;
+    };
+
     if(!leagueId||!cloudReady()){
-      list.innerHTML='<div class="empty-state"><strong>No active league</strong><small>Select a league to view live fantasy scoring.</small></div>';
-      status.textContent="OFFLINE";
+      board.innerHTML='<div class="empty-state"><strong>No active league</strong><small>Select a league before viewing head-to-head matchups.</small></div>';
+      if(prevBtn)prevBtn.disabled=true;
+      if(nextBtn)nextBtn.disabled=true;
     }else{
       (async()=>{
         try{
           const b=backend();
-          const [user,leagues,rosters,scores]=await Promise.all([
-            b.currentUser(),
-            b.listLeagues(),
-            b.listRosters(leagueId),
-            b.listFantasyGameScores(leagueId)
+          const [user,leagues,rounds,members,bots,rosters,scores]=await Promise.all([
+            b.currentUser(),b.listLeagues(),b.listFantasyRounds(leagueId),
+            b.listLeagueMembers(leagueId),b.listLeagueBots(leagueId),
+            b.listRosters(leagueId),b.listFantasyGameScores(leagueId)
           ]);
           const league=leagues.find(l=>String(l.id)===String(leagueId));
-          if(title)title.textContent=String(league?.name||"League");
-          const mine=rosters.filter(r=>String(r.user_id)===String(user?.id)&&String(r.slot||"").toUpperCase()!=="BN");
+          if(leagueTitle)leagueTitle.textContent=String(league?.name||"Matchup");
+          if(eyebrow)eyebrow.textContent="HEAD TO HEAD · "+competitionName(league?.settings?.competition||"");
+
+          if(!rounds.length){
+            board.innerHTML='<div class="empty-state"><strong>No fantasy rounds yet</strong><small>Rounds are created automatically when the league draft finishes.</small></div>';
+            prevBtn.disabled=true;nextBtn.disabled=true;return;
+          }
+
+          const liveRound=rounds.find(r=>r.status==="live")||rounds.find(r=>r.status==="upcoming")||rounds.at(-1);
+          if(!selectedMatchupRound||!rounds.some(r=>Number(r.round_number)===Number(selectedMatchupRound))){
+            selectedMatchupRound=Number(liveRound.round_number);
+          }
+          const round=rounds.find(r=>Number(r.round_number)===Number(selectedMatchupRound))||liveRound;
+          const roundIndex=rounds.findIndex(r=>Number(r.round_number)===Number(round.round_number));
+          prevBtn.disabled=roundIndex<=0;
+          nextBtn.disabled=roundIndex>=rounds.length-1;
+          prevBtn.onclick=()=>{if(roundIndex>0){selectedMatchupRound=Number(rounds[roundIndex-1].round_number);render("matchup",{replace:true});}};
+          nextBtn.onclick=()=>{if(roundIndex<rounds.length-1){selectedMatchupRound=Number(rounds[roundIndex+1].round_number);render("matchup",{replace:true});}};
+
+          roundLabel.textContent="Round "+round.round_number;
+          roundStatus.textContent=round.status==="live"?"LIVE FANTASY ROUND":round.status==="final"?"FINAL":"UPCOMING";
+          roundStatus.classList.toggle("live",round.status==="live");
+          roundDates.textContent=formatRoundDate(round.starts_at)+" – "+formatRoundDate(new Date(Date.parse(round.ends_at)-1));
+          
+          const [matchups,proMatches]=await Promise.all([
+            b.listLeagueMatchups(leagueId,round.round_number),
+            b.listProMatches(league?.settings?.competition||null,round.starts_at,round.ends_at)
+          ]);
+          const myMatchup=matchups.find(m=>
+            (String(m.home_manager_id||"")===String(user?.id))||
+            (String(m.away_manager_id||"")===String(user?.id))
+          );
+          if(!myMatchup){
+            board.innerHTML='<div class="empty-state"><strong>No matchup found</strong><small>Your team is not paired in this fantasy round.</small></div>';
+            return;
+          }
+
+          const managerNames=new Map();
+          members.forEach(m=>managerNames.set(managerKey(m.user_id,"human"),m.team_name||"Unnamed Team"));
+          bots.forEach(m=>managerNames.set(managerKey(m.id,"bot"),m.team_name||"Bot Manager"));
           const source=allFantasyPlayers();
-          const byPlayer=aggregateFantasyScores(scores);
-          const rows=mine.map(r=>{
-            const p=source.find(x=>playerKey(x)===String(r.player_id)||String(x.id||"")===String(r.player_id))||{name:r.player_id,team:"",role:r.slot};
-            const score=byPlayer.get(String(r.player_id))||{total:0,live:false,finalized:true,latest:null,rows:[]};
-            return {roster:r,player:p,score};
-          });
-          const anyLive=rows.some(x=>x.score.live);
-          const total=rows.reduce((sum,x)=>sum+x.score.total,0);
-          status.textContent=anyLive?"LIVE":"UPDATED";
-          status.classList.toggle("live",anyLive);
-          list.innerHTML=rows.length?[
-            `<div class="fantasy-team-total"><span>Starting lineup total</span><strong>${formatFantasyPoints(total)} FP</strong></div>`,
-            ...rows.map(({roster,player,score})=>{
-              const latest=score.latest;
-              const state=score.live?"LIVE":(score.games?"FINAL":"NO GAMES");
-              return `<article class="fantasy-score-row">
-                <div class="fantasy-score-player">
-                  <span class="role">${h(roster.slot||player.role||"")}</span>
-                  <div><strong>${h(player.name||roster.player_id)}</strong><small>${h(player.team||"")}</small></div>
-                </div>
-                <div class="fantasy-score-total"><span class="${score.live?"live":""}">${state}</span><strong>${formatFantasyPoints(score.total)} FP</strong></div>
-                ${score.games?renderFantasyBreakdown(score):'<small class="fantasy-no-score">No scored professional games yet.</small>'}
-              </article>`;
-            })
-          ].join(""):'<div class="empty-state"><strong>No starters found</strong><small>Complete your starting lineup to see live fantasy scoring.</small></div>';
+
+          const roundMatchIds=new Set(proMatches.map(m=>String(m.id)));
+          const roundScores=scores.filter(s=>roundMatchIds.has(String(s.match_id)));
+          const byPlayer=aggregateFantasyScores(roundScores);
+
+          const homeId=myMatchup.home_manager_id;
+          const awayId=myMatchup.away_manager_id;
+          const homeType=myMatchup.home_manager_type;
+          const awayType=myMatchup.away_manager_type;
+          const homeName=homeId?managerNames.get(managerKey(homeId,homeType))||"Home Team":"BYE";
+          const awayName=awayId?managerNames.get(managerKey(awayId,awayType))||"Away Team":"BYE";
+          const homeMine=String(homeId||"")===String(user?.id);
+          const awayMine=String(awayId||"")===String(user?.id);
+
+          if(!homeId||!awayId){
+            const myId=homeId||awayId;
+            const myType=homeId?homeType:awayType;
+            const myName=homeId?homeName:awayName;
+            const lineup=lineupFor(rosters,myId,myType,source,byPlayer,proMatches);
+            const total=lineup.reduce((sum,x)=>sum+x.score.total,0);
+            board.innerHTML=`<div class="matchup-bye-banner"><span>BYE WEEK</span><strong>No opponent this round</strong><small>Your lineup can still be viewed, but no head-to-head result is contested.</small></div>
+              ${renderLineup("YOUR TEAM",myName,lineup,total,true)}`;
+            return;
+          }
+
+          const homeLineup=lineupFor(rosters,homeId,homeType,source,byPlayer,proMatches);
+          const awayLineup=lineupFor(rosters,awayId,awayType,source,byPlayer,proMatches);
+          const homeTotal=homeLineup.reduce((sum,x)=>sum+x.score.total,0);
+          const awayTotal=awayLineup.reduce((sum,x)=>sum+x.score.total,0);
+          const resultLabel=myMatchup.result==="home_win"?"FINAL · "+homeName+" WINS":
+            myMatchup.result==="away_win"?"FINAL · "+awayName+" WINS":
+            myMatchup.result==="tie"?"FINAL · TIE":
+            myMatchup.result==="live"?"LIVE":"UPCOMING";
+
+          board.innerHTML=`<div class="matchup-scoreboard">
+              <div class="${homeMine?"mine":""}"><small>${homeMine?"YOU":"HOME"}</small><strong>${h(homeName)}</strong><span>${formatFantasyPoints(homeTotal)} FP</span></div>
+              <div class="matchup-versus"><span>${h(resultLabel)}</span><strong>VS</strong></div>
+              <div class="${awayMine?"mine":""}"><small>${awayMine?"YOU":"AWAY"}</small><strong>${h(awayName)}</strong><span>${formatFantasyPoints(awayTotal)} FP</span></div>
+            </div>
+            <div class="matchup-lineups-grid">
+              ${renderLineup(homeMine?"YOUR TEAM":"OPPONENT",homeName,homeLineup,homeTotal,homeMine)}
+              ${renderLineup(awayMine?"YOUR TEAM":"OPPONENT",awayName,awayLineup,awayTotal,awayMine)}
+            </div>`;
         }catch(err){
-          status.textContent="ERROR";
-          list.innerHTML='<div class="empty-state"><strong>Could not load scoring</strong><small>'+h(err.message||"Try again later.")+'</small></div>';
+          board.innerHTML='<div class="empty-state"><strong>Could not load matchup</strong><small>'+h(err.message||"Try again later.")+'</small></div>';
         }
       })();
     }
