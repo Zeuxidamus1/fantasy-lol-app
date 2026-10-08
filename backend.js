@@ -267,6 +267,19 @@
     return request("/rest/v1/rosters?league_id=eq."+encodeURIComponent(leagueId)+"&select=league_id,user_id,player_id,slot,created_at",{session:current});
   }
 
+  async function listProMatches(competition=null){
+    const current=await session();
+    if(!current)return [];
+    const from=new Date(Date.now()-24*60*60*1000).toISOString();
+    const to=new Date(Date.now()+45*24*60*60*1000).toISOString();
+    let path="/rest/v1/pro_matches?select=id,event_id,competition,league_name,league_code,stage,start_time,team_a_id,team_a_name,team_a_code,team_b_id,team_b_name,team_b_code,status,strategy,game_count,updated_at"
+      +"&start_time=gte."+encodeURIComponent(from)
+      +"&start_time=lte."+encodeURIComponent(to)
+      +"&order=start_time.asc";
+    if(competition)path+="&competition=eq."+encodeURIComponent(String(competition));
+    return request(path,{session:current});
+  }
+
   async function saveRoster(leagueId,players){
     const current=await session();
     const userId=current?.user?.id;
@@ -350,7 +363,7 @@
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
     listLeagues,createLeague,createBotLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,makeBotDraftPick,
-    listRosters,saveRoster,listTransactions,
+    listRosters,listProMatches,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
     listNotifications,markNotificationsRead,
     listTrades,createTrade,updateTrade,acceptTrade,
