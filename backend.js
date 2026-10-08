@@ -298,6 +298,18 @@
     return request(path,{session:current});
   }
 
+  async function listFantasyGameScores(leagueId,{playerId=null,matchId=null,finalized=null,limit=500}={}){
+    const current=await session();
+    if(!current)return [];
+    let path="/rest/v1/fantasy_game_scores?league_id=eq."+encodeURIComponent(leagueId)
+      +"&select=league_id,game_id,match_id,player_id,fantasy_points,breakdown,scoring_rules,finalized,source_timestamp,calculated_at,updated_at"
+      +"&order=source_timestamp.desc&limit="+Math.max(1,Math.min(1000,Number(limit)||500));
+    if(playerId)path+="&player_id=eq."+encodeURIComponent(String(playerId));
+    if(matchId)path+="&match_id=eq."+encodeURIComponent(String(matchId));
+    if(finalized!==null)path+="&finalized=eq."+String(Boolean(finalized));
+    return request(path,{session:current});
+  }
+
   async function saveRoster(leagueId,players){
     const current=await session();
     const userId=current?.user?.id;
@@ -381,7 +393,7 @@
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
     listLeagues,createLeague,createBotLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,makeBotDraftPick,
-    listRosters,listProMatches,listProGames,listPlayerGameStats,saveRoster,listTransactions,
+    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
     listNotifications,markNotificationsRead,
     listTrades,createTrade,updateTrade,acceptTrade,
