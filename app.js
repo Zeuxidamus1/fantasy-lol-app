@@ -242,6 +242,7 @@ const defaultLeagueSettings = {
   competition:"worlds",
   competitionSeason:2026,
   competitionType:"international",
+  fantasyFormat:"tournament",
   teamSlot:false,
   scoring:{kills:3,deaths:-1,assists:2,cs:0.02,win:5,firstBlood:2}
 };
@@ -256,6 +257,7 @@ function getLeagueSettings(){
       competition,
       competitionSeason:Number(saved.competitionSeason)||2026,
       competitionType:competitionType(competition),
+      fantasyFormat:saved.fantasyFormat||((competition==="first_stand")?"short_event":(competitionType(competition)==="regional"?"season":"tournament")),
       draftType:"Snake",
       teamSlot:false,
       scoringFormat:"Head-to-head",
@@ -292,7 +294,7 @@ function defaultUserRoster(){
     }
     if(chosen.length>=5)return chosen.slice(0,limit);
   }
-  return roster.slice(0,limit).map(p=>({...p,id:playerKey(p),position:p.position||(p.role==="BN"?"MID":p.role),slot:p.role}));
+  return [];
 }
 
 function getUserRoster(){
@@ -3088,6 +3090,20 @@ function render(view="home",options={}){
       competitionSelect.value=normalizeCompetitionCode(settings.competition)||"worlds";
       const competitionHelp=document.querySelector("#competitionHelp");
       if(competitionHelp)competitionHelp.textContent=competitionHelpText(competitionSelect.value)+" Competition cannot be changed after the draft starts.";
+      const fantasyFormat=document.querySelector("#fantasyFormat");
+      const fantasyFormatHelp=document.querySelector("#fantasyFormatHelp");
+      const inferredFormat=(code)=>code==="first_stand"?"short_event":(competitionType(code)==="regional"?"season":"tournament");
+      if(fantasyFormat)fantasyFormat.value=settings.fantasyFormat||inferredFormat(competitionSelect.value);
+      const syncFormatHelp=()=>{
+        if(!fantasyFormatHelp||!fantasyFormat)return;
+        fantasyFormatHelp.textContent=fantasyFormat.value==="season"
+          ?"Season League uses the regional schedule, regular head-to-head periods, then postseason stages."
+          :fantasyFormat.value==="short_event"
+            ?"Short Event League is optimized for compact international events with fewer scoring periods."
+            :"Tournament League follows stage-based scoring periods and a postseason bracket.";
+      };
+      if(fantasyFormat)fantasyFormat.onchange=syncFormatHelp;
+      syncFormatHelp();
       document.querySelector("#teamSlot").checked=false;
       const waiversToggle=document.querySelector("#leagueWaivers");
       const tradesToggle=document.querySelector("#leagueTrades");
@@ -3106,7 +3122,11 @@ function render(view="home",options={}){
         [...managerSelect.options].forEach(option=>{option.disabled=Number(option.value)>cap.maxManagers||cap.maxManagers<1;});
         if(cap.maxManagers>0&&Number(managerSelect.value)>cap.maxManagers)managerSelect.value=String(cap.maxManagers);
       };
-      competitionSelect.onchange=applyCapacity;
+      competitionSelect.onchange=()=>{
+        applyCapacity();
+        if(fantasyFormat)fantasyFormat.value=inferredFormat(competitionSelect.value);
+        syncFormatHelp();
+      };
       document.querySelector("#benchCount").onchange=applyCapacity;
       applyCapacity();
     };
@@ -3213,6 +3233,7 @@ function render(view="home",options={}){
           competition:normalizeCompetitionCode(document.querySelector("#competition").value)||"worlds",
           competitionSeason:2026,
           competitionType:competitionType(document.querySelector("#competition").value),
+          fantasyFormat:document.querySelector("#fantasyFormat")?.value||"tournament",
           teamSlot:false,
           scoring:{
             kills:numberOr("#scoreKills",defaultLeagueSettings.scoring.kills),
