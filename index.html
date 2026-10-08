@@ -304,11 +304,16 @@
         <button class="text-btn" data-jump="league">League</button>
       </div>
       <section class="card">
-        <div class="section-head">
-          <div><div class="eyebrow">LEAGUE TABLE</div><h3>Managers</h3></div>
+        <div class="section-head standings-head">
+          <div><div class="eyebrow">LEAGUE TABLE</div><h3>Head-to-head standings</h3></div>
+          <span class="status-pill" id="standingsStatus">OFFICIAL</span>
         </div>
-        <p class="profile-copy">Fantasy points are calculated from real professional match stats using this league's scoring settings. Live games refresh about every five minutes.</p>
+        <p class="profile-copy">Records update only when a fantasy round becomes final. PF and PA are official completed-round totals; a BYE does not count as a win or loss.</p>
+        <div class="standings-column-headings" aria-hidden="true">
+          <span>RK</span><span>TEAM</span><span>RECORD</span><span>PF</span><span>PA</span><span>BYE</span>
+        </div>
         <div id="standingsList" class="standings-live-list"></div>
+        <p class="profile-disclaimer" id="standingsTiebreakCopy">Tiebreak order: winning percentage, wins, points for, then lower points against.</p>
       </section>
     </section>
   </template>
