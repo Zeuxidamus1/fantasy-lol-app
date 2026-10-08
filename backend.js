@@ -305,6 +305,12 @@
       +"&order=rank.asc",{session:current});
   }
 
+  async function listDataSourceHealth(){
+    const current=await session();
+    if(!current)return [];
+    return request("/rest/v1/data_source_health?select=source,status,last_attempt_at,last_success_at,last_error_at,consecutive_errors,last_error,details,updated_at&order=source.asc",{session:current});
+  }
+
   async function listProGames(matchId){
     const current=await session();
     if(!current)return [];
@@ -418,7 +424,7 @@
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
     listLeagues,createLeague,createBotLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,makeBotDraftPick,
-    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,saveRoster,listTransactions,
+    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,listDataSourceHealth,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
     listNotifications,markNotificationsRead,
     listTrades,createTrade,updateTrade,acceptTrade,
