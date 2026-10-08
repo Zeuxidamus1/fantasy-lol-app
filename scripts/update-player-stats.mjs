@@ -79,7 +79,7 @@ for(let i=1;i<parsed.length;i++){
   const row={};
   headers.forEach((h,idx)=>row[h]=values[idx]??"");
 
-  const player=first(row,["player_name","player","name"]);
+  const player=first(row,["playername","player_name","player","name"]);
   const position=first(row,["position","role"]);
   if(!player||!position)continue;
 
@@ -94,7 +94,7 @@ for(let i=1;i<parsed.length;i++){
     patch:first(row,["patch"]),
     player:String(player),
     team:first(row,["team_name","team","teamname"]),
-    opponent:first(row,["opponent_name","opponent","opp_team","opponent_team"]),
+    opponent:first(row,["opponent_team_name","opponent_name","opponent","opp_team","opponent_team"]),
     side:first(row,["side"]),
     position:String(position).toUpperCase(),
     champion:first(row,["champion","pick"]),
@@ -108,7 +108,7 @@ for(let i=1;i<parsed.length;i++){
     gpm:num(first(row,["gpm","gold_per_minute","gold_per_min"])),
     kp:num(first(row,["kill_participation","kp"])),
     visionScore:num(first(row,["vision_score","visionscore"])),
-    firstBlood:bool(first(row,["first_blood","firstblood","first_blood_kill"]))
+    firstBlood:bool(first(row,["firstbloodkill","first_blood_kill","first_blood","firstblood"]))
   };
 
   const key=norm(player);
