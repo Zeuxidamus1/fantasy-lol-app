@@ -315,6 +315,82 @@
     return request(path,{session:current});
   }
 
+  async function listPlayerCompetitionStatus(competition=null){
+    const current=await session();
+    if(!current)return [];
+    let path="/rest/v1/player_competition_status?select=player_id,competition,status,next_match_at,remaining_matches,updated_at&order=next_match_at.asc.nullslast";
+    if(competition)path+="&competition=eq."+encodeURIComponent(String(competition));
+    return request(path,{session:current});
+  }
+
+  async function listPlayerProjections(leagueId,roundNumber=null){
+    const current=await session();
+    if(!current)return [];
+    let path="/rest/v1/player_projections?league_id=eq."+encodeURIComponent(leagueId)
+      +"&select=league_id,player_id,round_number,expected_games,avg_fp_per_game,recent_avg_fp,projected_fp,generated_at"
+      +"&order=projected_fp.desc";
+    if(roundNumber!==null)path+="&round_number=eq."+encodeURIComponent(String(roundNumber));
+    return request(path,{session:current});
+  }
+
+  async function listPlayoffs(leagueId){
+    const current=await session();
+    if(!current)return [];
+    return request("/rest/v1/fantasy_playoffs?league_id=eq."+encodeURIComponent(leagueId)
+      +"&select=*&order=round_number.asc,bracket_slot.asc",{session:current});
+  }
+
+  async function getLeagueChampion(leagueId){
+    const current=await session();
+    if(!current)return null;
+    const rows=await request("/rest/v1/league_champions?league_id=eq."+encodeURIComponent(leagueId)+"&select=*",{session:current});
+    return Array.isArray(rows)?(rows[0]||null):rows;
+  }
+
+  async function listLeagueActivity(leagueId,limit=50){
+    const current=await session();
+    if(!current)return [];
+    const max=Math.max(1,Math.min(100,Number(limit)||50));
+    return request("/rest/v1/league_activity?league_id=eq."+encodeURIComponent(leagueId)
+      +"&select=*&order=created_at.desc&limit="+max,{session:current});
+  }
+
+  async function listLeagueHistory(leagueId){
+    const current=await session();
+    if(!current)return [];
+    return request("/rest/v1/league_history?league_id=eq."+encodeURIComponent(leagueId)+"&select=*&order=completed_at.desc.nullslast",{session:current});
+  }
+
+  async function listScoreCorrections(leagueId,limit=100){
+    const current=await session();
+    if(!current)return [];
+    return request("/rest/v1/fantasy_score_corrections?league_id=eq."+encodeURIComponent(leagueId)
+      +"&select=*&order=detected_at.desc&limit="+Math.max(1,Math.min(200,Number(limit)||100)),{session:current});
+  }
+
+  async function listWaiverPriority(leagueId){
+    const current=await session();
+    if(!current)return [];
+    return request("/rest/v1/waiver_priority?league_id=eq."+encodeURIComponent(leagueId)
+      +"&select=league_id,manager_id,manager_type,priority,updated_at&order=priority.asc",{session:current});
+  }
+
+  async function getOpsSnapshot(){
+    const current=await session();
+    if(!current)throw new Error("Sign in first.");
+    return request("/rest/v1/rpc/get_ops_snapshot",{method:"POST",body:{},session:current});
+  }
+
+  async function logClientError(message,stack="",context={}){
+    const current=await session();
+    const user=await currentUser().catch(()=>null);
+    if(!current||!user?.id)return null;
+    return request("/rest/v1/client_error_logs",{method:"POST",body:{
+      user_id:user.id,page:location.hash||location.pathname,message:String(message||"Unknown error").slice(0,1000),
+      stack:String(stack||"").slice(0,6000),context
+    },session:current,headers:{"Prefer":"return=minimal"}});
+  }
+
   async function listDataSourceHealth(){
     const current=await session();
     if(!current)return [];
@@ -368,10 +444,14 @@
     return request("/rest/v1/waiver_claims?league_id=eq."+encodeURIComponent(leagueId)+"&select=*&order=priority.asc,created_at.asc",{session:current});
   }
 
-  async function createWaiver(leagueId,playerId,priority=1){
+  async function createWaiver(leagueId,playerId,priority=null,dropPlayerId=null){
     const current=await session();
     if(!current)throw new Error("Sign in before creating a waiver claim.");
-    return request("/rest/v1/rpc/create_waiver",{method:"POST",body:{p_league_id:leagueId,p_player_id:String(playerId),p_priority:Number(priority)||1},session:current});
+    return request("/rest/v1/rpc/create_waiver",{method:"POST",body:{
+      p_league_id:leagueId,p_player_id:String(playerId),
+      p_priority:priority==null?null:Number(priority)||null,
+      p_drop_player_id:dropPlayerId?String(dropPlayerId):null
+    },session:current});
   }
 
   async function cancelWaiver(id){
@@ -434,10 +514,11 @@
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
     listLeagues,createLeague,createBotLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,makeBotDraftPick,
-    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,listLineupLocks,listDataSourceHealth,saveRoster,listTransactions,
+    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,listLineupLocks,listPlayerCompetitionStatus,listPlayerProjections,listPlayoffs,getLeagueChampion,listLeagueActivity,listLeagueHistory,listScoreCorrections,listWaiverPriority,listDataSourceHealth,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
     listNotifications,markNotificationsRead,
     listTrades,createTrade,updateTrade,acceptTrade,
+    getOpsSnapshot,logClientError,
     request
   });
 })();
