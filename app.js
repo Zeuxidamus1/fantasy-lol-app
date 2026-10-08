@@ -2091,6 +2091,19 @@ function render(view="home",options={}){
                (codeKey&&(pName===codeKey||pCode===codeKey));
       });
     };
+    const rosterMatchForPlayers=(players,teamId,teamName,teamCode)=>{
+      const idKey=String(teamId||"");
+      const nameKey=normalizeTeam(teamName);
+      const codeKey=normalizeTeam(teamCode);
+      return (players||[]).some(p=>{
+        const playerTeamId=String(p.teamId||p.team_id||"");
+        if(idKey&&playerTeamId&&idKey===playerTeamId)return true;
+        const pName=normalizeTeam(p.team);
+        const pCode=normalizeTeam(p.teamCode);
+        return (nameKey&&(pName===nameKey||pCode===nameKey)) ||
+               (codeKey&&(pName===codeKey||pCode===codeKey));
+      });
+    };
 
     const drawSchedule=()=>{
       const rows=scheduleRows.map(localScheduleRow).sort((a,b)=>{
@@ -2139,12 +2152,61 @@ function render(view="home",options={}){
             if(copy&&leagueCompetition)copy.textContent=rosterOnly
               ?"Only "+competitionName(leagueCompetition)+" matches involving players on your current fantasy roster."
               :"Official "+competitionName(leagueCompetition)+" matches in the current schedule window.";
-            const [loaded,matches]=await Promise.all([
+            const [loaded,matches,user,rounds,matchups,allRosters]=await Promise.all([
               loadRosterFromCloud(leagueId),
-              backend().listProMatches?.(leagueCompetition)
+              backend().listProMatches?.(leagueCompetition),
+              backend().currentUser(),
+              backend().listFantasyRounds(leagueId).catch(()=>[]),
+              backend().listLeagueMatchups(leagueId).catch(()=>[]),
+              backend().listRosters(leagueId).catch(()=>[])
             ]);
             rosterPlayers=loaded?getUserRoster():[];
             if(Array.isArray(matches)&&matches.length)scheduleRows=matches.map(databaseMatchToSchedule);
+
+            if(rosterOnly){
+              const intel=document.querySelector("#scheduleIntelligenceCard");
+              const currentRound=rounds.find(x=>x.status==="live")||rounds.find(x=>x.status==="upcoming");
+              if(intel&&currentRound){
+                intel.hidden=false;
+                const periodRows=scheduleRows.filter(row=>{
+                  const t=Date.parse(row.startTime||row.date||"");
+                  return Number.isFinite(t)&&t>=Date.parse(currentRound.starts_at)&&t<Date.parse(currentRound.ends_at);
+                });
+                const rowsForPlayers=players=>periodRows.filter(row=>
+                  rosterMatchForPlayers(players,row.aId,row.a,row.aCode)||
+                  rosterMatchForPlayers(players,row.bId,row.b,row.bCode)
+                );
+                const myRows=rowsForPlayers(rosterPlayers);
+                const playersWithGames=rosterPlayers.filter(player=>myRows.some(row=>
+                  rosterMatchForPlayers([player],row.aId,row.a,row.aCode)||
+                  rosterMatchForPlayers([player],row.bId,row.b,row.bCode)
+                ));
+                const noGames=rosterPlayers.filter(player=>!playersWithGames.some(x=>playerKey(x)===playerKey(player)));
+
+                const myMatch=matchups.find(m=>Number(m.round_number)===Number(currentRound.round_number)&&(
+                  String(m.home_manager_id||"")===String(user?.id)||
+                  String(m.away_manager_id||"")===String(user?.id)
+                ));
+                let opponentRows=[];
+                if(myMatch){
+                  const opponentId=String(myMatch.home_manager_id||"")===String(user?.id)?myMatch.away_manager_id:myMatch.home_manager_id;
+                  const opponentRosterIds=allRosters.filter(x=>String(x.user_id)===String(opponentId)).map(x=>String(x.player_id));
+                  const source=allFantasyPlayers();
+                  const opponentPlayers=opponentRosterIds.map(id=>source.find(p=>playerKey(p)===id||String(p.id||"")===id)).filter(Boolean);
+                  opponentRows=rowsForPlayers(opponentPlayers);
+                }
+
+                document.querySelector("#scheduleIntelPeriod").textContent=currentRound.label||("Fantasy Round "+currentRound.round_number);
+                document.querySelector("#scheduleIntelMyGames").textContent=String(myRows.length);
+                document.querySelector("#scheduleIntelOpponentGames").textContent=myMatch?String(opponentRows.length):"—";
+                document.querySelector("#scheduleIntelActivePlayers").textContent=String(playersWithGames.length);
+                document.querySelector("#scheduleIntelNoGames").textContent=String(noGames.length);
+                const warnings=document.querySelector("#scheduleIntelWarnings");
+                if(warnings)warnings.innerHTML=noGames.length
+                  ?'<div class="roster-status-banner incomplete"><strong>Players with no game scheduled</strong><small>'+h(noGames.map(p=>p.name).join(", "))+'</small></div>'
+                  :'<div class="roster-status-banner complete"><strong>✓ Every rostered player has a scheduled match</strong><small>Based on the current fantasy scoring period.</small></div>';
+              }
+            }
           }else{
             rosterPlayers=[];
           }
