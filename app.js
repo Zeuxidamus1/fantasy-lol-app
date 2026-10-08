@@ -884,13 +884,15 @@ function rosterRow(p, manage=false){
   const slot=p.slot||p.role;
   const position=playerPosition(p);
   const isBench=slot==="BN";
+  const locked=!!p.lineupLock;
   const lineupAction=isBench
     ? '<button class="mini-btn" data-start-roster="'+playerKey(p)+'">START</button>'
     : '<button class="mini-btn" data-bench-roster="'+playerKey(p)+'">BENCH</button>';
-  return `<div class="roster-slot ${isBench?"bench":""}">
+  const lockBadge=locked?'<span class="lineup-lock-badge" title="This player is locked for the current fantasy period">🔒 LOCKED</span>':"";
+  return `<div class="roster-slot ${isBench?"bench":""} ${locked?"lineup-locked":""}">
     <span class="slot-label">${h(slot)}</span>
-    <div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(position||p.role)}${p.opp?" · "+h(p.opp):""}</small></div>
-    ${manage?'<div class="team-actions">'+lineupAction+'<button class="mini-btn danger" data-drop-roster="'+playerKey(p)+'">DROP</button></div>':""}
+    <div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(position||p.role)}${p.opp?" · "+h(p.opp):""}</small>${lockBadge}</div>
+    ${manage?(locked?'<div class="team-actions"><span class="locked-action">Match started</span></div>':'<div class="team-actions">'+lineupAction+'<button class="mini-btn danger" data-drop-roster="'+playerKey(p)+'">DROP</button></div>'):""}
   </div>`;
 }
 
@@ -1406,6 +1408,7 @@ function render(view="home",options={}){
     });
 
     let rosterMovesEnabled=false;
+    let activeLineupLocks=new Map();
     const refreshTeam=()=>render("team",{replace:true});
 
     const bindRosterActions=()=>{
@@ -1478,7 +1481,7 @@ function render(view="home",options={}){
     };
 
     const drawRoster=()=>{
-      const current=getUserRoster();
+      const current=getUserRoster().map(p=>({...p,lineupLock:activeLineupLocks.get(playerKey(p))||null}));
       const validation=validateRoster(current);
       const starters=current.filter(p=>ROSTER_RULES.starterSlots.includes(p.slot||p.role));
       const flex=current.filter(p=>(p.slot||p.role)==="FLEX");
@@ -1567,6 +1570,15 @@ function render(view="home",options={}){
           });
 
           await loadRosterFromCloud(leagueId);
+          const rounds=await b.listFantasyRounds(leagueId);
+          const activeRound=rounds.find(r=>r.status==="live");
+          activeLineupLocks=new Map();
+          if(activeRound){
+            const locks=await b.listLineupLocks(leagueId,activeRound.round_number);
+            locks
+              .filter(lock=>String(lock.manager_id)===String(user.id)&&String(lock.manager_type)==="human")
+              .forEach(lock=>activeLineupLocks.set(String(lock.player_id),lock));
+          }
           drawRoster();
         }catch(err){
           badge.hidden=true;
