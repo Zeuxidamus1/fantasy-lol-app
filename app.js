@@ -428,7 +428,11 @@ async function createWaiverClaim(player){
         showToast("You already have a claim on this player.");
         return;
       }
-      await backend().createWaiver(leagueId,playerKey(player),existing.filter(c=>String(c.user_id)===String(user?.id)&&c.status==="pending").length+1);
+      if(getUserRoster().length>=rosterLimit()){
+        openWaiverDropChooser(player);
+        return;
+      }
+      await backend().createWaiver(leagueId,playerKey(player),null,null);
       showToast(`Waiver claim submitted for ${player.name}`);
       return;
     }catch(err){showToast(err.message||"Could not submit waiver claim");return;}
@@ -742,6 +746,32 @@ function openDropChooser(incoming){
   const shell=document.querySelector(".app-shell");
   if(shell)shell.inert=true;
   queueMicrotask(()=>list.querySelector("[data-drop-id]")?.focus());
+}
+
+function openWaiverDropChooser(incoming){
+  const modal=document.querySelector("#transactionModal");
+  const list=document.querySelector("#transactionDropList");
+  const copy=document.querySelector("#transactionCopy");
+  const leagueId=getActiveLeagueId();
+  if(!modal||!list||!copy||!leagueId||!cloudReady())return;
+  const current=getUserRoster();
+  copy.textContent="Your roster is full. Choose who would be dropped if your waiver claim for "+incoming.name+" wins.";
+  list.innerHTML=current.map(p=>'<button class="drop-option" data-waiver-drop-id="'+playerKey(p)+'"><span class="role-badge">'+h(p.slot||p.role)+'</span><span><strong>'+h(p.name)+'</strong><small>'+h(p.team)+' · '+h(p.position||p.role)+'</small></span><span class="drop-action">DROP IF WON</span></button>').join("");
+  list.querySelectorAll("[data-waiver-drop-id]").forEach(btn=>btn.onclick=async()=>{
+    const dropId=btn.dataset.waiverDropId;
+    btn.disabled=true;
+    try{
+      await backend().createWaiver(leagueId,playerKey(incoming),null,dropId);
+      closeTransactionModal();
+      showToast("Waiver claim submitted for "+incoming.name);
+    }catch(err){showToast(err.message||"Could not submit waiver claim");btn.disabled=false;}
+  });
+  modalReturnFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
+  modal.hidden=false;
+  document.body.classList.add("modal-open");
+  const shell=document.querySelector(".app-shell");
+  if(shell)shell.inert=true;
+  queueMicrotask(()=>list.querySelector("[data-waiver-drop-id]")?.focus());
 }
 
 function allFantasyPlayers(){
@@ -1561,12 +1591,27 @@ function render(view="home",options={}){
           await loadRosterFromCloud(leagueId);
           const rounds=await b.listFantasyRounds(leagueId);
           const activeRound=rounds.find(r=>r.status==="live");
+          const competition=normalizeCompetitionCode(activeLeague?.settings?.competition)||"worlds";
+          const statusRows=await b.listPlayerCompetitionStatus(competition).catch(()=>[]);
           activeLineupLocks=new Map();
           if(activeRound){
             const locks=await b.listLineupLocks(leagueId,activeRound.round_number);
             locks
               .filter(lock=>String(lock.manager_id)===String(user.id)&&String(lock.manager_type)==="human")
               .forEach(lock=>activeLineupLocks.set(String(lock.player_id),lock));
+          }
+          const rosterNow=getUserRoster();
+          const rosterIds=new Set(rosterNow.map(playerKey));
+          const relevantStatus=statusRows.filter(x=>rosterIds.has(String(x.player_id)));
+          const nextTimes=relevantStatus.map(x=>Date.parse(x.next_match_at||"")).filter(Number.isFinite).filter(t=>t>Date.now()).sort((a,b)=>a-b);
+          const nextLockEl=document.querySelector("#teamNextLock");
+          const lockStatusEl=document.querySelector("#teamLockStatus");
+          if(nextLockEl){
+            nextLockEl.textContent=nextTimes.length?new Date(nextTimes[0]).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}):"No upcoming lock";
+          }
+          if(lockStatusEl){
+            const lockedCount=rosterNow.filter(p=>activeLineupLocks.has(playerKey(p))).length;
+            lockStatusEl.textContent=lockedCount+" locked · "+Math.max(0,rosterNow.length-lockedCount)+" unlocked";
           }
           drawRoster();
         }catch(err){
