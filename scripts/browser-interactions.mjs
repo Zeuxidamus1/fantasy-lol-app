@@ -168,12 +168,20 @@ try{
       if(cs.display==='none'||cs.visibility==='hidden'||Number(cs.opacity)===0)return false;
       const r=el.getBoundingClientRect();
       if(!r.width&&!r.height)return false;
-      if(r.right>vw+1||r.left<-1)return true;
+      const insideHorizontalScroller=(()=>{
+        let p=el.parentElement;
+        while(p&&p!==document.body){
+          const ps=getComputedStyle(p);
+          if(['auto','scroll'].includes(ps.overflowX)&&p.scrollWidth>p.clientWidth+1)return true;
+          p=p.parentElement;
+        }
+        return false;
+      })();
+      if((r.right>vw+1||r.left<-1)&&!insideHorizontalScroller)return true;
       const scrollX=el.scrollWidth-el.clientWidth;
-      const scrollY=el.scrollHeight-el.clientHeight;
       const text=(el.textContent||'').trim();
       const isScrollable=['auto','scroll'].includes(cs.overflowX);
-      return !!text && scrollX>2 && !isScrollable;
+      return !!text && scrollX>2 && !isScrollable && !insideHorizontalScroller;
     });
     window.__visualOffenders=offenders.slice(0,10).map(el=>({
       tag:el.tagName,id:el.id,cls:el.className,
