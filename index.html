@@ -83,7 +83,7 @@
         <button class="secondary-btn login-secondary" id="landingCreateAccount" type="button">Create Account</button>
       </section>
 
-      <p class="login-legal">By continuing, you agree to use Rift Fantasy responsibly. Riot Games is not affiliated with this project.</p>
+      <p class="login-legal">By continuing, you agree to the <button class="legal-inline-link" type="button" data-jump="terms">Terms</button> and acknowledge the <button class="legal-inline-link" type="button" data-jump="privacy">Privacy Notice</button>.</p>
     </section>
   </template>
 
@@ -125,7 +125,7 @@
         <button class="text-btn auth-back-btn" id="signupBack" type="button">Already have an account? Sign in</button>
       </section>
 
-      <p class="login-legal">By creating an account, you agree to use Rift Fantasy responsibly. Riot Games is not affiliated with this project.</p>
+      <p class="login-legal">By creating an account, you agree to the <button class="legal-inline-link" type="button" data-jump="terms">Terms</button> and acknowledge the <button class="legal-inline-link" type="button" data-jump="privacy">Privacy Notice</button>.</p>
     </section>
   </template>
 
@@ -180,7 +180,84 @@
       <section class="card setup-card" id="signedInCard" hidden>
         <div class="section-head"><div><div class="eyebrow">SIGNED IN</div><h3 id="signedInEmail">Manager</h3></div><span class="verified-badge">CLOUD</span></div>
         <button class="secondary-btn" id="signOutBtn">Sign Out</button>
-      </section>    </section>
+      </section>
+
+      <section class="card setup-card">
+        <div class="section-head"><div><div class="eyebrow">LEGAL</div><h3>Privacy &amp; Terms</h3></div></div>
+        <div class="grid-two">
+          <button class="secondary-btn" type="button" data-jump="privacy">Privacy Notice</button>
+          <button class="secondary-btn" type="button" data-jump="terms">Terms</button>
+        </div>
+      </section>
+    </section>
+  </template>
+
+  <template id="privacy-template">
+    <section class="stack legal-page">
+      <div class="section-title">
+        <div><div class="eyebrow">RIFT FANTASY</div><h2>Privacy Notice</h2></div>
+        <button class="secondary-btn" type="button" data-jump="account">Back</button>
+      </div>
+
+      <section class="card legal-card">
+        <h3>Information used by Rift Fantasy</h3>
+        <p>Rift Fantasy uses your email address and account identifier for sign-in, verification, password recovery, and account access.</p>
+        <p>When you use fantasy features, the service stores information needed to run your leagues, including league membership, team names, rosters, draft picks, lineup choices, trades, waivers, matchup results, standings, and notifications.</p>
+      </section>
+
+      <section class="card legal-card">
+        <h3>Browser and diagnostic information</h3>
+        <p>The app uses browser storage for session state and local preferences such as selected leagues and watchlist choices.</p>
+        <p>If you are signed in and the app encounters an error, it may record limited technical error information such as the current app page, error message, stack trace, and basic error context so problems can be diagnosed. Internal provider-health and operations data is not displayed to normal users.</p>
+      </section>
+
+      <section class="card legal-card">
+        <h3>Service providers</h3>
+        <p>Supabase provides authentication, database, scheduled jobs, and backend functions. GitHub Pages hosts the public static website. These services process information as needed to operate Rift Fantasy.</p>
+      </section>
+
+      <section class="card legal-card">
+        <h3>Deletion and questions</h3>
+        <p>League deletion is permanent when a commissioner deletes a league. Other account information is retained as needed to operate the service and may also be subject to the hosting providers’ operational retention.</p>
+        <p>For privacy questions or data-removal requests, contact the Rift Fantasy operator through the project repository.</p>
+        <a class="legal-external-link" href="https://github.com/Zeuxidamus1/fantasy-lol-app" target="_blank" rel="noopener noreferrer">Rift Fantasy project repository</a>
+      </section>
+    </section>
+  </template>
+
+  <template id="terms-template">
+    <section class="stack legal-page">
+      <div class="section-title">
+        <div><div class="eyebrow">RIFT FANTASY</div><h2>Terms</h2></div>
+        <button class="secondary-btn" type="button" data-jump="account">Back</button>
+      </div>
+
+      <section class="card legal-card">
+        <h3>Fantasy entertainment only</h3>
+        <p>Rift Fantasy is a fantasy esports game for entertainment. It does not provide betting, wagering, or gambling functionality.</p>
+      </section>
+
+      <section class="card legal-card">
+        <h3>Accounts and leagues</h3>
+        <p>You are responsible for maintaining access to your account and for activity performed through it. League commissioners control league settings and may permanently delete a league. Deleted leagues are not archived for later restoration.</p>
+      </section>
+
+      <section class="card legal-card">
+        <h3>Esports data and scoring</h3>
+        <p>Professional schedules, rosters, match results, and statistics can be delayed, corrected, unavailable, or changed by their source. Rift Fantasy may reconcile finalized fantasy scores when official or validated match data changes.</p>
+      </section>
+
+      <section class="card legal-card">
+        <h3>Independent fan project</h3>
+        <p>Rift Fantasy is an independent fan project. It is not endorsed, sponsored, or affiliated with Riot Games, Inc. League of Legends, Riot Games, and related properties are trademarks or registered trademarks of Riot Games, Inc.</p>
+        <p>Use of the service remains subject to applicable Riot Games developer and game policies.</p>
+      </section>
+
+      <section class="card legal-card">
+        <h3>Availability</h3>
+        <p>The service may be changed, interrupted, or discontinued, and uninterrupted availability is not guaranteed. Do not use Rift Fantasy for gambling or other prohibited activity.</p>
+      </section>
+    </section>
   </template>
 
   <template id="home-template">
