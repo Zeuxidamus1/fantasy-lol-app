@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-10T13:38:02.779Z",
+  "updatedAt": "2026-10-10T18:32:51.757Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -656,7 +656,7 @@ window.ESPORTS_DATA = {
       "bId": "109480204628225868",
       "b": "LOS",
       "bCode": "LOS",
-      "status": "UNSTARTED",
+      "status": "INPROGRESS",
       "strategy": "bestOf",
       "count": 5
     },
