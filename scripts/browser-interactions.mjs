@@ -112,6 +112,29 @@ try{
   await evaluate("document.querySelector('#signupBack').click()");
   await expect("signup back returns to sign in","document.title.includes('Sign In') && !!document.querySelector('#landingEmail')");
 
+  await evaluate("document.querySelector('#landingSignIn').click()");
+  await expect("empty login shows validation feedback","document.querySelector('#toast').textContent.includes('valid email and password')");
+
+  await evaluate("document.querySelector('#landingCreateAccount').click()");
+  await evaluate("(()=>{document.querySelector('#signupEmail').value='bad';document.querySelector('#signupPassword').value='12345678';document.querySelector('#signupPasswordConfirm').value='12345678';document.querySelector('#signupSubmit').click();})()");
+  await expect("invalid signup email is rejected","document.querySelector('#toast').textContent.includes('valid email address')");
+  await evaluate("(()=>{document.querySelector('#signupEmail').value='audit@example.com';document.querySelector('#signupPassword').value='short';document.querySelector('#signupPasswordConfirm').value='short';document.querySelector('#signupSubmit').click();})()");
+  await expect("short signup password is rejected","document.querySelector('#toast').textContent.includes('at least 8 characters')");
+  await evaluate("(()=>{document.querySelector('#signupPassword').value='password1';document.querySelector('#signupPasswordConfirm').value='password2';document.querySelector('#signupSubmit').click();})()");
+  await expect("mismatched signup passwords are rejected","document.querySelector('#toast').textContent.includes('Passwords do not match')");
+  await evaluate("document.querySelector('#signupBack').click()");
+  await expect("signup returns to login after invalid-input tests","document.title.includes('Sign In')");
+
+  await evaluate("document.querySelector('#landingCreateAccount').click()");
+  await expect("history has signup state","document.title.includes('Create Account')");
+  await evaluate("history.back()");
+  await sleep(500);
+  await expect("browser back returns to login","document.title.includes('Sign In')");
+  await evaluate("history.forward()");
+  await sleep(500);
+  await expect("browser forward returns to signup","document.title.includes('Create Account')");
+  await evaluate("document.querySelector('#signupBack').click()");
+
   await route("players");
   await expect("players route renders","document.title.includes('Players') && !!document.querySelector('#playerSearch')");
   await evaluate("(()=>{const i=document.querySelector('#playerSearch'); i.value='Faker'; i.dispatchEvent(new Event('input',{bubbles:true}));})()");
@@ -121,6 +144,14 @@ try{
   await expect("player profile has projection panel","!!document.querySelector('#profileProjectedFp') && !!document.querySelector('#profileAvailability')");
   await evaluate("document.querySelector('#watchPlayerBtn').click()");
   await expect("watchlist persists","JSON.parse(localStorage.getItem('riftWatchlist')||'[]').length === 1");
+  await evaluate("location.reload()");
+  await sleep(700);
+  await expect("watchlist survives page refresh","JSON.parse(localStorage.getItem('riftWatchlist')||'[]').length === 1");
+
+  await route("privacy");
+  await expect("privacy route has correct title","document.title.includes('Privacy Notice') && !!document.querySelector('.legal-page')");
+  await route("terms");
+  await expect("terms route has correct title","document.title.includes('Terms') && document.body.innerText.includes(\"Rift Fantasy isn't endorsed by Riot Games\")");
 
   await route("team");
   await expect("team route renders","document.title.includes('My Team') && !!document.querySelector('#teamNoLeague')");
