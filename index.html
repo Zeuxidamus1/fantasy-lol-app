@@ -845,6 +845,10 @@
             <div><div class="eyebrow">PLAYER SELECTION</div><h3>Available Players</h3></div>
             <small class="draft-player-help">Select a player card for details.</small>
           </div>
+          <section class="roster-status-banner draft-roster-status" id="draftRosterStatus" aria-live="polite">
+            <strong id="draftRosterStatusTitle">⚠ Roster Incomplete</strong>
+            <small id="draftRosterStatusCopy">Roster needs will appear as you draft.</small>
+          </section>
           <label class="search"><span>⌕</span><input id="draftSearch" aria-label="Search draft pool" placeholder="Search draft pool" /></label>
           <div class="filter-row" id="draftFilters">
             <button class="chip active" data-draft-role="ALL">All</button>
@@ -858,11 +862,6 @@
         </section>
 
         <aside class="draft-selection-sidebar">
-          <section class="roster-status-banner draft-roster-status" id="draftRosterStatus" aria-live="polite">
-            <strong id="draftRosterStatusTitle">⚠ Roster Incomplete</strong>
-            <small id="draftRosterStatusCopy">Roster needs will appear as you draft.</small>
-          </section>
-
           <section class="card draft-my-picks-card">
             <div class="section-head"><div><div class="eyebrow">MY PICKS</div><h3 id="draftMyTeamName">My Team</h3></div></div>
             <div id="myDraftRoster" class="draft-roster"></div>
