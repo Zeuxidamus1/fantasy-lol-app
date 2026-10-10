@@ -334,12 +334,12 @@ function aggregateFantasyScores(scores=[]){
   for(const score of scores){
     const key=String(score.player_id);
     const current=map.get(key)||{
-      player_id:key,total:0,live:false,finalized:true,games:0,latest:null,rows:[],
+      player_id:key,total:0,live:false,delayed:false,hasUnfinalized:false,finalized:true,games:0,latest:null,rows:[],
       breakdown:Object.fromEntries(keys.map(k=>[k,{stat:0,multiplier:null,points:0}]))
     };
     current.total+=Number(score.fantasy_points)||0;
     current.games+=1;
-    current.live=current.live||!score.finalized;
+    current.hasUnfinalized=current.hasUnfinalized||!score.finalized;
     current.finalized=current.finalized&&!!score.finalized;
     current.latest=!current.latest||Date.parse(score.updated_at||"")>Date.parse(current.latest.updated_at||"")?score:current.latest;
     current.rows.push(score);
@@ -350,6 +350,13 @@ function aggregateFantasyScores(scores=[]){
       if(Number.isFinite(Number(part.multiplier)))current.breakdown[k].multiplier=Number(part.multiplier);
     }
     map.set(key,current);
+  }
+  for(const current of map.values()){
+    const updatedAt=Date.parse(current.latest?.updated_at||"");
+    const fresh=Number.isFinite(updatedAt)&&Date.now()-updatedAt<=3*60*1000;
+    current.live=current.hasUnfinalized&&fresh;
+    current.delayed=current.hasUnfinalized&&!fresh;
+    delete current.hasUnfinalized;
   }
   return map;
 }
@@ -1840,6 +1847,7 @@ function render(view="home",options={}){
       return !!((pName&&teams.includes(pName))||(pCode&&teams.includes(pCode)));
     };
     const playerRoundState=(player,score,matches)=>{
+      if(score?.delayed)return "DATA DELAYED";
       if(score?.live)return "LIVE";
       const related=matches.filter(m=>teamMatchesPlayer(player,m));
       const upcoming=related.some(m=>{
@@ -1864,7 +1872,7 @@ function render(view="home",options={}){
         });
     };
     const renderLineup=(label,name,items,total,isMine)=>{
-      const remaining=items.filter(x=>["LIVE","UPCOMING","MORE GAMES"].includes(x.state)).length;
+      const remaining=items.filter(x=>["LIVE","DATA DELAYED","UPCOMING","MORE GAMES"].includes(x.state)).length;
       const complete=items.filter(x=>x.state==="COMPLETE").length;
       return `<section class="matchup-side ${isMine?"mine":""}">
         <div class="matchup-team-heading">
@@ -1876,7 +1884,7 @@ function render(view="home",options={}){
           <article class="matchup-player-row">
             <span class="role">${h(String(roster.slot||player.role||""))}</span>
             <div class="matchup-player-main"><strong>${h(player.name||roster.player_id)}</strong><small>${h(player.team||"")}</small></div>
-            <div class="matchup-player-state"><span class="${state==="LIVE"?"live":""}">${locked?"🔒 ":""}${h(state)}</span><strong>${formatFantasyPoints(score.total)}</strong></div>
+            <div class="matchup-player-state"><span class="${state==="LIVE"?"live":state==="DATA DELAYED"?"data-delayed":""}">${locked?"🔒 ":""}${h(state)}</span><strong>${formatFantasyPoints(score.total)}</strong></div>
             ${score.games?renderFantasyBreakdown(score):""}
           </article>`).join(""):'<div class="empty-state"><strong>No starters</strong><small>This lineup is incomplete.</small></div>'}</div>
       </section>`;
