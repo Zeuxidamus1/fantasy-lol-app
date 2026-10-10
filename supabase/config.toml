@@ -1,0 +1,7 @@
+project_id = "rift-fantasy"
+
+[functions.sync-match-stats]
+verify_jwt = false
+
+[functions.sync-pandascore-validator]
+verify_jwt = false
