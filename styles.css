@@ -726,3 +726,38 @@ body{background:
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
 }
+
+/* Text containment and responsive safety */
+.card,.setup-card,.roster-slot,.player-card,.home-match-row,.playoff-row,.activity-row,
+.history-row,.matchup-player-row,.standing-live-row,.transaction-row,.notification-item,
+.section-head,.section-title,.profile-stat,.form-group,.team-actions,.schedule-title-actions{
+  min-width:0;
+}
+.card *, .setup-card *, .roster-slot *, .player-card *, .home-match-row *,
+.playoff-row *, .activity-row *, .history-row *, .matchup-player-row *,
+.standing-live-row *, .transaction-row *, .notification-item *{
+  max-width:100%;
+}
+button,.primary-btn,.secondary-btn,.text-btn,.mini-btn,.choice,.drop-option,
+.status-pill,.verified-badge,.role-badge{
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  min-width:0;
+}
+h1,h2,h3,h4,p,small,strong,span,label,.profile-copy,.setup-footnote,.field-help,
+.player-info,.player-info strong,.player-info small,.standing-live-team,
+.matchup-player-main,.home-match-teams,.notification-copy{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
+.grid-two,.profile-stats,.league-overview-grid,.transaction-summary{
+  min-width:0;
+}
+@media(max-width:600px){
+  .section-head,.section-title{gap:10px;align-items:flex-start}
+  .section-head>.section-head-actions,.section-title>div:last-child{max-width:100%}
+  .schedule-title-actions,.team-title-actions,.profile-actions{flex-wrap:wrap}
+  .primary-btn,.secondary-btn,.text-btn{max-width:100%}
+}
