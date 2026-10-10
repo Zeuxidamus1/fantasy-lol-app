@@ -761,3 +761,14 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
   .schedule-title-actions,.team-title-actions,.profile-actions{flex-wrap:wrap}
   .primary-btn,.secondary-btn,.text-btn{max-width:100%}
 }
+
+@media(max-width:480px){
+  .player-row{align-items:flex-start}
+  .player-info small{
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+    overflow-wrap:anywhere;
+    line-height:1.35;
+  }
+}
