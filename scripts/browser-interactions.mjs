@@ -176,6 +176,8 @@ try{
 
   await route("matchup");
   await expect("matchup uses real scoring surface","!!document.querySelector('#matchupScoreList') && !document.body.innerText.includes('Fantasy scoring is not live yet')");
+  await expect("fresh unfinalized score is labeled live","(()=>{const m=aggregateFantasyScores([{player_id:'p',fantasy_points:1,finalized:false,updated_at:new Date().toISOString(),breakdown:{}}]);const s=m.get('p');return s.live===true&&s.delayed===false})()");
+  await expect("stale unfinalized score is labeled delayed","(()=>{const m=aggregateFantasyScores([{player_id:'p',fantasy_points:1,finalized:false,updated_at:new Date(Date.now()-10*60*1000).toISOString(),breakdown:{}}]);const s=m.get('p');return s.live===false&&s.delayed===true})()");
   await expect("matchup fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
 
   await route("schedule");
