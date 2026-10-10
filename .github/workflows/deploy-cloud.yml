@@ -1,69 +1,89 @@
-name: Deploy Cloud Backend
+name: Release Supabase Backend
 
 on:
   workflow_dispatch:
+    inputs:
+      apply_migrations:
+        description: "Apply pending database migrations after the dry run"
+        required: true
+        type: boolean
+        default: false
+      deploy_functions:
+        description: "Deploy tracked Edge Functions after validation"
+        required: true
+        type: boolean
+        default: false
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: production-backend-release
+  cancel-in-progress: false
 
 jobs:
-  deploy:
+  release:
     runs-on: ubuntu-latest
+    environment: production
     env:
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-      SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-      SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
 
-      - name: Validate required cloud configuration
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+
+      - name: Run complete release gate
+        run: npm run release:check
+
+      - name: Validate database release configuration
+        shell: bash
         run: |
           set -euo pipefail
-          if [ -z "$SUPABASE_DB_URL" ]; then
-            echo "::error::Missing repository secret SUPABASE_DB_URL"
+          if [ -z "${SUPABASE_DB_URL:-}" ]; then
+            echo "::error::Missing secret SUPABASE_DB_URL"
             exit 1
           fi
-          if [ -z "$SUPABASE_URL" ]; then
-            echo "::error::Missing repository variable SUPABASE_URL"
-            exit 1
-          fi
-          if [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "::error::Missing repository variable SUPABASE_ANON_KEY"
-            exit 1
-          fi
-          case "$SUPABASE_URL" in
-            https://*.supabase.co) ;;
-            *) echo "::error::SUPABASE_URL must be an https://*.supabase.co URL"; exit 1 ;;
-          esac
 
-      - name: Apply database schema
-        run: psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f supabase/schema.sql
+      - name: Preview pending database migrations
+        run: npx --yes supabase@2.119.0 db push --db-url "$SUPABASE_DB_URL" --dry-run
 
-      - name: Generate browser-safe backend configuration
+      - name: Apply pending database migrations
+        if: ${{ inputs.apply_migrations }}
+        run: npx --yes supabase@2.119.0 db push --db-url "$SUPABASE_DB_URL"
+
+      - name: Validate Edge Function release configuration
+        if: ${{ inputs.deploy_functions }}
+        shell: bash
         run: |
-          node <<'NODE'
-          const fs=require("fs");
-          const url=process.env.SUPABASE_URL||"";
-          const key=process.env.SUPABASE_ANON_KEY||"";
-          if (/service[_-]?role/i.test(key)) {
-            throw new Error("Refusing to write a service-role credential to frontend configuration.");
-          }
-          const body=`window.RIFT_CONFIG = Object.freeze({
-            supabaseUrl: ${JSON.stringify(url)},
-            supabaseAnonKey: ${JSON.stringify(key)}
-          });\n`;
-          fs.writeFileSync("backend-config.js",body);
-          NODE
-
-      - name: Commit public frontend configuration
-        run: |
-          if git diff --quiet -- backend-config.js; then
-            echo "Frontend configuration already current."
-            exit 0
+          set -euo pipefail
+          if [ -z "${SUPABASE_ACCESS_TOKEN:-}" ]; then
+            echo "::error::Missing secret SUPABASE_ACCESS_TOKEN"
+            exit 1
           fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add backend-config.js
-          git commit -m "Configure production cloud backend"
-          git push
+          if [ -z "${SUPABASE_PROJECT_REF:-}" ]; then
+            echo "::error::Missing variable SUPABASE_PROJECT_REF"
+            exit 1
+          fi
+
+      - name: Deploy sync-match-stats
+        if: ${{ inputs.deploy_functions }}
+        run: npx --yes supabase@2.119.0 functions deploy sync-match-stats --project-ref "$SUPABASE_PROJECT_REF"
+
+      - name: Deploy sync-pandascore-validator
+        if: ${{ inputs.deploy_functions }}
+        run: npx --yes supabase@2.119.0 functions deploy sync-pandascore-validator --project-ref "$SUPABASE_PROJECT_REF"
+
+      - name: Release summary
+        run: |
+          echo "### Backend release gate" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Validation: passed" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Migration dry run: passed" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Migrations applied: ${{ inputs.apply_migrations }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Edge Functions deployed: ${{ inputs.deploy_functions }}" >> "$GITHUB_STEP_SUMMARY"
