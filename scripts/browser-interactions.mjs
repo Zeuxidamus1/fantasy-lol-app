@@ -186,7 +186,17 @@ try{
 
   await route("draft");
   await expect("draft room renders","document.title.includes('Draft Room') && !!document.querySelector('#draftPlayerList')");
+  await expect("draft player selection uses decision workspace","!!document.querySelector('.draft-selection-grid .draft-player-pool-card') && !!document.querySelector('.draft-selection-sidebar #draftRosterStatus') && !!document.querySelector('.draft-selection-sidebar #myDraftRoster')");
   await expect("draft page fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
+
+  await route("players");
+  const draftProfileId=await evaluate("document.querySelector('#freeAgentList [data-open-player]')?.dataset.openPlayer||null");
+  if(draftProfileId){
+    await evaluate("openPlayer("+JSON.stringify(draftProfileId)+",'draft')");
+    await expect("player profile remembers draft origin","document.title.includes('Player') && document.querySelector('#playerBackBtn').textContent.includes('Draft Room')");
+    await evaluate("document.querySelector('#playerBackBtn').click()");
+    await expect("player profile returns to draft room","document.title.includes('Draft Room') && !!document.querySelector('.draft-selection-grid')");
+  }
 
   await route("matchup");
   await expect("matchup uses real scoring surface","!!document.querySelector('#matchupScoreList') && !document.body.innerText.includes('Fantasy scoring is not live yet')");
