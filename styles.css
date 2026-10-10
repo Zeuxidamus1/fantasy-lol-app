@@ -772,3 +772,14 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
     line-height:1.35;
   }
 }
+
+.legal-inline-link{border:0;background:none;color:#7fc8ff;padding:0;font:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.legal-page{max-width:760px;margin:0 auto}
+.legal-card{line-height:1.65}
+.legal-card h3{margin:0 0 8px}
+.legal-card p{margin:8px 0;color:#9aacc4;overflow-wrap:anywhere}
+.legal-external-link{display:inline-block;margin-top:8px;color:#64dfc7;overflow-wrap:anywhere}
+@media(max-width:480px){
+  .legal-page .section-title{align-items:flex-start}
+  .legal-card{padding:14px}
+}
