@@ -1,4 +1,5 @@
 import { spawn, execFileSync } from "node:child_process";
+import http from "node:http";
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const chrome = (() => {
@@ -20,10 +21,23 @@ const cleanup=()=>{try{browser.kill("SIGKILL");}catch{} try{server.kill("SIGKILL
 process.on("exit",cleanup);
 process.on("SIGINT",()=>{cleanup();process.exit(130);});
 
-async function json(url, options){
-  const res=await fetch(url,options);
-  if(!res.ok) throw new Error(`${url} -> ${res.status}`);
-  return res.json();
+function requestText(url){
+  return new Promise((resolve,reject)=>{
+    const req=http.get(url,res=>{
+      let body="";
+      res.setEncoding("utf8");
+      res.on("data",chunk=>{body+=chunk;});
+      res.on("end",()=>{
+        if((res.statusCode||500)>=400)return reject(new Error(url+" -> "+res.statusCode));
+        resolve(body);
+      });
+    });
+    req.setTimeout(5000,()=>req.destroy(new Error("Request timed out: "+url)));
+    req.on("error",reject);
+  });
+}
+async function json(url){
+  return JSON.parse(await requestText(url));
 }
 async function waitFor(fn, timeout=10000){
   const start=Date.now();
@@ -37,8 +51,8 @@ async function waitFor(fn, timeout=10000){
 
 try{
   await waitFor(async()=>{
-    const r=await fetch("http://127.0.0.1:4174/");
-    return r.ok;
+    await requestText("http://127.0.0.1:4174/");
+    return true;
   });
   const target=await waitFor(async()=>{
     const list=await json("http://127.0.0.1:9223/json/list");
