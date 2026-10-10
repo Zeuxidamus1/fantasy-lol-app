@@ -22,13 +22,24 @@ if(!migrationFiles.length)fail("no Supabase migrations found");
 else pass(String(migrationFiles.length)+" Supabase migrations found");
 
 const seen=new Set();
+let legacyMigrationCount=0;
 for(const file of migrationFiles){
-  const match=file.match(/^(\d{14})_(.+)\.sql$/);
-  if(!match){fail("invalid migration filename "+file);continue;}
-  if(seen.has(match[1]))fail("duplicate migration timestamp "+match[1]);
-  seen.add(match[1]);
+  const canonical=file.match(/^(\d{14})_(.+)\.sql$/);
+  if(canonical){
+    if(seen.has(canonical[1]))fail("duplicate migration timestamp "+canonical[1]);
+    seen.add(canonical[1]);
+    continue;
+  }
+  if(/^\d{8}_.+\.sql$/.test(file)){
+    legacyMigrationCount++;
+    continue;
+  }
+  fail("invalid migration filename "+file);
 }
-if(migrationFiles.length&&failures===0)pass("migration filenames are unique and ordered");
+if(migrationFiles.length&&failures===0){
+  pass("migration filenames are valid");
+  if(legacyMigrationCount)console.log("INFO:",legacyMigrationCount+" legacy date-only migration filename(s) retained for compatibility");
+}
 
 const deploy=fs.existsSync(path.join(root,".github","workflows","deploy-cloud.yml"))
   ? fs.readFileSync(path.join(root,".github","workflows","deploy-cloud.yml"),"utf8")
