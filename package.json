@@ -2,13 +2,15 @@
   "name": "rift-fantasy",
   "version": "0.1.0",
   "private": true,
-  "description": "Static fantasy League of Legends esports prototype",
+  "description": "Fantasy League of Legends esports application",
   "type": "module",
   "scripts": {
     "test": "node scripts/validate.mjs",
     "check": "node --check app.js && node --check esports-data.js && node --check scripts/update-esports-data.mjs && node --check scripts/update-player-stats.mjs && node --check player-stats.js && node --check scripts/browser-interactions.mjs && bash -n scripts/browser-smoke.sh && node scripts/validate.mjs",
     "smoke": "bash scripts/browser-smoke.sh",
-    "e2e": "node scripts/browser-interactions.mjs"
+    "e2e": "node scripts/browser-interactions.mjs",
+    "preflight": "node scripts/deployment-preflight.mjs",
+    "release:check": "npm run check && npm run smoke && npm run e2e && npm run preflight"
   },
   "engines": {
     "node": ">=24"
