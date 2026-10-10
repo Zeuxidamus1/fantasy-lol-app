@@ -44,6 +44,8 @@ smoke_route() {
 
 smoke_route "home" "Welcome back"
 smoke_route "account" "RIFT ACCOUNT"
+smoke_route "privacy" "Privacy Notice"
+smoke_route "terms" "Fantasy entertainment only"
 smoke_route "team" "My Team"
 smoke_route "schedule" "Schedule"
 smoke_route "players" "Players"
