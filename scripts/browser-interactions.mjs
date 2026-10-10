@@ -186,7 +186,7 @@ try{
 
   await route("draft");
   await expect("draft room renders","document.title.includes('Draft Room') && !!document.querySelector('#draftPlayerList')");
-  await expect("draft player selection uses decision workspace","!!document.querySelector('.draft-selection-grid .draft-player-pool-card') && !!document.querySelector('.draft-selection-sidebar #draftRosterStatus') && !!document.querySelector('.draft-selection-sidebar #myDraftRoster')");
+  await expect("draft player selection keeps roster needs with player pool","!!document.querySelector('.draft-player-pool-card #draftRosterStatus') && !!document.querySelector('.draft-selection-sidebar #myDraftRoster')");
   await expect("draft page fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
 
   await route("players");
