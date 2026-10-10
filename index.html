@@ -824,11 +824,6 @@
         <button class="secondary-btn" id="refreshDraftBtn">Refresh Draft</button>
       </div>
 
-      <section class="roster-status-banner" id="draftRosterStatus" aria-live="polite">
-        <strong id="draftRosterStatusTitle">⚠ Roster Incomplete</strong>
-        <small id="draftRosterStatusCopy">Roster needs will appear as you draft.</small>
-      </section>
-
       <div class="card draft-board-card">
         <div class="section-head">
           <div><div class="eyebrow">DRAFT BOARD</div><h3>Recent picks</h3></div>
@@ -844,20 +839,35 @@
         <div id="fullDraftBoard" class="full-draft-board"></div>
       </div>
 
-      <label class="search"><span>⌕</span><input id="draftSearch" aria-label="Search draft pool" placeholder="Search draft pool" /></label>
-      <div class="filter-row" id="draftFilters">
-        <button class="chip active" data-draft-role="ALL">All</button>
-        <button class="chip" data-draft-role="TOP">Top</button>
-        <button class="chip" data-draft-role="JNG">Jungle</button>
-        <button class="chip" data-draft-role="MID">Mid</button>
-        <button class="chip" data-draft-role="ADC">ADC</button>
-        <button class="chip" data-draft-role="SUP">Support</button>
-      </div>
-      <div id="draftPlayerList" class="player-list"></div>
+      <div class="draft-selection-grid">
+        <section class="card draft-player-pool-card">
+          <div class="section-head">
+            <div><div class="eyebrow">PLAYER SELECTION</div><h3>Available Players</h3></div>
+            <small class="draft-player-help">Select a player card for details.</small>
+          </div>
+          <label class="search"><span>⌕</span><input id="draftSearch" aria-label="Search draft pool" placeholder="Search draft pool" /></label>
+          <div class="filter-row" id="draftFilters">
+            <button class="chip active" data-draft-role="ALL">All</button>
+            <button class="chip" data-draft-role="TOP">Top</button>
+            <button class="chip" data-draft-role="JNG">Jungle</button>
+            <button class="chip" data-draft-role="MID">Mid</button>
+            <button class="chip" data-draft-role="ADC">ADC</button>
+            <button class="chip" data-draft-role="SUP">Support</button>
+          </div>
+          <div id="draftPlayerList" class="player-list draft-player-list"></div>
+        </section>
 
-      <div class="card">
-        <div class="section-head"><div><div class="eyebrow">MY PICKS</div><h3 id="draftMyTeamName">My Team</h3></div></div>
-        <div id="myDraftRoster" class="draft-roster"></div>
+        <aside class="draft-selection-sidebar">
+          <section class="roster-status-banner draft-roster-status" id="draftRosterStatus" aria-live="polite">
+            <strong id="draftRosterStatusTitle">⚠ Roster Incomplete</strong>
+            <small id="draftRosterStatusCopy">Roster needs will appear as you draft.</small>
+          </section>
+
+          <section class="card draft-my-picks-card">
+            <div class="section-head"><div><div class="eyebrow">MY PICKS</div><h3 id="draftMyTeamName">My Team</h3></div></div>
+            <div id="myDraftRoster" class="draft-roster"></div>
+          </section>
+        </aside>
       </div>
     </section>
   </template>
