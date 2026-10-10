@@ -180,13 +180,7 @@
       <section class="card setup-card" id="signedInCard" hidden>
         <div class="section-head"><div><div class="eyebrow">SIGNED IN</div><h3 id="signedInEmail">Manager</h3></div><span class="verified-badge">CLOUD</span></div>
         <button class="secondary-btn" id="signOutBtn">Sign Out</button>
-      </section>
-      <section class="card setup-card" id="opsCard" hidden>
-        <div class="section-head"><div><div class="eyebrow">PLATFORM OPERATIONS</div><h3>System health</h3></div><span class="status-pill" id="opsStatus">CHECKING</span></div>
-        <div id="opsSummary" class="profile-stats"></div>
-        <div id="opsDetails" class="stack tight"></div>
-      </section>
-    </section>
+      </section>    </section>
   </template>
 
   <template id="home-template">
@@ -215,13 +209,9 @@
       <section class="card home-esports-hero">
         <div class="section-head">
           <div><div class="eyebrow">ESPORTS OVERVIEW</div><h3>What’s happening</h3></div>
-          <div class="data-health-wrap">
-            <span class="verified-badge">PRO LOL</span>
-            <span class="data-health-badge" id="homeDataHealth">CHECKING DATA</span>
-          </div>
+          <span class="verified-badge">PRO LOL</span>
         </div>
         <p class="profile-copy" id="homeEsportsSummary">Loading the latest tournament schedule available in Rift Fantasy.</p>
-        <small class="data-health-copy" id="homeDataHealthCopy">Checking the primary live-data source.</small>
       </section>
 
       <section class="card">
