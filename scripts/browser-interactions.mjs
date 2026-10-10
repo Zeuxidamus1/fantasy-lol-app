@@ -152,7 +152,7 @@ try{
   await expect("schedule filter works","document.querySelector('[data-day=today]').classList.contains('active')");
   await expect("schedule fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
 
-  const visualRoutes=["home","players","team","league","transactions","trade","draft","matchup","schedule","account"];
+  const visualRoutes=["home","players","team","league","transactions","trade","draft","matchup","schedule","account","privacy","terms"];
   const viewports=[
     {name:"small-phone",width:320,height:700,mobile:true},
     {name:"phone",width:390,height:844,mobile:true},
