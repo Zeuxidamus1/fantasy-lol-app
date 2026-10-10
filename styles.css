@@ -783,3 +783,5 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
   .legal-page .section-title{align-items:flex-start}
   .legal-card{padding:14px}
 }
+
+.matchup-player-state .data-delayed{font-weight:700;text-decoration:underline dotted;text-underline-offset:3px}
