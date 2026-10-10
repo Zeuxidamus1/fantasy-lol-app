@@ -1756,7 +1756,7 @@ function render(view="home",options={}){
     const returnLabels={draft:"Draft Room",team:"My Team",trade:"Trades",transactions:"Transactions",league:"League",players:"Players"};
     const returnView=returnLabels[selectedPlayerReturnView]?selectedPlayerReturnView:"players";
     playerBackBtn.textContent="← "+(returnLabels[returnView]||"Players");
-    playerBackBtn.onclick=()=>goBack(returnView);
+    playerBackBtn.onclick=()=>render(returnView,{replace:true});
   }
   if(view==="standings"){
     const list=document.querySelector("#standingsList");
