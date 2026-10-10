@@ -31,7 +31,7 @@ npm run release:check
 - The production backend workflow runs a migration dry-run before any database change.
 - Edge Function settings are tracked in `supabase/config.toml`.
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for the full release process.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the full release process and [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) for the final public-launch requirements.
 
 ## Security
 
