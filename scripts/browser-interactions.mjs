@@ -197,7 +197,12 @@ try{
     });
     for(const visualRoute of visualRoutes){
       await route(visualRoute);
-      await expect(vp.name+" "+visualRoute+" has no horizontal/text overflow",noOverflowExpression,7000);
+      const visualOk=await evaluate(noOverflowExpression);
+      if(!visualOk){
+        const offenders=await evaluate("window.__visualOffenders||[]");
+        throw new Error("Visual overflow at "+vp.name+" "+visualRoute+": "+JSON.stringify(offenders));
+      }
+      console.log("PASS",vp.name+" "+visualRoute+" has no horizontal/text overflow");
     }
   }
 
