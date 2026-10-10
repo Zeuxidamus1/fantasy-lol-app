@@ -106,7 +106,8 @@ check(!html.includes("Fantasy scoring is not live yet"),"obsolete fake-scoring p
 check(backend.includes("listPlayerProjections"),"backend exposes player projections");
 check(backend.includes("listPlayoffs"),"backend exposes playoffs");
 check(backend.includes("listWaiverPriority"),"backend exposes waiver priority");
-check(backend.includes("getOpsSnapshot"),"backend exposes secure ops snapshot");
+check(!backend.includes("getOpsSnapshot"),"browser backend does not expose operations snapshot");
+check(!backend.includes("listDataSourceHealth"),"browser backend does not expose source-health telemetry");
 
 console.log("\nValidation checks:");
 for(const msg of pass) console.log("  PASS",msg);
