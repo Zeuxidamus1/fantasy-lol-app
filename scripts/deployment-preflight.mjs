@@ -49,6 +49,26 @@ if(/PANDASCORE_API_TOKEN|LOL_ESPORTS_API_KEY|SUPABASE_DB_URL/.test(config)){
   pass("frontend config contains no backend-only secret names");
 }
 
+const secretScanFiles=[
+  "app.js","backend.js","backend-config.js","index.html","styles.css",
+  ...migrationFiles.map(f=>"supabase/migrations/"+f),
+  "supabase/functions/sync-match-stats/index.ts",
+  "supabase/functions/sync-pandascore-validator/index.ts"
+];
+for(const rel of secretScanFiles){
+  const full=path.join(root,rel);
+  if(!fs.existsSync(full))continue;
+  const body=fs.readFileSync(full,"utf8");
+  const forbidden=[
+    /sb_secret_[A-Za-z0-9_-]+/,
+    /service_role[^\n]{0,80}[=:][^\n]{8,}/i,
+    /const\s+API_KEY\s*=\s*["\'][^"\']{12,}["\']/
+    /PANDASCORE_API_TOKEN\s*=\s*["\'][^"\']+["\']/
+  ];
+  if(forbidden.some(rx=>rx.test(body)))fail("possible backend credential committed in "+rel);
+}
+if(!failures)pass("repository secret scan found no embedded backend credentials");
+
 const html=fs.readFileSync(path.join(root,"index.html"),"utf8");
 if(/id=["\']opsCard["\']|id=["\']homeDataHealth["\']/.test(html)){
   fail("backend telemetry element is rendered in public HTML");
