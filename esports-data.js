@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-10T18:32:51.757Z",
+  "updatedAt": "2026-10-10T22:29:26.840Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -656,7 +656,7 @@ window.ESPORTS_DATA = {
       "bId": "109480204628225868",
       "b": "LOS",
       "bCode": "LOS",
-      "status": "INPROGRESS",
+      "status": "COMPLETED",
       "strategy": "bestOf",
       "count": 5
     },
@@ -669,12 +669,12 @@ window.ESPORTS_DATA = {
       "league": "Worlds",
       "leagueCode": "worlds",
       "stage": "Play-Ins",
-      "aId": null,
-      "a": "TBD",
-      "aCode": "TBD",
-      "bId": null,
-      "b": "TBD",
-      "bCode": "TBD",
+      "aId": "100205576309502431",
+      "a": "FURIA",
+      "aCode": "FUR",
+      "bId": "107251245690956393",
+      "b": "MVK Esports",
+      "bCode": "MVK",
       "status": "UNSTARTED",
       "strategy": "bestOf",
       "count": 5
@@ -688,12 +688,12 @@ window.ESPORTS_DATA = {
       "league": "Worlds",
       "leagueCode": "worlds",
       "stage": "Play-Ins",
-      "aId": null,
-      "a": "TBD",
-      "aCode": "TBD",
-      "bId": null,
-      "b": "TBD",
-      "bCode": "TBD",
+      "aId": "98767991877340524",
+      "a": "Cloud9 Kia",
+      "aCode": "C9",
+      "bId": "111692118851466302",
+      "b": "Karmine Corp",
+      "bCode": "KC",
       "status": "UNSTARTED",
       "strategy": "bestOf",
       "count": 5
@@ -2219,7 +2219,8 @@ window.ESPORTS_DATA = {
       "rosterStatus": "starter",
       "league": "lcs",
       "competitions": [
-        "lcs"
+        "lcs",
+        "worlds"
       ]
     },
     {
@@ -2292,7 +2293,8 @@ window.ESPORTS_DATA = {
       "league": "cblol",
       "competitions": [
         "cblol",
-        "msi"
+        "msi",
+        "worlds"
       ]
     },
     {
@@ -2422,7 +2424,8 @@ window.ESPORTS_DATA = {
       "rosterStatus": "starter",
       "league": "lcs",
       "competitions": [
-        "lcs"
+        "lcs",
+        "worlds"
       ]
     },
     {
@@ -2606,7 +2609,8 @@ window.ESPORTS_DATA = {
       "league": "lec",
       "competitions": [
         "lec",
-        "msi"
+        "msi",
+        "worlds"
       ]
     },
     {
@@ -2643,7 +2647,8 @@ window.ESPORTS_DATA = {
       "league": "lec",
       "competitions": [
         "lec",
-        "msi"
+        "msi",
+        "worlds"
       ]
     },
     {
@@ -2698,7 +2703,8 @@ window.ESPORTS_DATA = {
       "league": "lec",
       "competitions": [
         "lec",
-        "msi"
+        "msi",
+        "worlds"
       ]
     },
     {
@@ -2863,7 +2869,8 @@ window.ESPORTS_DATA = {
       "rosterStatus": "starter",
       "league": "lcp",
       "competitions": [
-        "lcp"
+        "lcp",
+        "worlds"
       ]
     },
     {
@@ -4165,7 +4172,8 @@ window.ESPORTS_DATA = {
       "league": "cblol",
       "competitions": [
         "cblol",
-        "msi"
+        "msi",
+        "worlds"
       ]
     },
     {
@@ -4202,7 +4210,8 @@ window.ESPORTS_DATA = {
       "rosterStatus": "starter",
       "league": "lcp",
       "competitions": [
-        "lcp"
+        "lcp",
+        "worlds"
       ]
     },
     {
@@ -4296,7 +4305,8 @@ window.ESPORTS_DATA = {
       "rosterStatus": "starter",
       "league": "lcp",
       "competitions": [
-        "lcp"
+        "lcp",
+        "worlds"
       ]
     },
     {
@@ -4790,7 +4800,8 @@ window.ESPORTS_DATA = {
       "league": "cblol",
       "competitions": [
         "cblol",
-        "msi"
+        "msi",
+        "worlds"
       ]
     },
     {
@@ -5231,7 +5242,8 @@ window.ESPORTS_DATA = {
       "rosterStatus": "starter",
       "league": "lcp",
       "competitions": [
-        "lcp"
+        "lcp",
+        "worlds"
       ]
     },
     {
@@ -5268,7 +5280,8 @@ window.ESPORTS_DATA = {
       "league": "lec",
       "competitions": [
         "lec",
-        "msi"
+        "msi",
+        "worlds"
       ]
     },
     {
@@ -5432,7 +5445,8 @@ window.ESPORTS_DATA = {
       "rosterStatus": "reserve",
       "league": "lcs",
       "competitions": [
-        "lcs"
+        "lcs",
+        "worlds"
       ]
     },
     {
@@ -6998,7 +7012,8 @@ window.ESPORTS_DATA = {
       "rosterStatus": "reserve",
       "league": "lcp",
       "competitions": [
-        "lcp"
+        "lcp",
+        "worlds"
       ]
     },
     {
@@ -7270,7 +7285,8 @@ window.ESPORTS_DATA = {
       "league": "cblol",
       "competitions": [
         "cblol",
-        "msi"
+        "msi",
+        "worlds"
       ]
     },
     {
@@ -7362,7 +7378,8 @@ window.ESPORTS_DATA = {
       "rosterStatus": "starter",
       "league": "lcp",
       "competitions": [
-        "lcp"
+        "lcp",
+        "worlds"
       ]
     },
     {
@@ -7707,7 +7724,8 @@ window.ESPORTS_DATA = {
       "rosterStatus": "reserve",
       "league": "lcs",
       "competitions": [
-        "lcs"
+        "lcs",
+        "worlds"
       ]
     },
     {
@@ -7817,7 +7835,8 @@ window.ESPORTS_DATA = {
       "league": "cblol",
       "competitions": [
         "cblol",
-        "msi"
+        "msi",
+        "worlds"
       ]
     },
     {
@@ -7871,7 +7890,8 @@ window.ESPORTS_DATA = {
       "rosterStatus": "starter",
       "league": "lcs",
       "competitions": [
-        "lcs"
+        "lcs",
+        "worlds"
       ]
     },
     {
@@ -7981,7 +8001,8 @@ window.ESPORTS_DATA = {
       "league": "cblol",
       "competitions": [
         "cblol",
-        "msi"
+        "msi",
+        "worlds"
       ]
     },
     {
@@ -8257,7 +8278,8 @@ window.ESPORTS_DATA = {
       "rosterStatus": "starter",
       "league": "lcs",
       "competitions": [
-        "lcs"
+        "lcs",
+        "worlds"
       ]
     },
     {
@@ -8627,7 +8649,8 @@ window.ESPORTS_DATA = {
       "league": "lec",
       "competitions": [
         "lec",
-        "msi"
+        "msi",
+        "worlds"
       ]
     },
     {
@@ -8902,7 +8925,8 @@ window.ESPORTS_DATA = {
       "rosterStatus": "starter",
       "league": "lcs",
       "competitions": [
-        "lcs"
+        "lcs",
+        "worlds"
       ]
     },
     {
