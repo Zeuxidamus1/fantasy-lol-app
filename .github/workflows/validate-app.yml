@@ -2,11 +2,17 @@ name: Validate App
 
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
   pull_request:
+    branches: [main, staging]
+  workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
@@ -14,13 +20,16 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
+
       - name: Set up Node
         uses: actions/setup-node@v5
         with:
           node-version: "24"
-      - name: Run syntax and repository checks
-        run: npm run check
-      - name: Run browser route smoke tests
-        run: bash scripts/browser-smoke.sh
-      - name: Run browser interaction tests
-        run: node scripts/browser-interactions.mjs
+
+      - name: Run complete release gate
+        run: npm run release:check
+
+      - name: Validation summary
+        run: |
+          echo "### Validation passed" >> "$GITHUB_STEP_SUMMARY"
+          echo "Syntax, repository, browser smoke, browser interactions, deployment preflight, privacy, and text-containment checks passed." >> "$GITHUB_STEP_SUMMARY"
