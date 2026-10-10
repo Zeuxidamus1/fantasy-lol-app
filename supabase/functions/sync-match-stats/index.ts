@@ -2,7 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const EXPECTED_TOKEN_SHA256="27668aa7340953f582156c4d0c170f373991225ea64b9e39a1ae4faa4ee19885";
-const API_KEY="0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z";
+let API_KEY=Deno.env.get("LOL_ESPORTS_API_KEY")||"";
 const API_BASE="https://esports-api.lolesports.com/persisted/gw";
 const LIVE_BASE="https://feed.lolesports.com/livestats/v1";
 
@@ -171,6 +171,11 @@ Deno.serve(async(req:Request)=>{
     const serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if(!supabaseUrl||!serviceKey)throw new Error("Supabase service credentials unavailable");
     const supabase=createClient(supabaseUrl,serviceKey,{auth:{persistSession:false}});
+    if(!API_KEY){
+      const {data:secretValue,error:secretError}=await supabase.rpc("get_backend_secret",{p_name:"lol_esports_api_key"});
+      if(secretError||!secretValue)throw new Error("Riot API credential unavailable");
+      API_KEY=String(secretValue);
+    }
     const markHealth=async(source:string,ok:boolean,error:any=null,details:any={})=>{
       const now=new Date().toISOString();
       const {data:current}=await supabase.from("data_source_health")
