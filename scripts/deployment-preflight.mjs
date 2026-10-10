@@ -62,7 +62,8 @@ for(const rel of secretScanFiles){
   const forbidden=[
     /sb_secret_[A-Za-z0-9_-]+/,
     /service_role[^\n]{0,80}[=:][^\n]{8,}/i,
-    /const\s+API_KEY\s*=\s*["\'][^"\']{12,}["\'],\n    /PANDASCORE_API_TOKEN\s*=\s*["\'][^"\']+["\']/
+    /const\s+API_KEY\s*=\s*["'][^"']{12,}["']/,
+    /PANDASCORE_API_TOKEN\s*=\s*["'][^"']+["']/
   ];
   if(forbidden.some(rx=>rx.test(body)))fail("possible backend credential committed in "+rel);
 }
