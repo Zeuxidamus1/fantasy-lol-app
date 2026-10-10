@@ -269,6 +269,7 @@ function getLeagueSettings(){
 }
 
 let selectedPlayerId=null;
+let selectedPlayerReturnView="players";
 let selectedMatchupRound=null;
 let tradePrefill={id:null,side:null};
 let modalReturnFocus=null;
@@ -836,8 +837,9 @@ function fantasyPointsForGame(game,scoring=getLeagueSettings()?.scoring||default
   return Number(total.toFixed(1));
 }
 
-function openPlayer(id){
+function openPlayer(id,returnView=currentView||"players"){
   selectedPlayerId=id;
+  selectedPlayerReturnView=returnView==="player"?"players":returnView;
   render("player");
 }
 
@@ -1750,7 +1752,11 @@ function render(view="home",options={}){
       }
     };
     void configureLeagueActions();
-    document.querySelector("#playerBackBtn").onclick=()=>goBack("players");
+    const playerBackBtn=document.querySelector("#playerBackBtn");
+    const returnLabels={draft:"Draft Room",team:"My Team",trade:"Trades",transactions:"Transactions",league:"League",players:"Players"};
+    const returnView=returnLabels[selectedPlayerReturnView]?selectedPlayerReturnView:"players";
+    playerBackBtn.textContent="← "+(returnLabels[returnView]||"Players");
+    playerBackBtn.onclick=()=>goBack(returnView);
   }
   if(view==="standings"){
     const list=document.querySelector("#standingsList");
@@ -2806,9 +2812,10 @@ function render(view="home",options={}){
           const blockedForCompletion=myTurn&&mustFillMissingRole&&!missingRoleSet.has(p.role);
           const disabled=!myTurn||blockedForCompletion;
           const label=blockedForCompletion?"NEED ROLE":"DRAFT";
-          return `<div class="player-row draft-player"><span class="role-badge">${h(p.role)}</span><div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)}</small></div><button class="draft-btn" data-player-id="${h(p.id)}" ${disabled?"disabled":""}>${label}</button></div>`;
+          return `<div class="player-row draft-player clickable" data-open-player="${h(p.id)}" tabindex="0" role="button" aria-label="View ${h(p.name)} details"><span class="role-badge">${h(p.role)}</span><div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)}</small></div><button class="draft-btn" data-player-id="${h(p.id)}" ${disabled?"disabled":""}>${label}</button></div>`;
         }).join("")||'<div class="empty-state"><strong>No available players</strong><small>Try another role or search.</small></div>';
-        list.querySelectorAll("[data-player-id]").forEach(btn=>btn.onclick=async()=>{
+        list.querySelectorAll("[data-player-id]").forEach(btn=>btn.onclick=async e=>{
+          e.stopPropagation();
           const player=draftPool.find(p=>String(p.id)===String(btn.dataset.playerId));
           if(!player)return;
           btn.disabled=true;
@@ -2816,6 +2823,15 @@ function render(view="home",options={}){
             await b.makeDraftPick(leagueId,player.id,player.role);
             await refresh();
           }catch(err){showToast(err.message||"Could not make draft pick");await refresh();}
+        });
+        list.querySelectorAll("[data-open-player]").forEach(row=>{
+          row.onclick=e=>{if(e.target.closest(".draft-btn"))return;openPlayer(row.dataset.openPlayer,"draft");};
+          row.onkeydown=e=>{
+            if(e.key!=="Enter"&&e.key!==" ")return;
+            if(e.target.closest(".draft-btn"))return;
+            e.preventDefault();
+            openPlayer(row.dataset.openPlayer,"draft");
+          };
         });
 
         board.innerHTML=picks.length?picks.slice(-10).reverse().map(p=>{
