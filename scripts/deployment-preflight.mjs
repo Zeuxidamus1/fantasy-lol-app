@@ -33,7 +33,7 @@ if(migrationFiles.length&&failures===0)pass("migration filenames are unique and 
 const deploy=fs.existsSync(path.join(root,".github","workflows","deploy-cloud.yml"))
   ? fs.readFileSync(path.join(root,".github","workflows","deploy-cloud.yml"),"utf8")
   : "";
-if(/psql[\\s\\S]*supabase\\/schema\\.sql/i.test(deploy)){
+if(/psql[\s\S]*supabase\/schema\.sql/i.test(deploy)){
   fail("deployment workflow must not apply supabase/schema.sql directly");
 }else{
   pass("deployment workflow does not reapply legacy schema.sql");
