@@ -152,7 +152,70 @@ try{
   await expect("schedule filter works","document.querySelector('[data-day=today]').classList.contains('active')");
   await expect("schedule fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
 
-  await send("Emulation.setDeviceMetricsOverride",{width:1280,height:900,deviceScaleFactor:1,mobile:false});
+  const visualRoutes=["home","players","team","league","transactions","trade","draft","matchup","schedule","account"];
+  const viewports=[
+    {name:"small-phone",width:320,height:700,mobile:true},
+    {name:"phone",width:390,height:844,mobile:true},
+    {name:"tablet",width:768,height:1024,mobile:true},
+    {name:"small-desktop",width:1024,height:768,mobile:false},
+    {name:"desktop",width:1440,height:1000,mobile:false}
+  ];
+
+  const noOverflowExpression=`(()=>{
+    const vw=document.documentElement.clientWidth;
+    const offenders=[...document.querySelectorAll('body *')].filter(el=>{
+      const cs=getComputedStyle(el);
+      if(cs.display==='none'||cs.visibility==='hidden'||Number(cs.opacity)===0)return false;
+      const r=el.getBoundingClientRect();
+      if(!r.width&&!r.height)return false;
+      if(r.right>vw+1||r.left<-1)return true;
+      const scrollX=el.scrollWidth-el.clientWidth;
+      const scrollY=el.scrollHeight-el.clientHeight;
+      const text=(el.textContent||'').trim();
+      const isScrollable=['auto','scroll'].includes(cs.overflowX);
+      return !!text && scrollX>2 && !isScrollable;
+    });
+    window.__visualOffenders=offenders.slice(0,10).map(el=>({
+      tag:el.tagName,id:el.id,cls:el.className,
+      text:(el.textContent||'').trim().slice(0,80),
+      scrollWidth:el.scrollWidth,clientWidth:el.clientWidth
+    }));
+    return offenders.length===0 && document.documentElement.scrollWidth<=vw+1;
+  })()`;
+
+  for(const vp of viewports){
+    await send("Emulation.setDeviceMetricsOverride",{
+      width:vp.width,height:vp.height,deviceScaleFactor:1,mobile:vp.mobile
+    });
+    for(const visualRoute of visualRoutes){
+      await route(visualRoute);
+      await expect(vp.name+" "+visualRoute+" has no horizontal/text overflow",noOverflowExpression,7000);
+    }
+  }
+
+  await send("Emulation.setDeviceMetricsOverride",{width:320,height:700,deviceScaleFactor:1,mobile:true});
+  await route("players");
+  await evaluate(`(()=>{
+    const row=document.querySelector('#freeAgentList .player-row');
+    if(!row)return;
+    const strong=row.querySelector('strong');
+    const small=row.querySelector('small');
+    if(strong)strong.textContent='ExtremelyLongProfessionalPlayerNameThatMustStayInsideThePlayerCard';
+    if(small)small.textContent='Extremely Long Professional Esports Team Name That Must Wrap Correctly Without Breaking Layout';
+  })()`);
+  await expect("long player/team text stays contained",noOverflowExpression);
+
+  await route("league");
+  await evaluate(`(()=>{
+    const btn=document.querySelector('[data-jump="create-league"]');
+    if(btn)btn.textContent='Create A League With A Very Long Action Label That Must Remain Inside The Button';
+  })()`);
+  await expect("long button text stays contained",noOverflowExpression);
+
+  await route("account");
+  await expect("account remains usable at 320px","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
+
+  await send("Emulation.setDeviceMetricsOverride",{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
   await route("team");
   await expect("team fits desktop viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
   await route("draft");
