@@ -98,6 +98,7 @@ try{
 
   await send("Runtime.enable");
   await send("Page.enable");
+  await send("Network.enable");
   await send("Page.navigate",{url:"http://127.0.0.1:4174/#home"});
   await sleep(700);
   await expect("test page loaded","location.origin === 'http://127.0.0.1:4174' && document.readyState !== 'loading'");
@@ -147,6 +148,19 @@ try{
   await evaluate("location.reload()");
   await sleep(700);
   await expect("watchlist survives page refresh","JSON.parse(localStorage.getItem('riftWatchlist')||'[]').length === 1");
+
+  await send("Network.setCacheDisabled",{cacheDisabled:true});
+  await send("Network.emulateNetworkConditions",{
+    offline:false,latency:350,downloadThroughput:450*1024,uploadThroughput:150*1024,connectionType:"cellular3g"
+  });
+  const slowStart=Date.now();
+  await route("players");
+  await expect("players remains usable on throttled connection","!!document.querySelector('#playerSearch') && document.readyState==='complete'",12000);
+  const slowElapsed=Date.now()-slowStart;
+  if(slowElapsed>12000)throw new Error("Throttled players load exceeded 12 seconds: "+slowElapsed);
+  console.log("PASS throttled connection load",slowElapsed+"ms");
+  await send("Network.emulateNetworkConditions",{offline:false,latency:0,downloadThroughput:-1,uploadThroughput:-1,connectionType:"none"});
+  await send("Network.setCacheDisabled",{cacheDisabled:false});
 
   await route("privacy");
   await expect("privacy route has correct title","document.title.includes('Privacy Notice') && !!document.querySelector('.legal-page')");
