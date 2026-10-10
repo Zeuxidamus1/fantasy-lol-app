@@ -2695,7 +2695,6 @@ function render(view="home",options={}){
     const leagueId=getActiveLeagueId();
     const search=document.querySelector("#draftSearch");
     const list=document.querySelector("#draftPlayerList");
-    const board=document.querySelector("#draftBoard");
     const fullBoard=document.querySelector("#fullDraftBoard");
     const rosterEl=document.querySelector("#myDraftRoster");
     const startBtn=document.querySelector("#startDraftBtn");
@@ -2756,7 +2755,6 @@ function render(view="home",options={}){
             ?"Start the draft once every manager has joined."
             :"The commissioner will start the draft when the league is ready.";
           document.querySelector("#draftClock").textContent="—";
-          document.querySelector("#draftProgress").textContent="0 picks";
         }else{
           const order=draft.manager_order||[];
           const currentManager=managerForPick(Number(draft.current_pick)||0,order);
@@ -2771,7 +2769,6 @@ function render(view="home",options={}){
             ?"Rosters have been created automatically from the final board."
             :"Picks sync across every manager's device.";
           document.querySelector("#draftClock").textContent=draft.status==="drafting"?"LIVE":"DONE";
-          document.querySelector("#draftProgress").textContent=`${picks.length}/${(draft.manager_order?.length||0)*(draft.total_rounds||0)} picks`;
           const botOnClock=currentIsBot&&draft.status==="drafting";
           if(botOnClock&&!botPickPending){
             botPickPending=true;
@@ -2833,12 +2830,6 @@ function render(view="home",options={}){
             openPlayer(row.dataset.openPlayer,"draft");
           };
         });
-
-        board.innerHTML=picks.length?picks.slice(-10).reverse().map(p=>{
-          const player=draftPool.find(x=>String(x.id)===String(p.player_id));
-          const manager=memberById.get(String(p.user_id));
-          return `<div class="draft-pick ${String(p.user_id)===String(currentUser.id)?"mine":""}"><small>#${p.pick_number} · R${p.round_number}</small><strong>${h(player?.name||p.player_id)}</strong><span>${h(p.role)} · ${h(manager?.team_name||"Manager")}</span></div>`;
-        }).join(""):'<div class="muted">No picks yet.</div>';
 
         if(draft?.manager_order?.length){
           const headers=draft.manager_order.map(uid=>`<div class="board-head">${h(memberById.get(String(uid))?.team_name||"Manager")}</div>`).join("");
