@@ -1,60 +1,55 @@
 # Rift Fantasy
 
-Rift Fantasy is a mobile-first fantasy League of Legends esports prototype hosted on GitHub Pages.
+Rift Fantasy is a mobile-first fantasy League of Legends esports application hosted on GitHub Pages with Supabase-backed shared leagues, live fantasy scoring, head-to-head matchups, standings, lineup locking, waivers, trades, playoffs, bot managers, projections, notifications, league history, and automated data-integrity checks.
 
-## Current capabilities
+## Data architecture
 
-The app includes a home dashboard, fantasy roster management, player profiles, a mock snake draft, pro match schedules, league setup, demo matchups and standings, waiver claim simulation, add/drop transactions, a local trade simulator, and browser-persisted settings.
+Professional schedule and roster data is synchronized into Supabase. Fantasy scoring uses persisted professional game statistics and league-specific scoring rules. Independent provider validation runs only in the backend and never controls fantasy scores or exposes provider diagnostics to normal users.
 
-## Data and scoring status
-
-Pro schedule and roster data can be refreshed from the LoL Esports persisted API by the GitHub Actions workflow in `.github/workflows/update-esports-data.yml`. The workflow requires a repository secret named `LOL_ESPORTS_API_KEY`. If the secret is missing or the upstream API fails, the workflow keeps the last known-good `esports-data.js` snapshot instead of overwriting it.
-
-Fantasy projections, matchup scores, fantasy standings, waiver processing, and multi-manager trades are currently **prototype/demo behavior**. They are intentionally labeled as such in the UI. There is not yet a shared backend, authentication system, live fantasy scoring pipeline, or synchronized multi-user league state.
+The public website does not display API health, cron jobs, source names, internal IDs, anomaly records, provider tokens, or other backend telemetry.
 
 ## Local validation
 
-No runtime dependencies are required. Node 24+ is used only for repository checks.
+Node 24+ is used for repository and browser checks.
 
 ```bash
 npm run check
 npm run smoke
 npm run e2e
+npm run preflight
+npm run release:check
 ```
 
-The validation checks JavaScript syntax, required files, route/template consistency, duplicate HTML IDs, data-file structure, duplicate function declarations, CSS brace balance, accessibility basics, and accidental hard-coded API-key fallbacks.
+`npm run release:check` is the complete release gate.
 
 ## Deployment
 
-GitHub Pages serves the static files from the repository root. Navigation uses hash-based views so refreshing a view does not require server-side routing.
+- `staging` is the code-rehearsal branch.
+- `main` is the production branch.
+- Both branches run the full validation workflow.
+- Supabase database changes are deployed only from timestamped files in `supabase/migrations/`.
+- The production backend workflow runs a migration dry-run before any database change.
+- Edge Function settings are tracked in `supabase/config.toml`.
 
-## Security note
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the full release process.
 
-Do not commit API credentials. Configure `LOL_ESPORTS_API_KEY` only as a GitHub Actions repository secret.
+## Security
 
-## Cloud backend
+Only browser-safe Supabase publishable configuration belongs in `backend-config.js`.
 
-A Supabase-ready backend layer now exists:
+Never commit:
 
-- `supabase/schema.sql` defines authenticated profiles, leagues, membership, rosters, waivers, trades, invite-code RPCs, and row-level security policies.
-- `backend.js` provides authentication and shared-league API methods without exposing privileged credentials.
-- `backend-config.js` is intentionally blank until the production Supabase project URL and public anon key are available.
+- Supabase database passwords or connection strings
+- Supabase secret/service-role keys
+- Supabase access tokens
+- LoL Esports provider secrets
+- PandaScore tokens
+- other backend credentials
 
-The public anon key is designed for browser use when protected by Row Level Security. Never place a Supabase service-role key in frontend files.
+Provider tokens belong in GitHub Actions secrets or Supabase Edge Function Secrets as appropriate.
 
-## Project status
+## Source of truth
 
-The frontend and cloud integration layer are ready for backend provisioning. Until a Supabase project is connected and the schema is applied, the app safely remains in local prototype mode. Live fantasy scoring still requires a separate trusted ingestion/scoring service before production launch.
+For an existing Supabase environment, `supabase/migrations/` is authoritative.
 
-
-## Cloud deployment workflow
-
-Once a Supabase project exists, the repository can finish the backend setup without manual SQL copy/paste.
-
-Configure these GitHub repository settings:
-
-- Secret: `SUPABASE_DB_URL` — the PostgreSQL connection string for the Supabase project.
-- Variable: `SUPABASE_URL` — the public project URL, such as `https://<project-ref>.supabase.co`.
-- Variable: `SUPABASE_ANON_KEY` — the browser-safe public anon key. Never use the service-role key here.
-
-Then run **Actions → Deploy Cloud Backend → Run workflow**. The workflow applies `supabase/schema.sql`, generates the browser-safe `backend-config.js`, commits that public configuration, and lets GitHub Pages redeploy automatically.
+Do not apply `supabase/schema.sql` directly to production. It is retained as a legacy/reference snapshot only.
