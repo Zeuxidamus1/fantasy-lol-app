@@ -97,7 +97,7 @@ check(html.includes('aria-live="polite"'),"toast uses an ARIA live region");
 check(html.includes('class="skip-link"'),"page has a keyboard skip link");
 check(html.includes('id="privacy-template"'),"privacy notice is available");
 check(html.includes('id="terms-template"'),"terms page is available");
-check(html.includes("not endorsed, sponsored, or affiliated with Riot Games"),"Riot non-endorsement notice is present");
+check(html.includes("Rift Fantasy isn't endorsed by Riot Games") && html.includes("doesn't reflect the views or opinions of Riot Games"),"Riot required legal boilerplate is present");
 check(!html.includes('id="opsCard"'),"backend operations data is not rendered in the website");
 check(!html.includes('id="homeDataHealth"'),"backend source-health telemetry is not rendered in the website");
 check(css.includes("overflow-wrap:anywhere"),"long UI text is contained inside cards and controls");
