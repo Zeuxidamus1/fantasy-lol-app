@@ -375,12 +375,6 @@
       +"&select=league_id,manager_id,manager_type,priority,updated_at&order=priority.asc",{session:current});
   }
 
-  async function getOpsSnapshot(){
-    const current=await session();
-    if(!current)throw new Error("Sign in first.");
-    return request("/rest/v1/rpc/get_ops_snapshot",{method:"POST",body:{},session:current});
-  }
-
   async function logClientError(message,stack="",context={}){
     const current=await session();
     const user=await currentUser().catch(()=>null);
@@ -389,12 +383,6 @@
       user_id:user.id,page:location.hash||location.pathname,message:String(message||"Unknown error").slice(0,1000),
       stack:String(stack||"").slice(0,6000),context
     },session:current,headers:{"Prefer":"return=minimal"}});
-  }
-
-  async function listDataSourceHealth(){
-    const current=await session();
-    if(!current)return [];
-    return request("/rest/v1/data_source_health?select=source,status,last_attempt_at,last_success_at,last_error_at,consecutive_errors,last_error,details,updated_at&order=source.asc",{session:current});
   }
 
   async function listProGames(matchId){
@@ -520,11 +508,11 @@
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
     listLeagues,createLeague,createBotLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,makeBotDraftPick,
-    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,listLineupLocks,listPlayerCompetitionStatus,listPlayerProjections,listPlayoffs,getLeagueChampion,listLeagueActivity,listLeagueHistory,listScoreCorrections,listWaiverPriority,listDataSourceHealth,saveRoster,listTransactions,
+    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,listLineupLocks,listPlayerCompetitionStatus,listPlayerProjections,listPlayoffs,getLeagueChampion,listLeagueActivity,listLeagueHistory,listScoreCorrections,listWaiverPriority,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
     listNotifications,markNotificationsRead,
     listTrades,createTrade,updateTrade,acceptTrade,reviewTrade,
-    getOpsSnapshot,logClientError,
+    logClientError,
     request
   });
 })();
