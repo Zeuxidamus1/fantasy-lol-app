@@ -139,6 +139,7 @@ function eligibleDraftPool(settings=getLeagueSettings()){
 
 const draftManagerNames = ["Baron Bandits","Zeuxidamus","Rift Raiders","Pentakill Club","Nexus Breakers","Blue Buff Boys","Dragon Slayers","Iron V","Red Side","First Blood","Scuttle Club","Elder Enjoyers"];
 let draftTimerId=null;
+let tradeTimerId=null;
 const memoryStorage=new Map();
 function storageGet(key){
   try{
@@ -958,6 +959,7 @@ function render(view="home",options={}){
     return render("login",{...options,replace:true});
   }
   if(view!=="draft"&&draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
+  if(view!=="trade"&&tradeTimerId){clearInterval(tradeTimerId);tradeTimerId=null;}
   if(!options.fromHistory){
     const hash="#"+view;
     if(options.replace||currentView===null){
@@ -2329,6 +2331,7 @@ function render(view="home",options={}){
     const refreshTradeData=async()=>{
       if(!leagueId||!cloudReady())throw new Error("Select an online league before trading.");
       const b=backend();
+      const leaguesPromise=b.listLeagues();
       [user,members,rosters,trades]=await Promise.all([
         b.currentUser(),
         b.listLeagueMembers(leagueId),
@@ -2336,6 +2339,15 @@ function render(view="home",options={}){
         b.listTrades(leagueId)
       ]);
       if(!user)throw new Error("Sign in before trading.");
+      const leagues=await leaguesPromise;
+      const activeLeague=leagues.find(l=>String(l.id)===String(leagueId));
+      if(activeLeague?.settings){
+        storageSet("riftLeagueSettings",JSON.stringify({
+          ...defaultLeagueSettings,
+          ...activeLeague.settings,
+          scoring:{...defaultLeagueSettings.scoring,...(activeLeague.settings.scoring||{})}
+        }));
+      }
       isCommissioner=members.some(m=>String(m.user_id)===String(user.id)&&m.role==="owner");
     };
 
@@ -2586,6 +2598,8 @@ function render(view="home",options={}){
       renderTabs();
     });
     updateTabButtons();
+    if(tradeTimerId)clearInterval(tradeTimerId);
+    tradeTimerId=setInterval(()=>{if(document.querySelector("#tradeContent"))renderTabs();},60000);
     void init();
   }
   if(view==="transactions"){
