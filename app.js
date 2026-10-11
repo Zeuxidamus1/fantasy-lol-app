@@ -2298,6 +2298,8 @@ function render(view="home",options={}){
     if(tradePrefill.side==="theirs"&&tradePrefill.id)selectedTheirs.add(String(tradePrefill.id));
     tradePrefill={id:null,side:null};
     let user=null,members=[],rosters=[],trades=[];
+    let tradeCompetition=null;
+    let tradePlayerStatusMap=new Map();
     let isCommissioner=false;
     const playerFromId=id=>playerById(id)||{id,name:id,team:"",role:""};
     const partnerName=id=>members.find(m=>String(m.user_id)===String(id))?.team_name||"Manager";
@@ -2353,12 +2355,18 @@ function render(view="home",options={}){
       const row=source.find(r=>String(r.player_id)===String(id));
       return row?playerFromId(row.player_id).name:id;
     });
-    const requiredDropsForTrade=t=>{
-      const incomingIds=offerIds(t,"send");
-      const outgoingIds=offerIds(t,"receive");
-      const mine=myRoster();
-      return Math.max(0,mine.length-outgoingIds.length+incomingIds.length-rosterLimit());
+    const rosterBalanceFor=(currentCount,outgoingCount,incomingCount)=>{
+      const post=currentCount-outgoingCount+incomingCount;
+      return {post,drops:Math.max(0,post-rosterLimit()),adds:Math.max(0,rosterLimit()-post)};
     };
+    const recipientBalanceForTrade=t=>rosterBalanceFor(myRoster().length,offerIds(t,"receive").length,offerIds(t,"send").length);
+    const tradeFreeAgents=()=>allFantasyPlayers().filter(p=>{
+      const id=playerKey(p);
+      const status=String(tradePlayerStatusMap.get(id)?.status||"");
+      if(!playerEligibleForCompetition(p,tradeCompetition)||!playerIsDraftable(p))return false;
+      if(["inactive","eliminated","season_complete","substitute"].includes(status))return false;
+      return !rosters.some(r=>String(r.player_id)===String(id));
+    });
 
     if(tradeRealtimeCleanup){try{tradeRealtimeCleanup();}catch{}tradeRealtimeCleanup=null;}
     let liveRefreshPending=false;
@@ -2375,6 +2383,9 @@ function render(view="home",options={}){
       if(!user)throw new Error("Sign in before trading.");
       const leagues=await leaguesPromise;
       const activeLeague=leagues.find(l=>String(l.id)===String(leagueId));
+      tradeCompetition=normalizeCompetitionCode(activeLeague?.settings?.competition)||null;
+      const tradeStatuses=tradeCompetition?await b.listPlayerCompetitionStatus(tradeCompetition).catch(()=>[]):[];
+      tradePlayerStatusMap=new Map(tradeStatuses.map(x=>[String(x.player_id),x]));
       if(activeLeague?.settings){
         storageSet("riftLeagueSettings",JSON.stringify({
           ...defaultLeagueSettings,
