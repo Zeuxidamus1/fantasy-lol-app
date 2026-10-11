@@ -1046,3 +1046,32 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
   .completed-pick-round{width:34px;height:34px}
   .completed-pick-number{min-width:42px}
 }
+
+
+/* Multi-player trade center */
+.trade-expiration-field{margin-top:2px}
+.trade-tab-badge{display:inline-grid;place-items:center;min-width:19px;height:19px;padding:0 5px;margin-left:4px;border-radius:999px;background:#2ddcba;color:#06211c;font-size:9px;font-weight:900}
+.trade-tab-badge[hidden]{display:none}
+.trade-option{position:relative}
+.trade-option.selected::after{content:"✓";position:absolute;right:9px;top:9px;color:#57ebce;font-weight:900}
+.trade-summary-title{display:block;color:#dbe8f8;font-size:11px;margin-bottom:7px}
+.trade-summary-lists{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px}
+.trade-summary-side{border:1px solid #1e3148;background:#091626;border-radius:10px;padding:8px;min-width:0}
+.trade-summary-side span{display:block;color:#70849f;font-size:8px;font-weight:900;letter-spacing:.7px;margin-bottom:4px}
+.trade-summary-side strong{display:block;font-size:10px;line-height:1.45;overflow-wrap:anywhere}
+.trade-impact{display:flex;flex-direction:column;gap:3px;padding-top:8px;border-top:1px solid #1d3048}
+.trade-impact strong{font-size:10px;color:#dce8f8}
+.trade-impact small{font-size:9px;color:#8195ae;line-height:1.45}
+.trade-impact .warning{color:#e7c87c}
+.trade-player-stack{display:flex;flex-direction:column;gap:4px}
+.trade-player-stack strong{display:block}
+.trade-player-stack small{display:block;color:#70849f;font-size:8px;margin-top:1px}
+.trade-expiry{display:block;margin-top:8px!important;color:#8ea3bc!important}
+.trade-card-focus{border-color:#2ddcba;box-shadow:0 0 0 1px rgba(45,220,186,.28) inset}
+.trade-status.expired,.trade-status.rejected,.trade-status.canceled{background:#292f3c;color:#9caabd}
+.trade-drop-choice.selected{border-color:#2ddcba;background:#10322f}
+.trade-drop-choice.selected .drop-action{color:#57ebce}
+.trade-drop-confirm{width:100%;margin-top:10px}
+@media(max-width:390px){
+  .trade-summary-lists{grid-template-columns:1fr}
+}
