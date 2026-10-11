@@ -3677,14 +3677,15 @@ async function loadNotifications({open=false}={}){
       const receive=playerName(p.receive_player_id);
       const rosterPlayer=playerName(p.player_id);
       switch(n.kind){
-        case "trade_offer": return {title:`Trade offer from ${actor}`,body:`${send} for ${receive}. Tap to review.`,view:"trade"};
-        case "trade_activity": return {title:`${actor} sent a trade offer`,body:`Trade proposed with ${target}: ${send} ↔ ${receive}.`,view:"trade"};
-        case "trade_accepted": return {title:"Trade completed",body:`${actor} accepted a trade: ${send} ↔ ${receive}.`,view:"trade"};
-        case "trade_declined": return {title:"Trade declined",body:`${actor} declined a trade offer.`,view:"trade"};
-        case "trade_canceled": return {title:"Trade canceled",body:`${actor} canceled a trade offer.`,view:"trade"};
-        case "trade_review_required": return {title:"Trade awaiting commissioner review",body:`${actor} accepted a trade. Review it before rosters change.`,view:"trade"};
-        case "trade_approved": return {title:"Trade approved",body:"The commissioner approved the trade and rosters were updated.",view:"trade"};
-        case "trade_rejected": return {title:"Trade rejected",body:"The commissioner rejected the trade.",view:"trade"};
+        case "trade_offer": return {title:`Trade offer from ${actor}`,body:"Tap to review the incoming offer.",view:"trade",tradeId:p.trade_id,tradeTab:"incoming"};
+        case "trade_activity": return {title:`${actor} sent a trade offer`,body:`Trade proposed with ${target}.`,view:"trade",tradeId:p.trade_id,tradeTab:"history"};
+        case "trade_accepted": return {title:"Trade completed",body:`${actor} accepted a trade offer.`,view:"trade",tradeId:p.trade_id,tradeTab:"history"};
+        case "trade_declined": return {title:"Trade declined",body:`${actor} declined a trade offer.`,view:"trade",tradeId:p.trade_id,tradeTab:"history"};
+        case "trade_canceled": return {title:"Trade canceled",body:`${actor} canceled a trade offer.`,view:"trade",tradeId:p.trade_id,tradeTab:"history"};
+        case "trade_expired": return {title:"Trade expired",body:"This offer is no longer active.",view:"trade",tradeId:p.trade_id,tradeTab:"history"};
+        case "trade_review_required": return {title:"Trade awaiting commissioner review",body:`${actor} accepted a trade. Review it before rosters change.`,view:"trade",tradeId:p.trade_id,tradeTab:"history"};
+        case "trade_approved": return {title:"Trade approved",body:"The commissioner approved the trade and rosters were updated.",view:"trade",tradeId:p.trade_id,tradeTab:"history"};
+        case "trade_rejected": return {title:"Trade rejected",body:"The commissioner rejected the trade.",view:"trade",tradeId:p.trade_id,tradeTab:"history"};
         case "roster_add": return {title:`${actor} added ${rosterPlayer}`,body:"League roster move",view:"transactions"};
         case "roster_drop": return {title:`${actor} dropped ${rosterPlayer}`,body:"League roster move",view:"transactions"};
         case "roster_swap": return {title:`${actor} made a roster move`,body:"Roster swap",view:"transactions",swap:{dropped:playerName(p.dropped_player_id),added:playerName(p.added_player_id)}};
@@ -3713,14 +3714,27 @@ async function loadNotifications({open=false}={}){
       const detail=d.swap
         ? `<span class="notification-swap"><span class="swap-drop">${h(d.swap.dropped)}</span><span class="swap-arrow">→</span><span class="swap-add">${h(d.swap.added)}</span></span><small>Dropped one player and added another.</small>`
         : `<small>${h(d.body)}</small>`;
-      return `<button class="notification-item ${n.read_at?"":"unread"}" data-notification-view="${h(d.view)}" data-notification-id="${h(n.id)}"><span class="notification-dot"></span><span class="notification-copy"><strong>${h(d.title)}</strong>${detail}<em>${h(league?.name||"League")} · ${h(fmt(n.created_at))}</em></span></button>`;
+      return `<button class="notification-item ${n.read_at?"":"unread"}" data-notification-view="${h(d.view)}" data-notification-id="${h(n.id)}" data-notification-league="${h(n.league_id||"")}" data-notification-trade-id="${h(d.tradeId||"")}" data-notification-trade-tab="${h(d.tradeTab||"")}"><span class="notification-dot"></span><span class="notification-copy"><strong>${h(d.title)}</strong>${detail}<em>${h(league?.name||"League")} · ${h(fmt(n.created_at))}</em></span></button>`;
     }).join(""):'<div class="empty-state"><strong>No notifications yet</strong><small>Lineup locks, fantasy periods, matchup results, trades, and roster activity will appear here.</small></div>';
 
     notificationList.querySelectorAll("[data-notification-view]").forEach(item=>item.onclick=async()=>{
-      if(!item.classList.contains("unread")){closeNotifications();render(item.dataset.notificationView);return;}
-      try{await b.markNotificationsRead([item.dataset.notificationId]);}catch{}
+      const destination=item.dataset.notificationView;
+      const leagueId=item.dataset.notificationLeague;
+      if(leagueId&&leagueId!==String(getActiveLeagueId()||"")){
+        setActiveLeagueId(leagueId);
+        await loadRosterFromCloud(leagueId).catch(()=>{});
+      }
+      if(destination==="trade"){
+        tradeRouteIntent={
+          tab:item.dataset.notificationTradeTab||"incoming",
+          id:item.dataset.notificationTradeId||null
+        };
+      }
+      if(item.classList.contains("unread")){
+        try{await b.markNotificationsRead([item.dataset.notificationId]);}catch{}
+      }
       closeNotifications();
-      render(item.dataset.notificationView);
+      render(destination);
       void loadNotifications();
     });
 
