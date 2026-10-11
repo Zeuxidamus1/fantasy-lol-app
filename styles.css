@@ -76,7 +76,7 @@
 .team-name-editor{padding:14px}
 
 .notification-btn{position:relative}
-.notification-badge{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#ffcc3d;color:#07111e;border:2px solid #07111e;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.notification-badge{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#ffcc3d;color:#07111e;border:2px solid #07131f;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;white-space:nowrap}
 .notification-panel{position:fixed;inset:0;z-index:1200}
 .notification-backdrop{position:absolute;inset:0;background:rgba(2,8,18,.68)}
 .notification-sheet{position:absolute;top:74px;right:max(14px,calc((100vw - 520px)/2 + 14px));width:min(440px,calc(100vw - 28px));max-height:calc(100vh - 104px);overflow:auto;background:#0b1a2b;border:1px solid #24415f;border-radius:18px;padding:16px;box-shadow:0 24px 70px rgba(0,0,0,.45)}
@@ -421,7 +421,7 @@ body{background:
   linear-gradient(180deg,#06121f 0%,#06101c 100%);
   color:var(--rf-text)}
 .app-shell{background:linear-gradient(180deg,rgba(8,20,34,.98),rgba(6,16,28,.99));border-color:#17314a;box-shadow:0 28px 80px rgba(0,0,0,.35)}
-.app-header{background:rgba(6,17,29,.94);border-color:#19334d;backdrop-filter:blur(18px)}
+.topbar{background:#07131f;border-bottom-color:rgba(80,140,200,.16);backdrop-filter:blur(18px)}.topbar .icon-btn{background:#0b1b2c;border-color:#203a54;color:#f4f8ff}.topbar .icon-btn:hover{border-color:#2b526f;background:#0e2135}.topbar .eyebrow{color:#7892b1}.topbar h1{color:#f4f8ff}
 .card{background:linear-gradient(180deg,#0d1e31 0%,#0a192a 100%);border-color:#203b57;box-shadow:0 10px 28px rgba(0,0,0,.13)}
 .section-title h2{letter-spacing:-.55px}
 .eyebrow{color:#7f9ab9;letter-spacing:1.5px}
