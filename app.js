@@ -2492,6 +2492,7 @@ function render(view="home",options={}){
     const cloudList=document.querySelector("#cloudLeagueList");
     const overviewCard=document.querySelector("#leagueOverviewCard");
     const activeLeagueEntryCard=document.querySelector("#activeLeagueEntryCard");
+    const managerReadiness=document.querySelector("#leagueManagerReadiness");
     const quickAccess=document.querySelector("#leagueQuickAccess");
     const rulesModal=document.querySelector("#leagueRulesModal");
     const entryActions=document.querySelector("#leagueEntryActions");
@@ -2499,6 +2500,7 @@ function render(view="home",options={}){
     if(!getActiveLeagueId()){
       if(overviewCard)overviewCard.hidden=true;
       if(activeLeagueEntryCard)activeLeagueEntryCard.hidden=true;
+      if(managerReadiness)managerReadiness.hidden=true;
       if(quickAccess)quickAccess.hidden=true;
       if(rulesModal)rulesModal.hidden=true;
     }
@@ -2506,6 +2508,7 @@ function render(view="home",options={}){
     (async()=>{
       if(!cloudReady()){
         if(overviewCard)overviewCard.hidden=true;
+        if(managerReadiness)managerReadiness.hidden=true;
         if(quickAccess)quickAccess.hidden=true;
         if(rulesModal)rulesModal.hidden=true;
         if(cloudList)cloudList.hidden=true;
@@ -2552,6 +2555,7 @@ function render(view="home",options={}){
         if(!leagues.length){
           if(overviewCard)overviewCard.hidden=true;
           if(activeLeagueEntryCard)activeLeagueEntryCard.hidden=true;
+          if(managerReadiness)managerReadiness.hidden=true;
           if(quickAccess)quickAccess.hidden=true;
           if(rulesModal)rulesModal.hidden=true;
           if(cloudCard)cloudCard.hidden=false;
@@ -2585,6 +2589,7 @@ function render(view="home",options={}){
 
         if(overviewCard)overviewCard.hidden=false;
         if(activeLeagueEntryCard)activeLeagueEntryCard.hidden=false;
+        if(managerReadiness)managerReadiness.hidden=false;
         if(quickAccess)quickAccess.hidden=false;
         if(rulesModal)rulesModal.hidden=true;
         if(cloudCard)cloudCard.hidden=true;
@@ -2605,6 +2610,42 @@ function render(view="home",options={}){
             if(type==="bot")return botsNow.find(x=>String(x.id)===String(id))?.team_name||"Bot Manager";
             return membersNow.find(x=>String(x.user_id)===String(id))?.team_name||"Manager";
           };
+          const expectedManagers=Math.max(1,Number(activeSettings.managers)||membersNow.length+botsNow.length||1);
+          const humanManagers=membersNow.length;
+          const botManagers=botsNow.length;
+          const readyManagers=humanManagers+botManagers;
+          const readinessCount=document.querySelector("#leagueManagerReadinessCount");
+          const readinessTitle=document.querySelector("#leagueManagerReadinessTitle");
+          const readinessCopy=document.querySelector("#leagueManagerReadinessCopy");
+          const readinessBar=document.querySelector("#leagueManagerProgressBar");
+          const readinessBtn=managerReadiness?.querySelector(".league-manager-draft-btn");
+          if(readinessCount)readinessCount.textContent=readyManagers+" / "+expectedManagers;
+          if(readinessBar)readinessBar.style.width=Math.min(100,(readyManagers/expectedManagers)*100)+"%";
+          const managerBreakdown=botManagers
+            ? humanManagers+" human · "+botManagers+" bot"+(botManagers===1?"":"s")
+            : humanManagers+" human manager"+(humanManagers===1?"":"s");
+          const leagueStatus=String(activeLeague.status||"pre_draft");
+          if(readinessTitle&&readinessCopy){
+            if(leagueStatus==="pre_draft"&&readyManagers>=expectedManagers){
+              readinessTitle.textContent="✓ All "+expectedManagers+" managers have joined";
+              readinessCopy.textContent="Draft Room Ready · "+managerBreakdown;
+              managerReadiness?.classList.add("ready");
+            }else if(leagueStatus==="pre_draft"){
+              const remaining=Math.max(0,expectedManagers-readyManagers);
+              readinessTitle.textContent=readyManagers+" / "+expectedManagers+" managers joined";
+              readinessCopy.textContent="Waiting for "+remaining+" more manager"+(remaining===1?"":"s")+" · "+managerBreakdown;
+              managerReadiness?.classList.remove("ready");
+            }else if(leagueStatus==="drafting"){
+              readinessTitle.textContent="Draft in progress";
+              readinessCopy.textContent=readyManagers+" / "+expectedManagers+" managers ready · "+managerBreakdown;
+              managerReadiness?.classList.add("ready");
+            }else{
+              readinessTitle.textContent="Draft complete";
+              readinessCopy.textContent=readyManagers+" / "+expectedManagers+" managers · "+managerBreakdown;
+              managerReadiness?.classList.add("ready");
+            }
+          }
+          if(readinessBtn)readinessBtn.textContent=leagueStatus==="active"?"View Draft Board":"Open Draft Room";
           const playoffCard=document.querySelector("#leaguePlayoffCard");
           const playoffContent=document.querySelector("#leaguePlayoffContent");
           if(playoffCard&&playoffContent&&(playoffs.length||champion)){
