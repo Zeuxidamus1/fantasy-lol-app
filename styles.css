@@ -1264,3 +1264,42 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
   .topbar .topbar-action-btn{width:35px;height:35px;min-height:35px}
   .topbar .topbar-action-btn svg{width:17px;height:17px}
 }
+
+
+/* Trade acceptance review + counteroffer polish */
+.trade-accept-summary{
+  display:grid;
+  gap:8px;
+  margin:0 0 12px;
+}
+.trade-accept-summary>div{
+  border:1px solid #1d3148;
+  background:#091626;
+  border-radius:12px;
+  padding:10px 11px;
+}
+.trade-accept-summary span{
+  display:block;
+  margin-bottom:4px;
+  color:#6f86a3;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.9px;
+}
+.trade-accept-summary strong{
+  display:block;
+  color:#eef6ff;
+  font-size:11px;
+  line-height:1.45;
+  overflow-wrap:anywhere;
+}
+.trade-accept-summary .trade-accept-drop-summary{
+  border-color:#5a4630;
+  background:#211d16;
+}
+.trade-accept-summary .trade-accept-drop-summary span{color:#d1a768}
+.trade-card-actions:has([data-counter-trade]){display:grid;grid-template-columns:1fr 1fr 1fr}
+@media(max-width:390px){
+  .trade-card-actions:has([data-counter-trade]){grid-template-columns:1fr 1fr}
+  .trade-card-actions:has([data-counter-trade]) [data-decline-trade]{grid-column:1/-1}
+}
