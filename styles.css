@@ -887,3 +887,23 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
   .draft-player .draft-btn{min-width:62px;padding:7px 6px}
   .draft-my-picks-card .draft-roster{grid-template-columns:1fr}
 }
+
+
+.league-manager-readiness{display:grid;gap:12px}
+.league-manager-readiness-main{display:flex;align-items:center;justify-content:space-between;gap:16px;min-width:0}
+.league-manager-readiness-main>div:first-child{min-width:0}
+.league-manager-readiness h3{margin:3px 0 5px}
+.league-manager-readiness small{color:#8ea2bd;line-height:1.4}
+.league-manager-count{flex:0 0 auto;min-width:82px;padding:9px 10px;border:1px solid #25415f;border-radius:13px;background:#081829;text-align:center}
+.league-manager-count strong{display:block;font-size:18px;color:#dce9f8}
+.league-manager-count small{display:block;margin-top:2px;font-size:8px;letter-spacing:.12em}
+.league-manager-progress{height:7px;border-radius:999px;background:#071421;overflow:hidden;border:1px solid #18304a}
+.league-manager-progress span{display:block;height:100%;width:0;background:#2bbda0;border-radius:inherit;transition:width .25s ease}
+.league-manager-readiness.ready{border-color:#287260}
+.league-manager-readiness.ready .league-manager-count{border-color:#287260;background:#09261f}
+.league-manager-draft-btn{width:100%}
+@media(max-width:430px){
+  .league-manager-readiness-main{align-items:flex-start}
+  .league-manager-count{min-width:74px;padding:8px}
+  .league-manager-count strong{font-size:16px}
+}
