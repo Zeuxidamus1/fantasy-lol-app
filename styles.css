@@ -1306,3 +1306,43 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
 
 .trade-status.review_pending{background:#342f19;color:#ead377}
 .trade-review-copy{display:block;margin-top:8px;color:#d3bd77!important;line-height:1.4}
+
+
+/* Lineup lock summary help */
+.lock-label{display:inline-flex;align-items:center;gap:5px;min-width:0}
+.lock-help-btn{
+  width:18px;height:18px;min-height:18px;padding:0;
+  display:inline-grid;place-items:center;
+  border:1px solid #2a4964;
+  border-radius:50%;
+  background:#0c2033;
+  color:#75dcca;
+  font:800 10px/1 Inter,system-ui,sans-serif;
+  cursor:pointer;
+  flex:0 0 18px;
+}
+.lock-help-btn:hover,.lock-help-btn[aria-expanded="true"]{
+  border-color:#32dcbc;
+  background:#10342f;
+  color:#66efd2;
+}
+.lock-help-btn:focus-visible{outline:2px solid #55ebcd;outline-offset:2px}
+.lineup-lock-help{
+  margin-top:9px;
+  padding:11px 12px;
+  border:1px solid #24435d;
+  border-radius:12px;
+  background:#091827;
+}
+.lineup-lock-help[hidden]{display:none}
+.lineup-lock-help strong{display:block;margin-bottom:4px;color:#e8f2ff;font-size:11px}
+.lineup-lock-help small{display:block;color:#849ab5;font-size:10px;line-height:1.5}
+.team-summary-card #teamNextLock{
+  max-width:58%;
+  text-align:right;
+  line-height:1.35;
+}
+@media(max-width:390px){
+  .team-summary-card .stat-row{gap:10px}
+  .team-summary-card #teamNextLock{max-width:54%;font-size:11px}
+}
