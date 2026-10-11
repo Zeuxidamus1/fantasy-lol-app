@@ -2270,6 +2270,7 @@ function render(view="home",options={}){
     tradeRouteIntent={tab:null,id:null};
     let tab=routeIntent.tab||"offers";
     let focusTradeId=routeIntent.id||null;
+    let counterSourceTradeId=null;
     const selectedMine=new Set();
     const selectedTheirs=new Set();
     if(tradePrefill.side==="mine"&&tradePrefill.id)selectedMine.add(String(tradePrefill.id));
@@ -2402,23 +2403,40 @@ function render(view="home",options={}){
       theirList.querySelectorAll("[data-trade-theirs]").forEach(btn=>btn.onclick=()=>toggle(selectedTheirs,btn.dataset.tradeTheirs));
     };
 
-    const openTradeDropChooser=(trade,needed)=>{
+    const openTradeAcceptance=(trade,needed=0)=>{
       const modal=document.querySelector("#transactionModal");
       const list=document.querySelector("#transactionDropList");
       const copy=document.querySelector("#transactionCopy");
       const title=document.querySelector("#transactionTitle");
       if(!modal||!list||!copy)return;
-      const outbound=new Set(offerIds(trade,"receive"));
+      const sendIds=offerIds(trade,"receive");
+      const receiveIds=offerIds(trade,"send");
+      const outbound=new Set(sendIds);
       const eligible=myRoster().filter(r=>!outbound.has(String(r.player_id)));
       const picked=new Set();
-      if(title)title.textContent="Roster Move Required";
-      copy.textContent=`This trade will put your roster ${needed} player${needed===1?"":"s"} over the league limit. Choose exactly ${needed} player${needed===1?"":"s"} to drop before completing the trade.`;
+      if(title)title.textContent=needed>0?"Complete Trade":"Confirm Trade";
+      copy.textContent=needed>0
+        ? `Your roster will be ${needed} player${needed===1?"":"s"} over the league limit. Review the trade and choose exactly ${needed} player${needed===1?"":"s"} to drop.`
+        : "Review the full trade package before completing it. Rosters update immediately once the trade is accepted.";
+      const packageSummary=`
+        <div class="trade-accept-summary">
+          <div><span>YOU RECEIVE</span><strong>${h(receiveIds.map(id=>playerFromId(id).name).join(", "))}</strong></div>
+          <div><span>YOU SEND</span><strong>${h(sendIds.map(id=>playerFromId(id).name).join(", "))}</strong></div>
+          ${needed>0?`<div class="trade-accept-drop-summary"><span>YOU DROP</span><strong id="tradeDropSummary">Choose ${needed} player${needed===1?"":"s"}</strong></div>`:""}
+        </div>`;
       const draw=()=>{
-        list.innerHTML=eligible.map(r=>{
+        const dropChoices=needed>0?eligible.map(r=>{
           const p=playerFromId(r.player_id);
           const on=picked.has(String(r.player_id));
           return `<button class="drop-option trade-drop-choice ${on?"selected":""}" data-trade-drop-id="${h(r.player_id)}"><span class="role-badge">${h(r.slot||p.role)}</span><span><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.role||r.slot)}</small></span><span class="drop-action">${on?"SELECTED":"DROP"}</span></button>`;
-        }).join("")+`<button class="primary-btn trade-drop-confirm" id="completeTradeWithDrops" ${picked.size===needed?"":"disabled"}>Complete Trade</button>`;
+        }).join(""):"";
+        list.innerHTML=packageSummary+dropChoices+`<button class="primary-btn trade-drop-confirm" id="completeTradeWithDrops" ${picked.size===needed?"":"disabled"}>${needed>0?"Complete Trade":"Accept Trade"}</button>`;
+        const dropSummary=list.querySelector("#tradeDropSummary");
+        if(dropSummary){
+          dropSummary.textContent=picked.size
+            ? [...picked].map(id=>playerFromId(id).name).join(", ")
+            : `Choose ${needed} player${needed===1?"":"s"}`;
+        }
         list.querySelectorAll("[data-trade-drop-id]").forEach(btn=>btn.onclick=()=>{
           const id=String(btn.dataset.tradeDropId);
           if(picked.has(id))picked.delete(id);
@@ -2447,7 +2465,7 @@ function render(view="home",options={}){
       document.body.classList.add("modal-open");
       const shell=document.querySelector(".app-shell");
       if(shell)shell.inert=true;
-      queueMicrotask(()=>list.querySelector("[data-trade-drop-id]")?.focus());
+      queueMicrotask(()=>list.querySelector("[data-trade-drop-id],#completeTradeWithDrops")?.focus());
     };
 
     const renderTabs=()=>{
@@ -2481,7 +2499,7 @@ function render(view="home",options={}){
         const actions=status==="pending"
           ?(isOutgoing
             ?`<div class="trade-card-actions"><button class="secondary-btn" data-cancel-trade="${h(t.id)}">Cancel Offer</button></div>`
-            :`<div class="trade-card-actions"><button class="primary-btn" data-accept-trade="${h(t.id)}">Accept</button><button class="secondary-btn" data-decline-trade="${h(t.id)}">Decline</button></div>`)
+            :`<div class="trade-card-actions"><button class="primary-btn" data-accept-trade="${h(t.id)}">Accept</button><button class="secondary-btn" data-counter-trade="${h(t.id)}">Counter</button><button class="secondary-btn" data-decline-trade="${h(t.id)}">Decline</button></div>`)
           :(commissionerQueue
             ?`<div class="trade-card-actions"><button class="primary-btn" data-approve-trade="${h(t.id)}">Approve</button><button class="secondary-btn" data-reject-trade="${h(t.id)}">Reject</button></div>`
             :"");
@@ -2510,18 +2528,24 @@ function render(view="home",options={}){
         try{await backend().updateTrade(btn.dataset.declineTrade,"declined");showToast("Trade declined");await init();}
         catch(err){showToast(err.message||"Could not decline trade");}
       });
-      content.querySelectorAll("[data-accept-trade]").forEach(btn=>btn.onclick=async()=>{
+      content.querySelectorAll("[data-accept-trade]").forEach(btn=>btn.onclick=()=>{
         const trade=trades.find(t=>String(t.id)===String(btn.dataset.acceptTrade));
         if(!trade)return;
-        const needed=requiredDropsForTrade(trade);
-        if(needed>0){openTradeDropChooser(trade,needed);return;}
-        btn.disabled=true;
-        try{
-          const result=await backend().acceptTrade(trade.id,[]);
-          await loadRosterFromCloud(leagueId);
-          showToast(result?.status==="review_pending"?"Trade accepted · Awaiting commissioner review":"Trade accepted");
-          await init();
-        }catch(err){showToast(err.message||"Could not accept trade");btn.disabled=false;}
+        openTradeAcceptance(trade,requiredDropsForTrade(trade));
+      });
+      content.querySelectorAll("[data-counter-trade]").forEach(btn=>btn.onclick=()=>{
+        const trade=trades.find(t=>String(t.id)===String(btn.dataset.counterTrade));
+        if(!trade)return;
+        const partnerId=String(trade.from_user);
+        if([...partnerSelect.options].some(option=>String(option.value)===partnerId))partnerSelect.value=partnerId;
+        selectedMine.clear();
+        selectedTheirs.clear();
+        offerIds(trade,"receive").forEach(id=>selectedMine.add(String(id)));
+        offerIds(trade,"send").forEach(id=>selectedTheirs.add(String(id)));
+        counterSourceTradeId=String(trade.id);
+        renderBuilder();
+        document.querySelector(".trade-builder")?.scrollIntoView({behavior:"smooth",block:"start"});
+        showToast("Counteroffer loaded. Adjust the package and send when ready.");
       });
       content.querySelectorAll("[data-approve-trade]").forEach(btn=>btn.onclick=async()=>{
         try{await backend().reviewTrade(btn.dataset.approveTrade,true);await loadRosterFromCloud(leagueId);showToast("Trade approved");await init();}
@@ -2594,9 +2618,15 @@ function render(view="home",options={}){
           receive_player_ids:receiveIds,
           expires_in_hours:Number(expirationSelect?.value)||48
         });
+        if(counterSourceTradeId){
+          try{await backend().updateTrade(counterSourceTradeId,"declined");}
+          catch(err){console.warn("Counteroffer sent but original offer could not be closed",err);}
+        }
         selectedMine.clear();
         selectedTheirs.clear();
-        showToast("Trade offer sent");
+        const wasCounter=Boolean(counterSourceTradeId);
+        counterSourceTradeId=null;
+        showToast(wasCounter?"Counteroffer sent":"Trade offer sent");
         await init();
       }catch(err){
         showToast(err.message||"Could not send trade offer");
