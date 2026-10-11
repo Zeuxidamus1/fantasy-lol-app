@@ -2374,7 +2374,7 @@ function render(view="home",options={}){
         const opponentDrops=Math.max(0,theirsAfter-rosterLimit());
         const myOverflow=Math.max(0,mineAfter-rosterLimit());
         summary.innerHTML=`
-          <strong class="trade-summary-title">Trade Offer</strong>
+          <strong class="trade-summary-title">${counterSourceTradeId?"Counteroffer":"Trade Offer"}</strong>
           <div class="trade-summary-lists">
             <div class="trade-summary-side"><span>YOU SEND</span><strong>${h(mineNames.join(", "))}</strong></div>
             <div class="trade-summary-side"><span>YOU RECEIVE</span><strong>${h(theirNames.join(", "))}</strong></div>
@@ -2387,9 +2387,11 @@ function render(view="home",options={}){
             ${myOverflow?`<small class="warning">You would be ${myOverflow} player${myOverflow===1?"":"s"} over the roster limit. Add more players to You Send first.</small>`:""}
           </div>`;
         submit.disabled=myOverflow>0;
+        submit.textContent=counterSourceTradeId?"Send Counteroffer":"Send Trade Offer";
       }else{
         summary.textContent="Select at least one player from each side to build an offer. You can select up to 5 players per side.";
         submit.disabled=true;
+        submit.textContent=counterSourceTradeId?"Send Counteroffer":"Send Trade Offer";
       }
 
       const toggle=(set,id)=>{
@@ -2606,7 +2608,7 @@ function render(view="home",options={}){
       }
     };
 
-    partnerSelect.onchange=()=>{selectedTheirs.clear();renderBuilder();};
+    partnerSelect.onchange=()=>{selectedTheirs.clear();counterSourceTradeId=null;renderBuilder();};
     submit.onclick=async()=>{
       const sendIds=[...selectedMine];
       const receiveIds=[...selectedTheirs];
@@ -2618,15 +2620,16 @@ function render(view="home",options={}){
           receive_player_ids:receiveIds,
           expires_in_hours:Number(expirationSelect?.value)||48
         });
+        let counterClosed=true;
+        const wasCounter=Boolean(counterSourceTradeId);
         if(counterSourceTradeId){
           try{await backend().updateTrade(counterSourceTradeId,"declined");}
-          catch(err){console.warn("Counteroffer sent but original offer could not be closed",err);}
+          catch(err){counterClosed=false;console.warn("Counteroffer sent but original offer could not be closed",err);}
         }
         selectedMine.clear();
         selectedTheirs.clear();
-        const wasCounter=Boolean(counterSourceTradeId);
         counterSourceTradeId=null;
-        showToast(wasCounter?"Counteroffer sent":"Trade offer sent");
+        showToast(wasCounter?(counterClosed?"Counteroffer sent":"Counteroffer sent · Original offer is still active"):"Trade offer sent");
         await init();
       }catch(err){
         showToast(err.message||"Could not send trade offer");
