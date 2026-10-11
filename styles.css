@@ -1303,3 +1303,6 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
   .trade-card-actions:has([data-counter-trade]){grid-template-columns:1fr 1fr}
   .trade-card-actions:has([data-counter-trade]) [data-decline-trade]{grid-column:1/-1}
 }
+
+.trade-status.review_pending{background:#342f19;color:#ead377}
+.trade-review-copy{display:block;margin-top:8px;color:#d3bd77!important;line-height:1.4}
