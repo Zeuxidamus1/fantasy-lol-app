@@ -2736,6 +2736,8 @@ function render(view="home",options={}){
     const leagueId=getActiveLeagueId();
     const liveState=document.querySelector("#draftLiveState");
     const completeState=document.querySelector("#draftCompleteState");
+    const pageEyebrow=document.querySelector("#draftPageEyebrow");
+    const exitBtn=document.querySelector("#draftExitBtn");
     const search=document.querySelector("#draftSearch");
     const list=document.querySelector("#draftPlayerList");
     const fullBoard=document.querySelector("#fullDraftBoard");
@@ -2802,6 +2804,8 @@ function render(view="home",options={}){
     const renderCompletedState=(draftData,mine)=>{
       liveState.hidden=true;
       completeState.hidden=false;
+      if(pageEyebrow)pageEyebrow.textContent="DRAFT SUMMARY";
+      if(exitBtn)exitBtn.hidden=true;
       const order=draftData.manager_order||[];
       const position=Math.max(0,order.findIndex(id=>String(id)===String(currentUser.id)))+1;
       document.querySelector("#draftRecapRounds").textContent=String(draftData.total_rounds||0);
@@ -2856,6 +2860,8 @@ function render(view="home",options={}){
 
         completeState.hidden=true;
         liveState.hidden=false;
+        if(pageEyebrow)pageEyebrow.textContent="LIVE LEAGUE DRAFT";
+        if(exitBtn)exitBtn.hidden=false;
         if(completedFullBoardCard)completedFullBoardCard.hidden=true;
 
         const owner=me?.role==="owner";
@@ -2944,6 +2950,8 @@ function render(view="home",options={}){
       }catch(err){
         completeState.hidden=true;
         liveState.hidden=false;
+        if(pageEyebrow)pageEyebrow.textContent="LIVE LEAGUE DRAFT";
+        if(exitBtn)exitBtn.hidden=false;
         document.querySelector("#draftTurnLabel").textContent="Draft unavailable";
         document.querySelector("#draftHint").textContent=err.message||"Could not load the draft.";
       }
