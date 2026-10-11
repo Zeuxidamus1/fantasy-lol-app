@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261011-standings-mobile-v2" />
+  <link rel="stylesheet" href="styles.css?v=20261011-standings-cleanup-v3" />
 </head>
 <body>
   <a class="skip-link" href="#app">Skip to main content</a>
@@ -382,14 +382,12 @@
           <div class="eyebrow" id="standingsLeagueName">LEAGUE</div>
           <h2>Standings</h2>
         </div>
-        <div class="standings-season-pill" aria-label="Current standings phase">
-          <span>Regular Season</span><span class="standings-season-chevron" aria-hidden="true">⌄</span>
-        </div>
+        <div class="standings-season-pill" aria-label="Current standings phase">Regular Season</div>
       </div>
 
       <section class="standings-table-card">
         <div class="standings-column-headings" aria-hidden="true">
-          <span>#</span>
+          <span aria-hidden="true"></span>
           <span>TEAM</span>
           <span>RECORD</span>
           <span class="standings-heading-stat">PF <button class="standings-info pf-info" type="button" tabindex="-1" title="Points For — total fantasy points your team has scored." aria-label="PF means Points For">?</button></span>
@@ -399,10 +397,6 @@
         <div id="standingsList" class="standings-live-list"></div>
       </section>
 
-      <div class="standings-footnotes">
-        <p>Records update when a fantasy round becomes final. PF and PA use official completed-round totals. BYE does not count as a win or loss.</p>
-        <p id="standingsTiebreakCopy">Tiebreak order: winning percentage, wins, fewer losses, points for, then lower points against.</p>
-      </div>
     </section>
   </template>
 
