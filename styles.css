@@ -672,89 +672,72 @@ body{background:
   .matchup-player-row{grid-template-columns:36px minmax(0,1fr) auto}
 }
 
-/* Real league standings — mockup matched */
-.standings-view .app-shell{max-width:980px}
-.standings-view .bottom-nav{width:min(980px,100%)}
-.standings-view main{padding:30px 32px 38px}
-.standings-page{gap:26px}
-.standings-page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
-.standings-title-block .eyebrow{font-size:13px;letter-spacing:2px;color:#77a9e5}
-.standings-page-head h2{margin:8px 0 0;font-size:42px;line-height:.98;font-weight:900;letter-spacing:-1.4px}
-.standings-season-pill{min-width:230px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:0 24px;border:1px solid #2c87c0;border-radius:22px;background:linear-gradient(180deg,#0b1b2c,#081827);color:#f0f6ff;font-size:18px;font-weight:500;box-shadow:inset 0 0 0 1px rgba(69,170,230,.07)}
-.standings-season-chevron{font-size:28px;line-height:1;color:#f4f8ff;transform:translateY(-2px)}
-.standings-table-card{overflow:hidden;border:1px solid #1f5c86;border-radius:22px;background:linear-gradient(180deg,#0b1d30 0%,#081827 100%);box-shadow:0 18px 40px rgba(0,0,0,.16)}
-.standings-column-headings{display:grid;grid-template-columns:48px 68px minmax(190px,1fr) 125px 105px 105px 70px;gap:0;align-items:center;min-height:68px;padding:0 22px;border-bottom:1px solid #1b4a6d;color:#7eafea;font-size:13px;font-weight:900;letter-spacing:.035em}
+/* Real league standings — mobile-first mockup */
+.standings-view .app-shell{max-width:520px}
+.standings-view .bottom-nav{width:min(520px,100%)}
+.standings-view main{padding:20px 18px 30px}
+.standings-page{gap:18px}
+.standings-page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px}
+.standings-title-block .eyebrow{font-size:10px;letter-spacing:1.6px;color:#77a9e5}
+.standings-page-head h2{margin:6px 0 0;font-size:32px;line-height:1;font-weight:900;letter-spacing:-1px}
+.standings-season-pill{min-width:168px;height:48px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 14px;border:1px solid #2c87c0;border-radius:15px;background:linear-gradient(180deg,#0b1b2c,#081827);color:#f0f6ff;font-size:14px;font-weight:700}
+.standings-season-chevron{font-size:20px;line-height:1;transform:translateY(-1px)}
+.standings-table-card{overflow:hidden;border:1px solid #1f5c86;border-radius:18px;background:linear-gradient(180deg,#0b1d30 0%,#081827 100%);box-shadow:0 14px 30px rgba(0,0,0,.15)}
+.standings-column-headings{display:grid;grid-template-columns:28px minmax(0,1fr) 64px 54px 54px 38px;gap:5px;align-items:center;min-height:50px;padding:0 10px;border-bottom:1px solid #1b4a6d;color:#7eafea;font-size:9px;font-weight:900;letter-spacing:.035em}
 .standings-column-headings>span:nth-child(1){grid-column:1}
-.standings-column-headings>span:nth-child(2){grid-column:2/4}
-.standings-column-headings>span:nth-child(3){grid-column:4;text-align:center}
-.standings-column-headings>span:nth-child(4){grid-column:5;text-align:center}
-.standings-column-headings>span:nth-child(5){grid-column:6;text-align:center}
-.standings-column-headings>span:nth-child(6){grid-column:7;text-align:center}
-.standings-heading-stat{display:flex;align-items:center;justify-content:center;gap:7px}
-.standings-info{width:24px;height:24px;padding:0;border:2px solid #4b8fd4;border-radius:50%;background:#10243b;color:#78b9f4;font:900 13px/20px Inter,system-ui,sans-serif;cursor:help}
+.standings-column-headings>span:nth-child(2){grid-column:2}
+.standings-column-headings>span:nth-child(3){grid-column:3;text-align:center}
+.standings-column-headings>span:nth-child(4){grid-column:4;text-align:center}
+.standings-column-headings>span:nth-child(5){grid-column:5;text-align:center}
+.standings-column-headings>span:nth-child(6){grid-column:6;text-align:center}
+.standings-heading-stat{display:flex;align-items:center;justify-content:center;gap:3px}
+.standings-info{width:16px;height:16px;padding:0;border:1px solid #4b8fd4;border-radius:50%;background:#10243b;color:#78b9f4;font:900 9px/14px Inter,system-ui,sans-serif;cursor:help}
 .standings-info.pf-info{border-color:#22ddc5;color:#3ce6cf}
 .standings-live-list{margin:0}
 .real-standings-row{
   display:grid;
-  grid-template-columns:48px 68px minmax(190px,1fr) 125px 105px 105px 70px;
-  gap:0;
+  grid-template-columns:28px minmax(0,1fr) 64px 54px 54px 38px;
+  gap:5px;
   align-items:center;
-  width:100%;
-  min-width:0;
-  min-height:98px;
-  padding:14px 22px;
+  min-height:78px;
+  padding:10px;
   border-top:1px solid #143a58;
   background:linear-gradient(90deg,rgba(7,18,31,.58),rgba(8,27,44,.7))
 }
 .real-standings-row:first-child{border-top:0}
-.real-standings-row.mine{margin:5px 7px;width:calc(100% - 14px);min-height:104px;padding:12px 14px;border:1px solid #20dac5;border-radius:18px;background:linear-gradient(90deg,rgba(10,64,66,.9),rgba(9,48,57,.85));box-shadow:inset 0 0 30px rgba(33,218,197,.06)}
-.real-standings-row .rank{grid-column:1;color:#75a8e4;font-size:28px;font-weight:900;text-align:center}
-.standing-team-avatar{grid-column:2;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;border:2px solid #4a8de4;background:radial-gradient(circle at 38% 32%,#274c85,#0a1c31 68%);color:#8fc2ff;font-size:15px;font-weight:900;letter-spacing:.02em;box-shadow:inset 0 0 0 5px rgba(3,12,22,.55),0 0 18px rgba(44,114,180,.13)}
-.real-standings-row:nth-child(1) .standing-team-avatar{border-color:#ba5ee6;color:#e5a6ff;background:radial-gradient(circle at 35% 30%,#6d367e,#11172c 68%)}
-.real-standings-row:nth-child(2) .standing-team-avatar,.real-standings-row.mine .standing-team-avatar{border-color:#27e0cd;color:#64f0df;background:radial-gradient(circle at 35% 30%,#17645f,#0a2730 68%)}
-.real-standings-row:nth-child(3) .standing-team-avatar{border-color:#4a96eb;color:#78bdff}
-.real-standings-row:nth-child(4) .standing-team-avatar{border-color:#ed6b71;color:#ff9c9f;background:radial-gradient(circle at 35% 30%,#66333d,#181629 68%)}
-.real-standings-row .standing-live-team{grid-column:3;min-width:0;padding-left:12px}
-.real-standings-row .standing-live-team strong{display:block;font-size:18px;line-height:1.12;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.real-standings-row .standing-live-team small{display:block;margin-top:7px;color:#65a6e8;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.real-standings-row.mine{margin:4px 5px;width:calc(100% - 10px);min-height:74px;padding:8px 6px;border:1px solid #20dac5;border-radius:14px;background:linear-gradient(90deg,rgba(10,64,66,.9),rgba(9,48,57,.85));box-shadow:inset 0 0 24px rgba(33,218,197,.05)}
+.real-standings-row .rank{grid-column:1;color:#75a8e4;font-size:18px;font-weight:900;text-align:center}
+.standing-team-avatar{display:none}
+.real-standings-row .standing-live-team{grid-column:2;min-width:0;padding-left:2px}
+.real-standings-row .standing-live-team strong{display:block;font-size:12px;line-height:1.15;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.real-standings-row .standing-live-team small{display:block;margin-top:4px;color:#65a6e8;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .standings-you{color:#29e0c7;font-weight:900}
-.real-standings-row .standing-live-record{grid-column:4;text-align:center;min-width:0}
-.real-standings-row .standing-live-record strong{font-size:19px;white-space:nowrap}
+.real-standings-row .standing-live-record{grid-column:3;text-align:center;min-width:0}
+.real-standings-row .standing-live-record strong{font-size:12px;white-space:nowrap}
 .standing-stat-cell{text-align:center;min-width:0}
-.standing-stat-cell strong{display:block;font-size:19px;line-height:1.1;white-space:nowrap}
-.real-standings-row .standings-pf{grid-column:5}
-.real-standings-row .standings-pa{grid-column:6}
-.real-standings-row .standings-bye{grid-column:7}
-.standings-footnotes{padding:0 8px}
-.standings-footnotes p{margin:0;color:#536d88;font-size:10px;line-height:1.5}
-.standings-footnotes p+p{margin-top:3px}
-@media(max-width:900px){
-  .standings-view main{padding:28px 22px 34px}
-  .standings-page-head h2{font-size:36px}
-  .standings-season-pill{min-width:220px;height:62px;font-size:18px}
-  .standings-column-headings,
-  .real-standings-row{grid-template-columns:44px 62px minmax(160px,1fr) 110px 92px 92px 58px;padding-left:14px;padding-right:14px}
-  .real-standings-row{min-height:96px}
-  .standing-team-avatar{width:50px;height:50px}
-  .real-standings-row .standing-live-team strong{font-size:17px}
-  .real-standings-row .standing-live-team small{font-size:12px}
-  .real-standings-row .standing-live-record strong,
-  .standing-stat-cell strong{font-size:18px}
-}
-@media(max-width:680px){
-  .standings-view main{padding:22px 16px 32px}
-  .standings-page{gap:18px}
-  .standings-page-head{align-items:flex-start}
-  .standings-page-head h2{font-size:34px}
-  .standings-season-pill{min-width:190px;height:54px;padding:0 16px;border-radius:17px;font-size:16px}
-  .standings-table-card{overflow-x:auto}
-  .standings-column-headings,
-  .real-standings-row{min-width:700px}
-  .standings-footnotes{padding:0 2px}
-}
+.standing-stat-cell strong{display:block;font-size:12px;line-height:1.1;white-space:nowrap}
+.real-standings-row .standings-pf{grid-column:4}
+.real-standings-row .standings-pa{grid-column:5}
+.real-standings-row .standings-bye{grid-column:6}
+.standings-footnotes{padding:0 3px}
+.standings-footnotes p{margin:0;color:#536d88;font-size:9px;line-height:1.45}
+.standings-footnotes p+p{margin-top:4px}
 @media(max-width:430px){
+  .standings-view main{padding:18px 14px 28px}
+  .standings-page-head{align-items:flex-start}
+  .standings-page-head h2{font-size:29px}
+  .standings-season-pill{min-width:150px;height:44px;padding:0 12px;font-size:12px}
+  .standings-column-headings,
+  .real-standings-row{grid-template-columns:24px minmax(0,1fr) 56px 48px 48px 32px;gap:4px;padding-left:8px;padding-right:8px}
+  .real-standings-row .standing-live-team strong{font-size:11px}
+  .real-standings-row .standing-live-record strong,
+  .standing-stat-cell strong{font-size:11px}
+}
+@media(max-width:360px){
   .standings-page-head{flex-direction:column;align-items:stretch}
-  .standings-season-pill{width:100%;min-width:0;height:50px}
+  .standings-season-pill{width:100%;min-width:0}
+  .standings-column-headings,
+  .real-standings-row{grid-template-columns:22px minmax(0,1fr) 50px 43px 43px 28px}
 }
 
 /* Esports source health */
