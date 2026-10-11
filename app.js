@@ -2763,7 +2763,10 @@ function render(view="home",options={}){
         storageSet("riftLeagueSettings",JSON.stringify(activeSettings));
 
         if(overviewCard)overviewCard.hidden=false;
-        if(activeLeagueEntryCard)activeLeagueEntryCard.hidden=false;
+        if(activeLeagueEntryCard){
+          activeLeagueEntryCard.hidden=false;
+          activeLeagueEntryCard.open=false;
+        }
         if(managerReadiness)managerReadiness.hidden=false;
         if(quickAccess)quickAccess.hidden=false;
         if(rulesModal)rulesModal.hidden=true;
@@ -2820,6 +2823,7 @@ function render(view="home",options={}){
               managerReadiness?.classList.add("ready");
             }
           }
+          if(managerReadiness)managerReadiness.hidden=leagueStatus==="active"||leagueStatus==="completed";
           if(readinessBtn)readinessBtn.textContent=leagueStatus==="active"?"View Draft Board":"Open Draft Room";
           const playoffCard=document.querySelector("#leaguePlayoffCard");
           const playoffContent=document.querySelector("#leaguePlayoffContent");
