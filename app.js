@@ -2734,12 +2734,19 @@ function render(view="home",options={}){
   if(view==="draft"){
     if(draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
     const leagueId=getActiveLeagueId();
+    const liveState=document.querySelector("#draftLiveState");
+    const completeState=document.querySelector("#draftCompleteState");
     const search=document.querySelector("#draftSearch");
     const list=document.querySelector("#draftPlayerList");
     const fullBoard=document.querySelector("#fullDraftBoard");
+    const completedFullBoard=document.querySelector("#completedFullDraftBoard");
+    const completedFullBoardCard=document.querySelector("#completedFullBoardCard");
+    const completedPickList=document.querySelector("#completedDraftPickList");
     const rosterEl=document.querySelector("#myDraftRoster");
     const startBtn=document.querySelector("#startDraftBtn");
     const refreshBtn=document.querySelector("#refreshDraftBtn");
+    const openCompletedBoardBtn=document.querySelector("#openCompletedDraftBoard");
+    const closeCompletedBoardBtn=document.querySelector("#closeCompletedDraftBoard");
     let role="ALL";
     let currentUser=null;
     let members=[];
@@ -2758,8 +2765,65 @@ function render(view="home",options={}){
       return order[pos]||null;
     };
 
+    const wireProfileRows=root=>{
+      root?.querySelectorAll("[data-open-player]").forEach(row=>{
+        row.onclick=e=>{
+          if(e.target.closest(".draft-btn"))return;
+          openPlayer(row.dataset.openPlayer,"draft");
+        };
+        row.onkeydown=e=>{
+          if(e.key!=="Enter"&&e.key!==" ")return;
+          if(e.target.closest(".draft-btn"))return;
+          e.preventDefault();
+          openPlayer(row.dataset.openPlayer,"draft");
+        };
+      });
+    };
+
+    const renderBoard=(target,draftData,pickRows)=>{
+      if(!target)return;
+      if(draftData?.manager_order?.length){
+        const headers=draftData.manager_order.map(uid=>`<div class="board-head">${h(memberById.get(String(uid))?.team_name||"Manager")}</div>`).join("");
+        let cells="";
+        const total=(draftData.total_rounds||0)*draftData.manager_order.length;
+        for(let i=0;i<total;i++){
+          const uid=managerForPick(i,draftData.manager_order);
+          const pick=pickRows.find(p=>Number(p.pick_number)===i+1);
+          const player=pick?draftPool.find(x=>String(x.id)===String(pick.player_id)):null;
+          cells+=`<div class="board-cell ${String(uid)===String(currentUser.id)?"mine":""} ${draftData.status==="drafting"&&i===Number(draftData.current_pick)?"on-clock":""}" ${player?`data-open-player="${h(player.id)}" tabindex="0" role="button" aria-label="View ${h(player.name)} details"`:""}><small>R${Math.floor(i/draftData.manager_order.length)+1} · #${i+1}</small><strong>${h(player?.name||"—")}</strong><span>${h(memberById.get(String(uid))?.team_name||"")}</span></div>`;
+        }
+        target.innerHTML=`<div class="full-board-grid" style="grid-template-columns:repeat(${draftData.manager_order.length},minmax(92px,1fr))">${headers}${cells}</div>`;
+        wireProfileRows(target);
+      }else{
+        target.innerHTML='<div class="muted">The draft board will appear when the commissioner starts the draft.</div>';
+      }
+    };
+
+    const renderCompletedState=(draftData,mine)=>{
+      liveState.hidden=true;
+      completeState.hidden=false;
+      const order=draftData.manager_order||[];
+      const position=Math.max(0,order.findIndex(id=>String(id)===String(currentUser.id)))+1;
+      document.querySelector("#draftRecapRounds").textContent=String(draftData.total_rounds||0);
+      document.querySelector("#draftRecapPosition").textContent=position>0?"#"+position:"—";
+      document.querySelector("#draftRecapPlayers").textContent=String(mine.length);
+
+      completedPickList.innerHTML=mine.length?mine
+        .slice()
+        .sort((x,y)=>Number(x.pick_number)-Number(y.pick_number))
+        .map(p=>{
+          const player=draftPool.find(x=>String(x.id)===String(p.player_id));
+          return `<div class="completed-pick-row clickable" data-open-player="${h(p.player_id)}" tabindex="0" role="button" aria-label="View ${h(player?.name||p.player_id)} details"><span class="completed-pick-round">R${h(p.round_number)}</span><div class="completed-pick-info"><strong>${h(player?.name||p.player_id)}</strong><small>${h(player?.team||p.role||"")}</small></div><div class="completed-pick-number"><small>Pick</small><strong>#${h(p.pick_number)}</strong></div><span class="completed-pick-chevron" aria-hidden="true">›</span></div>`;
+        }).join("")
+        :'<div class="muted">No picks were recorded for your team.</div>';
+      wireProfileRows(completedPickList);
+      renderBoard(completedFullBoard,draftData,picks);
+    };
+
     const refresh=async()=>{
       if(!leagueId||!cloudReady()){
+        completeState.hidden=true;
+        liveState.hidden=false;
         document.querySelector("#draftTurnLabel").textContent="Join a league first";
         document.querySelector("#draftHint").textContent="The live Draft Room belongs to your active online league.";
         startBtn.hidden=true;
@@ -2782,6 +2846,18 @@ function render(view="home",options={}){
         const me=memberById.get(String(currentUser.id));
         document.querySelector("#draftMyTeamName").textContent=me?.team_name||"My Team";
 
+        const mine=picks.filter(p=>String(p.user_id)===String(currentUser.id));
+        if(draft?.status==="complete"){
+          renderCompletedState(draft,mine);
+          await loadRosterFromCloud(leagueId);
+          if(draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
+          return;
+        }
+
+        completeState.hidden=true;
+        liveState.hidden=false;
+        if(completedFullBoardCard)completedFullBoardCard.hidden=true;
+
         const owner=me?.role==="owner";
         const expected=Number(league?.settings?.managers)||(members.length+bots.length);
         const presentManagers=members.length+bots.length;
@@ -2802,14 +2878,10 @@ function render(view="home",options={}){
           const currentMember=memberById.get(String(currentManager));
           const currentIsBot=currentMember?.role==="bot"||currentMember?.manager_type==="bot";
           const round=Math.floor((Number(draft.current_pick)||0)/Math.max(1,order.length))+1;
-          document.querySelector("#draftRoundLabel").textContent=draft.status==="complete"?"DRAFT COMPLETE":`ROUND ${round} · PICK ${Number(draft.current_pick||0)+1}`;
-          document.querySelector("#draftTurnLabel").textContent=draft.status==="complete"
-            ?"Draft complete"
-            :String(currentManager)===String(currentUser.id)?"You're on the clock":`${currentMember?.team_name||"Another manager"}${currentIsBot?" 🤖":""} is on the clock`;
-          document.querySelector("#draftHint").textContent=draft.status==="complete"
-            ?"Rosters have been created automatically from the final board."
-            :"Picks sync across every manager's device.";
-          document.querySelector("#draftClock").textContent=draft.status==="drafting"?"LIVE":"DONE";
+          document.querySelector("#draftRoundLabel").textContent=`ROUND ${round} · PICK ${Number(draft.current_pick||0)+1}`;
+          document.querySelector("#draftTurnLabel").textContent=String(currentManager)===String(currentUser.id)?"You're on the clock":`${currentMember?.team_name||"Another manager"}${currentIsBot?" 🤖":""} is on the clock`;
+          document.querySelector("#draftHint").textContent="Picks sync across every manager's device.";
+          document.querySelector("#draftClock").textContent=draft.status==="drafting"?"LIVE":"—";
           const botOnClock=currentIsBot&&draft.status==="drafting";
           if(botOnClock&&!botPickPending){
             botPickPending=true;
@@ -2823,7 +2895,6 @@ function render(view="home",options={}){
         const taken=new Set(picks.map(p=>String(p.player_id)));
         const q=search.value.trim().toLowerCase();
         const myTurn=league?.status==="drafting"&&draft?.status==="drafting"&&String(managerForPick(Number(draft.current_pick)||0,draft.manager_order||[]))===String(currentUser.id);
-        const mine=picks.filter(p=>String(p.user_id)===String(currentUser.id));
         const assignedMine=draftAssignments(mine);
         const activeDraftSettings={
           ...defaultLeagueSettings,
@@ -2852,6 +2923,7 @@ function render(view="home",options={}){
           const label=blockedForCompletion?"NEED ROLE":"DRAFT";
           return `<div class="player-row draft-player clickable" data-open-player="${h(p.id)}" tabindex="0" role="button" aria-label="View ${h(p.name)} details"><span class="role-badge">${h(p.role)}</span><div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)}</small></div><button class="draft-btn" data-player-id="${h(p.id)}" ${disabled?"disabled":""}>${label}</button></div>`;
         }).join("")||'<div class="empty-state"><strong>No available players</strong><small>Try another role or search.</small></div>';
+
         list.querySelectorAll("[data-player-id]").forEach(btn=>btn.onclick=async e=>{
           e.stopPropagation();
           const player=draftPool.find(p=>String(p.id)===String(btn.dataset.playerId));
@@ -2862,36 +2934,16 @@ function render(view="home",options={}){
             await refresh();
           }catch(err){showToast(err.message||"Could not make draft pick");await refresh();}
         });
-        list.querySelectorAll("[data-open-player]").forEach(row=>{
-          row.onclick=e=>{if(e.target.closest(".draft-btn"))return;openPlayer(row.dataset.openPlayer,"draft");};
-          row.onkeydown=e=>{
-            if(e.key!=="Enter"&&e.key!==" ")return;
-            if(e.target.closest(".draft-btn"))return;
-            e.preventDefault();
-            openPlayer(row.dataset.openPlayer,"draft");
-          };
-        });
-
-        if(draft?.manager_order?.length){
-          const headers=draft.manager_order.map(uid=>`<div class="board-head">${h(memberById.get(String(uid))?.team_name||"Manager")}</div>`).join("");
-          let cells="";
-          const total=(draft.total_rounds||0)*draft.manager_order.length;
-          for(let i=0;i<total;i++){
-            const uid=managerForPick(i,draft.manager_order);
-            const pick=picks.find(p=>Number(p.pick_number)===i+1);
-            const player=pick?draftPool.find(x=>String(x.id)===String(pick.player_id)):null;
-            cells+=`<div class="board-cell ${String(uid)===String(currentUser.id)?"mine":""} ${draft.status==="drafting"&&i===Number(draft.current_pick)?"on-clock":""}"><small>R${Math.floor(i/draft.manager_order.length)+1} · #${i+1}</small><strong>${h(player?.name||"—")}</strong><span>${h(memberById.get(String(uid))?.team_name||"")}</span></div>`;
-          }
-          fullBoard.innerHTML=`<div class="full-board-grid" style="grid-template-columns:repeat(${draft.manager_order.length},minmax(92px,1fr))">${headers}${cells}</div>`;
-        }else fullBoard.innerHTML='<div class="muted">The draft board will appear when the commissioner starts the draft.</div>';
+        wireProfileRows(list);
+        renderBoard(fullBoard,draft,picks);
 
         rosterEl.innerHTML=assignedMine.length?assignedMine.map(p=>{
           const player=draftPool.find(x=>String(x.id)===String(p.player_id));
           return `<div class="draft-roster-slot filled-start"><small>${h(p.slot)}</small><strong>${h(player?.name||p.player_id)}</strong></div>`;
         }).join(""):'<div class="muted">Your picks will appear here.</div>';
-
-        if(draft?.status==="complete")await loadRosterFromCloud(leagueId);
       }catch(err){
+        completeState.hidden=true;
+        liveState.hidden=false;
         document.querySelector("#draftTurnLabel").textContent="Draft unavailable";
         document.querySelector("#draftHint").textContent=err.message||"Could not load the draft.";
       }
@@ -2909,9 +2961,19 @@ function render(view="home",options={}){
       document.querySelectorAll("[data-draft-role]").forEach(x=>x.classList.toggle("active",x===c));
       refresh();
     });
+    if(openCompletedBoardBtn)openCompletedBoardBtn.onclick=()=>{
+      completedFullBoardCard.hidden=false;
+      completedFullBoardCard.scrollIntoView({behavior:"smooth",block:"start"});
+    };
+    if(closeCompletedBoardBtn)closeCompletedBoardBtn.onclick=()=>{
+      completedFullBoardCard.hidden=true;
+      openCompletedBoardBtn?.focus();
+    };
+
     void refresh();
     draftTimerId=setInterval(refresh,3000);
   }
+
   if(view==="create-league"){
     if(!cloudReady()){
       showToast("League services are unavailable.");
