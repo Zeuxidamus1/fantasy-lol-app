@@ -637,20 +637,23 @@
         <button class="secondary-btn league-manager-draft-btn" type="button" data-jump="draft">Open Draft Room</button>
       </section>
 
-      <section class="card league-additional-actions-card" id="activeLeagueEntryCard" hidden>
-        <div class="section-head">
+      <details class="card league-additional-actions-card league-more-details" id="activeLeagueEntryCard" hidden>
+        <summary class="league-more-summary">
           <div>
             <div class="eyebrow">MORE LEAGUES</div>
-            <h3>Create/Join a League</h3>
+            <strong>Create or Join Another League</strong>
+          </div>
+          <span class="league-more-chevron" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="league-more-content">
+          <p class="profile-copy">Create another fantasy league or join an existing one.</p>
+          <div class="league-entry-actions active-league-entry-actions">
+            <button class="primary-btn" type="button" data-jump="create-league">Create a League</button>
+            <button class="secondary-btn" type="button" data-jump="join-league">Join a League</button>
+            <button class="secondary-btn bot-entry-btn" type="button" data-jump="bot-league">🤖 Bot League</button>
           </div>
         </div>
-        <p class="profile-copy">Create another fantasy league or join an existing one.</p>
-        <div class="league-entry-actions active-league-entry-actions">
-          <button class="primary-btn" type="button" data-jump="create-league">Create a League</button>
-          <button class="secondary-btn" type="button" data-jump="join-league">Join a League</button>
-          <button class="secondary-btn bot-entry-btn" type="button" data-jump="bot-league">🤖 Bot League</button>
-        </div>
-      </section>
+      </details>
 
       <section class="league-section" id="leagueQuickAccess">
         <div class="league-section-heading">
