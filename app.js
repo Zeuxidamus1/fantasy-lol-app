@@ -2194,7 +2194,16 @@ function render(view="home",options={}){
     const draw=()=>{
       const q=search.value.trim().toLowerCase();
       const source=getActiveLeagueId()?eligibleFantasyPlayers():allFantasyPlayers();
-      const filtered=source.filter(p=>(role==="ALL"||p.role===role)&&(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)));
+      const hiddenStatuses=new Set(["inactive","eliminated","season_complete"]);
+      const filtered=source.filter(p=>{
+        if(role!=="ALL"&&p.role!==role)return false;
+        if(!(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)))return false;
+        if(!getActiveLeagueId()||q)return true;
+        const pid=playerKey(p);
+        const ownership=leagueRosters.find(r=>String(r.player_id)===String(pid));
+        const availability=playerStatusMap.get(String(pid));
+        return Boolean(ownership)||!hiddenStatuses.has(String(availability?.status||""));
+      });
       list.innerHTML=filtered.map(p=>playerRow(p,true)).join("") || '<div class="empty-state"><strong>No players found</strong><small>Try a different name, team, or role.</small></div>';
 
       list.querySelectorAll(".add-btn").forEach((b,i)=>{
