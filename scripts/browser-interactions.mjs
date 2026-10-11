@@ -187,6 +187,19 @@ try{
   await route("draft");
   await expect("draft room renders","document.title.includes('Draft Room') && !!document.querySelector('#draftPlayerList')");
   await expect("draft player selection keeps roster needs with player pool","!!document.querySelector('.draft-player-pool-card #draftRosterStatus') && !!document.querySelector('.draft-selection-sidebar #myDraftRoster')");
+  await expect("completed draft summary structure exists","!!document.querySelector('#draftCompleteState .draft-complete-hero') && !!document.querySelector('#draftCompleteState [data-jump=team]') && !!document.querySelector('#openCompletedDraftBoard') && !!document.querySelector('#draftRecapRounds') && !!document.querySelector('#draftRecapPosition') && !!document.querySelector('#draftRecapPlayers') && !!document.querySelector('#completedDraftPickList') && !!document.querySelector('#completedFullBoardCard')");
+  await expect("completed board starts hidden","document.querySelector('#completedFullBoardCard').hidden===true");
+  await evaluate(`(()=>{
+    const live=document.querySelector('#draftLiveState');
+    const done=document.querySelector('#draftCompleteState');
+    live.hidden=true;done.hidden=false;
+    document.querySelector('#draftRecapRounds').textContent='7';
+    document.querySelector('#draftRecapPosition').textContent='#2';
+    document.querySelector('#draftRecapPlayers').textContent='7';
+    document.querySelector('#completedDraftPickList').innerHTML=Array.from({length:7},(_,i)=>'<div class="completed-pick-row"><span class="completed-pick-round">R'+(i+1)+'</span><div class="completed-pick-info"><strong>ProfessionalPlayer'+(i+1)+'</strong><small>Professional Team Name</small></div><div class="completed-pick-number"><small>Pick</small><strong>#'+(i+1)+'</strong></div><span class="completed-pick-chevron">›</span></div>').join('');
+  })()`);
+  await expect("completed draft summary fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
+  await evaluate("document.querySelector('#draftLiveState').hidden=false;document.querySelector('#draftCompleteState').hidden=true");
   await expect("draft page fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
 
   await route("players");
