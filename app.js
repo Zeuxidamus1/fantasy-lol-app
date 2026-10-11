@@ -2458,7 +2458,7 @@ function render(view="home",options={}){
       theirList.querySelectorAll("[data-trade-theirs]").forEach(btn=>btn.onclick=()=>toggle(selectedTheirs,btn.dataset.tradeTheirs));
     };
 
-    const openTradeAcceptance=(trade,needed=0)=>{
+    const openTradeAcceptance=(trade,balance)=>{
       activeAcceptanceTradeId=String(trade.id);
       const modal=document.querySelector("#transactionModal");
       const list=document.querySelector("#transactionDropList");
@@ -2468,36 +2468,53 @@ function render(view="home",options={}){
       const sendIds=offerIds(trade,"receive");
       const receiveIds=offerIds(trade,"send");
       const outbound=new Set(sendIds);
-      const eligible=myRoster().filter(r=>!outbound.has(String(r.player_id)));
-      const picked=new Set();
-      if(title)title.textContent=needed>0?"Complete Trade":"Confirm Trade";
-      copy.textContent=needed>0
-        ? `Your roster will be ${needed} player${needed===1?"":"s"} over the league limit. Review the trade and choose exactly ${needed} player${needed===1?"":"s"} to drop.`
-        : "Review the full trade package before completing it. Rosters update immediately once the trade is accepted.";
+      const dropEligible=myRoster().filter(r=>!outbound.has(String(r.player_id)));
+      const addEligible=tradeFreeAgents().filter(p=>!receiveIds.includes(playerKey(p)));
+      const pickedDrops=new Set();
+      const pickedAdds=new Set();
+      const neededDrops=Number(balance?.drops)||0;
+      const neededAdds=Number(balance?.adds)||0;
+      if(title)title.textContent=(neededDrops||neededAdds)?"Complete Trade":"Confirm Trade";
+      copy.textContent=neededDrops
+        ? `Review the trade and choose exactly ${neededDrops} player${neededDrops===1?"":"s"} to drop so your roster stays full.`
+        : neededAdds
+          ? `Review the trade and choose exactly ${neededAdds} eligible free agent${neededAdds===1?"":"s"} to add so your roster stays full.`
+          : "Review the full trade package before completing it. Rosters update immediately once the trade is accepted.";
       const packageSummary=`
         <div class="trade-accept-summary">
           <div><span>YOU RECEIVE</span><strong>${h(receiveIds.map(id=>playerFromId(id).name).join(", "))}</strong></div>
           <div><span>YOU SEND</span><strong>${h(sendIds.map(id=>playerFromId(id).name).join(", "))}</strong></div>
-          ${needed>0?`<div class="trade-accept-drop-summary"><span>YOU DROP</span><strong id="tradeDropSummary">Choose ${needed} player${needed===1?"":"s"}</strong></div>`:""}
+          ${neededDrops?`<div class="trade-accept-drop-summary"><span>YOU DROP</span><strong id="tradeDropSummary">Choose ${neededDrops} player${neededDrops===1?"":"s"}</strong></div>`:""}
+          ${neededAdds?`<div class="trade-accept-add-summary"><span>YOU ADD</span><strong id="tradeAddSummary">Choose ${neededAdds} free agent${neededAdds===1?"":"s"}</strong></div>`:""}
         </div>`;
       const draw=()=>{
-        const dropChoices=needed>0?eligible.map(r=>{
+        const dropChoices=neededDrops?dropEligible.map(r=>{
           const p=playerFromId(r.player_id);
-          const on=picked.has(String(r.player_id));
+          const on=pickedDrops.has(String(r.player_id));
           return `<button class="drop-option trade-drop-choice ${on?"selected":""}" data-trade-drop-id="${h(r.player_id)}"><span class="role-badge">${h(r.slot||p.role)}</span><span><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.role||r.slot)}</small></span><span class="drop-action">${on?"SELECTED":"DROP"}</span></button>`;
         }).join(""):"";
-        list.innerHTML=packageSummary+dropChoices+`<button class="primary-btn trade-drop-confirm" id="completeTradeWithDrops" ${picked.size===needed?"":"disabled"}>${needed>0?"Complete Trade":"Accept Trade"}</button>`;
+        const addChoices=neededAdds?addEligible.map(p=>{
+          const id=playerKey(p),on=pickedAdds.has(id);
+          return `<button class="drop-option trade-add-choice ${on?"selected":""}" data-trade-add-id="${h(id)}"><span class="role-badge">${h(p.role)}</span><span><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.role)}</small></span><span class="drop-action">${on?"SELECTED":"ADD"}</span></button>`;
+        }).join(""):"";
+        const ready=pickedDrops.size===neededDrops&&pickedAdds.size===neededAdds;
+        list.innerHTML=packageSummary+dropChoices+addChoices+`<button class="primary-btn trade-drop-confirm" id="completeTradeWithDrops" ${ready?"":"disabled"}>Accept Trade</button>`;
         const dropSummary=list.querySelector("#tradeDropSummary");
-        if(dropSummary){
-          dropSummary.textContent=picked.size
-            ? [...picked].map(id=>playerFromId(id).name).join(", ")
-            : `Choose ${needed} player${needed===1?"":"s"}`;
-        }
+        if(dropSummary)dropSummary.textContent=pickedDrops.size?[...pickedDrops].map(id=>playerFromId(id).name).join(", "):`Choose ${neededDrops} player${neededDrops===1?"":"s"}`;
+        const addSummary=list.querySelector("#tradeAddSummary");
+        if(addSummary)addSummary.textContent=pickedAdds.size?[...pickedAdds].map(id=>playerFromId(id).name).join(", "):`Choose ${neededAdds} free agent${neededAdds===1?"":"s"}`;
         list.querySelectorAll("[data-trade-drop-id]").forEach(btn=>btn.onclick=()=>{
           const id=String(btn.dataset.tradeDropId);
-          if(picked.has(id))picked.delete(id);
-          else if(picked.size<needed)picked.add(id);
-          else showToast(`Choose exactly ${needed} player${needed===1?"":"s"} to drop.`);
+          if(pickedDrops.has(id))pickedDrops.delete(id);
+          else if(pickedDrops.size<neededDrops)pickedDrops.add(id);
+          else showToast(`Choose exactly ${neededDrops} player${neededDrops===1?"":"s"} to drop.`);
+          draw();
+        });
+        list.querySelectorAll("[data-trade-add-id]").forEach(btn=>btn.onclick=()=>{
+          const id=String(btn.dataset.tradeAddId);
+          if(pickedAdds.has(id))pickedAdds.delete(id);
+          else if(pickedAdds.size<neededAdds)pickedAdds.add(id);
+          else showToast(`Choose exactly ${neededAdds} free agent${neededAdds===1?"":"s"} to add.`);
           draw();
         });
         const confirm=list.querySelector("#completeTradeWithDrops");
@@ -2513,7 +2530,7 @@ function render(view="home",options={}){
               renderTabs();
               return;
             }
-            const result=await backend().acceptTrade(trade.id,[...picked]);
+            const result=await backend().acceptTrade(trade.id,[...pickedDrops],[...pickedAdds]);
             activeAcceptanceTradeId=null;
             await loadRosterFromCloud(leagueId);
             closeTransactionModal();
@@ -2542,9 +2559,8 @@ function render(view="home",options={}){
       document.body.classList.add("modal-open");
       const shell=document.querySelector(".app-shell");
       if(shell)shell.inert=true;
-      queueMicrotask(()=>list.querySelector("[data-trade-drop-id],#completeTradeWithDrops")?.focus());
+      queueMicrotask(()=>list.querySelector("[data-trade-drop-id],[data-trade-add-id],#completeTradeWithDrops")?.focus());
     };
-
     const renderTabs=()=>{
       const active=t=>effectiveStatus(t)==="pending";
       const outgoing=trades.filter(t=>String(t.from_user)===String(user?.id)&&active(t));
@@ -2608,7 +2624,7 @@ function render(view="home",options={}){
       content.querySelectorAll("[data-accept-trade]").forEach(btn=>btn.onclick=()=>{
         const trade=trades.find(t=>String(t.id)===String(btn.dataset.acceptTrade));
         if(!trade)return;
-        openTradeAcceptance(trade,requiredDropsForTrade(trade));
+        openTradeAcceptance(trade,recipientBalanceForTrade(trade));
       });
       content.querySelectorAll("[data-counter-trade]").forEach(btn=>btn.onclick=()=>{
         const trade=trades.find(t=>String(t.id)===String(btn.dataset.counterTrade));
