@@ -1268,7 +1268,6 @@ function render(view="home",options={}){
   }
   if(view==="home"){
     const upcomingList=document.querySelector("#homeUpcomingMatches");
-    const tournamentList=document.querySelector("#homeTournamentList");
     const onboardingCard=document.querySelector("#onboardingCard");
     if(onboardingCard){
       let dismissed=false;
@@ -1286,7 +1285,6 @@ function render(view="home",options={}){
     });
 
     const upcoming=rows.filter(g=>g.day!=="past").slice(0,3);
-    const tournaments=[...new Set(rows.map(g=>String(g.league||"").trim()).filter(Boolean))].slice(0,4);
 
     if(upcomingList){
       upcomingList.innerHTML=upcoming.length?upcoming.map(g=>`
@@ -1303,11 +1301,6 @@ function render(view="home",options={}){
         :'<div class="empty-state"><strong>No upcoming matches</strong><small>Check back after the next esports-data refresh.</small></div>';
     }
 
-    if(tournamentList){
-      tournamentList.innerHTML=tournaments.length
-        ?tournaments.map(name=>`<div class="home-tournament-chip">${h(name)}</div>`).join("")
-        :'<div class="empty-state"><strong>Tournament feed unavailable</strong><small>Rift Fantasy will continue using the existing local esports data when it becomes available.</small></div>';
-    }
   }
   if(view==="team"){
     const leagueId=getActiveLeagueId();
