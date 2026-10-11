@@ -384,7 +384,25 @@ async function loadRosterFromCloud(leagueId){
       const p=source.find(x=>playerKey(x)===String(row.player_id)||String(x.id||"")===String(row.player_id));
       return p?{...p,id:playerKey(p),position:p.role,slot:row.slot||"BN",role:row.slot==="BN"?"BN":p.role}:null;
     }).filter(Boolean);
-    storageSet("riftUserRoster",JSON.stringify(loaded.length?normalizeUserRoster(loaded):[]));
+    const normalized=loaded.length?normalizeUserRoster(loaded):[];
+    storageSet("riftUserRoster",JSON.stringify(normalized));
+    const validation=validateRoster(normalized);
+    if(!validation.isComplete){
+      const missing=[
+        ...validation.missingStarterPositions,
+        ...(validation.missingFlexSlots?["FLEX"]:[]),
+        ...(validation.missingBenchSlots?["BENCH"]:[])
+      ];
+      const alertKey="riftRosterAlert:"+leagueId+":"+user.id+":"+normalized.length+":"+missing.join(",");
+      let alreadyShown=false;
+      try{alreadyShown=sessionStorage.getItem(alertKey)==="1";}catch{}
+      if(!alreadyShown){
+        const countText=normalized.length+"/"+validation.totalRequired+" players";
+        const missingText=missing.length?" Missing: "+missing.join(", ")+".":"";
+        showToast("Roster incomplete · "+countText+"."+missingText);
+        try{sessionStorage.setItem(alertKey,"1");}catch{}
+      }
+    }
     return true;
   }catch(err){
     console.warn("Cloud roster load failed:",err);
