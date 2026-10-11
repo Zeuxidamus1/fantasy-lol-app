@@ -1269,7 +1269,6 @@ function render(view="home",options={}){
   if(view==="home"){
     const upcomingList=document.querySelector("#homeUpcomingMatches");
     const tournamentList=document.querySelector("#homeTournamentList");
-    const summary=document.querySelector("#homeEsportsSummary");
     const onboardingCard=document.querySelector("#onboardingCard");
     if(onboardingCard){
       let dismissed=false;
@@ -1288,12 +1287,6 @@ function render(view="home",options={}){
 
     const upcoming=rows.filter(g=>g.day!=="past").slice(0,3);
     const tournaments=[...new Set(rows.map(g=>String(g.league||"").trim()).filter(Boolean))].slice(0,4);
-
-    if(summary){
-      summary.textContent=upcoming.length
-        ?`Quick look at the next ${upcoming.length} professional match${upcoming.length===1?"":"es"} currently available in the Rift Fantasy esports feed.`
-        :"No upcoming professional matches are currently available in the local esports feed.";
-    }
 
     if(upcomingList){
       upcomingList.innerHTML=upcoming.length?upcoming.map(g=>`
