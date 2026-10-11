@@ -1793,20 +1793,22 @@ function render(view="home",options={}){
           });
 
           list.innerHTML=rows.length?rows.map(s=>{
-            const detail=s.isBot?"🤖 Bot":(s.manager.role==="owner"?"Commissioner":"Manager")+(s.mine?" · You":"");
+            const detail=s.isBot?"Bot":(s.manager.role==="owner"?"Commissioner":"Manager");
+            const teamName=String(s.manager.team_name||"Unnamed Team");
+            const initials=teamName.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]).join("").toUpperCase()||"RF";
             return `<div class="standing-live-row real-standings-row ${s.mine?"mine":""} ${s.isBot?"bot-manager-row":""}">
               <span class="rank">${Number(s.rank)||"—"}</span>
+              <div class="standing-team-avatar" aria-hidden="true">${h(initials)}</div>
               <div class="standing-live-team">
-                <strong>${h(s.manager.team_name||"Unnamed Team")}</strong>
-                <small>${h(detail)}</small>
+                <strong>${h(teamName)}</strong>
+                <small>${h(detail)}${s.mine?'<b class="standings-you"> · You</b>':""}</small>
               </div>
               <div class="standing-live-record">
                 <strong>${h(s.record)}</strong>
-                <small>${s.completed_matchups?((s.pct*100).toFixed(1)+"%"):"No finals"}</small>
               </div>
-              <div class="standing-stat-cell standings-pf"><strong>${formatFantasyPoints(s.points_for)}</strong><small>PF</small></div>
-              <div class="standing-stat-cell standings-pa"><strong>${formatFantasyPoints(s.points_against)}</strong><small>PA</small></div>
-              <div class="standing-stat-cell standings-bye"><strong>${Number(s.byes)||0}</strong><small>BYE</small></div>
+              <div class="standing-stat-cell standings-pf"><strong>${formatFantasyPoints(s.points_for)}</strong></div>
+              <div class="standing-stat-cell standings-pa"><strong>${formatFantasyPoints(s.points_against)}</strong></div>
+              <div class="standing-stat-cell standings-bye"><strong>${Number(s.byes)||0}</strong></div>
             </div>`;
           }).join(""):'<div class="empty-state"><strong>No standings yet</strong><small>Standings are created automatically after the league draft.</small></div>';
         }catch(err){
