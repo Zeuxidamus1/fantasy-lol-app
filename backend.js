@@ -473,6 +473,25 @@
     return request("/rest/v1/trades?league_id=eq."+encodeURIComponent(leagueId)+"&select=*&order=created_at.desc",{session:current});
   }
 
+  async function subscribeLeagueTradeUpdates(leagueId,onChange){
+    const current=await session();
+    if(!current||!leagueId||typeof onChange!=="function")return ()=>{};
+    const createClient=window.supabase?.createClient;
+    if(typeof createClient!=="function")return ()=>{};
+    const client=createClient(base,anonKey,{
+      auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
+    });
+    try{await client.realtime.setAuth(current.access_token);}catch{}
+    const channel=client
+      .channel("rift-trades-"+leagueId+"-"+Math.random().toString(36).slice(2))
+      .on("postgres_changes",{event:"*",schema:"public",table:"trades",filter:"league_id=eq."+leagueId},payload=>onChange({type:"trade",payload}))
+      .on("postgres_changes",{event:"*",schema:"public",table:"rosters",filter:"league_id=eq."+leagueId},payload=>onChange({type:"roster",payload}))
+      .subscribe();
+    return ()=>{
+      try{client.removeChannel(channel);}catch{}
+    };
+  }
+
   async function createTrade(leagueId,toUser,offer){
     const current=await session();
     if(!current)throw new Error("Sign in before creating a trade.");
@@ -514,7 +533,7 @@
     listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,listLineupLocks,listPlayerCompetitionStatus,listPlayerProjections,listPlayoffs,getLeagueChampion,listLeagueActivity,listLeagueHistory,listScoreCorrections,listWaiverPriority,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
     listNotifications,markNotificationsRead,
-    listTrades,createTrade,updateTrade,acceptTrade,reviewTrade,
+    listTrades,subscribeLeagueTradeUpdates,createTrade,updateTrade,acceptTrade,reviewTrade,
     logClientError,
     request
   });
