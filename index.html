@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261011-standings-layout-fix" />
+  <link rel="stylesheet" href="styles.css?v=20261011-league-hub-redesign" />
 </head>
 <body>
   <a class="skip-link" href="#app">Skip to main content</a>
@@ -615,6 +615,23 @@
             <strong id="leagueOverviewInvite">—</strong>
           </div>
         </div>
+
+        <section class="league-tools-panel" id="leagueQuickAccess">
+          <div class="league-tools-heading">
+            <div>
+              <div class="eyebrow">LEAGUE TOOLS</div>
+              <strong>Manage this league</strong>
+            </div>
+          </div>
+          <div class="league-quick-grid league-hub-tools">
+            <button class="league-tool-btn" data-jump="team"><span class="action-icon">◈</span><span><strong>My Team</strong><small>Roster &amp; lineup</small></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>
+            <button class="league-tool-btn" data-jump="matchup"><span class="action-icon">⚔</span><span><strong>Matchup</strong><small>Head-to-head</small></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>
+            <button class="league-tool-btn" data-jump="standings"><span class="action-icon">≡</span><span><strong>Standings</strong><small>League table</small></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>
+            <button class="league-tool-btn" data-jump="draft"><span class="action-icon">◎</span><span><strong>Draft Room</strong><small>Draft board &amp; picks</small></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>
+            <button class="league-tool-btn league-tool-wide" data-jump="transactions"><span class="action-icon">↕</span><span><strong>Transactions</strong><small>Waivers, trades, adds &amp; drops</small></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>
+          </div>
+        </section>
+
         <div class="league-switch-row" id="leagueSwitchRow" hidden>
           <label for="leagueSwitcherSelect">Switch League</label>
           <select id="leagueSwitcherSelect" class="form-control" aria-label="Switch active league"></select>
@@ -654,22 +671,6 @@
           </div>
         </div>
       </details>
-
-      <section class="league-section" id="leagueQuickAccess">
-        <div class="league-section-heading">
-          <div>
-            <div class="eyebrow">QUICK ACCESS</div>
-            <h3>League tools</h3>
-          </div>
-        </div>
-        <div class="league-quick-grid">
-          <button class="action-card" data-jump="team"><span class="action-icon">◈</span><strong>My Team</strong><small>Roster & lineup</small></button>
-          <button class="action-card" data-jump="matchup"><span class="action-icon">⚔</span><strong>Matchup</strong><small>Head-to-head</small></button>
-          <button class="action-card" data-jump="standings"><span class="action-icon">≡</span><strong>Standings</strong><small>League managers</small></button>
-          <button class="action-card" data-jump="draft"><span class="action-icon">◎</span><strong>Draft Room</strong><small>Draft board & picks</small></button>
-          <button class="action-card" data-jump="transactions"><span class="action-icon">↕</span><strong>Transactions</strong><small>Waivers, trades, adds & drops</small></button>
-        </div>
-      </section>
 
       <section class="card" id="leaguePlayoffCard" hidden>
         <div class="section-head"><div><div class="eyebrow">POSTSEASON</div><h3>Playoffs & Championship</h3></div><span class="status-pill" id="leagueChampionPill">PLAYOFFS</span></div>
