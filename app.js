@@ -2280,6 +2280,7 @@ function render(view="home",options={}){
     let tab=routeIntent.tab||"offers";
     let focusTradeId=routeIntent.id||null;
     let counterSourceTradeId=null;
+    let activeAcceptanceTradeId=null;
     const selectedMine=new Set();
     const selectedTheirs=new Set();
     if(tradePrefill.side==="mine"&&tradePrefill.id)selectedMine.add(String(tradePrefill.id));
@@ -2302,6 +2303,25 @@ function render(view="home",options={}){
       if(t?.status==="pending"&&t?.expires_at&&new Date(t.expires_at).getTime()<=Date.now())return "expired";
       return String(t?.status||"pending");
     };
+    const staleTradeMessage=status=>{
+      switch(String(status||"")){
+        case "canceled": return "This trade offer was canceled by the sender.";
+        case "declined": return "This trade offer was declined.";
+        case "expired": return "This trade offer expired and can no longer be accepted.";
+        case "accepted": return "This trade has already been completed.";
+        case "review_pending": return "This trade is already awaiting commissioner review.";
+        case "rejected": return "This trade was rejected.";
+        default: return "This trade is no longer available.";
+      }
+    };
+    const closeStaleAcceptance=(status)=>{
+      if(!activeAcceptanceTradeId)return;
+      activeAcceptanceTradeId=null;
+      const modal=document.querySelector("#transactionModal");
+      if(modal&&!modal.hidden)closeTransactionModal();
+      showToast(staleTradeMessage(status));
+    };
+
     const expiryText=t=>{
       if(effectiveStatus(t)==="expired")return "Expired";
       if(!t?.expires_at)return "";
@@ -2415,6 +2435,7 @@ function render(view="home",options={}){
     };
 
     const openTradeAcceptance=(trade,needed=0)=>{
+      activeAcceptanceTradeId=String(trade.id);
       const modal=document.querySelector("#transactionModal");
       const list=document.querySelector("#transactionDropList");
       const copy=document.querySelector("#transactionCopy");
@@ -2459,12 +2480,33 @@ function render(view="home",options={}){
         if(confirm)confirm.onclick=async()=>{
           confirm.disabled=true;
           try{
+            await refreshTradeData();
+            const liveTrade=trades.find(t=>String(t.id)===String(trade.id));
+            const liveStatus=liveTrade?effectiveStatus(liveTrade):"unavailable";
+            if(!liveTrade||liveStatus!=="pending"){
+              closeStaleAcceptance(liveStatus);
+              renderBuilder();
+              renderTabs();
+              return;
+            }
             const result=await backend().acceptTrade(trade.id,[...picked]);
+            activeAcceptanceTradeId=null;
             await loadRosterFromCloud(leagueId);
             closeTransactionModal();
             showToast(result?.status==="review_pending"?"Trade accepted · Awaiting commissioner review":"Trade accepted");
             await init();
           }catch(err){
+            try{
+              await refreshTradeData();
+              const latest=trades.find(t=>String(t.id)===String(trade.id));
+              const latestStatus=latest?effectiveStatus(latest):"unavailable";
+              if(!latest||latestStatus!=="pending"){
+                closeStaleAcceptance(latestStatus);
+                renderBuilder();
+                renderTabs();
+                return;
+              }
+            }catch{}
             showToast(err.message||"Could not accept trade");
             confirm.disabled=false;
           }
@@ -2579,6 +2621,11 @@ function render(view="home",options={}){
       liveRefreshPending=true;
       try{
         await refreshTradeData();
+        if(activeAcceptanceTradeId){
+          const liveTrade=trades.find(t=>String(t.id)===String(activeAcceptanceTradeId));
+          const liveStatus=liveTrade?effectiveStatus(liveTrade):"unavailable";
+          if(!liveTrade||liveStatus!=="pending")closeStaleAcceptance(liveStatus);
+        }
         if(reloadRoster)await loadRosterFromCloud(leagueId).catch(()=>{});
         renderBuilder();
         renderTabs();
