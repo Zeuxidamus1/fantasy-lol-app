@@ -223,6 +223,20 @@ body.tournament-guide-open{overflow:hidden}
 .league-overview-grid small{display:block;color:#71849f;font-size:8px;text-transform:uppercase;letter-spacing:.7px;font-weight:800}
 .league-overview-grid strong{display:block;margin-top:4px;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .league-overview-copy{margin-top:12px}
+.league-tools-panel{margin-top:16px;padding-top:15px;border-top:1px solid rgba(85,145,180,.2)}
+.league-tools-heading{display:flex;align-items:end;justify-content:space-between;margin-bottom:10px}
+.league-tools-heading strong{display:block;margin-top:3px;font-size:14px}
+.league-hub-tools{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.league-tool-btn{display:grid;grid-template-columns:28px minmax(0,1fr) 14px;align-items:center;gap:9px;width:100%;min-width:0;min-height:68px;padding:11px 12px;border:1px solid #21405c;border-radius:13px;background:rgba(7,22,37,.72);color:#edf5ff;text-align:left;font:inherit;cursor:pointer;transition:border-color .15s ease,background .15s ease,transform .15s ease}
+.league-tool-btn:hover{border-color:#2d6b78;background:#0c2a39;transform:translateY(-1px)}
+.league-tool-btn:focus-visible{outline:2px solid #55ebcd;outline-offset:2px}
+.league-tool-btn .action-icon{font-size:19px;line-height:1}
+.league-tool-btn strong,.league-tool-btn small{display:block}
+.league-tool-btn strong{font-size:11px}
+.league-tool-btn small{margin-top:3px;color:#76a3c9;font-size:8px;line-height:1.3}
+.league-tool-arrow{justify-self:end;color:#5a85a7;font-size:18px}
+.league-tool-wide{grid-column:1/-1}
+
 .league-section{display:flex;flex-direction:column;gap:10px}
 .league-section-heading{display:flex;justify-content:space-between;align-items:end;padding:0 2px}
 .league-section-heading h3{margin:2px 0 0;font-size:16px}
@@ -1106,3 +1120,8 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
 .league-more-details[open] .league-more-chevron{transform:rotate(180deg)}
 .league-more-content{padding:0 16px 16px;border-top:1px solid #1c3048}
 .league-more-content .profile-copy{margin-top:14px}
+
+@media(max-width:350px){
+  .league-hub-tools{grid-template-columns:1fr}
+  .league-tool-wide{grid-column:auto}
+}
