@@ -659,39 +659,41 @@ body{background:
 
 /* Real league standings */
 .standings-head{align-items:flex-start}
-.standings-column-headings{display:grid;grid-template-columns:42px minmax(150px,1.6fr) minmax(82px,.7fr) minmax(72px,.55fr) minmax(72px,.55fr) minmax(52px,.4fr);gap:10px;padding:8px 10px;font-size:.66rem;font-weight:900;letter-spacing:.08em;opacity:.55}
-.real-standings-row{display:grid;grid-template-columns:42px minmax(150px,1.6fr) minmax(82px,.7fr) minmax(72px,.55fr) minmax(72px,.55fr) minmax(52px,.4fr);gap:10px;align-items:center}
-.real-standings-row .rank{font-size:1rem;font-weight:900;text-align:center}
-.standing-stat-cell{text-align:right}
-.standing-stat-cell strong,.standing-stat-cell small{display:block}
-.standing-stat-cell small{font-size:.66rem;opacity:.6}
-@media(max-width:680px){
-  .standings-column-headings{display:none}
-  .real-standings-row{
-    grid-template-columns:30px minmax(0,1fr) 48px 48px 42px;
-    grid-template-areas:
-      "rank team record record record"
-      ". team pf pa bye";
-    gap:6px 8px;
-    padding:12px 4px;
-    min-width:0
-  }
-  .real-standings-row .rank{grid-area:rank}
-  .real-standings-row .standing-live-team{grid-area:team;min-width:0}
-  .real-standings-row .standing-live-team strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .real-standings-row .standing-live-record{grid-area:record;text-align:right}
-  .real-standings-row .standing-stat-cell{display:block;text-align:right;margin-left:0;min-width:0}
-  .real-standings-row .standings-pf{grid-area:pf}
-  .real-standings-row .standings-pa{grid-area:pa}
-  .real-standings-row .standings-bye{grid-area:bye}
+.standings-column-headings{display:none}
+.real-standings-row{
+  display:grid;
+  grid-template-columns:30px minmax(0,1fr) minmax(50px,auto) minmax(50px,auto) minmax(40px,auto);
+  grid-template-areas:
+    "rank team record record record"
+    ". team pf pa bye";
+  gap:6px 8px;
+  align-items:center;
+  width:100%;
+  min-width:0;
+  padding:12px 6px;
+  overflow:hidden
 }
+.real-standings-row .rank{grid-area:rank;font-size:1rem;font-weight:900;text-align:center}
+.real-standings-row .standing-live-team{grid-area:team;min-width:0}
+.real-standings-row .standing-live-team strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.real-standings-row .standing-live-record{grid-area:record;text-align:right;min-width:0}
+.standing-stat-cell{text-align:right;min-width:0}
+.standing-stat-cell strong,.standing-stat-cell small{display:block}
+.standing-stat-cell strong{font-size:1rem;line-height:1.1;white-space:nowrap}
+.standing-stat-cell small{font-size:.66rem;opacity:.6}
+.real-standings-row .standings-pf{grid-area:pf}
+.real-standings-row .standings-pa{grid-area:pa}
+.real-standings-row .standings-bye{grid-area:bye}
+.real-standings-row.mine{box-sizing:border-box}
 @media(max-width:380px){
   .real-standings-row{
-    grid-template-columns:26px minmax(0,1fr) 42px 42px 36px;
-    gap:5px 6px
+    grid-template-columns:26px minmax(0,1fr) 44px 44px 36px;
+    gap:5px 6px;
+    padding-left:4px;
+    padding-right:4px
   }
-  .real-standings-row .standing-stat-cell strong{font-size:.92rem}
-  .real-standings-row .standing-live-record strong{font-size:.9rem}
+  .real-standings-row .standing-stat-cell strong{font-size:.9rem}
+  .real-standings-row .standing-live-record strong{font-size:.88rem}
 }
 
 /* Esports source health */
