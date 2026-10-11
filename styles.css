@@ -1346,3 +1346,5 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
   .team-summary-card .stat-row{gap:10px}
   .team-summary-card #teamNextLock{max-width:54%;font-size:11px}
 }
+
+.trade-add-choice.selected{border-color:#2ddcba;background:#10322f}.trade-add-choice.selected .drop-action{color:#57ebce}.trade-accept-add-summary{border-color:#24594f!important;background:#102d29!important}.trade-accept-add-summary span{color:#58e4c6!important}
