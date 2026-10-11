@@ -140,6 +140,7 @@ function eligibleDraftPool(settings=getLeagueSettings()){
 const draftManagerNames = ["Baron Bandits","Zeuxidamus","Rift Raiders","Pentakill Club","Nexus Breakers","Blue Buff Boys","Dragon Slayers","Iron V","Red Side","First Blood","Scuttle Club","Elder Enjoyers"];
 let draftTimerId=null;
 let tradeTimerId=null;
+let tradeRealtimeCleanup=null;
 const memoryStorage=new Map();
 function storageGet(key){
   try{
@@ -960,6 +961,7 @@ function render(view="home",options={}){
   }
   if(view!=="draft"&&draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
   if(view!=="trade"&&tradeTimerId){clearInterval(tradeTimerId);tradeTimerId=null;}
+  if(view!=="trade"&&tradeRealtimeCleanup){try{tradeRealtimeCleanup();}catch{}tradeRealtimeCleanup=null;}
   if(!options.fromHistory){
     const hash="#"+view;
     if(options.replace||currentView===null){
@@ -2328,6 +2330,8 @@ function render(view="home",options={}){
       return Math.max(0,mine.length-outgoingIds.length+incomingIds.length-rosterLimit());
     };
 
+    if(tradeRealtimeCleanup){try{tradeRealtimeCleanup();}catch{}tradeRealtimeCleanup=null;}
+    let liveRefreshPending=false;
     const refreshTradeData=async()=>{
       if(!leagueId||!cloudReady())throw new Error("Select an online league before trading.");
       const b=backend();
@@ -2546,6 +2550,26 @@ function render(view="home",options={}){
       }
     };
 
+    const syncTradeView=async({reloadRoster=false}={})=>{
+      if(liveRefreshPending)return;
+      liveRefreshPending=true;
+      try{
+        await refreshTradeData();
+        if(reloadRoster)await loadRosterFromCloud(leagueId).catch(()=>{});
+        renderBuilder();
+        renderTabs();
+        if(!tradeRealtimeCleanup&&typeof backend().subscribeLeagueTradeUpdates==="function"){
+          tradeRealtimeCleanup=await backend().subscribeLeagueTradeUpdates(leagueId,change=>{
+            void syncTradeView({reloadRoster:change?.type==="roster"||change?.type==="trade"});
+          });
+        }
+      }catch(err){
+        console.warn("Trade live refresh failed",err);
+      }finally{
+        liveRefreshPending=false;
+      }
+    };
+
     const init=async()=>{
       try{
         await refreshTradeData();
@@ -2599,7 +2623,9 @@ function render(view="home",options={}){
     });
     updateTabButtons();
     if(tradeTimerId)clearInterval(tradeTimerId);
-    tradeTimerId=setInterval(()=>{if(document.querySelector("#tradeContent"))renderTabs();},60000);
+    tradeTimerId=setInterval(()=>{
+      if(document.querySelector("#tradeContent"))void syncTradeView({reloadRoster:true});
+    },20000);
     void init();
   }
   if(view==="transactions"){
