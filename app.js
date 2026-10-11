@@ -2777,8 +2777,8 @@ function render(view="home",options={}){
         document.querySelector("#leagueOverviewRole").textContent=activeMembership?.role==="owner"?"Commissioner":"Manager";
         document.querySelector("#leagueOverviewInvite").textContent=activeLeague.invite_code||"—";
         try{
-          const [playoffs,champion,activity,history,membersNow,botsNow]=await Promise.all([
-            b.listPlayoffs(activeId),b.getLeagueChampion(activeId),b.listLeagueActivity(activeId,12),
+          const [playoffs,champion,history,membersNow,botsNow]=await Promise.all([
+            b.listPlayoffs(activeId),b.getLeagueChampion(activeId),
             b.listLeagueHistory(activeId),b.listLeagueMembers(activeId),b.listLeagueBots(activeId)
           ]);
           const managerName=function(id,type){
@@ -2833,9 +2833,6 @@ function render(view="home",options={}){
               playoffContent.innerHTML=playoffs.map(function(x){return '<div class="playoff-row"><div><strong>'+h(x.stage==="championship"?"Championship":"Semifinal "+x.bracket_slot)+'</strong><small>Seed '+h(x.home_seed??"—")+' vs Seed '+h(x.away_seed??"—")+'</small></div><div><strong>'+formatFantasyPoints(x.home_score)+' - '+formatFantasyPoints(x.away_score)+'</strong><small>'+h(String(x.status||"upcoming").toUpperCase())+'</small></div></div>';}).join("");
             }
           }
-          const activityCard=document.querySelector("#leagueActivityCard");
-          const activityContent=document.querySelector("#leagueActivityContent");
-          if(activityCard&&activityContent&&activity.length){activityCard.hidden=false;activityContent.innerHTML=activity.map(function(x){return '<div class="activity-row"><div><strong>'+h(String(x.kind||"League activity").replaceAll("_"," "))+'</strong><small>'+h(x.payload?.player_id?playerById(x.payload.player_id)?.name||x.payload.player_id:"")+'</small></div><small>'+new Date(x.created_at).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+'</small></div>';}).join("");}
           const historyCard=document.querySelector("#leagueHistoryCard");
           const historyContent=document.querySelector("#leagueHistoryContent");
           if(historyCard&&historyContent&&history.length){historyCard.hidden=false;historyContent.innerHTML=history.map(function(x){return '<div class="history-row"><div><strong>'+h(String(x.season_key||x.competition))+'</strong><small>'+h(competitionName(x.competition))+'</small></div><div><strong>'+(x.champion_manager_id?h(managerName(x.champion_manager_id,x.champion_manager_type)):"—")+'</strong><small>Champion</small></div></div>';}).join("");}
