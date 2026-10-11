@@ -276,6 +276,7 @@ try{
   await expect("long player/team text stays contained",noOverflowExpression);
 
   await route("league");
+  await expect("league page includes manager readiness status","!!document.querySelector('#leagueManagerReadiness') && !!document.querySelector('#leagueManagerReadinessCount') && !!document.querySelector('#leagueManagerProgressBar')");
   await evaluate(`(()=>{
     const btn=document.querySelector('[data-jump="create-league"]');
     if(btn)btn.textContent='Create A League With A Very Long Action Label That Must Remain Inside The Button';
