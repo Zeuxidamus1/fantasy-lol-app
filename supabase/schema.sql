@@ -2581,3 +2581,22 @@ $function$
 revoke all on function public.player_is_trade_eligible_for_league(uuid,text) from public,anon,authenticated;
 grant execute on function public.player_is_trade_eligible_for_league(uuid,text) to service_role;
 
+
+
+-- Enable Supabase Realtime Postgres Changes for league trades and rosters.
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname='supabase_realtime' and schemaname='public' and tablename='trades'
+  ) then
+    alter publication supabase_realtime add table public.trades;
+  end if;
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname='supabase_realtime' and schemaname='public' and tablename='rosters'
+  ) then
+    alter publication supabase_realtime add table public.rosters;
+  end if;
+end $$;
+
