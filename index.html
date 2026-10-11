@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261011-league-active-cleanup" />
+  <link rel="stylesheet" href="styles.css?v=20261011-league-controls" />
 </head>
 <body>
   <a class="skip-link" href="#app">Skip to main content</a>
@@ -587,7 +587,6 @@
         <div>
           <h2>League</h2>
         </div>
-        <button class="secondary-btn commissioner-only" id="leagueSetupBtn" data-jump="setup" hidden>Commissioner Tools</button>
       </div>
 
       <section class="card league-overview-card" id="leagueOverviewCard">
@@ -597,7 +596,8 @@
             <h3 id="leagueOverviewName">No league selected</h3>
           </div>
           <div class="league-overview-actions">
-            <button class="secondary-btn league-rules-toggle" id="leagueRulesToggle" type="button" aria-expanded="false">Rules &amp; Setup</button>
+            <button class="secondary-btn league-rules-toggle" id="leagueRulesToggle" type="button" aria-expanded="false">Rules</button>
+            <button class="secondary-btn league-commissioner-btn commissioner-only" id="leagueSetupBtn" data-jump="setup" hidden>Commissioner Tools</button>
           </div>
         </div>
         <div class="league-overview-grid">
