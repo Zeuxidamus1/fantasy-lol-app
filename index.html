@@ -15,18 +15,29 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261011-standings-cleanup-v3" />
+  <link rel="stylesheet" href="styles.css?v=20261011-premium-header-v1" />
 </head>
 <body>
   <a class="skip-link" href="#app">Skip to main content</a>
   <noscript><div class="no-js-message">Rift Fantasy requires JavaScript to run. Enable JavaScript and reload the page.</div></noscript>
   <div class="app-shell">
     <header class="topbar">
-      <div>
-        <div class="eyebrow">FANTASY LEAGUE OF LEGENDS</div>
-        <h1>Rift Fantasy</h1>
+      <div class="topbar-brand" aria-label="Rift Fantasy">
+        <div class="topbar-mark" aria-hidden="true"><span>RF</span></div>
+        <div class="topbar-wordmark">
+          <div class="topbar-kicker">FANTASY LEAGUE OF LEGENDS</div>
+          <h1>Rift Fantasy</h1>
+        </div>
       </div>
-      <div class="topbar-actions"><button class="icon-btn" id="accountBtn" aria-label="Account">👤</button><button class="icon-btn notification-btn" id="notificationBtn" aria-label="Notifications">🔔<span class="notification-badge" id="notificationBadge" hidden>0</span></button></div>
+      <div class="topbar-actions">
+        <button class="icon-btn topbar-action-btn" id="accountBtn" aria-label="Account" title="Account">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12.25a4.25 4.25 0 1 0 0-8.5 4.25 4.25 0 0 0 0 8.5Zm-7 7.5c.7-3.58 3.36-5.75 7-5.75s6.3 2.17 7 5.75"/></svg>
+        </button>
+        <button class="icon-btn notification-btn topbar-action-btn" id="notificationBtn" aria-label="Notifications" title="Notifications">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.75 9.5a5.25 5.25 0 0 1 10.5 0c0 5 2 5.25 2 6.75H4.75c0-1.5 2-1.75 2-6.75ZM9.75 19a2.4 2.4 0 0 0 4.5 0"/></svg>
+          <span class="notification-badge" id="notificationBadge" hidden>0</span>
+        </button>
+      </div>
     </header>
 
     <main id="app"></main>
