@@ -272,6 +272,7 @@ let selectedPlayerId=null;
 let selectedPlayerReturnView="players";
 let selectedMatchupRound=null;
 let tradePrefill={id:null,side:null};
+let tradeRouteIntent={tab:null,id:null};
 let modalReturnFocus=null;
 
 function playerKey(p){
@@ -2269,19 +2270,61 @@ function render(view="home",options={}){
     const theirList=document.querySelector("#tradeTheirPlayers");
     const summary=document.querySelector("#tradeSummaryBox");
     const submit=document.querySelector("#submitTradeBtn");
+    const expirationSelect=document.querySelector("#tradeExpiration");
     const content=document.querySelector("#tradeContent");
-    let tab="offers";
-    let selectedMine=tradePrefill.side==="mine"?tradePrefill.id:null;
-    let selectedTheirs=tradePrefill.side==="theirs"?tradePrefill.id:null;
+    const incomingBadge=document.querySelector("#incomingTradeBadge");
+    const routeIntent={...tradeRouteIntent};
+    tradeRouteIntent={tab:null,id:null};
+    let tab=routeIntent.tab||"offers";
+    let focusTradeId=routeIntent.id||null;
+    const selectedMine=new Set();
+    const selectedTheirs=new Set();
+    if(tradePrefill.side==="mine"&&tradePrefill.id)selectedMine.add(String(tradePrefill.id));
+    if(tradePrefill.side==="theirs"&&tradePrefill.id)selectedTheirs.add(String(tradePrefill.id));
     tradePrefill={id:null,side:null};
     let user=null,members=[],rosters=[],trades=[];
     let isCommissioner=false;
     const playerFromId=id=>playerById(id)||{id,name:id,team:"",role:""};
-
     const partnerName=id=>members.find(m=>String(m.user_id)===String(id))?.team_name||"Manager";
-    const currentPartner=()=>partnerSelect.value;
-    const myRoster=()=>rosters.filter(r=>String(r.user_id)===String(user?.id));
-    const theirRoster=()=>rosters.filter(r=>String(r.user_id)===String(currentPartner()));
+    const currentPartner=()=>partnerSelect?.value||"";
+    const myRoster=()=>rosters.filter(r=>String(r.user_id)===String(user?.id)&&String(r.manager_type||"human")==="human");
+    const theirRoster=()=>rosters.filter(r=>String(r.user_id)===String(currentPartner())&&String(r.manager_type||"human")==="human");
+    const offerIds=(trade,side)=>{
+      const plural=trade?.offer?.[side+"_player_ids"];
+      if(Array.isArray(plural))return [...new Set(plural.map(String).filter(Boolean))];
+      const one=trade?.offer?.[side+"_player_id"];
+      return one?[String(one)]:[];
+    };
+    const effectiveStatus=t=>{
+      if(t?.status==="pending"&&t?.expires_at&&new Date(t.expires_at).getTime()<=Date.now())return "expired";
+      return String(t?.status||"pending");
+    };
+    const expiryText=t=>{
+      if(effectiveStatus(t)==="expired")return "Expired";
+      if(!t?.expires_at)return "";
+      const ms=new Date(t.expires_at).getTime()-Date.now();
+      if(ms<=0)return "Expired";
+      const mins=Math.ceil(ms/60000);
+      if(mins<60)return "Expires in "+mins+" minute"+(mins===1?"":"s");
+      const hours=Math.ceil(ms/3600000);
+      if(hours<48)return "Expires in "+hours+" hour"+(hours===1?"":"s");
+      const days=Math.ceil(ms/86400000);
+      return "Expires in "+days+" day"+(days===1?"":"s");
+    };
+    const playerStack=ids=>ids.map(id=>{
+      const p=playerFromId(id);
+      return `<span><strong>${h(p.name)}</strong><small>${h(p.role||"")} · ${h(p.team||"")}</small></span>`;
+    }).join("");
+    const selectedNames=(set,source)=>[...set].map(id=>{
+      const row=source.find(r=>String(r.player_id)===String(id));
+      return row?playerFromId(row.player_id).name:id;
+    });
+    const requiredDropsForTrade=t=>{
+      const incomingIds=offerIds(t,"send");
+      const outgoingIds=offerIds(t,"receive");
+      const mine=myRoster();
+      return Math.max(0,mine.length-outgoingIds.length+incomingIds.length-rosterLimit());
+    };
 
     const refreshTradeData=async()=>{
       if(!leagueId||!cloudReady())throw new Error("Select an online league before trading.");
@@ -2296,55 +2339,140 @@ function render(view="home",options={}){
       isCommissioner=members.some(m=>String(m.user_id)===String(user.id)&&m.role==="owner");
     };
 
+    const updateTabButtons=()=>{
+      document.querySelectorAll("[data-trade-tab]").forEach(btn=>btn.classList.toggle("active",btn.dataset.tradeTab===tab));
+    };
+
     const renderBuilder=()=>{
       const mine=myRoster();
       const theirs=theirRoster();
-      if(selectedMine&&!mine.some(r=>String(r.player_id)===String(selectedMine)))selectedMine=null;
-      if(selectedTheirs&&!theirs.some(r=>String(r.player_id)===String(selectedTheirs)))selectedTheirs=null;
+      [...selectedMine].forEach(id=>{if(!mine.some(r=>String(r.player_id)===id))selectedMine.delete(id);});
+      [...selectedTheirs].forEach(id=>{if(!theirs.some(r=>String(r.player_id)===id))selectedTheirs.delete(id);});
 
       myList.innerHTML=mine.length?mine.map(r=>{
         const p=playerFromId(r.player_id);
-        return `<button class="trade-option ${String(selectedMine)===String(r.player_id)?"selected":""}" data-trade-mine="${h(r.player_id)}"><strong>${h(p.name)}</strong><small>${h(p.role||r.slot)} · ${h(p.team)}</small></button>`;
+        return `<button class="trade-option ${selectedMine.has(String(r.player_id))?"selected":""}" data-trade-mine="${h(r.player_id)}"><strong>${h(p.name)}</strong><small>${h(p.role||r.slot)} · ${h(p.team)}</small></button>`;
       }).join(""):'<div class="empty-state"><strong>No rostered players</strong><small>Your drafted roster will appear here.</small></div>';
 
       theirList.innerHTML=theirs.length?theirs.map(r=>{
         const p=playerFromId(r.player_id);
-        return `<button class="trade-option ${String(selectedTheirs)===String(r.player_id)?"selected":""}" data-trade-theirs="${h(r.player_id)}"><strong>${h(p.name)}</strong><small>${h(p.role||r.slot)} · ${h(p.team)}</small></button>`;
+        return `<button class="trade-option ${selectedTheirs.has(String(r.player_id))?"selected":""}" data-trade-theirs="${h(r.player_id)}"><strong>${h(p.name)}</strong><small>${h(p.role||r.slot)} · ${h(p.team)}</small></button>`;
       }).join(""):'<div class="empty-state"><strong>No players to trade for</strong><small>This manager does not have a roster yet.</small></div>';
 
-      const mineP=mine.find(r=>String(r.player_id)===String(selectedMine));
-      const theirP=theirs.find(r=>String(r.player_id)===String(selectedTheirs));
-      if(mineP&&theirP){
-        summary.innerHTML=`You send <strong>${h(playerFromId(mineP.player_id).name)}</strong> to ${h(partnerName(currentPartner()))} and receive <strong>${h(playerFromId(theirP.player_id).name)}</strong>.`;
-        submit.disabled=false;
+      const mineNames=selectedNames(selectedMine,mine);
+      const theirNames=selectedNames(selectedTheirs,theirs);
+      const valid=mineNames.length>0&&theirNames.length>0&&mineNames.length<=5&&theirNames.length<=5;
+      if(valid){
+        const mineAfter=mine.length-mineNames.length+theirNames.length;
+        const theirsAfter=theirs.length-theirNames.length+mineNames.length;
+        const opponentDrops=Math.max(0,theirsAfter-rosterLimit());
+        const myOverflow=Math.max(0,mineAfter-rosterLimit());
+        summary.innerHTML=`
+          <strong class="trade-summary-title">Trade Offer</strong>
+          <div class="trade-summary-lists">
+            <div class="trade-summary-side"><span>YOU SEND</span><strong>${h(mineNames.join(", "))}</strong></div>
+            <div class="trade-summary-side"><span>YOU RECEIVE</span><strong>${h(theirNames.join(", "))}</strong></div>
+          </div>
+          <div class="trade-impact">
+            <strong>Roster Impact</strong>
+            <small>Your roster: ${mine.length} → ${mineAfter} players</small>
+            <small>${h(partnerName(currentPartner()))}: ${theirs.length} → ${theirsAfter} players</small>
+            ${opponentDrops?`<small class="warning">${h(partnerName(currentPartner()))} will need to drop ${opponentDrops} player${opponentDrops===1?"":"s"} if accepted.</small>`:""}
+            ${myOverflow?`<small class="warning">You would be ${myOverflow} player${myOverflow===1?"":"s"} over the roster limit. Add more players to You Send first.</small>`:""}
+          </div>`;
+        submit.disabled=myOverflow>0;
       }else{
-        summary.textContent="Select one player from each side to build an offer.";
+        summary.textContent="Select at least one player from each side to build an offer. You can select up to 5 players per side.";
         submit.disabled=true;
       }
 
-      myList.querySelectorAll("[data-trade-mine]").forEach(btn=>btn.onclick=()=>{selectedMine=btn.dataset.tradeMine;renderBuilder();});
-      theirList.querySelectorAll("[data-trade-theirs]").forEach(btn=>btn.onclick=()=>{selectedTheirs=btn.dataset.tradeTheirs;renderBuilder();});
+      const toggle=(set,id)=>{
+        id=String(id);
+        if(set.has(id))set.delete(id);
+        else if(set.size>=5)showToast("You can select up to 5 players per side.");
+        else set.add(id);
+        renderBuilder();
+      };
+      myList.querySelectorAll("[data-trade-mine]").forEach(btn=>btn.onclick=()=>toggle(selectedMine,btn.dataset.tradeMine));
+      theirList.querySelectorAll("[data-trade-theirs]").forEach(btn=>btn.onclick=()=>toggle(selectedTheirs,btn.dataset.tradeTheirs));
+    };
+
+    const openTradeDropChooser=(trade,needed)=>{
+      const modal=document.querySelector("#transactionModal");
+      const list=document.querySelector("#transactionDropList");
+      const copy=document.querySelector("#transactionCopy");
+      const title=document.querySelector("#transactionTitle");
+      if(!modal||!list||!copy)return;
+      const outbound=new Set(offerIds(trade,"receive"));
+      const eligible=myRoster().filter(r=>!outbound.has(String(r.player_id)));
+      const picked=new Set();
+      if(title)title.textContent="Roster Move Required";
+      copy.textContent=`This trade will put your roster ${needed} player${needed===1?"":"s"} over the league limit. Choose exactly ${needed} player${needed===1?"":"s"} to drop before completing the trade.`;
+      const draw=()=>{
+        list.innerHTML=eligible.map(r=>{
+          const p=playerFromId(r.player_id);
+          const on=picked.has(String(r.player_id));
+          return `<button class="drop-option trade-drop-choice ${on?"selected":""}" data-trade-drop-id="${h(r.player_id)}"><span class="role-badge">${h(r.slot||p.role)}</span><span><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.role||r.slot)}</small></span><span class="drop-action">${on?"SELECTED":"DROP"}</span></button>`;
+        }).join("")+`<button class="primary-btn trade-drop-confirm" id="completeTradeWithDrops" ${picked.size===needed?"":"disabled"}>Complete Trade</button>`;
+        list.querySelectorAll("[data-trade-drop-id]").forEach(btn=>btn.onclick=()=>{
+          const id=String(btn.dataset.tradeDropId);
+          if(picked.has(id))picked.delete(id);
+          else if(picked.size<needed)picked.add(id);
+          else showToast(`Choose exactly ${needed} player${needed===1?"":"s"} to drop.`);
+          draw();
+        });
+        const confirm=list.querySelector("#completeTradeWithDrops");
+        if(confirm)confirm.onclick=async()=>{
+          confirm.disabled=true;
+          try{
+            const result=await backend().acceptTrade(trade.id,[...picked]);
+            await loadRosterFromCloud(leagueId);
+            closeTransactionModal();
+            showToast(result?.status==="review_pending"?"Trade accepted · Awaiting commissioner review":"Trade accepted");
+            await init();
+          }catch(err){
+            showToast(err.message||"Could not accept trade");
+            confirm.disabled=false;
+          }
+        };
+      };
+      draw();
+      modalReturnFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
+      modal.hidden=false;
+      document.body.classList.add("modal-open");
+      const shell=document.querySelector(".app-shell");
+      if(shell)shell.inert=true;
+      queueMicrotask(()=>list.querySelector("[data-trade-drop-id]")?.focus());
     };
 
     const renderTabs=()=>{
-      const outgoing=trades.filter(t=>String(t.from_user)===String(user?.id)&&t.status==="pending");
-      const incoming=trades.filter(t=>String(t.to_user)===String(user?.id)&&t.status==="pending");
-      const history=trades.filter(t=>t.status!=="pending"&&(
+      const active=t=>effectiveStatus(t)==="pending";
+      const outgoing=trades.filter(t=>String(t.from_user)===String(user?.id)&&active(t));
+      const incoming=trades.filter(t=>String(t.to_user)===String(user?.id)&&active(t));
+      const history=trades.filter(t=>effectiveStatus(t)!=="pending"&&(
         String(t.from_user)===String(user?.id)||
         String(t.to_user)===String(user?.id)||
-        (isCommissioner&&t.status==="review_pending")
+        (isCommissioner&&effectiveStatus(t)==="review_pending")
       ));
+      if(incomingBadge){
+        incomingBadge.textContent=String(incoming.length);
+        incomingBadge.hidden=incoming.length===0;
+      }
+      updateTabButtons();
+
       const renderCard=t=>{
-        const sent=playerFromId(t.offer?.send_player_id);
-        const received=playerFromId(t.offer?.receive_player_id);
+        const sendIds=offerIds(t,"send");
+        const receiveIds=offerIds(t,"receive");
         const isOutgoing=String(t.from_user)===String(user?.id);
         const counterpart=isOutgoing?partnerName(t.to_user):partnerName(t.from_user);
-        const status=String(t.status||"pending");
+        const status=effectiveStatus(t);
         const commissionerQueue=isCommissioner&&status==="review_pending";
         const userParty=String(t.from_user)===String(user?.id)||String(t.to_user)===String(user?.id);
-        const swapMarkup=commissionerQueue&&!userParty
-          ?`<div class="trade-swap"><div class="trade-side"><span>${h(partnerName(t.from_user))} SENDS</span><strong>${h(sent.name)}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>${h(partnerName(t.to_user))} SENDS</span><strong>${h(received.name)}</strong></div></div>`
-          :`<div class="trade-swap"><div class="trade-side"><span>YOU SEND</span><strong>${h(isOutgoing?sent.name:received.name)}</strong></div><div class="trade-arrow">⇄</div><div class="trade-side"><span>YOU RECEIVE</span><strong>${h(isOutgoing?received.name:sent.name)}</strong></div></div>`;
+        const leftIds=commissionerQueue&&!userParty?sendIds:(isOutgoing?sendIds:receiveIds);
+        const rightIds=commissionerQueue&&!userParty?receiveIds:(isOutgoing?receiveIds:sendIds);
+        const leftLabel=commissionerQueue&&!userParty?partnerName(t.from_user)+" SENDS":"YOU SEND";
+        const rightLabel=commissionerQueue&&!userParty?partnerName(t.to_user)+" SENDS":"YOU RECEIVE";
+        const drops=Array.isArray(t.acceptance_drop_player_ids)?t.acceptance_drop_player_ids:[];
         const actions=status==="pending"
           ?(isOutgoing
             ?`<div class="trade-card-actions"><button class="secondary-btn" data-cancel-trade="${h(t.id)}">Cancel Offer</button></div>`
@@ -2352,9 +2480,16 @@ function render(view="home",options={}){
           :(commissionerQueue
             ?`<div class="trade-card-actions"><button class="primary-btn" data-approve-trade="${h(t.id)}">Approve</button><button class="secondary-btn" data-reject-trade="${h(t.id)}">Reject</button></div>`
             :"");
-        return `<div class="trade-card">
+        const focused=focusTradeId&&String(t.id)===String(focusTradeId);
+        return `<div class="trade-card ${focused?"trade-card-focus":""}" data-trade-card="${h(t.id)}">
           <div class="trade-card-head"><div><h4>${h(commissionerQueue?"Commissioner Review":counterpart)}</h4><small>${new Date(t.created_at).toLocaleString()}</small></div><span class="trade-status ${h(status)}">${h(status.replaceAll("_"," ").toUpperCase())}</span></div>
-          ${swapMarkup}
+          <div class="trade-swap">
+            <div class="trade-side"><span>${h(leftLabel)}</span><div class="trade-player-stack">${playerStack(leftIds)}</div></div>
+            <div class="trade-arrow">⇄</div>
+            <div class="trade-side"><span>${h(rightLabel)}</span><div class="trade-player-stack">${playerStack(rightIds)}</div></div>
+          </div>
+          ${drops.length?`<small class="trade-expiry">Roster drops: ${h(drops.map(id=>playerFromId(id).name).join(", "))}</small>`:""}
+          ${status==="pending"&&expiryText(t)?`<small class="trade-expiry">${h(expiryText(t))}</small>`:""}
           ${status==="review_pending"?'<small class="trade-review-copy">Recipient accepted. Rosters do not change until commissioner approval.</small>':""}
           ${actions}
         </div>`;
@@ -2371,12 +2506,17 @@ function render(view="home",options={}){
         catch(err){showToast(err.message||"Could not decline trade");}
       });
       content.querySelectorAll("[data-accept-trade]").forEach(btn=>btn.onclick=async()=>{
+        const trade=trades.find(t=>String(t.id)===String(btn.dataset.acceptTrade));
+        if(!trade)return;
+        const needed=requiredDropsForTrade(trade);
+        if(needed>0){openTradeDropChooser(trade,needed);return;}
+        btn.disabled=true;
         try{
-          const result=await backend().acceptTrade(btn.dataset.acceptTrade);
+          const result=await backend().acceptTrade(trade.id,[]);
           await loadRosterFromCloud(leagueId);
           showToast(result?.status==="review_pending"?"Trade accepted · Awaiting commissioner review":"Trade accepted");
           await init();
-        }catch(err){showToast(err.message||"Could not accept trade");}
+        }catch(err){showToast(err.message||"Could not accept trade");btn.disabled=false;}
       });
       content.querySelectorAll("[data-approve-trade]").forEach(btn=>btn.onclick=async()=>{
         try{await backend().reviewTrade(btn.dataset.approveTrade,true);await loadRosterFromCloud(leagueId);showToast("Trade approved");await init();}
@@ -2386,6 +2526,12 @@ function render(view="home",options={}){
         try{await backend().reviewTrade(btn.dataset.rejectTrade,false);showToast("Trade rejected");await init();}
         catch(err){showToast(err.message||"Could not reject trade");}
       });
+
+      if(focusTradeId){
+        const target=content.querySelector('[data-trade-card="'+CSS.escape(String(focusTradeId))+'"]');
+        if(target)queueMicrotask(()=>target.scrollIntoView({behavior:"smooth",block:"center"}));
+        focusTradeId=null;
+      }
     };
 
     const init=async()=>{
@@ -2411,16 +2557,20 @@ function render(view="home",options={}){
       }
     };
 
-    partnerSelect.onchange=()=>{selectedTheirs=null;renderBuilder();};
+    partnerSelect.onchange=()=>{selectedTheirs.clear();renderBuilder();};
     submit.onclick=async()=>{
-      const mine=myRoster().find(r=>String(r.player_id)===String(selectedMine));
-      const theirs=theirRoster().find(r=>String(r.player_id)===String(selectedTheirs));
-      if(!mine||!theirs)return;
+      const sendIds=[...selectedMine];
+      const receiveIds=[...selectedTheirs];
+      if(!sendIds.length||!receiveIds.length)return;
       submit.disabled=true;
       try{
-        await backend().createTrade(leagueId,currentPartner(),{send_player_id:mine.player_id,receive_player_id:theirs.player_id});
-        selectedMine=null;
-        selectedTheirs=null;
+        await backend().createTrade(leagueId,currentPartner(),{
+          send_player_ids:sendIds,
+          receive_player_ids:receiveIds,
+          expires_in_hours:Number(expirationSelect?.value)||48
+        });
+        selectedMine.clear();
+        selectedTheirs.clear();
         showToast("Trade offer sent");
         await init();
       }catch(err){
@@ -2431,9 +2581,11 @@ function render(view="home",options={}){
 
     document.querySelectorAll("[data-trade-tab]").forEach(btn=>btn.onclick=()=>{
       tab=btn.dataset.tradeTab;
-      document.querySelectorAll("[data-trade-tab]").forEach(x=>x.classList.toggle("active",x===btn));
+      focusTradeId=null;
+      updateTabButtons();
       renderTabs();
     });
+    updateTabButtons();
     void init();
   }
   if(view==="transactions"){
