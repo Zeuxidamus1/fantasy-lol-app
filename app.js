@@ -1548,11 +1548,20 @@ function render(view="home",options={}){
           const rosterNow=getUserRoster();
           const rosterIds=new Set(rosterNow.map(playerKey));
           const relevantStatus=statusRows.filter(x=>rosterIds.has(String(x.player_id)));
-          const nextTimes=relevantStatus.map(x=>Date.parse(x.next_match_at||"")).filter(Number.isFinite).filter(t=>t>Date.now()).sort((a,b)=>a-b);
+          const nextLockRow=relevantStatus
+            .map(x=>({...x,_lockTime:Date.parse(x.next_match_at||"")}))
+            .filter(x=>Number.isFinite(x._lockTime)&&x._lockTime>Date.now())
+            .sort((a,b)=>a._lockTime-b._lockTime)[0]||null;
           const nextLockEl=document.querySelector("#teamNextLock");
           const lockStatusEl=document.querySelector("#teamLockStatus");
           if(nextLockEl){
-            nextLockEl.textContent=nextTimes.length?new Date(nextTimes[0]).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}):"No upcoming lock";
+            if(nextLockRow){
+              const player=playerById(nextLockRow.player_id);
+              const when=new Date(nextLockRow._lockTime).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+              nextLockEl.textContent=player?.name?when+" · "+player.name:when;
+            }else{
+              nextLockEl.textContent="No upcoming lock";
+            }
           }
           if(lockStatusEl){
             const lockedCount=rosterNow.filter(p=>activeLineupLocks.has(playerKey(p))).length;
@@ -3648,6 +3657,26 @@ function render(view="home",options={}){
       };
     })();
   }
+  document.querySelectorAll("[data-lock-help]").forEach(btn=>{
+    btn.onclick=()=>{
+      const panel=document.querySelector("#lineupLockHelp");
+      if(!panel)return;
+      const isOpen=!panel.hidden&&panel.dataset.helpType===btn.dataset.lockHelp;
+      document.querySelectorAll("[data-lock-help]").forEach(x=>x.setAttribute("aria-expanded","false"));
+      if(isOpen){
+        panel.hidden=true;
+        panel.dataset.helpType="";
+        return;
+      }
+      const next=btn.dataset.lockHelp==="next";
+      panel.innerHTML=next
+        ? "<strong>Next Lineup Lock</strong><small>The next time one of your rostered players becomes locked because their scheduled match is starting. Once locked, that player cannot be moved between the starting lineup, FLEX, and bench until the lock clears.</small>"
+        : "<strong>Lock Status</strong><small>Shows how many players on your roster are currently locked versus still available to move. A locked player has already reached their lineup lock for the active scoring period.</small>";
+      panel.dataset.helpType=btn.dataset.lockHelp;
+      panel.hidden=false;
+      btn.setAttribute("aria-expanded","true");
+    };
+  });
   document.querySelectorAll("[data-open-player]").forEach(row=>{
     if(row.dataset.profileBound)return;
     row.dataset.profileBound="1";
