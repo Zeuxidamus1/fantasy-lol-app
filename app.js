@@ -1804,9 +1804,9 @@ function render(view="home",options={}){
                 <strong>${h(s.record)}</strong>
                 <small>${s.completed_matchups?((s.pct*100).toFixed(1)+"%"):"No finals"}</small>
               </div>
-              <div class="standing-stat-cell"><strong>${formatFantasyPoints(s.points_for)}</strong><small>PF</small></div>
-              <div class="standing-stat-cell"><strong>${formatFantasyPoints(s.points_against)}</strong><small>PA</small></div>
-              <div class="standing-stat-cell"><strong>${Number(s.byes)||0}</strong><small>BYE</small></div>
+              <div class="standing-stat-cell standings-pf"><strong>${formatFantasyPoints(s.points_for)}</strong><small>PF</small></div>
+              <div class="standing-stat-cell standings-pa"><strong>${formatFantasyPoints(s.points_against)}</strong><small>PA</small></div>
+              <div class="standing-stat-cell standings-bye"><strong>${Number(s.byes)||0}</strong><small>BYE</small></div>
             </div>`;
           }).join(""):'<div class="empty-state"><strong>No standings yet</strong><small>Standings are created automatically after the league draft.</small></div>';
         }catch(err){
