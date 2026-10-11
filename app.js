@@ -2194,7 +2194,7 @@ function render(view="home",options={}){
     const draw=()=>{
       const q=search.value.trim().toLowerCase();
       const source=getActiveLeagueId()?eligibleFantasyPlayers():allFantasyPlayers();
-      const hiddenStatuses=new Set(["inactive","eliminated","season_complete"]);
+      const hiddenStatuses=new Set(["inactive","eliminated","season_complete","substitute"]);
       const filtered=source.filter(p=>{
         if(role!=="ALL"&&p.role!==role)return false;
         if(!(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)))return false;
@@ -2212,7 +2212,8 @@ function render(view="home",options={}){
         const ownership=leagueRosters.find(r=>String(r.player_id)===String(pid));
         const state=b.closest(".player-fantasy-state")?.querySelector(".player-status-label");
         const availability=playerStatusMap.get(String(pid));
-        const unavailable=availability&&["inactive","eliminated","season_complete"].includes(String(availability.status));
+        const draftable=playerIsDraftable(p);
+        const unavailable=!draftable||(availability&&["inactive","eliminated","season_complete","substitute"].includes(String(availability.status)));
         if(ownership){
           if(String(ownership.user_id)===String(currentUser?.id)){
             b.textContent="OWNED";
@@ -2224,7 +2225,8 @@ function render(view="home",options={}){
           }
           b.disabled=true;
         }else if(unavailable){
-          const label=String(availability.status).replaceAll("_"," ").toUpperCase();
+          const status=String(availability?.status||"");
+          const label=!draftable||status==="substitute"?"SUBSTITUTE":status.replaceAll("_"," ").toUpperCase();
           b.textContent="UNAVAILABLE";
           if(state)state.textContent=label;
           b.disabled=true;
