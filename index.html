@@ -376,23 +376,43 @@
   </template>
 
   <template id="standings-template">
-    <section class="stack">
-      <div class="section-title">
-        <div><div class="eyebrow" id="standingsLeagueName">LEAGUE</div><h2>Standings</h2></div>
-        <button class="text-btn" data-jump="league">League</button>
+    <section class="stack standings-page">
+      <div class="standings-page-head">
+        <div>
+          <div class="eyebrow" id="standingsLeagueName">LEAGUE</div>
+          <h2>Standings</h2>
+        </div>
+        <div class="standings-head-actions">
+          <div class="standings-season-pill" aria-label="Current standings phase">Regular Season</div>
+          <button class="text-btn standings-league-link" data-jump="league">League</button>
+        </div>
       </div>
-      <section class="card">
-        <div class="section-head standings-head">
-          <div><div class="eyebrow">LEAGUE TABLE</div><h3>Head-to-head standings</h3></div>
+
+      <section class="card standings-table-card">
+        <div class="standings-table-topline">
+          <div>
+            <div class="eyebrow">LEAGUE TABLE</div>
+            <h3>Head-to-head standings</h3>
+          </div>
           <span class="status-pill" id="standingsStatus">OFFICIAL</span>
         </div>
-        <p class="profile-copy">Records update only when a fantasy round becomes final. PF and PA are official completed-round totals; a BYE does not count as a win or loss.</p>
+
         <div class="standings-column-headings" aria-hidden="true">
-          <span>RK</span><span>TEAM</span><span>RECORD</span><span>PF</span><span>PA</span><span>BYE</span>
+          <span>#</span>
+          <span>TEAM</span>
+          <span>RECORD</span>
+          <span class="standings-heading-stat">PF <button class="standings-info" type="button" tabindex="-1" title="Points For — total fantasy points your team has scored." aria-label="PF means Points For">?</button></span>
+          <span class="standings-heading-stat">PA <button class="standings-info" type="button" tabindex="-1" title="Points Against — total fantasy points scored against your team." aria-label="PA means Points Against">?</button></span>
+          <span class="standings-heading-stat">BYE <button class="standings-info" type="button" tabindex="-1" title="Bye weeks — fantasy rounds where your team did not have an opponent." aria-label="BYE means bye weeks">?</button></span>
         </div>
+
         <div id="standingsList" class="standings-live-list"></div>
-        <p class="profile-disclaimer" id="standingsTiebreakCopy">Tiebreak order: winning percentage, wins, fewer losses, points for, then lower points against.</p>
       </section>
+
+      <div class="standings-footnotes">
+        <p>Records update when a fantasy round becomes final. PF and PA use official completed-round totals.</p>
+        <p id="standingsTiebreakCopy">Tiebreak order: winning percentage, wins, fewer losses, points for, then lower points against.</p>
+      </div>
     </section>
   </template>
 
