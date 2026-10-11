@@ -506,12 +506,13 @@
     return request("/rest/v1/rpc/resolve_trade",{method:"POST",body:{p_trade_id:id,p_status:status},session:current});
   }
 
-  async function acceptTrade(id,dropPlayerIds=[]){
+  async function acceptTrade(id,dropPlayerIds=[],addPlayerIds=[]){
     const current=await session();
     if(!current)throw new Error("Sign in before accepting a trade.");
     return request("/rest/v1/rpc/accept_trade_v2",{method:"POST",body:{
       p_trade_id:id,
-      p_drop_player_ids:Array.isArray(dropPlayerIds)?dropPlayerIds.map(String):[]
+      p_drop_player_ids:Array.isArray(dropPlayerIds)?dropPlayerIds.map(String):[],
+      p_add_player_ids:Array.isArray(addPlayerIds)?addPlayerIds.map(String):[]
     },session:current});
   }
 
