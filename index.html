@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261011-draft-complete" />
+  <link rel="stylesheet" href="styles.css?v=20261011-multi-trades" />
 </head>
 <body>
   <a class="skip-link" href="#app">Skip to main content</a>
@@ -804,15 +804,24 @@
             <div id="tradeTheirPlayers" class="trade-player-list"></div>
           </div>
         </div>
+        <div class="form-group trade-expiration-field">
+          <label for="tradeExpiration">Offer expires</label>
+          <select id="tradeExpiration" class="form-control">
+            <option value="24">24 hours</option>
+            <option value="48" selected>48 hours</option>
+            <option value="72">3 days</option>
+            <option value="168">7 days</option>
+          </select>
+        </div>
         <div class="trade-summary-box" id="tradeSummaryBox">
-          Select one player from each side to build an offer.
+          Select at least one player from each side to build an offer.
         </div>
         <button class="primary-btn" id="submitTradeBtn" disabled>Send Trade Offer</button>
       </section>
 
       <div class="filter-row">
         <button class="chip active" data-trade-tab="offers">My Offers</button>
-        <button class="chip" data-trade-tab="incoming">Incoming</button>
+        <button class="chip" data-trade-tab="incoming">Incoming <span class="trade-tab-badge" id="incomingTradeBadge" hidden>0</span></button>
         <button class="chip" data-trade-tab="history">History</button>
       </div>
       <div id="tradeContent" class="stack tight"></div>
@@ -1338,10 +1347,10 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="esports-data.js?v=20261011-draft-complete"></script>
-  <script src="backend-config.js?v=20261011-draft-complete"></script>
-  <script src="backend.js?v=20261011-draft-complete"></script>
-  <script src="player-stats.js?v=20261011-draft-complete"></script>
-  <script src="app.js?v=20261011-draft-complete"></script>
+  <script src="esports-data.js?v=20261011-multi-trades"></script>
+  <script src="backend-config.js?v=20261011-multi-trades"></script>
+  <script src="backend.js?v=20261011-multi-trades"></script>
+  <script src="player-stats.js?v=20261011-multi-trades"></script>
+  <script src="app.js?v=20261011-multi-trades"></script>
 </body>
 </html>
