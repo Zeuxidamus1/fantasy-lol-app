@@ -1151,3 +1151,116 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
   .league-quick-grid.league-hub-tools{grid-template-columns:1fr}
   .league-tool-wide{grid-column:auto}
 }
+
+
+/* Premium Rift Fantasy app header */
+.topbar{
+  min-height:72px;
+  padding:13px 16px 12px;
+  gap:12px;
+  background:
+    radial-gradient(circle at 12% -45%,rgba(45,220,186,.10),transparent 48%),
+    linear-gradient(180deg,rgba(7,20,33,.98),rgba(6,17,29,.96));
+  border-bottom:1px solid rgba(91,151,196,.18);
+  box-shadow:0 10px 28px rgba(0,0,0,.14);
+}
+.topbar-brand{display:flex;align-items:center;gap:11px;min-width:0;flex:1}
+.topbar-mark{
+  position:relative;
+  width:38px;height:38px;flex:0 0 38px;
+  display:grid;place-items:center;
+  border:1px solid rgba(67,232,199,.46);
+  border-radius:12px;
+  background:linear-gradient(145deg,#123a3b 0%,#0c2832 54%,#0a1c2c 100%);
+  box-shadow:0 7px 20px rgba(20,183,157,.12),inset 0 0 0 1px rgba(255,255,255,.025);
+  overflow:hidden;
+}
+.topbar-mark::after{
+  content:"";
+  position:absolute;inset:4px;
+  border:1px solid rgba(89,236,207,.10);
+  border-radius:8px;
+  pointer-events:none;
+}
+.topbar-mark span{
+  position:relative;z-index:1;
+  color:#68f0d4;
+  font-size:12px;font-weight:900;letter-spacing:-.4px;
+  text-shadow:0 0 18px rgba(45,220,186,.24);
+}
+.topbar-wordmark{min-width:0;display:flex;flex-direction:column;justify-content:center}
+.topbar-kicker{
+  margin:0 0 3px;
+  color:#6f8da9;
+  font-size:8px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:1.45px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.topbar .topbar-wordmark h1{
+  margin:0;
+  color:#f5f9ff;
+  font-size:21px;
+  line-height:1.05;
+  font-weight:900;
+  letter-spacing:-.75px;
+  white-space:nowrap;
+}
+.topbar-actions{gap:7px;flex:0 0 auto}
+.topbar .topbar-action-btn{
+  width:39px;height:39px;min-height:39px;
+  display:grid;place-items:center;
+  padding:0;
+  border-radius:12px;
+  border:1px solid rgba(77,119,157,.42);
+  background:linear-gradient(180deg,#0d2134,#0a1a2b);
+  color:#c9dbed;
+  box-shadow:0 5px 14px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.025);
+  transition:border-color .16s ease,background .16s ease,color .16s ease,transform .16s ease,box-shadow .16s ease;
+}
+.topbar .topbar-action-btn svg{
+  width:18px;height:18px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.topbar .topbar-action-btn:hover{
+  border-color:rgba(54,226,193,.52);
+  background:linear-gradient(180deg,#10293b,#0b2132);
+  color:#effcff;
+  box-shadow:0 6px 18px rgba(0,0,0,.18),0 0 0 1px rgba(45,220,186,.035);
+}
+.topbar .topbar-action-btn:active{transform:translateY(1px);background:#0b1d2d}
+.topbar .notification-badge{
+  top:-5px;right:-5px;
+  min-width:17px;height:17px;
+  padding:0 4px;
+  background:#41e3c2;
+  color:#061814;
+  border:2px solid #07131f;
+  font-size:9px;
+  box-shadow:0 3px 10px rgba(41,220,185,.24);
+}
+@media(max-width:430px){
+  .topbar{min-height:68px;padding:12px 13px 11px}
+  .topbar-brand{gap:9px}
+  .topbar-mark{width:36px;height:36px;flex-basis:36px;border-radius:11px}
+  .topbar .topbar-wordmark h1{font-size:20px}
+  .topbar-kicker{font-size:7.5px;letter-spacing:1.15px}
+  .topbar-actions{gap:6px}
+  .topbar .topbar-action-btn{width:37px;height:37px;min-height:37px;border-radius:11px}
+}
+@media(max-width:350px){
+  .topbar{padding-left:11px;padding-right:11px;gap:8px}
+  .topbar-brand{gap:8px}
+  .topbar-mark{width:34px;height:34px;flex-basis:34px}
+  .topbar .topbar-wordmark h1{font-size:18px}
+  .topbar-kicker{max-width:142px;font-size:7px;letter-spacing:.9px}
+  .topbar .topbar-action-btn{width:35px;height:35px;min-height:35px}
+  .topbar .topbar-action-btn svg{width:17px;height:17px}
+}
