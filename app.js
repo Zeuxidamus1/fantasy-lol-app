@@ -2635,7 +2635,7 @@ function render(view="home",options={}){
     const moveCount=document.querySelector("#transactionMoveCount");
     const leagueName=document.querySelector("#transactionLeagueName");
     const leagueId=getActiveLeagueId();
-    let user=null,claims=[],moves=[],members=[],leagues=[],priorities=[];
+    let user=null,claims=[],moves=[],members=[],leagues=[];
     const fmt=iso=>{const d=new Date(iso);return Number.isNaN(d.getTime())?"":d.toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});};
     const memberName=id=>members.find(m=>String(m.user_id)===String(id))?.team_name||"Manager";
     const playerFromId=id=>playerById(id)||{id,name:id,team:"",role:""};
@@ -2662,14 +2662,11 @@ function render(view="home",options={}){
       }
       try{
         const b=backend();
-        [user,claims,moves,members,leagues,priorities]=await Promise.all([
+        [user,claims,moves,members,leagues]=await Promise.all([
           b.currentUser(),b.listWaivers(leagueId),b.listTransactions(leagueId),
-          b.listLeagueMembers(leagueId),b.listLeagues(),b.listWaiverPriority(leagueId).catch(()=>[])
+          b.listLeagueMembers(leagueId),b.listLeagues()
         ]);
         leagueName.textContent=leagues.find(l=>String(l.id)===String(leagueId))?.name||"League";
-        const minePriority=priorities.find(x=>String(x.manager_id)===String(user?.id)&&x.manager_type==="human");
-        const priorityCopy=document.querySelector("#waiverPriorityCopy");
-        if(priorityCopy)priorityCopy.textContent=minePriority?"Your current waiver priority: #"+minePriority.priority:"Waiver priority initializes automatically.";
         draw();
       }catch(err){content.innerHTML=`<div class="empty-state cloud-error"><strong>Could not load transactions</strong><small>${h(err.message||"Please try again.")}</small></div>`;}
     };
