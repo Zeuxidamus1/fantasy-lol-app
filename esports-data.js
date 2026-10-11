@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-11T08:46:10.499Z",
+  "updatedAt": "2026-10-11T20:13:59.231Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "115548681803406309",
-      "eventId": "",
-      "competition": "lec",
-      "competitionType": "regional",
-      "startTime": "2026-09-11T15:00:00Z",
-      "league": "LEC",
-      "leagueCode": "lec",
-      "stage": "Playoffs",
-      "aId": "101383793572656373",
-      "a": "GIANTX",
-      "aCode": "GX",
-      "bId": "114868016111590239",
-      "b": "Natus Vincere",
-      "bCode": "NAVI",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "117030752644841637",
       "eventId": "",
