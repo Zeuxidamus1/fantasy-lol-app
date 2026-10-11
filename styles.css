@@ -1075,3 +1075,15 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
 @media(max-width:390px){
   .trade-summary-lists{grid-template-columns:1fr}
 }
+
+
+/* Collapsible additional-league actions */
+.league-more-details{padding:0;overflow:hidden}
+.league-more-summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px;cursor:pointer}
+.league-more-summary::-webkit-details-marker{display:none}
+.league-more-summary>div{min-width:0}
+.league-more-summary strong{display:block;margin-top:3px;font-size:15px;line-height:1.3}
+.league-more-chevron{font-size:18px;color:#70a4c9;transition:transform .18s ease;flex:0 0 auto}
+.league-more-details[open] .league-more-chevron{transform:rotate(180deg)}
+.league-more-content{padding:0 16px 16px;border-top:1px solid #1c3048}
+.league-more-content .profile-copy{margin-top:14px}
