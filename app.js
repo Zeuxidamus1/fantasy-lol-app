@@ -2420,10 +2420,10 @@ function render(view="home",options={}){
       const theirNames=selectedNames(selectedTheirs,theirs);
       const valid=mineNames.length>0&&theirNames.length>0&&mineNames.length<=5&&theirNames.length<=5;
       if(valid){
-        const mineAfter=mine.length-mineNames.length+theirNames.length;
-        const theirsAfter=theirs.length-theirNames.length+mineNames.length;
-        const opponentDrops=Math.max(0,theirsAfter-rosterLimit());
-        const myOverflow=Math.max(0,mineAfter-rosterLimit());
+        const mineBalance=rosterBalanceFor(mine.length,mineNames.length,theirNames.length);
+        const theirBalance=rosterBalanceFor(theirs.length,theirNames.length,mineNames.length);
+        const mineAfter=mineBalance.post;
+        const theirsAfter=theirBalance.post;
         summary.innerHTML=`
           <strong class="trade-summary-title">${counterSourceTradeId?"Counteroffer":"Trade Offer"}</strong>
           <div class="trade-summary-lists">
@@ -2432,12 +2432,14 @@ function render(view="home",options={}){
           </div>
           <div class="trade-impact">
             <strong>Roster Impact</strong>
-            <small>Your roster: ${mine.length} → ${mineAfter} players</small>
-            <small>${h(partnerName(currentPartner()))}: ${theirs.length} → ${theirsAfter} players</small>
-            ${opponentDrops?`<small class="warning">${h(partnerName(currentPartner()))} will need to drop ${opponentDrops} player${opponentDrops===1?"":"s"} if accepted.</small>`:""}
-            ${myOverflow?`<small class="warning">You would be ${myOverflow} player${myOverflow===1?"":"s"} over the roster limit. Add more players to You Send first.</small>`:""}
+            <small>Your roster: ${mine.length} → ${mineAfter} players before balance moves</small>
+            <small>${h(partnerName(currentPartner()))}: ${theirs.length} → ${theirsAfter} players before balance moves</small>
+            ${mineBalance.drops?`<small class="warning">You must choose ${mineBalance.drops} player${mineBalance.drops===1?"":"s"} to drop before sending.</small>`:""}
+            ${mineBalance.adds?`<small class="warning">You must choose ${mineBalance.adds} eligible free agent${mineBalance.adds===1?"":"s"} to add before sending.</small>`:""}
+            ${theirBalance.drops?`<small class="warning">${h(partnerName(currentPartner()))} must choose ${theirBalance.drops} player${theirBalance.drops===1?"":"s"} to drop before accepting.</small>`:""}
+            ${theirBalance.adds?`<small class="warning">${h(partnerName(currentPartner()))} must choose ${theirBalance.adds} eligible free agent${theirBalance.adds===1?"":"s"} to add before accepting.</small>`:""}
           </div>`;
-        submit.disabled=myOverflow>0;
+        submit.disabled=false;
         submit.textContent=counterSourceTradeId?"Send Counteroffer":"Send Trade Offer";
       }else{
         summary.textContent="Select at least one player from each side to build an offer. You can select up to 5 players per side.";
