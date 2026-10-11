@@ -2775,7 +2775,6 @@ function render(view="home",options={}){
         if(entryActions)entryActions.classList.remove("empty-league-actions");
 
         document.querySelector("#leagueOverviewName").textContent=activeLeague.name;
-        document.querySelector("#leagueOverviewStatus").textContent=String(activeLeague.status||"pre_draft").replace("_"," ").toUpperCase();
         document.querySelector("#leagueOverviewTeam").textContent=activeMembership?.team_name||"Your team";
         document.querySelector("#leagueOverviewRole").textContent=activeMembership?.role==="owner"?"Commissioner":"Manager";
         document.querySelector("#leagueOverviewInvite").textContent=activeLeague.invite_code||"—";
