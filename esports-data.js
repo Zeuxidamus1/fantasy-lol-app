@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-11T23:39:24.718Z",
+  "updatedAt": "2026-10-12T05:51:52.533Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "117030752644841637",
-      "eventId": "",
-      "competition": "lck",
-      "competitionType": "regional",
-      "startTime": "2026-09-12T05:00:00Z",
-      "league": "LCK",
-      "leagueCode": "lck",
-      "stage": "Playoffs",
-      "aId": "100205573496804586",
-      "a": "Hanwha Life Esports",
-      "aCode": "HLE",
-      "bId": "98767991853197861",
-      "b": "T1",
-      "bCode": "T1",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "117155436343202196",
       "eventId": "",
