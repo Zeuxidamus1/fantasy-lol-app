@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-12T05:51:52.533Z",
+  "updatedAt": "2026-10-12T15:17:01.043Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,44 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "117155436343202196",
-      "eventId": "",
-      "competition": "lpl",
-      "competitionType": "regional",
-      "startTime": "2026-09-12T09:00:00Z",
-      "league": "LPL",
-      "leagueCode": "lpl",
-      "stage": "Playoffs",
-      "aId": "99566404848691211",
-      "a": "Invictus Gaming",
-      "aCode": "IG",
-      "bId": "99566404856367466",
-      "b": "Anyone's Legend",
-      "bCode": "AL",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
-    {
-      "matchId": "115548681803406315",
-      "eventId": "",
-      "competition": "lec",
-      "competitionType": "regional",
-      "startTime": "2026-09-12T15:00:00Z",
-      "league": "LEC",
-      "leagueCode": "lec",
-      "stage": "Playoffs",
-      "aId": "99322214695067838",
-      "a": "Team Vitality",
-      "aCode": "VIT",
-      "bId": "103461966965149786",
-      "b": "Movistar KOI",
-      "bCode": "MKOI",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "115565671526403069",
       "eventId": "",
