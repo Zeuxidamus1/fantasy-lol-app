@@ -3137,17 +3137,24 @@ function render(view="home",options={}){
               const myRosterCount=(rosters||[]).filter(r=>String(r.manager_type||"human")==="human"&&String(r.user_id)===String(user.id)).length;
               const order=Array.isArray(draft?.manager_order)?draft.manager_order:[];
               const draftSlot=Math.max(-1,order.findIndex(id=>String(id)===String(user.id)));
-              const championName=champion
+              const championMember=champion
                 ?(String(champion.manager_type||"human")==="bot"
-                  ?bots.find(x=>String(x.id)===String(champion.manager_id))?.team_name
-                  :members.find(x=>String(x.user_id)===String(champion.manager_id))?.team_name)||"Champion"
-                :"No Champion";
+                  ?bots.find(x=>String(x.id)===String(champion.manager_id))
+                  :members.find(x=>String(x.user_id)===String(champion.manager_id)))
+                :null;
+              const championName=championMember?.team_name||(champion?"Champion":"No Champion");
+              const championStanding=champion
+                ?(standings||[]).find(s=>String(s.manager_type||"human")===String(champion.manager_type||"human")&&String(s.manager_id)===String(champion.manager_id))
+                :null;
+              const championRecord=championStanding
+                ?((Number(championStanding.wins)||0)+"-"+(Number(championStanding.losses)||0)+"-"+(Number(championStanding.ties)||0))
+                :"";
               const record=myStanding?((Number(myStanding.wins)||0)+"-"+(Number(myStanding.losses)||0)+"-"+(Number(myStanding.ties)||0)):"—";
               const finish=myStanding?.rank?"#"+Number(myStanding.rank):"—";
               const hasStandings=Array.isArray(standings)&&standings.some(s=>Number(s.completed_matchups)>0||Number(s.points_for)!==0||Number(s.wins)>0||Number(s.losses)>0||Number(s.ties)>0);
               const tools=[
                 ...(hasStandings?[{view:"standings",icon:"≡",title:"Final Standings"}]:[]),
-                ...(hasScoringPeriods?[{view:"matchup",icon:"⚔",title:"Matchup Results"}]:[]),
+                ...(hasScoringPeriods?[{view:"matchup",icon:"⚔",title:"Season Results"}]:[]),
                 {view:"team",icon:"◈",title:"Final Roster"},
                 ...(hasDraft?[{view:"draft",icon:"◎",title:"Draft Results"}]:[])
               ];
@@ -3167,11 +3174,12 @@ function render(view="home",options={}){
                   <div><small>Finish</small><strong>${h(finish)}</strong></div>
                   <div><small>Record</small><strong>${h(record)}</strong></div>
                   <div><small>PF</small><strong>${myStanding?formatFantasyPoints(myStanding.points_for):"—"}</strong></div>
+                  <div><small>PA</small><strong>${myStanding?formatFantasyPoints(myStanding.points_against):"—"}</strong></div>
                   <div><small>Best Week</small><strong>${bestWeek===null?"—":formatFantasyPoints(bestWeek)}</strong></div>
                   <div><small>Draft Slot</small><strong>${draftSlot>=0?"#"+(draftSlot+1):"—"}</strong></div>
                   <div><small>Final Roster</small><strong>${h(String(myRosterCount))}</strong></div>
                 </div>
-                <div class="completed-champion-row"><span>Champion</span><strong>${h(championName)}</strong></div>
+                <div class="completed-champion-row"><span>Champion</span><strong>${h(championName)}${championRecord?" · "+h(championRecord):""}</strong></div>
                 <div class="league-quick-grid league-hub-tools completed-review-tools">
                   ${tools.map(tool=>`<button class="league-tool-btn ${tools.length%2===1&&tool===tools[tools.length-1]?"league-tool-wide":""}" type="button" data-completed-view="${h(tool.view)}"><span class="action-icon">${tool.icon}</span><span><strong>${h(tool.title)}</strong></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>`).join("")}
                 </div>`;
