@@ -213,6 +213,12 @@
     return request("/rest/v1/rpc/start_mock_simulation",{method:"POST",body:{p_league_id:leagueId},session:current});
   }
 
+  async function listMockDraftPool(leagueId){
+    const current=await session();
+    if(!current)throw new Error("Sign in before loading the mock draft pool.");
+    return request("/rest/v1/rpc/list_mock_draft_pool",{method:"POST",body:{p_league_id:leagueId},session:current});
+  }
+
   async function deleteMockLeague(leagueId){
     const current=await session();
     if(!current)throw new Error("Sign in before deleting a mock league.");
@@ -570,7 +576,7 @@
     readSession,
     onSessionChange(fn){listeners.add(fn);return()=>listeners.delete(fn);},
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
-    listLeagues,createLeague,createBotLeague,isPlatformAdmin,createMockLeague,getMockSimulation,startMockSimulation,deleteMockLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
+    listLeagues,createLeague,createBotLeague,isPlatformAdmin,createMockLeague,getMockSimulation,startMockSimulation,listMockDraftPool,deleteMockLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,makeBotDraftPick,
     listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,listLineupLocks,listPlayerCompetitionStatus,listPlayerProjections,listPlayoffs,getLeagueChampion,listLeagueActivity,listLeagueHistory,listScoreCorrections,listWaiverPriority,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
