@@ -498,6 +498,15 @@
     return request("/rest/v1/rpc/create_trade",{method:"POST",body:{p_league_id:leagueId,p_to_user:toUser,p_offer:offer},session:current});
   }
 
+  async function createCounterTrade(originalTradeId,offer){
+    const current=await session();
+    if(!current)throw new Error("Sign in before creating a counteroffer.");
+    return request("/rest/v1/rpc/create_counter_trade",{method:"POST",body:{
+      p_original_trade_id:originalTradeId,
+      p_offer:offer
+    },session:current});
+  }
+
   async function updateTrade(id,status){
     const allowed=new Set(["declined","canceled"]);
     if(!allowed.has(status))throw new Error("Invalid trade status.");
@@ -534,7 +543,7 @@
     listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,listLineupLocks,listPlayerCompetitionStatus,listPlayerProjections,listPlayoffs,getLeagueChampion,listLeagueActivity,listLeagueHistory,listScoreCorrections,listWaiverPriority,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
     listNotifications,markNotificationsRead,
-    listTrades,subscribeLeagueTradeUpdates,createTrade,updateTrade,acceptTrade,reviewTrade,
+    listTrades,subscribeLeagueTradeUpdates,createTrade,createCounterTrade,updateTrade,acceptTrade,reviewTrade,
     logClientError,
     request
   });
