@@ -2196,8 +2196,16 @@ function render(view="home",options={}){
           nextBtn.onclick=()=>{if(roundIndex<rounds.length-1){selectedMatchupRound=Number(rounds[roundIndex+1].round_number);render("matchup",roundRenderOptions());}};
 
           roundLabel.textContent=round.label||((round.stage?round.stage+" · ":"")+"Round "+round.round_number);
-          roundStatus.textContent=round.status==="live"?"LIVE FANTASY PERIOD":round.status==="final"?"FINAL":"UPCOMING";
-          roundStatus.classList.toggle("live",round.status==="live");
+          const roundEnded=Date.now()>=Date.parse(round.ends_at||"");
+          const finalizing=round.status==="live"&&roundEnded;
+          roundStatus.textContent=round.status==="final"
+            ?"FINAL"
+            :finalizing
+              ?"FINALIZING STATS"
+              :round.status==="live"
+                ?"LIVE FANTASY PERIOD"
+                :"UPCOMING";
+          roundStatus.classList.toggle("live",round.status==="live"&&!finalizing);
           const matchText=Number(round.match_count)>0?" · "+Number(round.match_count)+" pro match"+(Number(round.match_count)===1?"":"es"):"";
           roundDates.textContent=formatRoundDate(round.starts_at)+" – "+formatRoundDate(new Date(Date.parse(round.ends_at)-1))+matchText;
           
