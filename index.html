@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261013-onboarding-mobile-v1" />
+  <link rel="stylesheet" href="styles.css?v=20261013-completed-results-v1" />
 </head>
 <body>
   <a class="skip-link" href="#app">Skip to main content</a>
@@ -627,15 +627,15 @@
           <small id="leagueCompletionCopy">This fantasy league has ended.</small>
         </div>
         <div class="league-overview-grid">
-          <div>
+          <div id="leagueOverviewTeamField">
             <small>Your Team</small>
             <strong id="leagueOverviewTeam">—</strong>
           </div>
-          <div>
+          <div id="leagueOverviewRoleField">
             <small>Role</small>
             <strong id="leagueOverviewRole">—</strong>
           </div>
-          <div>
+          <div id="leagueOverviewInviteField">
             <small>Invite Code</small>
             <strong id="leagueOverviewInvite">—</strong>
           </div>
@@ -644,11 +644,11 @@
         <section class="league-tools-panel" id="leagueQuickAccess">
           <div class="league-tools-heading">
             <div>
-              <div class="eyebrow">LEAGUE TOOLS</div>
-              <strong>Manage this league</strong>
+              <div class="eyebrow" id="leagueToolsEyebrow">LEAGUE TOOLS</div>
+              <strong id="leagueToolsTitle">Manage this league</strong>
             </div>
           </div>
-          <div class="league-quick-grid league-hub-tools">
+          <div class="league-quick-grid league-hub-tools" id="leagueToolsGrid">
             <button class="league-tool-btn" data-jump="team"><span class="action-icon">◈</span><span><strong>My Team</strong><small>Roster &amp; lineup</small></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>
             <button class="league-tool-btn" data-jump="matchup"><span class="action-icon">⚔</span><span><strong>Matchup</strong><small>Head-to-head</small></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>
             <button class="league-tool-btn" data-jump="standings"><span class="action-icon">≡</span><span><strong>Standings</strong><small>League table</small></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>
@@ -1356,10 +1356,10 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3"></script>
-  <script src="esports-data.js?v=20261011-standings-mobile-v2"></script>
-  <script src="backend-config.js?v=20261011-standings-mobile-v2"></script>
-  <script src="backend.js?v=20261011-roster-integrity-v2"></script>
-  <script src="player-stats.js?v=20261011-standings-mobile-v2"></script>
-  <script src="app.js?v=20261012-season-complete-v1"></script>
+  <script src="esports-data.js?v=20261013-completed-results-v1"></script>
+  <script src="backend-config.js?v=20261013-completed-results-v1"></script>
+  <script src="backend.js?v=20261013-completed-results-v1"></script>
+  <script src="player-stats.js?v=20261013-completed-results-v1"></script>
+  <script src="app.js?v=20261013-completed-results-v1"></script>
 </body>
 </html>
