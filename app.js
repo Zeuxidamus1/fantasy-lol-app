@@ -3210,6 +3210,29 @@ function render(view="home",options={}){
     const commissionerBtn=document.querySelector("#leagueSetupBtn");
     const rulesModal=document.querySelector("#leagueRulesModal");
     const entryActions=document.querySelector("#leagueEntryActions");
+    const renderLeagueSettingsSummary=summarySettings=>{
+      const summary=document.querySelector("#leagueSettingsSummary");
+      if(summary)summary.innerHTML=`
+        <div><span>Teams</span><strong>${h(String(summarySettings.managers))}</strong></div>
+        <div><span>Draft</span><strong>${h(summarySettings.draftType)}</strong></div>
+        <div><span>Scoring</span><strong>${h(summarySettings.scoringFormat)}</strong></div>
+        <div><span>Competition</span><strong>${h(competitionName(summarySettings.competition))}</strong></div>
+        <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP · FLEX · ${h(String(summarySettings.bench))} BN</strong></div>`;
+      const signedScore=value=>{
+        const n=Number(value);
+        if(!Number.isFinite(n))return "—";
+        return n>0?"+"+n:String(n);
+      };
+      const scoringSummary=document.querySelector("#leagueScoringSummary");
+      if(scoringSummary)scoringSummary.innerHTML=`
+        <div><span>Kills</span><strong>${signedScore(summarySettings.scoring.kills)}</strong></div>
+        <div><span>Deaths</span><strong>${signedScore(summarySettings.scoring.deaths)}</strong></div>
+        <div><span>Assists</span><strong>${signedScore(summarySettings.scoring.assists)}</strong></div>
+        <div><span>CS</span><strong>${signedScore(summarySettings.scoring.cs)}</strong></div>
+        <div><span>Win</span><strong>${signedScore(summarySettings.scoring.win)}</strong></div>
+        <div><span>First Blood</span><strong>${signedScore(summarySettings.scoring.firstBlood)}</strong></div>`;
+    };
+    renderLeagueSettingsSummary(settings);
 
     if(!getActiveLeagueId()){
       if(overviewCard)overviewCard.hidden=true;
@@ -3453,7 +3476,8 @@ function render(view="home",options={}){
           competitionType:competitionType(activeLeague.settings?.competition),
           scoring:{...defaultLeagueSettings.scoring,...(activeLeague.settings?.scoring||{})}
         };
-        cacheLeagueSettings(activeSettings)
+        cacheLeagueSettings(activeSettings);
+        renderLeagueSettingsSummary(activeSettings);
 
         if(overviewCard)overviewCard.hidden=false;
         if(activeLeagueEntryCard){
@@ -3624,25 +3648,6 @@ function render(view="home",options={}){
       }
     })();
 
-    document.querySelector("#leagueSettingsSummary").innerHTML=`
-      <div><span>Teams</span><strong>${settings.managers}</strong></div>
-      <div><span>Draft</span><strong>${settings.draftType}</strong></div>
-      <div><span>Scoring</span><strong>${settings.scoringFormat}</strong></div>
-      <div><span>Competition</span><strong>${competitionName(settings.competition)}</strong></div>
-      <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP · FLEX · ${settings.bench} BN</strong></div>`;
-    const signedScore=value=>{
-      const n=Number(value);
-      if(!Number.isFinite(n))return "—";
-      return n>0?"+"+n:String(n);
-    };
-    const scoringSummary=document.querySelector("#leagueScoringSummary");
-    if(scoringSummary)scoringSummary.innerHTML=`
-      <div><span>Kills</span><strong>${signedScore(settings.scoring.kills)}</strong></div>
-      <div><span>Deaths</span><strong>${signedScore(settings.scoring.deaths)}</strong></div>
-      <div><span>Assists</span><strong>${signedScore(settings.scoring.assists)}</strong></div>
-      <div><span>CS</span><strong>${signedScore(settings.scoring.cs)}</strong></div>
-      <div><span>Win</span><strong>${signedScore(settings.scoring.win)}</strong></div>
-      <div><span>First Blood</span><strong>${signedScore(settings.scoring.firstBlood)}</strong></div>`;
   }
   if(view==="draft"){
     if(draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
