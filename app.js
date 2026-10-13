@@ -4513,11 +4513,44 @@ function render(view="home",options={}){
     const simCard=document.querySelector("#creatorSimulationCard");
     const statsCard=document.querySelector("#creatorSimulationStatsCard");
     const createBtn=document.querySelector("#creatorCreateMockBtn");
+    const createCompetition=document.querySelector("#creatorCompetitionSelect");
+    const createCompetitionHelp=document.querySelector("#creatorCompetitionHelp");
+    const activeTournamentControl=document.querySelector("#creatorActiveTournamentControl");
+    const activeCompetition=document.querySelector("#creatorActiveCompetitionSelect");
+    const activeCompetitionHelp=document.querySelector("#creatorActiveCompetitionHelp");
+    const applyTournamentBtn=document.querySelector("#creatorApplyTournamentBtn");
     const openDraftBtn=document.querySelector("#creatorOpenDraftBtn");
     const startBtn=document.querySelector("#creatorStartSimulationBtn");
     const refreshBtn=document.querySelector("#creatorRefreshSimulationBtn");
     const deleteBtn=document.querySelector("#creatorDeleteMockBtn");
     let mockLeague=null;
+    let mockCompetitions=[];
+
+    const competitionOptionLabel=row=>{
+      const count=Number(row?.pool_count)||0;
+      return (row?.display_name||competitionName(row?.code))+" · "+count+" players";
+    };
+    const competitionHelp=row=>{
+      if(!row)return "Choose which tournament player pool to use for this mock draft.";
+      if(row.available){
+        return competitionOptionLabel(row)+" · TOP "+row.top_count+" · JNG "+row.jng_count+" · MID "+row.mid_count+" · ADC "+row.adc_count+" · SUP "+row.sup_count;
+      }
+      return competitionOptionLabel(row)+" · Not enough eligible players for a complete 2-team mock draft.";
+    };
+    const populateCompetitionSelect=(select,value)=>{
+      if(!select)return;
+      select.innerHTML=mockCompetitions.map(row=>`<option value="${h(row.code)}" ${row.available?"":"disabled"}>${h(competitionOptionLabel(row))}${row.available?"":" · UNAVAILABLE"}</option>`).join("");
+      const preferred=normalizeCompetitionCode(value)||"worlds";
+      if([...select.options].some(option=>option.value===preferred&&!option.disabled))select.value=preferred;
+      else{
+        const first=[...select.options].find(option=>!option.disabled);
+        if(first)select.value=first.value;
+      }
+    };
+    const updateCompetitionHelp=(select,target)=>{
+      if(!select||!target)return;
+      target.textContent=competitionHelp(mockCompetitions.find(row=>row.code===select.value));
+    };
 
     const drawSnapshot=snapshot=>{
       const run=snapshot?.run||{};
@@ -4551,16 +4584,27 @@ function render(view="home",options={}){
         showToast("Creator access required");
         return render("account",{replace:true});
       }
-      const leagues=await b.listLeagues();
+      const [leagues,competitionRows]=await Promise.all([
+        b.listLeagues(),
+        b.listMockCompetitions()
+      ]);
+      mockCompetitions=Array.isArray(competitionRows)?competitionRows:[];
+      populateCompetitionSelect(createCompetition,"worlds");
+      updateCompetitionHelp(createCompetition,createCompetitionHelp);
       mockLeague=leagues.find(l=>isSimulationLeague(l))||null;
       createCard.hidden=!!mockLeague;
       activeCard.hidden=!mockLeague;
       if(!mockLeague){
         simCard.hidden=true;statsCard.hidden=true;
+        if(activeTournamentControl)activeTournamentControl.hidden=true;
         return;
       }
 
-      const snapshot=await b.getMockSimulation(mockLeague.id);
+      const [snapshot,draftState,draftPicks]=await Promise.all([
+        b.getMockSimulation(mockLeague.id),
+        b.getLeagueDraft(mockLeague.id),
+        b.listDraftPicks(mockLeague.id)
+      ]);
       const run=snapshot?.run||{};
       document.querySelector("#creatorMockTitle").textContent=mockLeague.name||"Creator Mock Draft";
       const leagueStatus=String(mockLeague.status||"pre_draft");
@@ -4575,6 +4619,19 @@ function render(view="home",options={}){
               ?"The test game is complete. Review the final fantasy scores or delete the test league."
               :"Draft complete. Start the 35-minute scoring simulation when you're ready.";
 
+      const pickCount=Array.isArray(draftPicks)?draftPicks.length:0;
+      const canChangeTournament=(leagueStatus==="pre_draft"||leagueStatus==="drafting")&&pickCount===0;
+      if(activeTournamentControl)activeTournamentControl.hidden=!canChangeTournament;
+      if(activeCompetition){
+        populateCompetitionSelect(activeCompetition,mockLeague?.settings?.competition);
+        activeCompetition.disabled=!canChangeTournament;
+        updateCompetitionHelp(activeCompetition,activeCompetitionHelp);
+      }
+      if(applyTournamentBtn){
+        applyTournamentBtn.hidden=!canChangeTournament;
+        applyTournamentBtn.disabled=!canChangeTournament;
+      }
+
       openDraftBtn.hidden=run.status==="running";
       openDraftBtn.textContent=leagueStatus==="pre_draft"||leagueStatus==="drafting"?"Open Draft Room":"Review Draft Results";
       startBtn.hidden=!(leagueStatus==="active"&&run.status!=="running"&&run.status!=="completed");
@@ -4582,10 +4639,18 @@ function render(view="home",options={}){
       drawSnapshot(snapshot);
     };
 
+    if(createCompetition){
+      createCompetition.onchange=()=>updateCompetitionHelp(createCompetition,createCompetitionHelp);
+    }
+    if(activeCompetition){
+      activeCompetition.onchange=()=>updateCompetitionHelp(activeCompetition,activeCompetitionHelp);
+    }
+
     createBtn.onclick=async()=>{
       createBtn.disabled=true;
       try{
-        const created=await b.createMockLeague();
+        const competition=createCompetition?.value||"worlds";
+        const created=await b.createMockLeague(competition);
         const league=Array.isArray(created)?created[0]:created;
         if(!league?.id)throw new Error("Mock league was not created.");
         mockLeague=league;
@@ -4594,6 +4659,21 @@ function render(view="home",options={}){
         await load();
       }catch(err){showToast(err.message||"Could not create mock league");}
       finally{createBtn.disabled=false;}
+    };
+
+    applyTournamentBtn.onclick=async()=>{
+      if(!mockLeague||!activeCompetition)return;
+      applyTournamentBtn.disabled=true;
+      try{
+        const updated=await b.setMockCompetition(mockLeague.id,activeCompetition.value);
+        mockLeague=Array.isArray(updated)?updated[0]:updated;
+        showToast("Mock tournament changed to "+competitionName(activeCompetition.value));
+        await load();
+      }catch(err){
+        showToast(err.message||"Could not change mock tournament");
+      }finally{
+        applyTournamentBtn.disabled=false;
+      }
     };
 
     openDraftBtn.onclick=()=>{
