@@ -324,12 +324,33 @@ function defaultUserRoster(){
   return [];
 }
 
-function getUserRoster(){
+function currentSessionUserId(){
+  const session=backend()?.readSession?.();
+  const direct=session?.user?.id;
+  if(direct)return String(direct);
+  const token=String(session?.access_token||"");
+  const payload=token.split(".")[1];
+  if(!payload)return null;
   try{
-    const saved=JSON.parse(storageGet("riftUserRoster")||"null");
-    return Array.isArray(saved) ? saved : defaultUserRoster();
+    const normalized=payload.replace(/-/g,"+").replace(/_/g,"/");
+    const padded=normalized+"=".repeat((4-normalized.length%4)%4);
+    const parsed=JSON.parse(atob(padded));
+    return parsed?.sub?String(parsed.sub):null;
+  }catch{return null;}
+}
+function scopedLeagueStorageKey(base,leagueId=getActiveLeagueId()){
+  const userId=currentSessionUserId();
+  if(!userId)return null;
+  return base+":"+userId+(leagueId?":"+String(leagueId):"");
+}
+function getUserRoster(){
+  const key=scopedLeagueStorageKey("riftUserRoster");
+  if(!key)return [];
+  try{
+    const saved=JSON.parse(storageGet(key)||"null");
+    return Array.isArray(saved) ? saved : [];
   }catch{
-    return defaultUserRoster();
+    return [];
   }
 }
 
@@ -387,12 +408,27 @@ function aggregateFantasyScores(scores=[]){
   }
   return map;
 }
+function activeLeagueStorageKey(){
+  const userId=currentSessionUserId();
+  return userId?"riftActiveLeagueId:"+userId:null;
+}
 function getActiveLeagueId(){
-  return storageGet("riftActiveLeagueId")||null;
+  const key=activeLeagueStorageKey();
+  return key?(storageGet(key)||null):null;
 }
 function setActiveLeagueId(id){
-  if(id)storageSet("riftActiveLeagueId",String(id));
-  else storageRemove("riftActiveLeagueId");
+  const key=activeLeagueStorageKey();
+  if(!key)return;
+  if(id)storageSet(key,String(id));
+  else storageRemove(key);
+}
+function chooseDefaultPlayableLeague(leagues){
+  return [...(leagues||[])].sort((a,b)=>{
+    const ta=Date.parse(a?.created_at||"")||0;
+    const tb=Date.parse(b?.created_at||"")||0;
+    if(tb!==ta)return tb-ta;
+    return String(a?.id||"").localeCompare(String(b?.id||""));
+  })[0]||null;
 }
 
 // Completed-league review is a transient viewing context, not the active gameplay league.
@@ -414,7 +450,8 @@ async function loadRosterFromCloud(leagueId){
       return p?{...p,id:playerKey(p),position:p.role,slot:row.slot||"BN",role:row.slot==="BN"?"BN":p.role}:null;
     }).filter(Boolean);
     const normalized=loaded.length?normalizeUserRoster(loaded):[];
-    storageSet("riftUserRoster",JSON.stringify(normalized));
+    const rosterKey=scopedLeagueStorageKey("riftUserRoster",leagueId);
+    if(rosterKey)storageSet(rosterKey,JSON.stringify(normalized));
     const validation=validateRoster(normalized);
     if(!validation.isComplete){
       const leagues=await b.listLeagues().catch(()=>[]);
@@ -451,7 +488,8 @@ async function saveUserRoster(players){
     if(!user)throw new Error("Sign in before changing your roster.");
     await b.saveRoster(leagueId,normalized);
   }
-  storageSet("riftUserRoster",JSON.stringify(normalized));
+  const rosterKey=scopedLeagueStorageKey("riftUserRoster",leagueId);
+  if(rosterKey)storageSet(rosterKey,JSON.stringify(normalized));
   return normalized;
 }
 
@@ -3341,9 +3379,12 @@ function render(view="home",options={}){
           activeId=null;
         }
         if(!activeId&&liveLeagues.length){
-          activeId=String(liveLeagues[0].id);
-          setActiveLeagueId(activeId);
-          await loadRosterFromCloud(activeId);
+          const fallbackLeague=chooseDefaultPlayableLeague(liveLeagues);
+          activeId=fallbackLeague?String(fallbackLeague.id):null;
+          if(activeId){
+            setActiveLeagueId(activeId);
+            await loadRosterFromCloud(activeId);
+          }
         }
 
         if(!leagues.length){
