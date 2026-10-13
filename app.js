@@ -95,8 +95,11 @@ function leagueLifecycleConfig(league,context={}){
   const state=leagueLifecycleState(league,context);
   return {state,...LEAGUE_LIFECYCLE[state]};
 }
+function isSimulationLeague(league){
+  return league?.settings?.simulation===true;
+}
 function playableLeague(league){
-  return new Set(["pre_draft","drafting","active"]).has(String(league?.status||""));
+  return !isSimulationLeague(league)&&new Set(["pre_draft","drafting","active"]).has(String(league?.status||""));
 }
 function scheduleCompetitionCode(game){
   return normalizeCompetitionCode(game?.competition||game?.leagueCode||game?.league||"");
@@ -203,6 +206,7 @@ function eligibleDraftPool(settings=getLeagueSettings()){
 const draftManagerNames = ["Baron Bandits","Zeuxidamus","Rift Raiders","Pentakill Club","Nexus Breakers","Blue Buff Boys","Dragon Slayers","Iron V","Red Side","First Blood","Scuttle Club","Elder Enjoyers"];
 let draftTimerId=null;
 let tradeTimerId=null;
+let creatorSimulationTimerId=null;
 let tradeRealtimeCleanup=null;
 const memoryStorage=new Map();
 function storageGet(key){
@@ -1194,12 +1198,13 @@ function render(view="home",options={}){
   }
   view=requested;
   historicalLeagueContextId=options.historyLeagueId?String(options.historyLeagueId):null;
-  if(["home","league","create-league","join-league","bot-league","bot-settings","bot-confirm","bot-success","my-schedule"].includes(view)&&!backend()?.readSession?.()?.access_token){
+  if(["home","league","create-league","join-league","bot-league","bot-settings","bot-confirm","bot-success","my-schedule","creator-lab"].includes(view)&&!backend()?.readSession?.()?.access_token){
     return render("login",{...options,replace:true});
   }
   if(view!=="draft"&&draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
   if(view!=="trade"&&tradeTimerId){clearInterval(tradeTimerId);tradeTimerId=null;}
   if(view!=="trade"&&tradeRealtimeCleanup){try{tradeRealtimeCleanup();}catch{}tradeRealtimeCleanup=null;}
+  if(view!=="creator-lab"&&creatorSimulationTimerId){clearInterval(creatorSimulationTimerId);creatorSimulationTimerId=null;}
   if(!options.fromHistory){
     const hash="#"+view;
     if(options.replace||currentView===null){
@@ -1214,7 +1219,7 @@ function render(view="home",options={}){
   currentView=view;
   app.innerHTML="";
   app.appendChild(template.content.cloneNode(true));
-  const titles={login:"Sign In",signup:"Create Account",verify:"Verify Email",home:"Home",account:"Account",team:"My Team",matchup:"Matchup",standings:"Standings",schedule:"Schedule","my-schedule":"My Schedule",players:"Players",player:"Player",league:"League","create-league":"Create League","join-league":"Join League","bot-league":"Create Bot League","bot-settings":"Bot League Settings","bot-confirm":"Confirm Bot League","bot-success":"League Created",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup",privacy:"Privacy Notice",terms:"Terms"};
+  const titles={login:"Sign In",signup:"Create Account",verify:"Verify Email",home:"Home",account:"Account","creator-lab":"Mock Draft Simulator",team:"My Team",matchup:"Matchup",standings:"Standings",schedule:"Schedule","my-schedule":"My Schedule",players:"Players",player:"Player",league:"League","create-league":"Create League","join-league":"Join League","bot-league":"Create Bot League","bot-settings":"Bot League Settings","bot-confirm":"Confirm Bot League","bot-success":"League Created",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup",privacy:"Privacy Notice",terms:"Terms"};
   document.title=`${titles[view]||"Rift Fantasy"} · Rift Fantasy`;
   document.body.classList.toggle("login-view",["login","signup","verify"].includes(view));
   document.body.classList.toggle("standings-view",view==="standings");
@@ -1234,7 +1239,8 @@ function render(view="home",options={}){
     "bot-success":"league",
     schedule:"home",
     "my-schedule":"home",
-    player:"players"
+    player:"players",
+    "creator-lab":"account"
   }[view]||view;
   document.querySelectorAll(".nav-item").forEach(b=>{
     const active=b.dataset.view===primaryView;
@@ -1424,6 +1430,11 @@ function render(view="home",options={}){
         recoveryCard.hidden=true;
         signedInCard.hidden=false;
         document.querySelector("#signedInEmail").textContent=cloudUserEmail(user);
+        const creatorEntry=document.querySelector("#creatorLabEntry");
+        const creatorButton=document.querySelector("#openCreatorLabBtn");
+        const admin=await b.isPlatformAdmin().catch(()=>false);
+        if(creatorEntry)creatorEntry.hidden=!admin;
+        if(creatorButton&&admin)creatorButton.onclick=()=>render("creator-lab");
       }else{
         authCard.hidden=false;
         recoveryCard.hidden=true;
@@ -3614,7 +3625,7 @@ function render(view="home",options={}){
 
       try{
         const leagues=await b.listLeagues();
-        const completedLeagues=leagues.filter(l=>leagueLifecycleState(l)==="completed");
+        const completedLeagues=leagues.filter(l=>!isSimulationLeague(l)&&leagueLifecycleState(l)==="completed");
         const liveLeagues=leagues.filter(playableLeague);
         await renderCompletedLeagueCard(completedLeagues);
 
@@ -3966,7 +3977,13 @@ function render(view="home",options={}){
         }).join(""):'<div class="muted">No draft picks were recorded for this league.</div>';
       }else{
         if(openCompletedBoardBtn)openCompletedBoardBtn.hidden=false;
-        if(completeTeamBtnLabel)completeTeamBtnLabel.textContent="View My Team";
+        if(league?.settings?.simulation){
+          if(completeTeamBtnLabel)completeTeamBtnLabel.textContent="Back to Creator Lab";
+          if(completeTeamBtn){
+            completeTeamBtn.removeAttribute("data-jump");
+            completeTeamBtn.onclick=()=>render("creator-lab");
+          }
+        }else if(completeTeamBtnLabel)completeTeamBtnLabel.textContent="View My Team";
         if(completedListEyebrow)completedListEyebrow.textContent="YOUR DRAFT";
         if(completedListTitle)completedListTitle.textContent="Your picks";
         if(completedListHint)completedListHint.textContent="Tap a player for details.";
@@ -4418,6 +4435,138 @@ function render(view="home",options={}){
     const created=(()=>{try{return JSON.parse(sessionStorage.getItem("riftBotLeagueCreated")||"{}");}catch{return {};}})();
     const copy=document.querySelector("#botSuccessCopy");
     if(copy&&created.name)copy.textContent=`${created.name} is ready to go. ${created.human} human and ${created.bots} bot manager${created.bots===1?" is":"s are"} in the league.`;
+  }
+
+
+  if(view==="creator-lab"){
+    const b=backend();
+    const createCard=document.querySelector("#creatorLabCreateCard");
+    const activeCard=document.querySelector("#creatorLabActiveCard");
+    const simCard=document.querySelector("#creatorSimulationCard");
+    const statsCard=document.querySelector("#creatorSimulationStatsCard");
+    const createBtn=document.querySelector("#creatorCreateMockBtn");
+    const openDraftBtn=document.querySelector("#creatorOpenDraftBtn");
+    const startBtn=document.querySelector("#creatorStartSimulationBtn");
+    const refreshBtn=document.querySelector("#creatorRefreshSimulationBtn");
+    const deleteBtn=document.querySelector("#creatorDeleteMockBtn");
+    let mockLeague=null;
+
+    const drawSnapshot=snapshot=>{
+      const run=snapshot?.run||{};
+      const matchup=snapshot?.matchup||{};
+      const stats=Array.isArray(snapshot?.stats)?snapshot.stats:[];
+      const running=["running","completed"].includes(String(run.status||""));
+      simCard.hidden=!running;
+      statsCard.hidden=!running;
+      if(!running)return;
+
+      const elapsed=Math.min(Number(run.duration_minutes)||35,Number(run.elapsed_minutes)||0);
+      document.querySelector("#creatorSimulationClock").textContent=elapsed+" / "+(Number(run.duration_minutes)||35)+" MIN";
+      document.querySelector("#creatorSimulationProgress").style.width=Math.max(0,Math.min(100,(elapsed/(Number(run.duration_minutes)||35))*100))+"%";
+      document.querySelector("#creatorHomeScore").textContent=formatFantasyPoints(matchup.home_score||0);
+      document.querySelector("#creatorAwayScore").textContent=formatFantasyPoints(matchup.away_score||0);
+      document.querySelector("#creatorSimulationState").textContent=run.status==="completed"
+        ?("Simulation complete · "+String(matchup.result||"final").replaceAll("_"," ").toUpperCase())
+        :"Random stats update automatically every minute.";
+
+      const statsRoot=document.querySelector("#creatorSimulationStats");
+      statsRoot.innerHTML=stats.length?stats.map(row=>{
+        const side=row.manager_type==="human"?"YOU":"BOT";
+        const record=row.kills+"/"+row.deaths+"/"+row.assists;
+        return `<div class="creator-sim-player"><span class="role-badge">${h(row.role||"")}</span><div class="player-info"><strong>${h(row.name||row.player_id)}</strong><small>${h(side)} · ${h(row.team||"")} · ${h(record)} · ${Number(row.cs)||0} CS${row.first_blood?" · FIRST BLOOD":""}</small></div><span class="fp">${formatFantasyPoints(row.fantasy_points||0)} FP</span></div>`;
+      }).join(""):'<div class="muted">Simulation stats will appear after the first scoring tick.</div>';
+    };
+
+    const load=async()=>{
+      const admin=await b.isPlatformAdmin().catch(()=>false);
+      if(!admin){
+        showToast("Creator access required");
+        return render("account",{replace:true});
+      }
+      const leagues=await b.listLeagues();
+      mockLeague=leagues.find(l=>isSimulationLeague(l))||null;
+      createCard.hidden=!!mockLeague;
+      activeCard.hidden=!mockLeague;
+      if(!mockLeague){
+        simCard.hidden=true;statsCard.hidden=true;
+        return;
+      }
+
+      const snapshot=await b.getMockSimulation(mockLeague.id);
+      const run=snapshot?.run||{};
+      document.querySelector("#creatorMockTitle").textContent=mockLeague.name||"Creator Mock Draft";
+      const leagueStatus=String(mockLeague.status||"pre_draft");
+      document.querySelector("#creatorMockStatus").textContent=run.status==="running"?"SIMULATING":run.status==="completed"?"COMPLETE":leagueStatus.replaceAll("_"," ").toUpperCase();
+      document.querySelector("#creatorMockCopy").textContent=leagueStatus==="pre_draft"
+        ?"Open the real Draft Room and start the draft when you're ready."
+        :leagueStatus==="drafting"
+          ?"Your mock draft is live. The bot will make its own picks."
+          :run.status==="running"
+            ?"The 35-minute scoring simulation is running automatically."
+            :run.status==="completed"
+              ?"The test game is complete. Review the final fantasy scores or delete the test league."
+              :"Draft complete. Start the 35-minute scoring simulation when you're ready.";
+
+      openDraftBtn.hidden=run.status==="running";
+      openDraftBtn.textContent=leagueStatus==="pre_draft"||leagueStatus==="drafting"?"Open Draft Room":"Review Draft Results";
+      startBtn.hidden=!(leagueStatus==="active"&&run.status!=="running"&&run.status!=="completed");
+      refreshBtn.hidden=false;
+      drawSnapshot(snapshot);
+    };
+
+    createBtn.onclick=async()=>{
+      createBtn.disabled=true;
+      try{
+        const created=await b.createMockLeague();
+        const league=Array.isArray(created)?created[0]:created;
+        if(!league?.id)throw new Error("Mock league was not created.");
+        mockLeague=league;
+        setActiveLeagueId(league.id);
+        showToast("Mock league created");
+        await load();
+      }catch(err){showToast(err.message||"Could not create mock league");}
+      finally{createBtn.disabled=false;}
+    };
+
+    openDraftBtn.onclick=()=>{
+      if(!mockLeague)return;
+      setActiveLeagueId(mockLeague.id);
+      render("draft");
+    };
+
+    startBtn.onclick=async()=>{
+      if(!mockLeague)return;
+      startBtn.disabled=true;
+      try{
+        const snapshot=await b.startMockSimulation(mockLeague.id);
+        showToast("35-minute simulation started");
+        drawSnapshot(snapshot);
+        await load();
+      }catch(err){showToast(err.message||"Could not start simulation");}
+      finally{startBtn.disabled=false;}
+    };
+
+    refreshBtn.onclick=()=>load().catch(err=>showToast(err.message||"Could not refresh simulation"));
+
+    deleteBtn.onclick=async()=>{
+      if(!mockLeague)return;
+      if(!window.confirm("Delete this mock league and all simulated game data?"))return;
+      deleteBtn.disabled=true;
+      try{
+        const id=mockLeague.id;
+        await b.deleteMockLeague(id);
+        if(String(getActiveLeagueId()||"")===String(id))setActiveLeagueId(null);
+        mockLeague=null;
+        showToast("Mock league deleted");
+        await load();
+      }catch(err){showToast(err.message||"Could not delete mock league");}
+      finally{deleteBtn.disabled=false;}
+    };
+
+    void load().catch(err=>showToast(err.message||"Could not open Creator Lab"));
+    creatorSimulationTimerId=setInterval(()=>{
+      if(document.querySelector("#creatorSimulationCard"))void load().catch(()=>{});
+    },10000);
   }
 
   if(view==="setup"){
