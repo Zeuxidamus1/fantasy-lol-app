@@ -1822,7 +1822,22 @@ function render(view="home",options={}){
           }
           const rosterNow=getUserRoster();
           const rosterIds=new Set(rosterNow.map(playerKey));
+          cacheCompetitionStatuses(competition,statusRows);
           const relevantStatus=statusRows.filter(x=>rosterIds.has(String(x.player_id)));
+          const unavailableRostered=relevantStatus.filter(x=>String(x.status)!=="starter");
+          const availabilityBanner=document.querySelector("#teamAvailabilityBanner");
+          const availabilityCopy=document.querySelector("#teamAvailabilityCopy");
+          if(availabilityBanner&&availabilityCopy){
+            availabilityBanner.hidden=unavailableRostered.length===0;
+            if(unavailableRostered.length){
+              availabilityCopy.textContent=unavailableRostered.map(row=>{
+                const player=playerById(row.player_id);
+                return (player?.name||row.player_id)+" · "+playerAvailabilityLabel(row.status);
+              }).join(" · ");
+            }else{
+              availabilityCopy.textContent="";
+            }
+          }
           const nextLockRow=relevantStatus
             .map(x=>({...x,_lockTime:Date.parse(x.next_match_at||"")}))
             .filter(x=>Number.isFinite(x._lockTime)&&x._lockTime>Date.now())
