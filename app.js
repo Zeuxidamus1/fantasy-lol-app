@@ -2904,11 +2904,13 @@ function render(view="home",options={}){
 
     const draw=()=>{
       const q=search.value.trim().toLowerCase();
+      const completed=leagueStatus==="completed";
       const source=getActiveLeagueId()?eligibleFantasyPlayers():allFantasyPlayers();
       const hiddenStatuses=new Set(["inactive","eliminated","season_complete","substitute","no_upcoming_match"]);
       const filtered=source.filter(p=>{
         if(role!=="ALL"&&p.role!==role)return false;
         if(!(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)))return false;
+        if(completed)return true;
         if(!getActiveLeagueId()||q)return true;
         const pid=playerKey(p);
         const ownership=leagueRosters.find(r=>String(r.player_id)===String(pid));
@@ -2925,6 +2927,21 @@ function render(view="home",options={}){
         const availability=playerStatusMap.get(String(pid));
         const draftable=playerIsDraftable(p);
         const unavailable=!draftable||!playerAvailableForAcquisition(p,leagueCompetition);
+
+        if(completed){
+          if(ownership){
+            if(String(ownership.user_id)===String(currentUser?.id)){
+              if(state)state.textContent="Final roster · Your team";
+            }else{
+              if(state)state.textContent="Final roster";
+            }
+          }else{
+            if(state)state.textContent="Season complete";
+          }
+          b.hidden=true;
+          return;
+        }
+
         if(ownership){
           if(String(ownership.user_id)===String(currentUser?.id)){
             b.textContent="OWNED";
@@ -2991,8 +3008,10 @@ function render(view="home",options={}){
         leagueStatus=activeLeague.status||null;
         leagueCompetition=normalizeCompetitionCode(activeLeague.settings?.competition)||null;
         leagueWaiversEnabled=activeLeague.settings?.waivers!==false;
-        const statuses=leagueCompetition?await b.listPlayerCompetitionStatus(leagueCompetition).catch(()=>[]):[];
-        cacheCompetitionStatuses(leagueCompetition,statuses);
+        const statuses=leagueStatus==="completed"
+          ?[]
+          :leagueCompetition?await b.listPlayerCompetitionStatus(leagueCompetition).catch(()=>[]):[];
+        if(leagueStatus!=="completed")cacheCompetitionStatuses(leagueCompetition,statuses);
         playerStatusMap=new Map(statuses.map(x=>[String(x.player_id),x]));
       }catch{
         leagueRosters=[];
