@@ -388,19 +388,23 @@ async function loadRosterFromCloud(leagueId){
     storageSet("riftUserRoster",JSON.stringify(normalized));
     const validation=validateRoster(normalized);
     if(!validation.isComplete){
-      const missing=[
-        ...validation.missingStarterPositions,
-        ...(validation.missingFlexSlots?["FLEX"]:[]),
-        ...(validation.missingBenchSlots?["BENCH"]:[])
-      ];
-      const alertKey="riftRosterAlert:"+leagueId+":"+user.id+":"+normalized.length+":"+missing.join(",");
-      let alreadyShown=false;
-      try{alreadyShown=sessionStorage.getItem(alertKey)==="1";}catch{}
-      if(!alreadyShown){
-        const countText=normalized.length+"/"+validation.totalRequired+" players";
-        const missingText=missing.length?" Missing: "+missing.join(", ")+".":"";
-        showToast("Roster incomplete · "+countText+"."+missingText);
-        try{sessionStorage.setItem(alertKey,"1");}catch{}
+      const leagues=await b.listLeagues().catch(()=>[]);
+      const leagueStatus=String(leagues.find(l=>String(l.id)===String(leagueId))?.status||"");
+      if(leagueStatus==="active"){
+        const missing=[
+          ...validation.missingStarterPositions,
+          ...(validation.missingFlexSlots?["FLEX"]:[]),
+          ...(validation.missingBenchSlots?["BENCH"]:[])
+        ];
+        const alertKey="riftRosterAlert:"+leagueId+":"+user.id+":"+normalized.length+":"+missing.join(",");
+        let alreadyShown=false;
+        try{alreadyShown=sessionStorage.getItem(alertKey)==="1";}catch{}
+        if(!alreadyShown){
+          const countText=normalized.length+"/"+validation.totalRequired+" players";
+          const missingText=missing.length?" Missing: "+missing.join(", ")+".":"";
+          showToast("Roster incomplete · "+countText+"."+missingText);
+          try{sessionStorage.setItem(alertKey,"1");}catch{}
+        }
       }
     }
     return true;
@@ -828,6 +832,37 @@ function capacityMessage(competition,bench=1){
   const name=competitionName(cap.code);
   if(cap.maxManagers<1)return `${name} is not open for fantasy drafting yet because there is no complete eligible player pool.`;
   return `${name}: ${cap.poolSize} draftable players · up to ${cap.maxManagers} manager${cap.maxManagers===1?"":"s"} with ${Number(bench)||0} bench spot${Number(bench)===1?"":"s"}.`;
+}
+async function applyCompetitionScheduleAvailability(select,onChange){
+  if(!select||!cloudReady()||typeof backend()?.listProMatches!=="function")return;
+  const year=new Date().getFullYear();
+  const rows=await backend().listProMatches(null,new Date(Date.UTC(year,0,1)),new Date(Date.UTC(year+1,0,1))).catch(()=>[]);
+  if(!Array.isArray(rows)||!rows.length)return;
+  const byCompetition=new Map();
+  for(const row of rows){
+    const code=normalizeCompetitionCode(row.competition);
+    if(!code)continue;
+    const state=byCompetition.get(code)||{any:false,future:false};
+    state.any=true;
+    const t=Date.parse(row.start_time||"");
+    const status=String(row.status||"").toUpperCase();
+    if(Number.isFinite(t)&&t>Date.now()&&!["COMPLETED","CANCELED","CANCELLED","POSTPONED"].includes(status))state.future=true;
+    byCompetition.set(code,state);
+  }
+  for(const option of select.options){
+    const code=normalizeCompetitionCode(option.value);
+    const state=byCompetition.get(code);
+    if(!state?.any)continue;
+    if(!option.dataset.baseLabel)option.dataset.baseLabel=option.textContent;
+    const closed=!state.future;
+    option.disabled=closed;
+    option.textContent=closed?option.dataset.baseLabel+" · Season Complete":option.dataset.baseLabel;
+  }
+  if(select.selectedOptions[0]?.disabled){
+    const next=[...select.options].find(option=>!option.disabled&&competitionCapacity(option.value,1).maxManagers>0);
+    if(next)select.value=next.value;
+  }
+  if(typeof onChange==="function")onChange();
 }
 
 function watchlistIds(){
@@ -3456,6 +3491,7 @@ function render(view="home",options={}){
         document.querySelectorAll("[data-create-managers]").forEach(x=>x.classList.toggle("active",x===btn));
       });
       updateCreateCapacity();
+      void applyCompetitionScheduleAvailability(competition,updateCreateCapacity);
 
       createBtn.onclick=async()=>{
         const name=nameInput.value.trim();
@@ -3598,6 +3634,7 @@ function render(view="home",options={}){
       render("bot-settings");
     };
     update();
+    void applyCompetitionScheduleAvailability(competition,update);
   }
 
   if(view==="bot-settings"){
