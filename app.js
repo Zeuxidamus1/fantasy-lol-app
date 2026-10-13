@@ -1453,6 +1453,7 @@ function render(view="home",options={}){
 
     let rosterMovesEnabled=false;
     let leagueCompleted=false;
+    let historicalRosterOverride=null;
     let activeLineupLocks=new Map();
     const refreshTeam=()=>render("team",{replace:true});
 
@@ -1526,7 +1527,8 @@ function render(view="home",options={}){
     };
 
     const drawRoster=()=>{
-      const current=getUserRoster().map(p=>({...p,lineupLock:activeLineupLocks.get(playerKey(p))||null}));
+      const sourceRoster=Array.isArray(historicalRosterOverride)?historicalRosterOverride:getUserRoster();
+      const current=sourceRoster.map(p=>({...p,lineupLock:activeLineupLocks.get(playerKey(p))||null}));
       const validation=validateRoster(current);
       const starters=current.filter(p=>ROSTER_RULES.starterSlots.includes(p.slot||p.role));
       const flex=current.filter(p=>(p.slot||p.role)==="FLEX");
@@ -1617,7 +1619,7 @@ function render(view="home",options={}){
           rosterMovesEnabled=teamLifecycle.canManageRoster;
 
           if(leagueCompleted){
-            leagueNameEl.textContent="FINAL ROSTER · "+String(activeLeague?.name||"League").toUpperCase();
+            leagueNameEl.textContent="FINAL ROSTERS · "+String(activeLeague?.name||"League").toUpperCase();
             renameBtn.hidden=true;
             editor.hidden=true;
             const addPlayersBtn=document.querySelector('.team-screen [data-jump="players"]');
@@ -1626,6 +1628,51 @@ function render(view="home",options={}){
             const lockStatusRow=document.querySelector("#teamLockStatusRow");
             if(nextLockRow)nextLockRow.hidden=true;
             if(lockStatusRow)lockStatusRow.hidden=true;
+
+            const finalRosterManagerCard=document.querySelector("#finalRosterManagerCard");
+            const finalRosterManagerSelect=document.querySelector("#finalRosterManagerSelect");
+            const [bots,allRosterRows]=await Promise.all([
+              b.listLeagueBots(leagueId).catch(()=>[]),
+              b.listRosters(leagueId).catch(()=>[])
+            ]);
+            const rosterManagers=[
+              ...members.map(m=>({id:String(m.user_id),type:"human",team_name:m.team_name||"Unnamed Team"})),
+              ...bots.map(bot=>({id:String(bot.id),type:"bot",team_name:bot.team_name||"Bot Team"}))
+            ];
+            const sourcePlayers=allFantasyPlayers();
+            const rosterForManager=manager=>{
+              const rows=(allRosterRows||[]).filter(r=>String(r.user_id)===String(manager.id));
+              return rows.map(row=>{
+                const player=sourcePlayers.find(p=>playerKey(p)===String(row.player_id)||String(p.id||"")===String(row.player_id));
+                const slot=String(row.slot||"BN").toUpperCase();
+                const fallbackPosition=ROSTER_RULES.starterSlots.includes(slot)?slot:"";
+                return player
+                  ?{...player,id:playerKey(player),position:playerPosition(player)||fallbackPosition,slot,role:slot==="BN"?"BN":(playerPosition(player)||fallbackPosition)}
+                  :{id:String(row.player_id),name:String(row.player_id),team:"",position:fallbackPosition,slot,role:slot==="BN"?"BN":fallbackPosition};
+              });
+            };
+            const applyHistoricalRoster=manager=>{
+              historicalRosterOverride=rosterForManager(manager);
+              teamNameEl.textContent=manager.team_name+(manager.type==="human"&&String(manager.id)===String(user.id)?" · You":"");
+              drawRoster();
+            };
+
+            if(finalRosterManagerCard&&finalRosterManagerSelect){
+              finalRosterManagerCard.hidden=false;
+              finalRosterManagerSelect.innerHTML=rosterManagers.map(manager=>`<option value="${h(manager.type+":"+manager.id)}">${h(manager.team_name)}${manager.type==="human"&&String(manager.id)===String(user.id)?" · You":manager.type==="bot"?" · Bot":""}</option>`).join("");
+              const mineKey="human:"+String(user.id);
+              if(rosterManagers.some(manager=>manager.type+":"+manager.id===mineKey))finalRosterManagerSelect.value=mineKey;
+              const selectedManager=rosterManagers.find(manager=>manager.type+":"+manager.id===finalRosterManagerSelect.value)||rosterManagers[0];
+              if(selectedManager)applyHistoricalRoster(selectedManager);
+              else{
+                historicalRosterOverride=[];
+                teamNameEl.textContent="No final rosters";
+              }
+              finalRosterManagerSelect.onchange=()=>{
+                const selected=rosterManagers.find(manager=>manager.type+":"+manager.id===finalRosterManagerSelect.value);
+                if(selected)applyHistoricalRoster(selected);
+              };
+            }
           }else{
             renameBtn.hidden=false;
           }
@@ -1637,7 +1684,7 @@ function render(view="home",options={}){
             }
           });
 
-          await loadRosterFromCloud(leagueId);
+          if(!leagueCompleted)await loadRosterFromCloud(leagueId);
           const rounds=await b.listFantasyRounds(leagueId);
           const activeRound=rounds.find(r=>r.status==="live");
           const competition=normalizeCompetitionCode(activeLeague?.settings?.competition)||"worlds";
