@@ -3625,8 +3625,9 @@ function render(view="home",options={}){
 
       try{
         const leagues=await b.listLeagues();
-        const completedLeagues=leagues.filter(l=>!isSimulationLeague(l)&&leagueLifecycleState(l)==="completed");
-        const liveLeagues=leagues.filter(playableLeague);
+        const regularLeagues=leagues.filter(l=>!isSimulationLeague(l));
+        const completedLeagues=regularLeagues.filter(l=>leagueLifecycleState(l)==="completed");
+        const liveLeagues=regularLeagues.filter(playableLeague);
         await renderCompletedLeagueCard(completedLeagues);
 
         let activeId=getActiveLeagueId();
@@ -3643,7 +3644,7 @@ function render(view="home",options={}){
           }
         }
 
-        if(!leagues.length){
+        if(!regularLeagues.length){
           if(overviewCard)overviewCard.hidden=true;
           if(activeLeagueEntryCard)activeLeagueEntryCard.hidden=true;
           if(managerReadiness)managerReadiness.hidden=true;
