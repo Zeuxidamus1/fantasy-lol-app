@@ -170,6 +170,15 @@ try{
   await route("team");
   await expect("team route renders","document.title.includes('My Team') && !!document.querySelector('#teamNoLeague')");
   await expect("team shows no-league state without active league","document.querySelector('#teamNoLeague').hidden === false");
+  await evaluate("document.querySelector('[data-lock-help=next]').click()");
+  await expect("next-lock help opens","document.querySelector('#lineupLockHelp').hidden===false && document.querySelector('#lineupLockHelp').textContent.includes('scheduled match is starting')");
+  await expect("next-lock help sets expanded state","document.querySelector('[data-lock-help=next]').getAttribute('aria-expanded')==='true'");
+  await evaluate("document.querySelector('[data-lock-help=next]').click()");
+  await expect("next-lock help closes","document.querySelector('#lineupLockHelp').hidden===true");
+  await evaluate("document.querySelector('[data-roster-help=flex]').click()");
+  await expect("FLEX help opens","document.querySelector('#rosterHelpPopover').hidden===false && document.querySelector('#rosterHelpCopy').textContent.includes('extra starting slot')");
+  await evaluate("document.body.click()");
+  await expect("FLEX help closes on outside click","document.querySelector('#rosterHelpPopover').hidden===true");
 
   await expect("empty roster is incomplete","(()=>{const v=validateRoster([],{bench:2});return !v.isComplete&&v.missingStarterSlots===5&&v.missingFlexSlots===1&&v.missingBenchSlots===2&&v.totalPlayersMissing===8})()");
   await expect("full starters without FLEX are incomplete","(()=>{const ps=['TOP','JNG','MID','ADC','SUP'].map((r,i)=>({id:'p'+i,position:r,role:r,slot:r}));const v=validateRoster(ps,{bench:1});return !v.isComplete&&v.missingStarterSlots===0&&v.missingFlexSlots===1&&v.missingBenchSlots===1})()");
@@ -179,6 +188,7 @@ try{
   await expect("bench warning uses plural grammar","(()=>{const v={isComplete:false,missingStarterSlots:0,missingStarterPositions:[],missingFlexSlots:0,missingBenchSlots:2,requiredBenchSize:2};return rosterStatusText(v).includes('2 Bench Players')})()");
   await expect("draft assignment creates FLEX before bench","(()=>{const p=[{pick_number:1,role:'TOP'},{pick_number:2,role:'JNG'},{pick_number:3,role:'MID'},{pick_number:4,role:'ADC'},{pick_number:5,role:'SUP'},{pick_number:6,role:'ADC'},{pick_number:7,role:'TOP'}];const a=draftAssignments(p);return a[5].slot==='FLEX'&&a[6].slot==='BN'})()");
   await expect("FLEX eligibility is centralized","isFlexEligible({position:'ADC'})===true && isFlexEligible({position:'COACH'})===false");
+  await expect("competition availability accepts only active starters","(()=>{const p={id:'qa-player',competitions:['worlds'],draftable:true,rosterStatus:'starter'};cacheCompetitionStatuses('worlds',[{player_id:'qa-player',status:'starter',remaining_matches:2,next_match_at:new Date(Date.now()+3600000).toISOString()}]);const yes=playerAvailableForAcquisition(p,'worlds');cacheCompetitionStatuses('worlds',[{player_id:'qa-player',status:'no_upcoming_match',remaining_matches:0,next_match_at:null}]);const no=playerAvailableForAcquisition(p,'worlds');competitionStatusCache.delete('worlds');return yes===true&&no===false})()");
 
   await expect("league entry choices exist","(()=>{const t=document.querySelector('#league-template');return !!t?.content.querySelector('[data-jump=\"create-league\"]')&&!!t.content.querySelector('[data-jump=\"join-league\"]')&&!!t.content.querySelector('[data-jump=\"bot-league\"]')})()");
   await expect("join route is dedicated","(()=>{const t=document.querySelector('#join-league-template');return !!t?.content.querySelector('#joinLeagueCode')&&!t.content.querySelector('#createLeagueName')})()");
@@ -211,6 +221,12 @@ try{
     await expect("player profile returns to draft room","document.title.includes('Draft Room') && !!document.querySelector('.draft-selection-grid')");
   }
 
+  await route("standings");
+  await expect("standings renders","document.title.includes('Standings') && !!document.querySelector('#standingsList')");
+  await expect("standings info markers are non-interactive labels","document.querySelectorAll('.standings-info').length===3 && document.querySelectorAll('button.standings-info').length===0");
+  await expect("standings info labels explain PF PA and BYE","[...document.querySelectorAll('.standings-info')].every(el=>!!el.getAttribute('title')&&!!el.getAttribute('aria-label'))");
+  await expect("standings fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
+
   await route("matchup");
   await expect("matchup uses real scoring surface","!!document.querySelector('#matchupScoreList') && !document.body.innerText.includes('Fantasy scoring is not live yet')");
   await expect("fresh unfinalized score is labeled live","(()=>{const m=aggregateFantasyScores([{player_id:'p',fantasy_points:1,finalized:false,updated_at:new Date().toISOString(),breakdown:{}}]);const s=m.get('p');return s.live===true&&s.delayed===false})()");
@@ -222,7 +238,7 @@ try{
   await expect("schedule filter works","document.querySelector('[data-day=today]').classList.contains('active')");
   await expect("schedule fits mobile viewport","document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1");
 
-  const visualRoutes=["home","players","team","league","transactions","trade","draft","matchup","schedule","account","privacy","terms"];
+  const visualRoutes=["home","players","team","league","standings","transactions","trade","draft","matchup","schedule","my-schedule","account","privacy","terms"];
   const viewports=[
     {name:"small-phone",width:320,height:700,mobile:true},
     {name:"phone",width:390,height:844,mobile:true},
