@@ -1,11 +1,12 @@
 import fs from "node:fs/promises";
 
 const API_BASE = "https://esports-api.lolesports.com/persisted/gw";
-// LoL Esports uses a browser-facing persisted API key on lolesports.com.
-// Allow a repository secret to override it, but keep schedule refresh working
-// without requiring the separate developer.riotgames.com RGAPI development key.
-const SITE_API_KEY = "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z";
-const API_KEY = process.env.LOL_ESPORTS_API_KEY || SITE_API_KEY;
+// LoL Esports provider credentials must be supplied at runtime.
+// Do not commit provider keys, even when an upstream website exposes a browser-facing key.
+const API_KEY = String(process.env.LOL_ESPORTS_API_KEY || "").trim();
+if (!API_KEY) {
+  throw new Error("Missing LOL_ESPORTS_API_KEY. Configure it as a GitHub Actions secret or local environment variable.");
+}
 const HL = "en-US";
 const OUT = "esports-data.js";
 
