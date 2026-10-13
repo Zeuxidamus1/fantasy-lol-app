@@ -201,10 +201,14 @@
     return request("/rest/v1/rpc/list_mock_competitions",{method:"POST",body:{},session:current});
   }
 
-  async function createMockLeague(competition="worlds"){
+  async function createMockLeague(competition="worlds",durationMinutes=5){
     const current=await session();
     if(!current)throw new Error("Sign in before opening Creator Lab.");
-    return request("/rest/v1/rpc/create_mock_league",{method:"POST",body:{p_competition:String(competition)},session:current});
+    const duration=Number(durationMinutes)===35?35:5;
+    return request("/rest/v1/rpc/create_mock_league",{method:"POST",body:{
+      p_competition:String(competition),
+      p_duration_minutes:duration
+    },session:current});
   }
 
   async function setMockCompetition(leagueId,competition){
