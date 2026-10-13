@@ -3643,6 +3643,7 @@ function render(view="home",options={}){
 
     const renderBoard=(target,draftData,pickRows)=>{
       if(!target)return;
+      const historicalBoard=!!historicalLeagueContextId;
       if(draftData?.manager_order?.length){
         const headers=draftData.manager_order.map(uid=>`<div class="board-head">${h(memberById.get(String(uid))?.team_name||"Manager")}</div>`).join("");
         let cells="";
@@ -3651,10 +3652,10 @@ function render(view="home",options={}){
           const uid=managerForPick(i,draftData.manager_order);
           const pick=pickRows.find(p=>Number(p.pick_number)===i+1);
           const player=pick?draftPool.find(x=>String(x.id)===String(pick.player_id)):null;
-          cells+=`<div class="board-cell ${String(uid)===String(currentUser.id)?"mine":""} ${draftData.status==="drafting"&&i===Number(draftData.current_pick)?"on-clock":""}" ${player?`data-open-player="${h(player.id)}" tabindex="0" role="button" aria-label="View ${h(player.name)} details"`:""}><small>R${Math.floor(i/draftData.manager_order.length)+1} · #${i+1}</small><strong>${h(player?.name||"—")}</strong><span>${h(memberById.get(String(uid))?.team_name||"")}</span></div>`;
+          cells+=`<div class="board-cell ${String(uid)===String(currentUser.id)?"mine":""} ${draftData.status==="drafting"&&i===Number(draftData.current_pick)?"on-clock":""}" ${player&&!historicalBoard?`data-open-player="${h(player.id)}" tabindex="0" role="button" aria-label="View ${h(player.name)} details"`:""}><small>R${Math.floor(i/draftData.manager_order.length)+1} · #${i+1}</small><strong>${h(player?.name||"—")}</strong><span>${h(memberById.get(String(uid))?.team_name||"")}</span></div>`;
         }
         target.innerHTML=`<div class="full-board-grid" style="grid-template-columns:repeat(${draftData.manager_order.length},minmax(92px,1fr))">${headers}${cells}</div>`;
-        wireProfileRows(target);
+        if(!historicalBoard)wireProfileRows(target);
       }else{
         target.innerHTML='<div class="muted">The draft board will appear when the commissioner starts the draft.</div>';
       }
@@ -4361,7 +4362,19 @@ function render(view="home",options={}){
     row.addEventListener("click",(e)=>{if(e.target.closest(".add-btn,.draft-btn"))return;openPlayer(row.dataset.openPlayer);});
     row.addEventListener("keydown",(e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openPlayer(row.dataset.openPlayer);}});
   });
-  document.querySelectorAll("[data-jump]").forEach(b=>b.onclick=()=>render(b.dataset.jump));
+  document.querySelectorAll("[data-jump]").forEach(b=>b.onclick=()=>{
+    const target=b.dataset.jump;
+    if(historicalLeagueContextId){
+      const historicalViews=new Set(["team","matchup","standings","draft"]);
+      if(historicalViews.has(target)){
+        render(target,{historyLeagueId:historicalLeagueContextId});
+        return;
+      }
+      render("league");
+      return;
+    }
+    render(target);
+  });
 }
 
 let reportingClientError=false;
