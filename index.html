@@ -56,16 +56,11 @@
         <div class="login-mark" aria-hidden="true">RF</div>
         <div class="login-kicker">FANTASY LEAGUE OF LEGENDS</div>
         <h1>Rift Fantasy</h1>
-        <p>Draft pros. Build your roster. Compete with friends.</p>
-        <div class="login-feature-strip" aria-label="Rift Fantasy features">
-          <span>Draft Pros</span><span>Live Scoring</span><span>Head-to-Head</span>
-        </div>
       </div>
 
       <section class="login-card" aria-labelledby="loginTitle">
         <div class="login-card-head">
           <h2 id="loginTitle">Welcome back</h2>
-          <p>Sign in to continue to your leagues.</p>
         </div>
 
         <div class="form-group">
@@ -111,13 +106,11 @@
         <div class="login-mark" aria-hidden="true">RF</div>
         <div class="login-kicker">RIFT FANTASY</div>
         <h1>Create your account</h1>
-        <p>Start building your fantasy League of Legends leagues.</p>
       </div>
 
       <section class="login-card" aria-labelledby="signupTitle">
         <div class="login-card-head">
           <h2 id="signupTitle">Join Rift Fantasy</h2>
-          <p>Create one account for your leagues, rosters, and drafts.</p>
         </div>
 
         <div class="form-group">
@@ -185,7 +178,7 @@
           <button class="text-btn" id="resendVerifyBtn" hidden>Resend verification email</button>
           <button class="text-btn" id="forgotPasswordBtn">Forgot password?</button>
         </div>
-        <p class="setup-footnote" id="authHelp">Use one account to keep your leagues and rosters available across devices.</p>
+        <p class="setup-footnote" id="authHelp" hidden></p>
       </section>
       <section class="card setup-card recovery-card" id="recoveryCard" hidden>
         <div class="section-head"><div><div class="eyebrow">RESET PASSWORD</div><h3>Choose a new password</h3></div><span class="verified-badge">SECURE</span></div>
@@ -207,7 +200,6 @@
           <div><div class="eyebrow">CREATOR ONLY</div><h3>Creator Lab</h3></div>
           <span class="verified-badge">ADMIN</span>
         </div>
-        <p class="setup-footnote">Run an isolated mock draft against a bot, then simulate a 35-minute game with live fantasy scoring.</p>
         <button class="primary-btn" id="openCreatorLabBtn" type="button">Open Mock Draft Simulator</button>
       </section>
 
@@ -791,8 +783,7 @@
           <span class="league-more-chevron" aria-hidden="true">⌄</span>
         </summary>
         <div class="league-more-content">
-          <p class="profile-copy">Create another fantasy league or join an existing one.</p>
-          <div class="league-entry-actions active-league-entry-actions">
+            <div class="league-entry-actions active-league-entry-actions">
             <button class="primary-btn" type="button" data-jump="create-league">Create a League</button>
             <button class="secondary-btn" type="button" data-jump="join-league">Join a League</button>
             <button class="secondary-btn bot-entry-btn" type="button" data-jump="bot-league">🤖 Bot League</button>
@@ -812,7 +803,6 @@
             <h3 id="cloudLeagueTitle">Your leagues</h3>
           </div>
         </div>
-        <p class="profile-copy" id="cloudLeagueCopy">Choose which league you want to manage.</p>
         <div id="cloudLeagueList" class="stack tight league-list"></div>
         <div class="league-entry-actions league-entry-stack" id="leagueEntryActions">
           <button class="league-choice-card create-choice" type="button" data-jump="create-league">
@@ -840,8 +830,7 @@
             <div><div class="eyebrow">LEAGUE FORMAT</div><h3 id="leagueRulesTitle">Rules &amp; Setup</h3></div>
             <button class="icon-btn small-icon" type="button" data-close-league-rules aria-label="Close rules and setup">×</button>
           </div>
-          <p class="profile-copy">League format and scoring settings for the active league.</p>
-          <div class="settings-list league-rules-list" id="leagueSettingsSummary">
+            <div class="settings-list league-rules-list" id="leagueSettingsSummary">
             <div><span>Teams</span><strong>8</strong></div>
             <div><span>Draft</span><strong>Snake</strong></div>
             <div><span>Scoring</span><strong>Head-to-head</strong></div>
@@ -967,8 +956,7 @@
           <section class="card draft-player-pool-card">
             <div class="section-head">
               <div><div class="eyebrow">PLAYER SELECTION</div><h3>Available Players</h3></div>
-              <small class="draft-player-help">Select a player card for details.</small>
-            </div>
+                </div>
             <section class="roster-status-banner draft-roster-status" id="draftRosterStatus" aria-live="polite">
               <strong id="draftRosterStatusTitle">⚠ Roster Incomplete</strong>
               <small id="draftRosterStatusCopy">Roster needs will appear as you draft.</small>
@@ -999,8 +987,7 @@
           <div class="draft-complete-icon" aria-hidden="true">✓</div>
           <div class="eyebrow">DRAFT COMPLETE</div>
           <h2>Draft Complete!</h2>
-          <p>All rosters have been created and the draft is finished. Your league is ready to go.</p>
-        </section>
+          </section>
 
         <button class="primary-btn draft-team-primary" type="button" data-jump="team" id="draftCompleteTeamBtn">
           <span>👥</span><strong id="draftCompleteTeamBtnLabel">View My Team</strong><span aria-hidden="true">›</span>
@@ -1052,8 +1039,7 @@
           <div>
             <div class="eyebrow">PLAY SOLO OR WITH AI</div>
             <h3>Create a Bot League</h3>
-            <p>Want AI managers to draft and compete against you? Use Bot League setup instead.</p>
-          </div>
+              </div>
         </div>
         <button class="secondary-btn bot-entry-btn" type="button" data-jump="bot-league">Create Bot League</button>
       </section>
@@ -1108,12 +1094,12 @@
 
         <div class="form-group">
           <label>Draft</label>
-          <div class="static-setting-row"><strong>Snake Draft</strong><small>Managers take turns drafting players.</small></div>
+          <div class="static-setting-row"><strong>Snake Draft</strong></div>
         </div>
 
         <div class="form-group">
           <label>Scoring</label>
-          <div class="static-setting-row"><strong>Head-to-Head</strong><small>Face one manager each fantasy round.</small></div>
+          <div class="static-setting-row"><strong>Head-to-Head</strong></div>
         </div>
       </section>
 
@@ -1141,7 +1127,6 @@
       </div>
 
       <section class="card setup-card">
-        <p class="profile-copy">Enter the invite code provided by the league commissioner.</p>
         <div class="form-group">
           <label for="joinLeagueCode">Invite Code</label>
           <input id="joinLeagueCode" class="form-control" maxlength="12" placeholder="Invite code" autocomplete="off" />
@@ -1187,24 +1172,21 @@
 
         <div class="form-group">
           <div class="field-label-row"><label>League Size</label><span class="mini-help" title="Total managers including humans and bots.">?</span></div>
-          <small class="field-help">Total number of managers (humans + bots).</small>
-          <div class="number-choice-grid ten-up" id="botLeagueSize">
+            <div class="number-choice-grid ten-up" id="botLeagueSize">
             <button type="button" class="number-choice " data-bot-size="1">1</button><button type="button" class="number-choice " data-bot-size="2">2</button><button type="button" class="number-choice " data-bot-size="3">3</button><button type="button" class="number-choice " data-bot-size="4">4</button><button type="button" class="number-choice " data-bot-size="5">5</button><button type="button" class="number-choice " data-bot-size="6">6</button><button type="button" class="number-choice " data-bot-size="7">7</button><button type="button" class="number-choice active" data-bot-size="8">8</button><button type="button" class="number-choice " data-bot-size="9">9</button><button type="button" class="number-choice " data-bot-size="10">10</button>
           </div>
         </div>
 
         <div class="form-group">
           <div class="field-label-row"><label>Human Managers</label><span class="mini-help" title="You are always one of the human managers.">?</span></div>
-          <small class="field-help">You will always be one of the managers.</small>
-          <div class="number-choice-grid ten-up" id="botHumanCount">
+            <div class="number-choice-grid ten-up" id="botHumanCount">
             <button type="button" class="number-choice active" data-human-count="1">1</button><button type="button" class="number-choice " data-human-count="2">2</button><button type="button" class="number-choice " data-human-count="3">3</button><button type="button" class="number-choice " data-human-count="4">4</button><button type="button" class="number-choice " data-human-count="5">5</button><button type="button" class="number-choice " data-human-count="6">6</button><button type="button" class="number-choice " data-human-count="7">7</button><button type="button" class="number-choice " data-human-count="8">8</button><button type="button" class="number-choice " data-human-count="9">9</button><button type="button" class="number-choice " data-human-count="10">10</button>
           </div>
         </div>
 
         <div class="bot-count-card">
           <span class="bot-avatar">🤖</span>
-          <div><strong id="botManagerCount">7 Bot Managers</strong><small>AI managers will join this league.</small></div>
-        </div>
+          </div>
 
         <div class="form-group">
           <div class="field-label-row"><label>Bot Difficulty</label><span class="mini-help" title="Changes how much structure versus randomness bots use when drafting.">?</span></div>
@@ -1248,7 +1230,7 @@
           </div>
         </div>
         <div class="toggle-setting"><span><strong>Enable Waivers</strong><small>Allow waiver claims.</small></span><input id="botWaivers" type="checkbox" checked></div>
-        <div class="toggle-setting"><span><strong>Enable Trades</strong><small>Allow trades between human managers.</small></span><input id="botTrades" type="checkbox" checked></div>
+        <div class="toggle-setting"><span><strong>Enable Trades</strong></span><input id="botTrades" type="checkbox" checked></div>
         <div class="toggle-setting"><span><strong>Auto Set Lineups (Bots)</strong><small>Bots keep valid starting lineups automatically.</small></span><input id="botAutoLineups" type="checkbox" checked></div>
       </section>
       <button class="primary-btn" id="botSettingsNext" type="button">Next</button>
@@ -1311,7 +1293,7 @@
         <div class="form-group">
           <label>Draft type</label>
           <div class="option-grid" data-choice-group="draftType">
-            <button class="choice active" data-value="Snake"><strong>Snake Draft</strong><small>Managers take turns drafting players.</small></button>
+            <button class="choice active" data-value="Snake"><strong>Snake Draft</strong></button>
             <button class="choice disabled-choice" data-value="Salary Cap" disabled aria-disabled="true"><strong>Salary Cap</strong><small>Coming soon. Snake draft is currently supported.</small></button>
           </div>
         </div>
@@ -1319,7 +1301,7 @@
         <div class="form-group">
           <label>Scoring format</label>
           <div class="option-grid" data-choice-group="scoringFormat">
-            <button class="choice active" data-value="Head-to-head"><strong>Head-to-Head</strong><small>Face one manager each fantasy round.</small></button>
+            <button class="choice active" data-value="Head-to-head"><strong>Head-to-Head</strong></button>
             <button class="choice disabled-choice" data-value="Total Points" disabled aria-disabled="true"><strong>Total Points</strong><small>Coming soon. Head-to-head is currently supported.</small></button>
           </div>
         </div>
@@ -1359,15 +1341,15 @@
         <div class="form-group">
           <label>Transactions</label>
           <label class="toggle-row">
-            <span><strong>Enable Waivers</strong><small>Managers can submit waiver claims before a player's match locks.</small></span>
+            <span><strong>Enable Waivers</strong></span>
             <input id="leagueWaivers" type="checkbox" checked />
           </label>
           <label class="toggle-row">
-            <span><strong>Enable Trades</strong><small>Managers can trade unlocked players.</small></span>
+            <span><strong>Enable Trades</strong></span>
             <input id="leagueTrades" type="checkbox" checked />
           </label>
           <label class="toggle-row">
-            <span><strong>Commissioner Trade Review</strong><small>If enabled, accepted trades require commissioner approval before rosters change.</small></span>
+            <span><strong>Commissioner Trade Review</strong></span>
             <input id="leagueTradeReview" type="checkbox" />
           </label>
         </div>
@@ -1395,7 +1377,7 @@
 
       <div class="card setup-card league-management-card" id="leagueManagementCard">
         <div class="section-head"><div><div class="eyebrow">LEAGUE MANAGEMENT</div><h3>Delete league</h3></div><span class="status-pill" id="managementStatusPill">ACTIVE</span></div>
-        <p class="profile-copy" id="managementStatusCopy">Permanently delete this league and all league-specific data.</p>
+        <p class="profile-copy" id="managementStatusCopy" hidden></p>
         <div class="league-management-actions">
           <button class="danger-btn" id="deleteLeagueBtn" type="button">Delete League</button>
         </div>
@@ -1404,7 +1386,6 @@
 
       <div class="card setup-card commissioner-lock-notice" id="commissionerLockNotice" hidden>
         <div class="section-head"><div><div class="eyebrow">SETTINGS LOCKED</div><h3>Competition is underway</h3></div><span class="status-pill">LOCKED</span></div>
-        <p class="profile-copy">Structural league settings and scoring cannot change after the draft begins. This protects completed and live fantasy results.</p>
       </div>
       <button class="primary-btn" id="saveLeagueBtn">Save League Settings</button>
       <p class="setup-footnote">Commissioner changes are shared with every manager. Settings lock when the league draft begins.</p>
@@ -1458,6 +1439,6 @@
   <script src="backend-config.js?v=20261013-creator-lab-v2"></script>
   <script src="backend.js?v=20261013-mock-tournament-v1"></script>
   <script src="player-stats.js?v=20261013-creator-lab-v2"></script>
-  <script src="app.js?v=20261013-cleanup-v1"></script>
+  <script src="app.js?v=20261013-copy-cleanup-v1"></script>
 </body>
 </html>
