@@ -1604,7 +1604,7 @@ function render(view="home",options={}){
           const teamPlayoffs=await b.listPlayoffs(leagueId).catch(()=>[]);
           const teamLifecycle=leagueLifecycleConfig(activeLeague,{playoffs:teamPlayoffs});
           const teamLeagueStatus=teamLifecycle.state;
-          badge.textContent=teamLifecycle.label.toUpperCase();
+          badge.textContent=teamLifecycle.readOnly?"READ ONLY":teamLifecycle.label.toUpperCase();
           badge.hidden=false;
           leagueCompleted=teamLifecycle.readOnly;
           rosterMovesEnabled=teamLifecycle.canManageRoster;
@@ -1882,7 +1882,7 @@ function render(view="home",options={}){
           if(name)name.textContent=String(league?.name||"League").toUpperCase();
           if(league?.status==="completed"){
             if(pageTitle)pageTitle.textContent="Final Standings";
-            if(seasonPill)seasonPill.textContent="Season Complete";
+            if(seasonPill)seasonPill.textContent="READ ONLY";
           }
 
           const managerNames=new Map();
@@ -1923,7 +1923,9 @@ function render(view="home",options={}){
               <div class="standing-stat-cell standings-pa"><strong>${formatFantasyPoints(s.points_against)}</strong></div>
               <div class="standing-stat-cell standings-bye"><strong>${Number(s.byes)||0}</strong></div>
             </div>`;
-          }).join(""):'<div class="empty-state"><strong>No standings yet</strong><small>Standings are created automatically after the league draft.</small></div>';
+          }).join(""):(league?.status==="completed"
+            ?'<div class="empty-state"><strong>No fantasy scoring periods were played</strong><small>This league ended before standings could be created.</small></div>'
+            :'<div class="empty-state"><strong>No standings yet</strong><small>Standings are created automatically after the league draft.</small></div>');
         }catch(err){
           if(status)status.textContent="ERROR";
           list.innerHTML='<div class="empty-state"><strong>Could not load standings</strong><small>'+h(err.message||"Try again later.")+'</small></div>';
@@ -2017,11 +2019,13 @@ function render(view="home",options={}){
           ]);
           const league=leagues.find(l=>String(l.id)===String(leagueId));
           if(leagueTitle)leagueTitle.textContent=league?.status==="completed"?"Matchup Results":String(league?.name||"Matchup");
-          if(eyebrow)eyebrow.textContent=(league?.status==="completed"?"COMPLETED RESULTS · ":"HEAD TO HEAD · ")+competitionName(league?.settings?.competition||"");
+          if(eyebrow)eyebrow.textContent=(league?.status==="completed"?"READ ONLY · ":"HEAD TO HEAD · ")+competitionName(league?.settings?.competition||"");
 
           if(!rounds.length){
             const compName=competitionName(league?.settings?.competition||"");
-            board.innerHTML='<div class="empty-state"><strong>No active fantasy scoring period</strong><small>'+h(compName)+' has no scheduled matches after this league\'s draft. Rift Fantasy will create the next scoring period automatically when the pro schedule contains eligible matches.</small></div>';
+            board.innerHTML=league?.status==="completed"
+              ?'<div class="empty-state"><strong>No fantasy scoring periods were played</strong><small>This completed league has no matchup results.</small></div>'
+              :'<div class="empty-state"><strong>No active fantasy scoring period</strong><small>'+h(compName)+' has no scheduled matches after this league\'s draft. Rift Fantasy will create the next scoring period automatically when the pro schedule contains eligible matches.</small></div>';
             prevBtn.disabled=true;nextBtn.disabled=true;return;
           }
 
@@ -3111,8 +3115,9 @@ function render(view="home",options={}){
                 :"No Champion";
               const record=myStanding?((Number(myStanding.wins)||0)+"-"+(Number(myStanding.losses)||0)+"-"+(Number(myStanding.ties)||0)):"—";
               const finish=myStanding?.rank?"#"+Number(myStanding.rank):"—";
+              const hasStandings=Array.isArray(standings)&&standings.some(s=>Number(s.completed_matchups)>0||Number(s.points_for)!==0||Number(s.wins)>0||Number(s.losses)>0||Number(s.ties)>0);
               const tools=[
-                {view:"standings",icon:"≡",title:"Final Standings"},
+                ...(hasStandings?[{view:"standings",icon:"≡",title:"Final Standings"}]:[]),
                 ...(hasScoringPeriods?[{view:"matchup",icon:"⚔",title:"Matchup Results"}]:[]),
                 {view:"team",icon:"◈",title:"Final Roster"},
                 ...(hasDraft?[{view:"draft",icon:"◎",title:"Draft Results"}]:[])
@@ -3264,6 +3269,10 @@ function render(view="home",options={}){
             if(type==="bot")return botsNow.find(x=>String(x.id)===String(id))?.team_name||"Bot Manager";
             return membersNow.find(x=>String(x.user_id)===String(id))?.team_name||"Manager";
           };
+          const activeLifecycle=leagueLifecycleConfig(activeLeague,{playoffs});
+          if(overviewEyebrow){
+            overviewEyebrow.textContent=activeLifecycle.state==="playoffs"?"PLAYOFFS":activeLifecycle.label.toUpperCase()+" LEAGUE";
+          }
           const expectedManagers=Math.max(1,Number(activeSettings.managers)||membersNow.length+botsNow.length||1);
           const humanManagers=membersNow.length;
           const botManagers=botsNow.length;
@@ -3278,7 +3287,7 @@ function render(view="home",options={}){
           const managerBreakdown=botManagers
             ? humanManagers+" human · "+botManagers+" bot"+(botManagers===1?"":"s")
             : humanManagers+" human manager"+(humanManagers===1?"":"s");
-          const leagueStatus=String(activeLeague.status||"pre_draft");
+          const leagueStatus=activeLifecycle.state;
           if(leagueStatus==="completed"){
             if(toolsEyebrow)toolsEyebrow.textContent="SEASON RESULTS";
             if(toolsTitle)toolsTitle.textContent="Review this completed league";
@@ -3533,7 +3542,7 @@ function render(view="home",options={}){
         const mine=picks.filter(p=>String(p.user_id)===String(currentUser.id));
         if(draft?.status==="complete"){
           renderCompletedState(draft,mine);
-          if(league?.status==="completed"&&pageEyebrow)pageEyebrow.textContent="DRAFT RESULTS";
+          if(league?.status==="completed"&&pageEyebrow)pageEyebrow.textContent="DRAFT RESULTS · READ ONLY";
           await loadRosterFromCloud(leagueId);
           if(draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
           return;
