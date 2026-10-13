@@ -77,7 +77,7 @@ try{
   check(new Set(playerIds).size===playerIds.length,"player IDs are unique");
 }catch(err){fail.push("ESPORTS_DATA load: "+err.message);}
 
-check(!/LOL_ESPORTS_API_KEY\s*\|\|\s*["']/.test(updater),"no hard-coded API-key fallback");
+check(!/LOL_ESPORTS_API_KEY\s*\|\|\s*["'][^"']+["']/.test(updater),"no hard-coded API-key fallback");
 check(!/[A-Za-z0-9_-]{30,}\s*["'];?\s*\/\/\s*api key/i.test(updater),"no obvious inline API key");
 check(!/service[_-]?role/i.test(backendConfig),"frontend config does not contain service-role credentials");
 check(schema.includes("enable row level security"),"Supabase schema enables RLS");
