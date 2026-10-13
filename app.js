@@ -1097,7 +1097,7 @@ function fantasyPointsForGame(game,scoring=getLeagueSettings()?.scoring||default
   let total=kills*Number(scoring.kills||0)+deaths*Number(scoring.deaths||0)+assists*Number(scoring.assists||0);
   if(Number.isFinite(cs))total+=cs*Number(scoring.cs||0);
   if(game.win===true)total+=Number(scoring.win||0);
-  if(game.firstBlood===true)total+=Number(scoring.firstBlood||0);
+  if(game.firstBlood===true||game.first_blood===true)total+=Number(scoring.firstBlood||0);
   return Number(total.toFixed(1));
 }
 
