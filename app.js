@@ -4617,20 +4617,28 @@ function render(view="home",options={}){
       </div>`:'<div class="muted">Simulation stats will appear after the first scoring tick.</div>';
     };
 
-    const load=async()=>{
+    const load=async({refreshCompetitions=false}={})=>{
       const admin=await b.isPlatformAdmin().catch(()=>false);
       if(!admin){
         showToast("Creator access required");
         return render("account",{replace:true});
       }
-      const [leagues,competitionRows]=await Promise.all([
-        b.listLeagues(),
-        b.listMockCompetitions()
-      ]);
-      mockCompetitions=Array.isArray(competitionRows)?competitionRows:[];
-      populateCompetitionSelect(createCompetition,"worlds");
-      updateCompetitionHelp(createCompetition,createCompetitionHelp);
+
+      const leagues=await b.listLeagues();
       mockLeague=leagues.find(l=>isSimulationLeague(l))||null;
+
+      if(refreshCompetitions||!mockCompetitions.length){
+        try{
+          const competitionRows=await b.listMockCompetitions();
+          mockCompetitions=Array.isArray(competitionRows)?competitionRows:[];
+          populateCompetitionSelect(createCompetition,mockLeague?.settings?.competition||"worlds");
+          updateCompetitionHelp(createCompetition,createCompetitionHelp);
+        }catch(err){
+          if(!mockLeague)throw err;
+          console.warn("Creator Lab tournament availability could not refresh",err);
+        }
+      }
+
       createCard.hidden=!!mockLeague;
       activeCard.hidden=!mockLeague;
       if(!mockLeague){
@@ -4755,7 +4763,7 @@ function render(view="home",options={}){
       finally{deleteBtn.disabled=false;}
     };
 
-    void load().catch(err=>showToast(err.message||"Could not open Creator Lab"));
+    void load({refreshCompetitions:true}).catch(err=>showToast(err.message||"Could not open Creator Lab"));
     creatorSimulationTimerId=setInterval(()=>{
       if(document.querySelector("#creatorSimulationCard"))void load().catch(()=>{});
     },10000);
