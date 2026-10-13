@@ -1395,6 +1395,7 @@ function render(view="home",options={}){
     });
 
     let rosterMovesEnabled=false;
+    let leagueCompleted=false;
     let activeLineupLocks=new Map();
     const refreshTeam=()=>render("team",{replace:true});
 
@@ -1476,10 +1477,15 @@ function render(view="home",options={}){
       rosterCount.textContent=`${current.length}/${validation.totalRequired}`;
       starterCount.textContent=`${starters.length+flex.length}/6`;
 
-      statusBanner.classList.toggle("complete",validation.isComplete);
-      statusBanner.classList.toggle("incomplete",!validation.isComplete);
-      statusTitle.textContent=validation.isComplete?"✓ Roster Complete":"⚠ Roster Incomplete";
-      statusCopy.textContent=rosterStatusText(validation);
+      statusBanner.classList.toggle("complete",leagueCompleted||validation.isComplete);
+      statusBanner.classList.toggle("incomplete",!leagueCompleted&&!validation.isComplete);
+      if(leagueCompleted){
+        statusTitle.textContent="Season Complete";
+        statusCopy.textContent="This league has ended. Your final roster is locked.";
+      }else{
+        statusTitle.textContent=validation.isComplete?"✓ Roster Complete":"⚠ Roster Incomplete";
+        statusCopy.textContent=rosterStatusText(validation);
+      }
 
       starterList.innerHTML=ROSTER_RULES.starterSlots.map(role=>{
         const p=starters.find(x=>(x.slot||x.role)===role);
@@ -1545,9 +1551,11 @@ function render(view="home",options={}){
             }catch(err){showToast(err.message||"Could not update team name");}
             finally{saveNameBtn.disabled=false;}
           };
-          badge.textContent=String(activeLeague?.status||"pre_draft").replace("_"," ").toUpperCase();
+          const teamLeagueStatus=String(activeLeague?.status||"pre_draft");
+          badge.textContent=teamLeagueStatus==="completed"?"SEASON COMPLETE":teamLeagueStatus.replace("_"," ").toUpperCase();
           badge.hidden=false;
-          rosterMovesEnabled=activeLeague?.status==="active";
+          leagueCompleted=teamLeagueStatus==="completed";
+          rosterMovesEnabled=teamLeagueStatus==="active";
 
           document.querySelectorAll('.team-screen [data-jump="players"],.team-screen [data-jump="transactions"]').forEach(el=>{
             if(el.dataset.jump==="players"){
@@ -2048,6 +2056,7 @@ function render(view="home",options={}){
     let rosterPlayers=[];
     let scheduleRows=proSchedule.filter(g=>!!scheduleCompetitionCode(g));
     let leagueCompetition=null;
+    let leagueCompleted=false;
     const title=document.querySelector("#schedulePageTitle");
     const copy=document.querySelector("#scheduleScopeCopy");
     const fullBtn=document.querySelector("#fullScheduleBtn");
@@ -2116,9 +2125,11 @@ function render(view="home",options={}){
           <div class="game-meta"><span class="game-time">${h(g.time||"TBD")}</span><span class="game-league">${h(competitionName(g.competition||g.leagueCode)||g.league||"LoL Esports")}</span><span class="game-stage">${h([g.stage,Number(g.count)>0?"BO"+g.count:""].filter(Boolean).join(" · "))}</span><span class="game-status ${displayMatchStatus(g.status)==="LIVE"?"live":""} ${["POSTPONED","CANCELED"].includes(displayMatchStatus(g.status))?"canceled":""}">${h(displayMatchStatus(g.status))}</span></div>
           <div class="game-team right ${bOwned?"my-roster-team":""}"><div><strong>${h(g.b||"TBD")}</strong><small>${h(bNote)}</small></div><span class="team-mark">${h(g.bCode||"TBD")}</span></div>
         </div>`;
-      }).join(""):(rosterOnly
-        ? '<div class="empty-state"><strong>No roster games found</strong><small>There are no scheduled matches for players on your current roster in this time filter.</small></div>'
-        : '<div class="empty-state"><strong>No matches found</strong><small>Try another filter or check back after the next data refresh.</small></div>');
+      }).join(""):(leagueCompleted
+        ? '<div class="empty-state"><strong>Season complete</strong><small>'+h(competitionName(leagueCompetition))+' has no remaining matches. Use All to review completed matches.</small></div>'
+        : rosterOnly
+          ? '<div class="empty-state"><strong>No roster games found</strong><small>There are no scheduled matches for players on your current roster in this time filter.</small></div>'
+          : '<div class="empty-state"><strong>No matches found</strong><small>Try another filter or check back after the next data refresh.</small></div>');
     };
 
     document.querySelectorAll("[data-day]").forEach(c=>c.onclick=()=>{day=c.dataset.day;document.querySelectorAll("[data-day]").forEach(x=>x.classList.remove("active"));c.classList.add("active");drawSchedule();});
@@ -2130,13 +2141,19 @@ function render(view="home",options={}){
           const league=leagues.find(l=>String(l.id)===String(leagueId));
           if(league){
             leagueCompetition=normalizeCompetitionCode(league.settings?.competition)||null;
+            leagueCompleted=String(league.status)==="completed";
             if(title&&leagueCompetition)title.textContent=rosterOnly?"My "+competitionName(leagueCompetition)+" Schedule":competitionName(leagueCompetition)+" Schedule";
-            if(copy&&leagueCompetition)copy.textContent=rosterOnly
-              ?"Only "+competitionName(leagueCompetition)+" matches involving players on your current fantasy roster."
-              :"Official "+competitionName(leagueCompetition)+" matches in the current schedule window.";
+            if(copy&&leagueCompetition)copy.textContent=leagueCompleted
+              ? competitionName(leagueCompetition)+" season complete · no future matches remain."
+              : rosterOnly
+                ?"Only "+competitionName(leagueCompetition)+" matches involving players on your current fantasy roster."
+                :"Official "+competitionName(leagueCompetition)+" matches in the current schedule window.";
+            const season=Number(league.settings?.competitionSeason)||new Date().getFullYear();
+            const scheduleFrom=leagueCompleted?new Date(Date.UTC(season,0,1)):null;
+            const scheduleTo=leagueCompleted?new Date(Date.UTC(season+1,0,1)):null;
             const [loaded,matches,user,rounds,matchups,allRosters]=await Promise.all([
               loadRosterFromCloud(leagueId),
-              backend().listProMatches?.(leagueCompetition),
+              backend().listProMatches?.(leagueCompetition,scheduleFrom,scheduleTo),
               backend().currentUser(),
               backend().listFantasyRounds(leagueId).catch(()=>[]),
               backend().listLeagueMatchups(leagueId).catch(()=>[]),
@@ -2995,10 +3012,26 @@ function render(view="home",options={}){
         cloudCard?.classList.remove("empty-league-mode");
         if(entryActions)entryActions.classList.remove("empty-league-actions");
 
+        const overviewStatus=String(activeLeague.status||"pre_draft");
+        const overviewEyebrow=document.querySelector("#leagueOverviewEyebrow");
+        const completionBanner=document.querySelector("#leagueCompletionBanner");
+        const completionTitle=document.querySelector("#leagueCompletionTitle");
+        const completionCopy=document.querySelector("#leagueCompletionCopy");
         document.querySelector("#leagueOverviewName").textContent=activeLeague.name;
         document.querySelector("#leagueOverviewTeam").textContent=activeMembership?.team_name||"Your team";
         document.querySelector("#leagueOverviewRole").textContent=activeMembership?.role==="owner"?"Commissioner":"Manager";
         document.querySelector("#leagueOverviewInvite").textContent=activeLeague.invite_code||"—";
+        if(overviewEyebrow)overviewEyebrow.textContent=overviewStatus==="completed"?"COMPLETED LEAGUE":"ACTIVE LEAGUE";
+        if(completionBanner){
+          completionBanner.hidden=overviewStatus!=="completed";
+          if(overviewStatus==="completed"){
+            const hadGames=activeLeague.settings?.seasonHadGames!==false;
+            if(completionTitle)completionTitle.textContent="Season Complete";
+            if(completionCopy)completionCopy.textContent=hadGames
+              ? competitionName(activeSettings.competition)+" is complete. Rosters and transactions are locked."
+              : competitionName(activeSettings.competition)+" ended before this fantasy league had any scoring periods. No champion was awarded.";
+          }
+        }
         try{
           const [playoffs,champion,history,membersNow,botsNow]=await Promise.all([
             b.listPlayoffs(activeId),b.getLeagueChampion(activeId),
@@ -3052,7 +3085,9 @@ function render(view="home",options={}){
             const pill=document.querySelector("#leagueChampionPill");
             if(champion){
               pill.textContent="CHAMPION";
-              playoffContent.innerHTML='<div class="champion-banner"><strong>🏆 '+h(managerName(champion.manager_id,champion.manager_type))+'</strong><small>League Champion · Seed #'+h(champion.seed||"—")+'</small></div>';
+              const championName=managerName(champion.manager_id,champion.manager_type);
+              playoffContent.innerHTML='<div class="champion-banner"><strong>🏆 '+h(championName)+'</strong><small>League Champion · Seed #'+h(champion.seed||"—")+'</small></div>';
+              if(overviewStatus==="completed"&&completionCopy)completionCopy.textContent=competitionName(activeSettings.competition)+" is complete · Champion: "+championName+".";
             }else{
               playoffContent.innerHTML=playoffs.map(function(x){return '<div class="playoff-row"><div><strong>'+h(x.stage==="championship"?"Championship":"Semifinal "+x.bracket_slot)+'</strong><small>Seed '+h(x.home_seed??"—")+' vs Seed '+h(x.away_seed??"—")+'</small></div><div><strong>'+formatFantasyPoints(x.home_score)+' - '+formatFantasyPoints(x.away_score)+'</strong><small>'+h(String(x.status||"upcoming").toUpperCase())+'</small></div></div>';}).join("");
             }
@@ -3956,6 +3991,12 @@ async function loadNotifications({open=false}={}){
         case "waiver_submitted": return {title:`Waiver claim submitted: ${rosterPlayer}`,body:`Priority ${p.priority||1}. The claim remains subject to league lock rules.`,view:"transactions"};
         case "waiver_won": return {title:`Waiver won: ${rosterPlayer}`,body:"The player has been added to your bench and your waiver priority moved to the back.",view:"transactions"};
         case "waiver_lost": return {title:`Waiver not awarded: ${rosterPlayer}`,body:"Another manager had higher waiver priority.",view:"transactions"};
+        case "league_completed": {
+          const competition=competitionName(p.competition);
+          return p.had_games===false
+            ? {title:"Season complete",body:competition+" ended before this league had any fantasy scoring periods. No champion was awarded.",view:"league"}
+            : {title:"Season complete",body:competition+" is complete. Final standings and results are available.",view:"league"};
+        }
         case "roster_incomplete_warning": {
           const missing=Array.isArray(p.missing_slots)&&p.missing_slots.length?p.missing_slots.join(", "):"roster spots";
           const count=(p.roster_count!=null&&p.required_count!=null)?`${p.roster_count}/${p.required_count} players · `:"";
