@@ -4764,10 +4764,10 @@ async function loadNotifications({open=false}={}){
           const when=start&&!Number.isNaN(start.getTime())?start.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}):"soon";
           return {title:`${rosterPlayer} locks soon`,body:`Lineup locks at ${when}. Check your starter/bench decision now.`,view:"team"};
         }
-        case "fantasy_period_started": return {title:p.label||`Fantasy Round ${p.round_number||""} started`,body:`${p.match_count||0} pro match${Number(p.match_count)===1?"":"es"} in this scoring period.`,view:"matchup"};
+        case "fantasy_period_started": return {title:p.label||`Fantasy Round ${p.round_number||""} started`,body:`${p.match_count||0} pro match${Number(p.match_count)===1?"":"es"} in this scoring period.`,view:"matchup",roundNumber:p.round_number};
         case "matchup_final": {
           const outcome=String(p.outcome||"").toUpperCase();
-          return {title:`Matchup final · ${outcome}`,body:`${formatFantasyPoints(p.your_score)} - ${formatFantasyPoints(p.opponent_score)} FP`,view:"matchup"};
+          return {title:`Matchup final · ${outcome}`,body:`${formatFantasyPoints(p.your_score)} - ${formatFantasyPoints(p.opponent_score)} FP`,view:"matchup",roundNumber:p.round_number};
         }
         default:return {title:"League update",body:"New activity in your league.",view:"league"};
       }
@@ -4780,7 +4780,7 @@ async function loadNotifications({open=false}={}){
       const detail=d.swap
         ? `<span class="notification-swap"><span class="swap-drop">${h(d.swap.dropped)}</span><span class="swap-arrow">→</span><span class="swap-add">${h(d.swap.added)}</span></span><small>Dropped one player and added another.</small>`
         : `<small>${h(d.body)}</small>`;
-      return `<button class="notification-item ${n.read_at?"":"unread"}" data-notification-view="${h(d.view)}" data-notification-id="${h(n.id)}" data-notification-league="${h(n.league_id||"")}" data-notification-trade-id="${h(d.tradeId||"")}" data-notification-trade-tab="${h(d.tradeTab||"")}"><span class="notification-dot"></span><span class="notification-copy"><strong>${h(d.title)}</strong>${detail}<em>${h(league?.name||"League")} · ${h(fmt(n.created_at))}</em></span></button>`;
+      return `<button class="notification-item ${n.read_at?"":"unread"}" data-notification-view="${h(d.view)}" data-notification-id="${h(n.id)}" data-notification-league="${h(n.league_id||"")}" data-notification-trade-id="${h(d.tradeId||"")}" data-notification-trade-tab="${h(d.tradeTab||"")}" data-notification-round="${h(d.roundNumber||"")}"><span class="notification-dot"></span><span class="notification-copy"><strong>${h(d.title)}</strong>${detail}<em>${h(league?.name||"League")} · ${h(fmt(n.created_at))}</em></span></button>`;
     }).join(""):'<div class="empty-state"><strong>No notifications yet</strong><small>Lineup locks, fantasy periods, matchup results, trades, and roster activity will appear here.</small></div>';
 
     notificationList.querySelectorAll("[data-notification-view]").forEach(item=>item.onclick=async()=>{
@@ -4788,6 +4788,7 @@ async function loadNotifications({open=false}={}){
       const leagueId=item.dataset.notificationLeague;
       const notificationLeague=leagueMap.get(String(leagueId));
       const completedLeague=String(notificationLeague?.status||"")==="completed";
+      const notificationRound=Number(item.dataset.notificationRound);
 
       if(completedLeague){
         if(["trade","transactions","setup","players"].includes(destination))destination="league";
@@ -4797,11 +4798,22 @@ async function loadNotifications({open=false}={}){
       }
 
       if(destination==="trade"){
-        tradeRouteIntent={
-          tab:item.dataset.notificationTradeTab||"incoming",
-          id:item.dataset.notificationTradeId||null
-        };
+        let tradeTab=item.dataset.notificationTradeTab||"incoming";
+        const tradeId=item.dataset.notificationTradeId||null;
+        if(tradeId&&leagueId){
+          try{
+            const leagueTrades=await b.listTrades(leagueId);
+            const currentTrade=leagueTrades.find(t=>String(t.id)===String(tradeId));
+            if(currentTrade&&String(currentTrade.status)!=="pending")tradeTab="history";
+          }catch{}
+        }
+        tradeRouteIntent={tab:tradeTab,id:tradeId};
       }
+
+      if(destination==="matchup"&&Number.isFinite(notificationRound)&&notificationRound>0){
+        selectedMatchupRound=notificationRound;
+      }
+
       if(item.classList.contains("unread")){
         try{await b.markNotificationsRead([item.dataset.notificationId]);}catch{}
       }
@@ -4816,12 +4828,6 @@ async function loadNotifications({open=false}={}){
 
     notificationPanel.hidden=false;
     document.body.classList.add("notifications-open");
-    if(unread.length){
-      try{await b.markNotificationsRead(unread.map(n=>n.id));}catch{}
-      notificationBadge.hidden=true;
-      notificationList.querySelectorAll(".notification-item.unread").forEach(el=>el.classList.remove("unread"));
-      notificationSummary.textContent="You're all caught up.";
-    }
     return notifications;
   }catch(err){
     if(open){
