@@ -148,9 +148,9 @@ check(html.includes('id="creatorLabEntry" hidden'),"Creator Lab entry is hidden 
 check(app.includes('function isSimulationLeague(league)'),"simulation leagues have a dedicated visibility guard");
 check(app.includes('const regularLeagues=leagues.filter(l=>!isSimulationLeague(l));'),"normal league views exclude simulations");
 check(app.includes('if(view==="creator-lab")'),"Creator Lab route is wired");
-check(app.includes('startMockSimulation(mockLeague.id)'),"Creator Lab can start the 35-minute simulation");
+check(app.includes('startMockSimulation(mockLeague.id)'),"Creator Lab can start a mock simulation");
 check(backend.includes('async function isPlatformAdmin()'),"creator access check exists in frontend API");
-check(backend.includes('async function createMockLeague(competition="worlds")'),"mock league creation API accepts tournament selection");
+check(backend.includes('async function createMockLeague(competition="worlds",durationMinutes=5)'),"mock league creation API accepts tournament and duration selection");
 check(backend.includes('async function startMockSimulation(leagueId)'),"mock simulation start API exists");
 check(backend.includes('row.competition||"")!=="simulation"'),"normal schedule feed hides simulation matches");
 check(html.includes('id="creatorCompetitionSelect"'),"Creator Lab tournament selector exists");
