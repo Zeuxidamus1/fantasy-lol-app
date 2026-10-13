@@ -2047,7 +2047,40 @@ function render(view="home",options={}){
         const other=ownership&&!mine;
         const eligible=playerEligibleForCompetition(p,leagueCompetition);
         const draftable=playerIsDraftable(p);
-        const acquisitionAvailable=playerAvailableForAcquisition(p,leagueCompetition);
+        const mockDraftContext=league?.settings?.simulation===true
+          && selectedPlayerReturnView==="draft"
+          && league?.status==="drafting";
+        const acquisitionAvailable=mockDraftContext
+          ?(eligible&&draftable)
+          :playerAvailableForAcquisition(p,leagueCompetition);
+
+        if(mockDraftContext){
+          if(availability)availability.textContent=acquisitionAvailable?"MOCK DRAFT ELIGIBLE":"NOT ELIGIBLE";
+          if(expected)expected.textContent="SIM";
+          if(nextMatch)nextMatch.textContent="Simulated game";
+          document.querySelector("#profileStatus").textContent=acquisitionAvailable
+            ?"Eligible for mock draft"
+            :!eligible
+              ?`Not eligible for ${competitionName(leagueCompetition)}`
+              :"Not currently draftable";
+
+          waiverBtn.hidden=true;
+          tradeBtn.hidden=true;
+          addBtn.disabled=!acquisitionAvailable;
+          addBtn.textContent=acquisitionAvailable?"Draft Player":"Not Eligible";
+          addBtn.onclick=acquisitionAvailable?async()=>{
+            addBtn.disabled=true;
+            try{
+              await b.makeDraftPick(leagueId,p.id,p.role);
+              showToast(p.name+" drafted");
+              render("draft",{replace:true});
+            }catch(err){
+              showToast(err.message||"Could not make draft pick");
+              addBtn.disabled=false;
+            }
+          }:null;
+          return;
+        }
 
         document.querySelector("#profileStatus").textContent=mine
           ?"On your roster"
