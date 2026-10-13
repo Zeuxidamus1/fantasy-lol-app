@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-13T17:06:50.006Z",
+  "updatedAt": "2026-10-13T21:48:20.364Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "115565004607949381",
-      "eventId": "",
-      "competition": "lcs",
-      "competitionType": "regional",
-      "startTime": "2026-09-13T20:00:00Z",
-      "league": "LCS",
-      "leagueCode": "lcs",
-      "stage": "Playoffs",
-      "aId": "98926509892121852",
-      "a": "FlyQuest",
-      "aCode": "FLY",
-      "bId": "115688562107799886",
-      "b": "Sentinels",
-      "bCode": "SEN",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "116957100120526824",
       "eventId": "",
