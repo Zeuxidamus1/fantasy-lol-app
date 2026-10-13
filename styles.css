@@ -1156,6 +1156,15 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
 .completed-review-banner{margin:12px 0}
 .completed-review-meta{margin-top:0}
 .completed-review-tools{margin-top:12px}
+.completed-season-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.completed-season-summary>div{min-width:0;padding:10px;border:1px solid #1d3a50;border-radius:12px;background:#091827}
+.completed-season-summary small,.completed-season-summary strong{display:block}
+.completed-season-summary small{font-size:8px;text-transform:uppercase;letter-spacing:.7px;color:#7893ad;font-weight:800}
+.completed-season-summary strong{margin-top:4px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.completed-champion-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;padding:10px 12px;border:1px solid #285347;border-radius:12px;background:#0c2928}
+.completed-champion-row span{font-size:9px;text-transform:uppercase;letter-spacing:.7px;color:#7ea49b;font-weight:800}
+.completed-champion-row strong{font-size:12px;text-align:right}
+@media(max-width:430px){.completed-season-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 @media(max-width:350px){
   .league-quick-grid.league-hub-tools{grid-template-columns:1fr}
