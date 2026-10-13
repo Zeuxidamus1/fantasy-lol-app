@@ -1324,11 +1324,37 @@ function render(view="home",options={}){
     const upcomingList=document.querySelector("#homeUpcomingMatches");
     const onboardingCard=document.querySelector("#onboardingCard");
     if(onboardingCard){
-      let dismissed=false;
-      try{dismissed=localStorage.getItem("riftOnboardingDismissed")==="1";}catch{}
-      onboardingCard.hidden=dismissed;
+      onboardingCard.hidden=true;
       const dismiss=document.querySelector("#dismissOnboarding");
-      if(dismiss)dismiss.onclick=function(){try{localStorage.setItem("riftOnboardingDismissed","1");}catch{} onboardingCard.hidden=true;};
+      void (async()=>{
+        if(!cloudReady()){
+          onboardingCard.hidden=false;
+          if(dismiss)dismiss.onclick=()=>{onboardingCard.hidden=true;};
+          return;
+        }
+        try{
+          const b=backend();
+          const user=await b.currentUser().catch(()=>null);
+          if(!user){
+            onboardingCard.hidden=true;
+            return;
+          }
+          const prefs=await b.getUserPreferences();
+          onboardingCard.hidden=!!prefs?.onboarding_dismissed;
+          if(dismiss)dismiss.onclick=async()=>{
+            onboardingCard.hidden=true;
+            dismiss.disabled=true;
+            try{await b.setOnboardingDismissed(true);}
+            catch(err){
+              onboardingCard.hidden=false;
+              showToast(err.message||"Could not save onboarding preference.");
+            }finally{dismiss.disabled=false;}
+          };
+        }catch{
+          onboardingCard.hidden=false;
+          if(dismiss)dismiss.onclick=()=>{onboardingCard.hidden=true;};
+        }
+      })();
     }
 
     const renderUpcoming=sourceRows=>{
