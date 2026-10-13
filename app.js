@@ -274,7 +274,8 @@ const defaultLeagueSettings = {
 
 function getLeagueSettings(){
   try{
-    const saved=JSON.parse(storageGet("riftLeagueSettings")||"{}")||{};
+    const key=scopedLeagueStorageKey("riftLeagueSettings");
+    const saved=key?JSON.parse(storageGet(key)||"{}")||{}:{};
     const competition=normalizeCompetitionCode(saved.competition||defaultLeagueSettings.competition)||"worlds";
     return {
       ...defaultLeagueSettings,
@@ -291,6 +292,10 @@ function getLeagueSettings(){
   }catch{
     return {...defaultLeagueSettings,scoring:{...defaultLeagueSettings.scoring}};
   }
+}
+function cacheLeagueSettings(settings,leagueId=getActiveLeagueId()){
+  const key=scopedLeagueStorageKey("riftLeagueSettings",leagueId);
+  if(key)storageSet(key,JSON.stringify(settings));
 }
 
 let selectedPlayerId=null;
@@ -2557,8 +2562,16 @@ function render(view="home",options={}){
         currentUser=user;
         leagueRosters=rosters;
         const activeLeague=leagues.find(l=>String(l.id)===String(leagueId));
-        leagueStatus=activeLeague?.status||null;
-        leagueCompetition=normalizeCompetitionCode(activeLeague?.settings?.competition)||null;
+        if(!activeLeague){
+          setActiveLeagueId(null);
+          leagueStatus=null;
+          leagueCompetition=null;
+          leagueRosters=[];
+          draw();
+          return;
+        }
+        leagueStatus=activeLeague.status||null;
+        leagueCompetition=normalizeCompetitionCode(activeLeague.settings?.competition)||null;
         const statuses=leagueCompetition?await b.listPlayerCompetitionStatus(leagueCompetition).catch(()=>[]):[];
         playerStatusMap=new Map(statuses.map(x=>[String(x.player_id),x]));
       }catch{
@@ -2691,11 +2704,11 @@ function render(view="home",options={}){
       const tradeStatuses=tradeCompetition?await b.listPlayerCompetitionStatus(tradeCompetition).catch(()=>[]):[];
       tradePlayerStatusMap=new Map(tradeStatuses.map(x=>[String(x.player_id),x]));
       if(activeLeague?.settings){
-        storageSet("riftLeagueSettings",JSON.stringify({
+        cacheLeagueSettings({
           ...defaultLeagueSettings,
           ...activeLeague.settings,
           scoring:{...defaultLeagueSettings.scoring,...(activeLeague.settings.scoring||{})}
-        }));
+        })
       }
       isCommissioner=members.some(m=>String(m.user_id)===String(user.id)&&m.role==="owner");
     };
@@ -3435,7 +3448,7 @@ function render(view="home",options={}){
           competitionType:competitionType(activeLeague.settings?.competition),
           scoring:{...defaultLeagueSettings.scoring,...(activeLeague.settings?.scoring||{})}
         };
-        storageSet("riftLeagueSettings",JSON.stringify(activeSettings));
+        cacheLeagueSettings(activeSettings)
 
         if(overviewCard)overviewCard.hidden=false;
         if(activeLeagueEntryCard){
@@ -4002,7 +4015,7 @@ function render(view="home",options={}){
           if(!league?.id)throw new Error("League was not created.");
           await b.updateTeamName(league.id,teamName);
           setActiveLeagueId(league.id);
-          storageSet("riftLeagueSettings",JSON.stringify(next));
+          cacheLeagueSettings(next)
           showToast("League created"+(league.invite_code?": "+league.invite_code:""));
           render("league",{replace:true});
         }catch(err){
@@ -4172,7 +4185,7 @@ function render(view="home",options={}){
         const league=Array.isArray(created)?created[0]:created;
         if(!league?.id)throw new Error("Bot League was not created.");
         setActiveLeagueId(league.id);
-        storageSet("riftLeagueSettings",JSON.stringify(settings));
+        cacheLeagueSettings(settings)
         sessionStorage.setItem("riftBotLeagueCreated",JSON.stringify({name:config.name,human:setup.humanManagers,bots}));
         sessionStorage.removeItem("riftBotLeagueSetup");
         sessionStorage.removeItem("riftBotLeagueSettings");
@@ -4297,7 +4310,7 @@ function render(view="home",options={}){
           }
           const editable=league?.status==="pre_draft";
           settings={...defaultLeagueSettings,...(league?.settings||{}),name:league?.name||settings.name,competition:normalizeCompetitionCode(league?.settings?.competition)||"worlds",competitionSeason:Number(league?.settings?.competitionSeason)||2026,competitionType:competitionType(league?.settings?.competition),scoring:{...defaultLeagueSettings.scoring,...(league?.settings?.scoring||{})}};
-          storageSet("riftLeagueSettings",JSON.stringify(settings));
+          cacheLeagueSettings(settings)
           setupScreen.hidden=false;
 
           const saveBtn=document.querySelector("#saveLeagueBtn");
@@ -4368,7 +4381,7 @@ function render(view="home",options={}){
         const btn=document.querySelector("#saveLeagueBtn");btn.disabled=true;
         try{
           if(cloudReady()&&activeLeagueId)await backend().updateLeagueSettings(activeLeagueId,next.name,next);
-          storageSet("riftLeagueSettings",JSON.stringify(next));
+          cacheLeagueSettings(next)
           storageRemove("riftDraftState");
           showToast("League settings saved for everyone");
           render("league",{replace:true});
