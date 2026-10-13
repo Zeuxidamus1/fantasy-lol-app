@@ -4567,6 +4567,7 @@ function render(view="home",options={}){
     const deleteBtn=document.querySelector("#creatorDeleteMockBtn");
     let mockLeague=null;
     let mockCompetitions=[];
+    let mockDuration=5;
 
     const competitionOptionLabel=row=>{
       const count=Number(row?.pool_count)||0;
@@ -4593,6 +4594,22 @@ function render(view="home",options={}){
       if(!select||!target)return;
       target.textContent=competitionHelp(mockCompetitions.find(row=>row.code===select.value));
     };
+    const syncMockDurationUI=()=>{
+      document.querySelectorAll("[data-mock-duration]").forEach(btn=>{
+        const active=Number(btn.dataset.mockDuration)===mockDuration;
+        btn.classList.toggle("active",active);
+        btn.setAttribute("aria-pressed",active?"true":"false");
+      });
+      if(createBtn)createBtn.textContent=`Create ${mockDuration}-Minute Mock`;
+    };
+
+    document.querySelectorAll("[data-mock-duration]").forEach(btn=>{
+      btn.onclick=()=>{
+        mockDuration=Number(btn.dataset.mockDuration)===35?35:5;
+        syncMockDurationUI();
+      };
+    });
+    syncMockDurationUI();
 
     const drawSnapshot=snapshot=>{
       const run=snapshot?.run||{};
@@ -4701,7 +4718,7 @@ function render(view="home",options={}){
             ?""
             :run.status==="completed"
               ?"The test game is complete. Review the final fantasy scores or delete the test league."
-              :"Draft complete. Start the 35-minute scoring simulation when you're ready.";
+              :`Draft complete. Start the ${Number(run.duration_minutes)||5}-minute simulation when you're ready.`;
       if(mockCopy){
         mockCopy.textContent=mockCopyText;
         mockCopy.hidden=!mockCopyText;
@@ -4748,12 +4765,12 @@ function render(view="home",options={}){
       createBtn.disabled=true;
       try{
         const competition=createCompetition?.value||"worlds";
-        const created=await b.createMockLeague(competition);
+        const created=await b.createMockLeague(competition,mockDuration);
         const league=Array.isArray(created)?created[0]:created;
         if(!league?.id)throw new Error("Mock league was not created.");
         mockLeague=league;
         setActiveLeagueId(league.id);
-        showToast("Mock league created");
+        showToast(`${mockDuration}-minute mock league created`);
         await load();
       }catch(err){showToast(err.message||"Could not create mock league");}
       finally{createBtn.disabled=false;}
@@ -4785,7 +4802,7 @@ function render(view="home",options={}){
       startBtn.disabled=true;
       try{
         const snapshot=await b.startMockSimulation(mockLeague.id);
-        showToast("35-minute simulation started");
+        showToast(`${Number(snapshot?.run?.duration_minutes)||5}-minute simulation started`);
         drawSnapshot(snapshot);
         await load();
       }catch(err){showToast(err.message||"Could not start simulation");}
