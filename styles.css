@@ -1370,3 +1370,33 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
   font-size:11px;
   line-height:1.45;
 }
+
+/* Onboarding card responsive fix */
+.onboarding-card .onboarding-steps{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin:14px 0;
+}
+.onboarding-card .onboarding-steps>div{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  min-width:0;
+  padding:11px 12px;
+}
+.onboarding-card .onboarding-steps strong{
+  flex:0 0 28px;
+  min-width:28px;
+  width:28px;
+  height:28px;
+}
+.onboarding-card .onboarding-steps span{
+  min-width:0;
+  line-height:1.35;
+  overflow-wrap:normal;
+  word-break:normal;
+}
+@media(max-width:560px){
+  .onboarding-card .onboarding-steps{grid-template-columns:1fr}
+}
