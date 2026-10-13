@@ -980,7 +980,7 @@ function eligibleFantasyPlayers(settings=getLeagueSettings()){
 function competitionCapacity(competition,bench=1){
   const code=normalizeCompetitionCode(competition);
   const benchCount=Math.max(0,Number(bench)||0);
-  const pool=allFantasyPlayers().filter(p=>playerEligibleForCompetition(p,code)&&playerIsDraftable(p));
+  const pool=allFantasyPlayers().filter(p=>playerAvailableForAcquisition(p,code));
   const roleCounts=Object.fromEntries(["TOP","JNG","MID","ADC","SUP"].map(role=>[role,pool.filter(p=>p.role===role).length]));
   const roleLimit=Math.min(...Object.values(roleCounts));
   const rosterSize=6+benchCount;
@@ -997,7 +997,19 @@ function capacityMessage(competition,bench=1){
 async function applyCompetitionScheduleAvailability(select,onChange){
   if(!select||!cloudReady()||typeof backend()?.listProMatches!=="function")return;
   const year=new Date().getFullYear();
-  const rows=await backend().listProMatches(null,new Date(Date.UTC(year,0,1)),new Date(Date.UTC(year+1,0,1))).catch(()=>[]);
+  const [rows,statusRows]=await Promise.all([
+    backend().listProMatches(null,new Date(Date.UTC(year,0,1)),new Date(Date.UTC(year+1,0,1))).catch(()=>[]),
+    backend().listPlayerCompetitionStatus().catch(()=>[])
+  ]);
+  const groupedStatuses=new Map();
+  for(const row of (statusRows||[])){
+    const code=normalizeCompetitionCode(row.competition);
+    if(!code)continue;
+    const arr=groupedStatuses.get(code)||[];
+    arr.push(row);
+    groupedStatuses.set(code,arr);
+  }
+  for(const [code,items] of groupedStatuses)cacheCompetitionStatuses(code,items);
   if(!Array.isArray(rows)||!rows.length)return;
   const byCompetition=new Map();
   for(const row of rows){
@@ -2843,12 +2855,18 @@ function render(view="home",options={}){
 
       myList.innerHTML=mine.length?mine.map(r=>{
         const p=playerFromId(r.player_id);
-        return `<button class="trade-option ${selectedMine.has(String(r.player_id))?"selected":""}" data-trade-mine="${h(r.player_id)}"><strong>${h(p.name)}</strong><small>${h(p.role||r.slot)} · ${h(p.team)}</small></button>`;
+        const status=String(tradePlayerStatusMap.get(String(r.player_id))?.status||"");
+        const unavailable=status!=="starter";
+        if(unavailable)selectedMine.delete(String(r.player_id));
+        return `<button class="trade-option ${selectedMine.has(String(r.player_id))?"selected":""}" data-trade-mine="${h(r.player_id)}" ${unavailable?"disabled":""}><strong>${h(p.name)}</strong><small>${h(p.role||r.slot)} · ${h(p.team)}${unavailable?" · "+h(playerAvailabilityLabel(status)):""}</small></button>`;
       }).join(""):'<div class="empty-state"><strong>No rostered players</strong><small>Your drafted roster will appear here.</small></div>';
 
       theirList.innerHTML=theirs.length?theirs.map(r=>{
         const p=playerFromId(r.player_id);
-        return `<button class="trade-option ${selectedTheirs.has(String(r.player_id))?"selected":""}" data-trade-theirs="${h(r.player_id)}"><strong>${h(p.name)}</strong><small>${h(p.role||r.slot)} · ${h(p.team)}</small></button>`;
+        const status=String(tradePlayerStatusMap.get(String(r.player_id))?.status||"");
+        const unavailable=status!=="starter";
+        if(unavailable)selectedTheirs.delete(String(r.player_id));
+        return `<button class="trade-option ${selectedTheirs.has(String(r.player_id))?"selected":""}" data-trade-theirs="${h(r.player_id)}" ${unavailable?"disabled":""}><strong>${h(p.name)}</strong><small>${h(p.role||r.slot)} · ${h(p.team)}${unavailable?" · "+h(playerAvailabilityLabel(status)):""}</small></button>`;
       }).join(""):'<div class="empty-state"><strong>No players to trade for</strong><small>This manager does not have a roster yet.</small></div>';
 
       const mineNames=selectedNames(selectedMine,mine);
@@ -3930,6 +3948,9 @@ function render(view="home",options={}){
         currentUser=currentUser||await b.currentUser();
         const leagues=await b.listLeagues();
         const league=leagues.find(l=>String(l.id)===String(leagueId));
+        const leagueCompetition=normalizeCompetitionCode(league?.settings?.competition)||"worlds";
+        const draftStatusRows=await b.listPlayerCompetitionStatus(leagueCompetition).catch(()=>[]);
+        cacheCompetitionStatuses(leagueCompetition,draftStatusRows);
         members=await b.listLeagueMembers(leagueId);
         bots=await b.listLeagueBots(leagueId);
         memberById=new Map([
