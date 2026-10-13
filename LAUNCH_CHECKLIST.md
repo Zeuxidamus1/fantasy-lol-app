@@ -8,6 +8,7 @@
 - [x] Text-containment and long-label stress tests
 - [x] Deployment preflight and repository secret scan
 - [x] Supabase RLS and browser permission hardening
+- [x] Supabase browser grants, RLS policies, RPC permissions, and Creator Lab admin boundaries audited
 - [x] Full rollback fantasy lifecycle simulation
 - [x] Scheduled job health audit
 - [x] Integrity checks show no critical fantasy-data findings
