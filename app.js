@@ -2044,17 +2044,49 @@ function render(view="home",options={}){
     const note=document.querySelector("#profileDataNote");
     if(note)note.textContent=chain?`2026 professional match summary from ChainCC. Recent match history is shown below when available.`:"No ChainCC profile data matched this player yet.";
 
-    const teamName=String(p.team||"").toLowerCase();
-    const teamCode=String(p.teamCode||"").toLowerCase();
-    const matches=proSchedule.map(localScheduleRow).filter(g=>{
-      const a=`${g.a||""} ${g.aCode||""}`.toLowerCase();
-      const b=`${g.b||""} ${g.bCode||""}`.toLowerCase();
-      return (teamName&&((a.includes(teamName)||b.includes(teamName)))) || (teamCode&&((a.includes(teamCode)||b.includes(teamCode))));
-    }).slice(0,3);
-    document.querySelector("#profileMatches").innerHTML=matches.length?matches.map(g=>{
-      const opponent=(String(g.a||"").toLowerCase().includes(teamName)||String(g.aCode||"").toLowerCase()===teamCode)?g.b:g.a;
-      return `<div class="profile-match"><div><strong>vs ${h(opponent||"TBD")}</strong><small>${h(g.league||"")} · ${h(g.stage||"")}</small></div><div><strong>${h(g.time||"TBD")}</strong><small>${h(g.label||"")}</small></div></div>`;
-    }).join(""):'<div class="empty-state"><strong>No upcoming match found</strong><small>The schedule will populate automatically when a matching event is available.</small></div>';
+    const profileMatchesRoot=document.querySelector("#profileMatches");
+    const renderPlayerUpcomingMatches=sourceRows=>{
+      const now=Date.now();
+      const matches=(sourceRows||[])
+        .map(row=>row?.start_time?databaseMatchToSchedule(row):row)
+        .filter(Boolean)
+        .filter(match=>{
+          const start=Date.parse(match.startTime||match.date||"");
+          const status=displayMatchStatus(match.status);
+          if(!Number.isFinite(start)||start<=now)return false;
+          if(["FINAL","CANCELED","POSTPONED"].includes(status))return false;
+          const normalized={
+            team_a_id:match.aId||match.team_a_id,
+            team_a_name:match.a||match.team_a_name,
+            team_a_code:match.aCode||match.team_a_code,
+            team_b_id:match.bId||match.team_b_id,
+            team_b_name:match.b||match.team_b_name,
+            team_b_code:match.bCode||match.team_b_code
+          };
+          return playerMatchesProMatch(p,normalized);
+        })
+        .sort((a,b)=>Date.parse(a.startTime||a.date||"")-Date.parse(b.startTime||b.date||""))
+        .slice(0,3)
+        .map(localScheduleRow);
+
+      profileMatchesRoot.innerHTML=matches.length?matches.map(g=>{
+        const playerTeamId=String(p.teamId||p.team_id||"");
+        const aIsPlayer=playerTeamId
+          ?playerTeamId===String(g.aId||"")
+          :normalizeTeamKey(g.a)===normalizeTeamKey(p.team)||normalizeTeamKey(g.aCode)===normalizeTeamKey(p.teamCode);
+        const opponent=aIsPlayer?g.b:g.a;
+        return `<div class="profile-match"><div><strong>vs ${h(opponent||"TBD")}</strong><small>${h(g.league||competitionName(g.competition)||"LoL Esports")}${g.stage?" · "+h(g.stage):""}</small></div><div><strong>${h(g.time||"TBD")}</strong><small>${h(g.label||"Upcoming")}</small></div></div>`;
+      }).join(""):'<div class="empty-state"><strong>No upcoming match scheduled</strong></div>';
+    };
+
+    // Never label historical schedule rows as "Next matches."
+    renderPlayerUpcomingMatches(proSchedule);
+    if(cloudReady()&&backend()?.listProMatches){
+      if(profileMatchesRoot)profileMatchesRoot.innerHTML='<div class="empty-state"><strong>Loading current schedule…</strong></div>';
+      void backend().listProMatches(null,new Date().toISOString(),new Date(Date.now()+90*24*60*60*1000).toISOString())
+        .then(rows=>renderPlayerUpcomingMatches(Array.isArray(rows)?rows:[]))
+        .catch(()=>renderPlayerUpcomingMatches(proSchedule));
+    }
 
     const trendRoot=document.querySelector("#profileTrend");
     const sourceRoot=document.querySelector("#profileSource");
