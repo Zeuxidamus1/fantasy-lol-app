@@ -2397,8 +2397,8 @@ function render(view="home",options={}){
     if(leagueId&&cloudReady()){
       void backend().listLeagues().then(leagues=>{
         const league=leagues.find(l=>String(l.id)===String(leagueId));
-        if(league?.status==="completed"){
-          showToast("This league is complete. Trades are closed.");
+        if(league?.status!=="active"){
+          showToast(league?.status==="completed"?"This league is complete. Trades are closed.":"Trades are not available in this league yet.");
           render("league",{replace:true});
         }
       }).catch(()=>{});
@@ -2942,8 +2942,8 @@ function render(view="home",options={}){
     if(completedTransactionsLeagueId&&cloudReady()){
       void backend().listLeagues().then(leagues=>{
         const league=leagues.find(l=>String(l.id)===String(completedTransactionsLeagueId));
-        if(league?.status==="completed"){
-          showToast("This league is complete. Transactions are closed.");
+        if(league?.status!=="active"){
+          showToast(league?.status==="completed"?"This league is complete. Transactions are closed.":"Transactions are not available in this league yet.");
           render("league",{replace:true});
         }
       }).catch(()=>{});
@@ -3055,7 +3055,7 @@ function render(view="home",options={}){
         }
       };
 
-      const renderCompletedLeagueCard=completedLeagues=>{
+      const renderCompletedLeagueCard=async completedLeagues=>{
         if(!completedLeaguesCard||!completedLeagueList)return;
         completedLeaguesCard.hidden=completedLeagues.length===0;
         if(completedLeagueCount)completedLeagueCount.textContent=String(completedLeagues.length);
@@ -3069,10 +3069,33 @@ function render(view="home",options={}){
           return;
         }
 
-        completedLeagueList.innerHTML=completedLeagues.map(league=>`
+        const summaries=await Promise.all(completedLeagues.map(async league=>{
+          try{
+            const [standings,champion,members,bots]=await Promise.all([
+              b.listLeagueStandings(league.id).catch(()=>[]),
+              b.getLeagueChampion(league.id).catch(()=>null),
+              b.listLeagueMembers(league.id).catch(()=>[]),
+              b.listLeagueBots(league.id).catch(()=>[])
+            ]);
+            const mine=(standings||[]).find(s=>String(s.manager_type||"human")==="human"&&String(s.manager_id)===String(user.id));
+            let championName="No Champion";
+            if(champion){
+              championName=(String(champion.manager_type||"human")==="bot"
+                ?bots.find(x=>String(x.id)===String(champion.manager_id))?.team_name
+                :members.find(x=>String(x.user_id)===String(champion.manager_id))?.team_name)||"Champion";
+            }
+            return {league,finish:mine?.rank?"#"+Number(mine.rank):"—",championName};
+          }catch{
+            return {league,finish:"—",championName:"—"};
+          }
+        }));
+        completedLeagueList.innerHTML=summaries.map(({league,finish,championName})=>`
           <button class="league-choice-card completed-league-choice" type="button" data-review-completed-league="${h(league.id)}">
             <span class="league-choice-icon">✓</span>
-            <span><strong>${h(league.name)}</strong><small>${h(competitionName(league.settings?.competition||""))} ${h(String(league.settings?.competitionSeason||""))}</small></span>
+            <span>
+              <strong>${h(league.name)}</strong>
+              <small>${h(competitionName(league.settings?.competition||""))} ${h(String(league.settings?.competitionSeason||""))} · Finish ${h(finish)} · ${h(championName)}</small>
+            </span>
             <span class="league-choice-arrow">›</span>
           </button>`).join("");
 
@@ -3164,7 +3187,7 @@ function render(view="home",options={}){
         const leagues=await b.listLeagues();
         const completedLeagues=leagues.filter(l=>leagueLifecycleState(l)==="completed");
         const liveLeagues=leagues.filter(playableLeague);
-        renderCompletedLeagueCard(completedLeagues);
+        await renderCompletedLeagueCard(completedLeagues);
 
         let activeId=getActiveLeagueId();
         if(activeId&&!liveLeagues.some(l=>String(l.id)===String(activeId))){
@@ -3288,30 +3311,29 @@ function render(view="home",options={}){
             ? humanManagers+" human · "+botManagers+" bot"+(botManagers===1?"":"s")
             : humanManagers+" human manager"+(humanManagers===1?"":"s");
           const leagueStatus=activeLifecycle.state;
-          if(leagueStatus==="completed"){
-            if(toolsEyebrow)toolsEyebrow.textContent="SEASON RESULTS";
-            if(toolsTitle)toolsTitle.textContent="Review this completed league";
-            if(inviteField)inviteField.hidden=true;
-            if(commissionerBtn)commissionerBtn.hidden=true;
+          if(inviteField)inviteField.hidden=false;
+          if(toolsEyebrow)toolsEyebrow.textContent=leagueStatus==="playoffs"?"POSTSEASON":"LEAGUE TOOLS";
+          if(toolsTitle)toolsTitle.textContent=leagueStatus==="pre_draft"
+            ?"Prepare for the draft"
+            :leagueStatus==="drafting"
+              ?"Draft in progress"
+              :leagueStatus==="playoffs"
+                ?"Playoffs"
+                :"Manage this league";
 
-            const hasScoringPeriods=Array.isArray(roundsNow)&&roundsNow.length>0;
-            const hasDraft=Boolean(draftNow&&String(draftNow.status||"")==="complete");
-            const completedTools=[
-              {view:"standings",icon:"≡",title:"Final Standings",copy:"Final league table"},
-              ...(hasScoringPeriods?[{view:"matchup",icon:"⚔",title:"Matchup Results",copy:"Completed head-to-head results"}]:[]),
-              {view:"team",icon:"◈",title:"Final Roster",copy:"Read-only ending roster"},
-              ...(hasDraft?[{view:"draft",icon:"◎",title:"Draft Results",copy:"Final draft board & picks"}]:[])
-            ];
-            if(toolsGrid){
-              toolsGrid.innerHTML=completedTools.map(tool=>`<button class="league-tool-btn ${completedTools.length%2===1&&tool===completedTools[completedTools.length-1]?"league-tool-wide":""}" data-jump="${h(tool.view)}"><span class="action-icon">${tool.icon}</span><span><strong>${h(tool.title)}</strong><small>${h(tool.copy)}</small></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>`).join("");
-              toolsGrid.querySelectorAll("[data-jump]").forEach(btn=>{
-                btn.onclick=()=>render(btn.dataset.jump);
-              });
-            }
-          }else{
-            if(toolsEyebrow)toolsEyebrow.textContent="LEAGUE TOOLS";
-            if(toolsTitle)toolsTitle.textContent="Manage this league";
-            if(inviteField)inviteField.hidden=false;
+          const draftComplete=Boolean(draftNow&&String(draftNow.status||"")==="complete");
+          const activeTools=(leagueStatus==="pre_draft"||leagueStatus==="drafting")
+            ?[{view:"draft",icon:"◎",title:"Draft Room"}]
+            :[
+                {view:"team",icon:"◈",title:"My Team"},
+                {view:"matchup",icon:"⚔",title:"Matchup"},
+                {view:"standings",icon:"≡",title:"Standings"},
+                ...(draftComplete?[{view:"draft",icon:"◎",title:"Draft Results"}]:[]),
+                {view:"transactions",icon:"↕",title:"Transactions"}
+              ];
+          if(toolsGrid){
+            toolsGrid.innerHTML=activeTools.map(tool=>`<button class="league-tool-btn ${activeTools.length%2===1&&tool===activeTools[activeTools.length-1]?"league-tool-wide":""}" data-jump="${h(tool.view)}"><span class="action-icon">${tool.icon}</span><span><strong>${h(tool.title)}</strong></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>`).join("");
+            toolsGrid.querySelectorAll("[data-jump]").forEach(btn=>{btn.onclick=()=>render(btn.dataset.jump);});
           }
           if(readinessTitle&&readinessCopy){
             if(leagueStatus==="pre_draft"&&readyManagers>=expectedManagers){
