@@ -60,25 +60,46 @@ if(/PANDASCORE_API_TOKEN|LOL_ESPORTS_API_KEY|SUPABASE_DB_URL/.test(config)){
   pass("frontend config contains no backend-only secret names");
 }
 
-const secretScanFiles=[
-  "app.js","backend.js","backend-config.js","index.html","styles.css",
-  ...migrationFiles.map(f=>"supabase/migrations/"+f),
-  "supabase/functions/sync-match-stats/index.ts",
-  "supabase/functions/sync-pandascore-validator/index.ts"
+const ignoredDirs=new Set([".git","node_modules",".cache","dist","coverage"]);
+const textExtensions=new Set([".js",".mjs",".cjs",".ts",".tsx",".jsx",".html",".css",".md",".json",".yml",".yaml",".toml",".sql",".txt",".sh"]);
+const secretScanFiles=[];
+const walk=dir=>{
+  for(const entry of fs.readdirSync(dir,{withFileTypes:true})){
+    if(ignoredDirs.has(entry.name))continue;
+    const full=path.join(dir,entry.name);
+    if(entry.isDirectory()){walk(full);continue;}
+    const rel=path.relative(root,full).replaceAll("\\","/");
+    if(textExtensions.has(path.extname(entry.name).toLowerCase())||entry.name===".gitignore")secretScanFiles.push(rel);
+  }
+};
+walk(root);
+
+const forbiddenFiles=[
+  /(^|\/)\.env(?:\.|$)/i,
+  /(^|\/)(?:id_rsa|id_ed25519|credentials?|secrets?)(?:\.|$)/i,
+  /\.(?:pem|p12|pfx|jks|keystore)$/i
 ];
 for(const rel of secretScanFiles){
+  if(forbiddenFiles.some(rx=>rx.test(rel))&&!/\.env\.example$/i.test(rel)){
+    fail("sensitive-looking file must not be committed: "+rel);
+  }
   const full=path.join(root,rel);
-  if(!fs.existsSync(full))continue;
   const body=fs.readFileSync(full,"utf8");
   const forbidden=[
-    /sb_secret_[A-Za-z0-9_-]+/,
-    /service_role[^\n]{0,80}[=:][^\n]{8,}/i,
-    /const\s+API_KEY\s*=\s*["'][^"']{12,}["']/,
-    /PANDASCORE_API_TOKEN\s*=\s*["'][^"']+["']/
+    /sb_secret_[A-Za-z0-9_-]{8,}/,
+    /(?:ghp|github_pat)_[A-Za-z0-9_]{20,}/,
+    /AKIA[0-9A-Z]{16}/,
+    /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/,
+    /postgres(?:ql)?:\/\/[^\s"'<>]+/i,
+    /PANDASCORE_API_TOKEN\s*[:=]\s*["'][^"']+["']/i,
+    /SUPABASE_SERVICE_ROLE_KEY\s*[:=]\s*["'][^"']+["']/i,
+    /SUPABASE_ACCESS_TOKEN\s*[:=]\s*["'][^"']+["']/i,
+    /SUPABASE_DB_URL\s*[:=]\s*["'][^"']+["']/i,
+    /LOL_ESPORTS_API_KEY\s*[:=]\s*["'][^"']+["']/i
   ];
   if(forbidden.some(rx=>rx.test(body)))fail("possible backend credential committed in "+rel);
 }
-if(!failures)pass("repository secret scan found no embedded backend credentials");
+if(!failures)pass("repository-wide secret scan found no embedded backend credentials");
 
 const html=fs.readFileSync(path.join(root,"index.html"),"utf8");
 if(/id=["\']opsCard["\']|id=["\']homeDataHealth["\']/.test(html)){
