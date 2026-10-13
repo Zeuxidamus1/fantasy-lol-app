@@ -910,8 +910,8 @@
           <p>All rosters have been created and the draft is finished. Your league is ready to go.</p>
         </section>
 
-        <button class="primary-btn draft-team-primary" type="button" data-jump="team">
-          <span>👥</span><strong>View My Team</strong><span aria-hidden="true">›</span>
+        <button class="primary-btn draft-team-primary" type="button" data-jump="team" id="draftCompleteTeamBtn">
+          <span>👥</span><strong id="draftCompleteTeamBtnLabel">View My Team</strong><span aria-hidden="true">›</span>
         </button>
 
         <div class="draft-complete-actions">
@@ -930,8 +930,8 @@
 
         <section class="card draft-picks-preview-card">
           <div class="section-head">
-            <div><div class="eyebrow">YOUR DRAFT</div><h3>Your picks</h3></div>
-            <small>Tap a player for details.</small>
+            <div><div class="eyebrow" id="completedDraftListEyebrow">YOUR DRAFT</div><h3 id="completedDraftListTitle">Your picks</h3></div>
+            <small id="completedDraftListHint">Tap a player for details.</small>
           </div>
           <div id="completedDraftPickList" class="completed-draft-picks"></div>
         </section>
