@@ -188,6 +188,37 @@
     },session:current});
   }
 
+  async function isPlatformAdmin(){
+    const current=await session();
+    if(!current)return false;
+    const value=await request("/rest/v1/rpc/is_platform_admin",{method:"POST",body:{},session:current});
+    return value===true;
+  }
+
+  async function createMockLeague(){
+    const current=await session();
+    if(!current)throw new Error("Sign in before opening Creator Lab.");
+    return request("/rest/v1/rpc/create_mock_league",{method:"POST",body:{},session:current});
+  }
+
+  async function getMockSimulation(leagueId){
+    const current=await session();
+    if(!current)throw new Error("Sign in before opening Creator Lab.");
+    return request("/rest/v1/rpc/get_mock_simulation",{method:"POST",body:{p_league_id:leagueId},session:current});
+  }
+
+  async function startMockSimulation(leagueId){
+    const current=await session();
+    if(!current)throw new Error("Sign in before starting a simulation.");
+    return request("/rest/v1/rpc/start_mock_simulation",{method:"POST",body:{p_league_id:leagueId},session:current});
+  }
+
+  async function deleteMockLeague(leagueId){
+    const current=await session();
+    if(!current)throw new Error("Sign in before deleting a mock league.");
+    return request("/rest/v1/rpc/delete_mock_league",{method:"POST",body:{p_league_id:leagueId},session:current});
+  }
+
   async function joinLeague(inviteCode,teamName){
     const current=await session();
     if(!current)throw new Error("Sign in before joining a league.");
@@ -538,7 +569,7 @@
     readSession,
     onSessionChange(fn){listeners.add(fn);return()=>listeners.delete(fn);},
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
-    listLeagues,createLeague,createBotLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
+    listLeagues,createLeague,createBotLeague,isPlatformAdmin,createMockLeague,getMockSimulation,startMockSimulation,deleteMockLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,makeBotDraftPick,
     listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,listLineupLocks,listPlayerCompetitionStatus,listPlayerProjections,listPlayoffs,getLeagueChampion,listLeagueActivity,listLeagueHistory,listScoreCorrections,listWaiverPriority,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
