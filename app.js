@@ -3194,10 +3194,27 @@ function render(view="home",options={}){
       moveCount.textContent=moves.length;
       if(tab==="pending"){
         content.innerHTML=mineClaims.length?mineClaims.map(c=>{const p=playerFromId(c.player_id);return `<div class="transaction-item"><span class="transaction-icon claim">W</span><div class="transaction-info"><strong>${h(p.name)}<span class="status-pill pending">PENDING</span></strong><small>${h(p.team)} · Priority ${h(c.priority)}${c.process_after?" · Processes "+h(fmt(c.process_after)):""}</small><div class="claim-actions"><button class="claim-btn cancel" data-cancel-claim="${h(c.id)}">Cancel</button></div></div><span class="transaction-time">${fmt(c.created_at)}</span></div>`;}).join(""):'<div class="empty-state"><strong>No pending waiver claims</strong><small>Open a player profile and tap Waiver Claim to submit one.</small></div>';
-        content.querySelectorAll("[data-cancel-claim]").forEach(btn=>btn.onclick=async()=>{try{await backend().cancelWaiver(btn.dataset.cancelClaim);showToast("Waiver claim canceled");await init();}catch(err){showToast(err.message||"Could not cancel claim");}});
+        content.querySelectorAll("[data-cancel-claim]").forEach(btn=>btn.onclick=async()=>{
+          if(btn.disabled)return;
+          btn.disabled=true;
+          try{await backend().cancelWaiver(btn.dataset.cancelClaim);showToast("Waiver claim canceled");await init();}
+          catch(err){showToast(err.message||"Could not cancel claim");btn.disabled=false;}
+        });
       }else if(tab==="history"){
-        const mine=moves.filter(m=>String(m.user_id)===String(user?.id));
-        content.innerHTML=mine.length?mine.map(m=>{const p=playerFromId(m.player_id);return `<div class="transaction-item"><span class="transaction-icon ${m.action==="drop"?"drop":""}">${m.action==="add"?"+":"−"}</span><div class="transaction-info"><strong>${m.action==="add"?"Added":"Dropped"} ${h(p.name)}<span class="status-pill success">COMPLETE</span></strong><small>${h(p.team)} · ${h(p.role||"")}</small></div><span class="transaction-time">${fmt(m.created_at)}</span></div>`;}).join(""):'<div class="empty-state"><strong>No roster moves yet</strong><small>Your completed adds and drops will appear here.</small></div>';
+        const mineMoves=moves.filter(m=>String(m.user_id)===String(user?.id)).map(m=>({kind:"move",at:m.created_at,row:m}));
+        const mineClaims=claims.filter(c=>String(c.user_id)===String(user?.id)&&c.status!=="pending").map(c=>({kind:"waiver",at:c.resolved_at||c.created_at,row:c}));
+        const history=[...mineMoves,...mineClaims].sort((a,b)=>new Date(b.at||0)-new Date(a.at||0));
+        content.innerHTML=history.length?history.map(item=>{
+          if(item.kind==="move"){
+            const m=item.row,p=playerFromId(m.player_id);
+            return `<div class="transaction-item"><span class="transaction-icon ${m.action==="drop"?"drop":""}">${m.action==="add"?"+":"−"}</span><div class="transaction-info"><strong>${m.action==="add"?"Added":"Dropped"} ${h(p.name)}<span class="status-pill success">COMPLETE</span></strong><small>${h(p.team)} · ${h(p.role||"")}</small></div><span class="transaction-time">${fmt(m.created_at)}</span></div>`;
+          }
+          const c=item.row,p=playerFromId(c.player_id);
+          const status=String(c.status||"").toUpperCase();
+          const success=c.status==="won";
+          const note=c.resolution_note?String(c.resolution_note):c.status==="canceled"?"Claim canceled":"Waiver claim resolved";
+          return `<div class="transaction-item"><span class="transaction-icon claim">W</span><div class="transaction-info"><strong>${h(p.name)}<span class="status-pill ${success?"success":""}">${h(status)}</span></strong><small>${h(note)}</small></div><span class="transaction-time">${fmt(c.resolved_at||c.created_at)}</span></div>`;
+        }).join(""):'<div class="empty-state"><strong>No transaction history yet</strong><small>Resolved waiver claims and completed roster moves will appear here.</small></div>';
       }else{
         content.innerHTML=moves.length?moves.map(m=>{const p=playerFromId(m.player_id);return `<div class="transaction-item"><span class="transaction-icon ${m.action==="drop"?"drop":""}">${m.action==="add"?"+":"−"}</span><div class="transaction-info"><strong>${h(memberName(m.user_id))} ${m.action==="add"?"added":"dropped"} ${h(p.name)}</strong><small>${h(p.team)} · ${h(p.role||"")}</small></div><span class="transaction-time">${fmt(m.created_at)}</span></div>`;}).join(""):'<div class="empty-state"><strong>No league activity yet</strong><small>Roster moves from every manager will appear here.</small></div>';
       }
