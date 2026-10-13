@@ -1158,6 +1158,8 @@ function playerRow(p, add=false){
 function rosterRow(p, manage=false){
   const slot=p.slot||p.role;
   const position=playerPosition(p);
+  const visual=playerVisual(p);
+  const visualClass=playerVisualIsTeamLogo(p)?" team-logo":" player-photo";
   const isBench=slot==="BN";
   const locked=!!p.lineupLock;
   const lineupAction=isBench
@@ -1166,6 +1168,7 @@ function rosterRow(p, manage=false){
   const lockBadge=locked?'<span class="lineup-lock-badge" title="This player is locked for the current fantasy period">🔒 LOCKED</span>':"";
   return `<div class="roster-slot ${isBench?"bench":""} ${locked?"lineup-locked":""}">
     <span class="slot-label">${h(slot)}</span>
+    ${visual?`<img class="roster-player-visual${visualClass}" src="${h(visual)}" alt="" loading="lazy" />`:""}
     <div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(position||p.role)}${p.opp?" · "+h(p.opp):""}</small>${lockBadge}</div>
     ${manage?(locked?'<div class="team-actions"><span class="locked-action">Match started</span></div>':'<div class="team-actions">'+lineupAction+'</div>'):""}
   </div>`;
