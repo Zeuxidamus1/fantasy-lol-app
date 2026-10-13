@@ -4513,12 +4513,18 @@ async function loadNotifications({open=false}={}){
     }).join(""):'<div class="empty-state"><strong>No notifications yet</strong><small>Lineup locks, fantasy periods, matchup results, trades, and roster activity will appear here.</small></div>';
 
     notificationList.querySelectorAll("[data-notification-view]").forEach(item=>item.onclick=async()=>{
-      const destination=item.dataset.notificationView;
+      let destination=item.dataset.notificationView;
       const leagueId=item.dataset.notificationLeague;
-      if(leagueId&&leagueId!==String(getActiveLeagueId()||"")){
+      const notificationLeague=leagueMap.get(String(leagueId));
+      const completedLeague=String(notificationLeague?.status||"")==="completed";
+
+      if(completedLeague){
+        if(["trade","transactions","setup","players"].includes(destination))destination="league";
+      }else if(leagueId&&leagueId!==String(getActiveLeagueId()||"")){
         setActiveLeagueId(leagueId);
         await loadRosterFromCloud(leagueId).catch(()=>{});
       }
+
       if(destination==="trade"){
         tradeRouteIntent={
           tab:item.dataset.notificationTradeTab||"incoming",
@@ -4529,7 +4535,11 @@ async function loadNotifications({open=false}={}){
         try{await b.markNotificationsRead([item.dataset.notificationId]);}catch{}
       }
       closeNotifications();
-      render(destination);
+      if(completedLeague&&["team","matchup","standings","draft"].includes(destination)){
+        render(destination,{historyLeagueId:leagueId});
+      }else{
+        render(destination);
+      }
       void loadNotifications();
     });
 
