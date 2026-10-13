@@ -96,7 +96,7 @@ function leagueLifecycleConfig(league,context={}){
   return {state,...LEAGUE_LIFECYCLE[state]};
 }
 function playableLeague(league){
-  return String(league?.status||"")!=="completed";
+  return new Set(["pre_draft","drafting","active"]).has(String(league?.status||""));
 }
 function scheduleCompetitionCode(game){
   return normalizeCompetitionCode(game?.competition||game?.leagueCode||game?.league||"");
@@ -415,6 +415,11 @@ function aggregateFantasyScores(scores=[]){
 }
 function activeLeagueStorageKey(){
   const userId=currentSessionUserId();
+  if(userId){
+    storageRemove("riftActiveLeagueId");
+    storageRemove("riftUserRoster");
+    storageRemove("riftLeagueSettings");
+  }
   return userId?"riftActiveLeagueId:"+userId:null;
 }
 function getActiveLeagueId(){
