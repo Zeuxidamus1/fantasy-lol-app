@@ -269,6 +269,8 @@ const defaultLeagueSettings = {
   competitionType:"international",
   fantasyFormat:"tournament",
   teamSlot:false,
+  waivers:true,
+  waiverHours:24,
   scoring:{kills:3,deaths:-1,assists:2,cs:0.02,win:5,firstBlood:2}
 };
 
@@ -1885,6 +1887,7 @@ function render(view="home",options={}){
         ]);
         const league=leagues.find(l=>String(l.id)===String(leagueId));
         const leagueCompetition=normalizeCompetitionCode(league?.settings?.competition)||"worlds";
+        const waiversEnabled=league?.settings?.waivers!==false;
         const playerStatus=statusRows.find(x=>String(x.player_id)===playerKey(p)&&normalizeCompetitionCode(x.competition)===leagueCompetition);
         const currentRound=rounds.find(r=>r.status==="live")||rounds.find(r=>r.status==="upcoming");
         const projection=projectionRows.find(x=>String(x.player_id)===playerKey(p)&&(!currentRound||Number(x.round_number)===Number(currentRound.round_number)));
@@ -1938,12 +1941,26 @@ function render(view="home",options={}){
           tradeBtn.disabled=false;
           tradeBtn.onclick=()=>{tradePrefill={id:playerKey(p),side:"theirs"};render("trade");};
         }else{
-          addBtn.disabled=false;
-          addBtn.textContent=getUserRoster().length>=rosterLimit()?"Add / Choose Drop":"Add Player";
-          addBtn.onclick=()=>addPlayerToRoster(p);
-          waiverBtn.disabled=false;
-          waiverBtn.onclick=async()=>{waiverBtn.disabled=true;await createWaiverClaim(p);waiverBtn.disabled=false;};
           tradeBtn.disabled=true;
+          if(waiversEnabled){
+            addBtn.disabled=true;
+            addBtn.textContent="Use Waiver Claim";
+            addBtn.onclick=null;
+            waiverBtn.disabled=false;
+            waiverBtn.textContent="Waiver Claim";
+            waiverBtn.onclick=async()=>{
+              waiverBtn.disabled=true;
+              await createWaiverClaim(p);
+              waiverBtn.disabled=false;
+            };
+          }else{
+            addBtn.disabled=false;
+            addBtn.textContent=getUserRoster().length>=rosterLimit()?"Add / Choose Drop":"Add Player";
+            addBtn.onclick=()=>addPlayerToRoster(p);
+            waiverBtn.disabled=true;
+            waiverBtn.textContent="Waivers Off";
+            waiverBtn.onclick=null;
+          }
         }
       }catch(err){
         addBtn.disabled=true;
@@ -2494,6 +2511,7 @@ function render(view="home",options={}){
     let currentUser=null;
     let leagueStatus=null;
     let leagueCompetition=null;
+    let leagueWaiversEnabled=true;
     let playerStatusMap=new Map();
 
     const draw=()=>{
@@ -2544,11 +2562,18 @@ function render(view="home",options={}){
           b.hidden=true;
         }else{
           if(state){
-            state.textContent=availability
-              ?String(availability.status).replaceAll("_"," ")
-              :"Free agent";
+            state.textContent=leagueWaiversEnabled
+              ?"Waiver eligible"
+              :(availability?String(availability.status).replaceAll("_"," "):"Free agent");
           }
-          b.onclick=async e=>{e.stopPropagation();b.disabled=true;await addPlayerToRoster(p);await refreshOwnership();};
+          b.textContent=leagueWaiversEnabled?"WAIVER":"ADD";
+          b.onclick=async e=>{
+            e.stopPropagation();
+            b.disabled=true;
+            if(leagueWaiversEnabled)await createWaiverClaim(p);
+            else await addPlayerToRoster(p);
+            await refreshOwnership();
+          };
         }
       });
 
@@ -2577,6 +2602,7 @@ function render(view="home",options={}){
         }
         leagueStatus=activeLeague.status||null;
         leagueCompetition=normalizeCompetitionCode(activeLeague.settings?.competition)||null;
+        leagueWaiversEnabled=activeLeague.settings?.waivers!==false;
         const statuses=leagueCompetition?await b.listPlayerCompetitionStatus(leagueCompetition).catch(()=>[]):[];
         playerStatusMap=new Map(statuses.map(x=>[String(x.player_id),x]));
       }catch{
