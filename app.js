@@ -2102,7 +2102,7 @@ function render(view="home",options={}){
       .replace(/^JarvanIV$/,"Jarvan IV")
       .replace(/^XinZhao$/,"Xin Zhao")
       .replace(/^Khazix$/,"Kha'Zix");
-    const renderRecentGames=(games,sourceLabel)=>{
+    const renderRecentGames=(games,sourceType)=>{
       trendRoot.innerHTML=games.length?games.slice(0,5).map(g=>{
         const fp=fantasyPointsForGame(g,scoring);
         const result=g.win===true?"W":g.win===false?"L":"—";
@@ -2113,13 +2113,25 @@ function render(view="home",options={}){
         const kda=hasKda?`${Number(g.kills)}/${Number(g.deaths)}/${Number(g.assists)}`:"";
         const opponent=g.opponent||opponentNameForId(g.opponent_team_id);
         return `<div class="recent-game-row"><span class="recent-result ${result==="W"?"win":result==="L"?"loss":""}">${result}</span><div class="recent-game-main"><strong>${h(displayChampion(g.champion||g.champion_id))}${kda?" · "+h(kda):""}</strong><small>${h(opponent?"vs "+opponent:"Pro match")}${dateText?" · "+h(dateText):""}</small></div>${Number.isFinite(fp)?`<div class="recent-fp"><strong>${h(fp.toFixed(1))}</strong><small>FP</small></div>`:""}</div>`;
-      }).join(""):'<div class="empty-state"><strong>No recent matches found</strong></div>';
-      if(sourceRoot)sourceRoot.textContent="Recent games: "+sourceLabel;
+      }).join(""):'<div class="empty-state"><strong>No recent pro matches found</strong></div>';
+
+      if(sourceRoot){
+        const latestRaw=games?.[0]?.date||games?.[0]?.completed_at||games?.[0]?.source_timestamp||games?.[0]?.updated_at||"";
+        const latestDate=latestRaw?new Date(latestRaw):null;
+        const latestText=latestDate&&!Number.isNaN(latestDate.getTime())
+          ?latestDate.toLocaleDateString([], {month:"short",day:"numeric"})
+          :"";
+        sourceRoot.textContent=sourceType==="rift"
+          ?"Pro match history · Finalized Rift data"
+          :latestText
+            ?`Pro match history · Historical fallback through ${latestText}`
+            :"Pro match history · Historical fallback";
+      }
     };
 
     const chainRecent=(chain?.recent||[]).slice(0,5);
-    renderRecentGames(chainRecent,"ChainCC fallback");
-    if(dataNote)dataNote.textContent=chain?"Season summary from ChainCC. Recent games refresh from finalized Rift match data when available.":"Recent games refresh from finalized Rift match data.";
+    renderRecentGames(chainRecent,"fallback");
+    if(dataNote)dataNote.textContent=chain?"Professional season summary · Historical fallback":"Professional match data unavailable";
 
     if(cloudReady()&&typeof backend()?.listPlayerGameStats==="function"){
       void backend().listPlayerGameStats({playerId:String(p.id||""),limit:20}).then(rows=>{
@@ -2127,8 +2139,8 @@ function render(view="home",options={}){
           .filter(row=>row.finalized!==false)
           .sort((a,b)=>Date.parse(b.source_timestamp||b.updated_at||"")-Date.parse(a.source_timestamp||a.updated_at||""));
         if(finalized.length){
-          renderRecentGames(finalized,"Rift live/final match data");
-          if(dataNote)dataNote.textContent="Recent games are from finalized professional match data stored by Rift Fantasy. ChainCC remains a historical fallback.";
+          renderRecentGames(finalized,"rift");
+          if(dataNote)dataNote.textContent="Professional season summary";
         }
       }).catch(()=>{});
     }
