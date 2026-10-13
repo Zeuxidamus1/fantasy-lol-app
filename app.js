@@ -2635,8 +2635,9 @@ function render(view="home",options={}){
       return one?[String(one)]:[];
     };
     const effectiveStatus=t=>{
-      if(t?.status==="pending"&&t?.expires_at&&new Date(t.expires_at).getTime()<=Date.now())return "expired";
-      return String(t?.status||"pending");
+      const status=String(t?.status||"pending");
+      if(["pending","review_pending"].includes(status)&&t?.expires_at&&new Date(t.expires_at).getTime()<=Date.now())return "expired";
+      return status;
     };
     const staleTradeMessage=status=>{
       switch(String(status||"")){
@@ -2937,12 +2938,16 @@ function render(view="home",options={}){
       content.innerHTML=rows.length?rows.map(renderCard).join(""):`<div class="empty-state"><strong>No ${tab==="offers"?"outgoing offers":tab==="incoming"?"incoming offers":"trade history"}</strong><small>Trades from your active league will appear here.</small></div>`;
 
       content.querySelectorAll("[data-cancel-trade]").forEach(btn=>btn.onclick=async()=>{
+        if(btn.disabled)return;
+        btn.disabled=true;
         try{await backend().updateTrade(btn.dataset.cancelTrade,"canceled");showToast("Trade offer canceled");await init();}
-        catch(err){showToast(err.message||"Could not cancel trade");}
+        catch(err){showToast(err.message||"Could not cancel trade");btn.disabled=false;}
       });
       content.querySelectorAll("[data-decline-trade]").forEach(btn=>btn.onclick=async()=>{
+        if(btn.disabled)return;
+        btn.disabled=true;
         try{await backend().updateTrade(btn.dataset.declineTrade,"declined");showToast("Trade declined");await init();}
-        catch(err){showToast(err.message||"Could not decline trade");}
+        catch(err){showToast(err.message||"Could not decline trade");btn.disabled=false;}
       });
       content.querySelectorAll("[data-accept-trade]").forEach(btn=>btn.onclick=()=>{
         const trade=trades.find(t=>String(t.id)===String(btn.dataset.acceptTrade));
@@ -2964,12 +2969,16 @@ function render(view="home",options={}){
         showToast("Counteroffer loaded. Adjust the package and send when ready.");
       });
       content.querySelectorAll("[data-approve-trade]").forEach(btn=>btn.onclick=async()=>{
+        if(btn.disabled)return;
+        btn.disabled=true;
         try{await backend().reviewTrade(btn.dataset.approveTrade,true);await loadRosterFromCloud(leagueId);showToast("Trade approved");await init();}
-        catch(err){showToast(err.message||"Could not approve trade");}
+        catch(err){showToast(err.message||"Could not approve trade");btn.disabled=false;}
       });
       content.querySelectorAll("[data-reject-trade]").forEach(btn=>btn.onclick=async()=>{
+        if(btn.disabled)return;
+        btn.disabled=true;
         try{await backend().reviewTrade(btn.dataset.rejectTrade,false);showToast("Trade rejected");await init();}
-        catch(err){showToast(err.message||"Could not reject trade");}
+        catch(err){showToast(err.message||"Could not reject trade");btn.disabled=false;}
       });
 
       if(focusTradeId){
@@ -3091,23 +3100,20 @@ function render(view="home",options={}){
       const sendOffer=async(senderDropIds=[],senderAddIds=[])=>{
         submit.disabled=true;
         try{
-          await backend().createTrade(leagueId,currentPartner(),{
+          const offerPayload={
             send_player_ids:sendIds,
             receive_player_ids:receiveIds,
             sender_drop_player_ids:senderDropIds,
             sender_add_player_ids:senderAddIds,
             expires_in_hours:Number(expirationSelect?.value)||48
-          });
-          let counterClosed=true;
+          };
           const wasCounter=Boolean(counterSourceTradeId);
-          if(counterSourceTradeId){
-            try{await backend().updateTrade(counterSourceTradeId,"declined");}
-            catch(err){counterClosed=false;console.warn("Counteroffer sent but original offer could not be closed",err);}
-          }
+          if(wasCounter)await backend().createCounterTrade(counterSourceTradeId,offerPayload);
+          else await backend().createTrade(leagueId,currentPartner(),offerPayload);
           selectedMine.clear();
           selectedTheirs.clear();
           counterSourceTradeId=null;
-          showToast(wasCounter?(counterClosed?"Counteroffer sent":"Counteroffer sent · Original offer is still active"):"Trade offer sent");
+          showToast(wasCounter?"Counteroffer sent":"Trade offer sent");
           await init();
         }catch(err){
           showToast(err.message||"Could not send trade offer");
