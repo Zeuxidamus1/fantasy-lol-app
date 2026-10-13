@@ -156,6 +156,15 @@ function playerEligibleForCompetition(player,competition){
   const code=normalizeCompetitionCode(competition);
   return !!code && playerCompetitionCodes(player).includes(code);
 }
+function playerExplicitlyEligibleForCompetition(player,competition){
+  const code=normalizeCompetitionCode(competition);
+  if(!code)return false;
+  const explicit=[
+    ...(Array.isArray(player?.competitions)?player.competitions:[]),
+    player?.competition
+  ].map(normalizeCompetitionCode).filter(Boolean);
+  return explicit.includes(code);
+}
 function playerIsDraftable(player){
   return player?.draftable!==false && String(player?.rosterStatus||"starter").toLowerCase()!=="reserve";
 }
@@ -201,7 +210,7 @@ const draftPool = ((window.ESPORTS_DATA && window.ESPORTS_DATA.players) || []).m
 function eligibleDraftPool(settings=getLeagueSettings()){
   const code=normalizeCompetitionCode(settings?.competition);
   if(settings?.simulation===true){
-    return draftPool.filter(p=>playerEligibleForCompetition(p,code)&&playerIsDraftable(p));
+    return draftPool.filter(p=>playerExplicitlyEligibleForCompetition(p,code)&&playerIsDraftable(p));
   }
   return draftPool.filter(p=>playerAvailableForAcquisition(p,code));
 }
@@ -2050,8 +2059,11 @@ function render(view="home",options={}){
         const mockDraftContext=league?.settings?.simulation===true
           && selectedPlayerReturnView==="draft"
           && league?.status==="drafting";
+        const mockEligible=mockDraftContext
+          ?playerExplicitlyEligibleForCompetition(p,leagueCompetition)
+          :false;
         const acquisitionAvailable=mockDraftContext
-          ?(eligible&&draftable)
+          ?(mockEligible&&draftable)
           :playerAvailableForAcquisition(p,leagueCompetition);
 
         if(mockDraftContext){
@@ -2060,7 +2072,7 @@ function render(view="home",options={}){
           if(nextMatch)nextMatch.textContent="Simulated game";
           document.querySelector("#profileStatus").textContent=acquisitionAvailable
             ?"Eligible for mock draft"
-            :!eligible
+            :!mockEligible
               ?`Not eligible for ${competitionName(leagueCompetition)}`
               :"Not currently draftable";
 
