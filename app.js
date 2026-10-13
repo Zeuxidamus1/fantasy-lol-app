@@ -3107,12 +3107,11 @@ function render(view="home",options={}){
             completedLeagueReviewPanel.hidden=false;
             completedLeagueReviewPanel.innerHTML='<div class="empty-state"><strong>Loading completed league…</strong><small>Preparing final results.</small></div>';
             try{
-              const [members,bots,rounds,draft,draftPicks,champion,standings,matchups,rosters]=await Promise.all([
+              const [members,bots,rounds,draft,champion,standings,matchups,rosters]=await Promise.all([
                 b.listLeagueMembers(league.id),
                 b.listLeagueBots(league.id).catch(()=>[]),
                 b.listFantasyRounds(league.id).catch(()=>[]),
                 b.getLeagueDraft(league.id).catch(()=>null),
-                b.listDraftPicks(league.id).catch(()=>[]),
                 b.getLeagueChampion(league.id).catch(()=>null),
                 b.listLeagueStandings(league.id).catch(()=>[]),
                 b.listLeagueMatchups(league.id).catch(()=>[]),
@@ -3283,9 +3282,9 @@ function render(view="home",options={}){
           }
         }
         try{
-          const [playoffs,champion,history,membersNow,botsNow,roundsNow,draftNow]=await Promise.all([
+          const [playoffs,champion,membersNow,botsNow,roundsNow,draftNow]=await Promise.all([
             b.listPlayoffs(activeId),b.getLeagueChampion(activeId),
-            b.listLeagueHistory(activeId),b.listLeagueMembers(activeId),b.listLeagueBots(activeId),
+            b.listLeagueMembers(activeId),b.listLeagueBots(activeId),
             b.listFantasyRounds(activeId).catch(()=>[]),b.getLeagueDraft(activeId).catch(()=>null)
           ]);
           const managerName=function(id,type){
