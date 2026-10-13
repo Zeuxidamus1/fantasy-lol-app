@@ -75,6 +75,29 @@ function competitionType(value){
   const code=normalizeCompetitionCode(value);
   return COMPETITION_META[code]?.type || "international";
 }
+
+const LEAGUE_LIFECYCLE=Object.freeze({
+  pre_draft:{label:"Pre-Draft",canDraft:true,canManageRoster:false,canTrade:false,canWaive:false,readOnly:false},
+  drafting:{label:"Drafting",canDraft:true,canManageRoster:false,canTrade:false,canWaive:false,readOnly:false},
+  active:{label:"Active",canDraft:false,canManageRoster:true,canTrade:true,canWaive:true,readOnly:false},
+  playoffs:{label:"Playoffs",canDraft:false,canManageRoster:true,canTrade:true,canWaive:true,readOnly:false},
+  completed:{label:"Season Complete",canDraft:false,canManageRoster:false,canTrade:false,canWaive:false,readOnly:true}
+});
+function leagueLifecycleState(league,{playoffs=[]}={}){
+  const raw=String(league?.status||"pre_draft");
+  if(raw==="completed")return "completed";
+  if(raw==="drafting")return "drafting";
+  if(raw==="pre_draft")return "pre_draft";
+  if(raw==="active"&&Array.isArray(playoffs)&&playoffs.length)return "playoffs";
+  return "active";
+}
+function leagueLifecycleConfig(league,context={}){
+  const state=leagueLifecycleState(league,context);
+  return {state,...LEAGUE_LIFECYCLE[state]};
+}
+function playableLeague(league){
+  return String(league?.status||"")!=="completed";
+}
 function scheduleCompetitionCode(game){
   return normalizeCompetitionCode(game?.competition||game?.leagueCode||game?.league||"");
 }
@@ -1578,11 +1601,13 @@ function render(view="home",options={}){
             }catch(err){showToast(err.message||"Could not update team name");}
             finally{saveNameBtn.disabled=false;}
           };
-          const teamLeagueStatus=String(activeLeague?.status||"pre_draft");
-          badge.textContent=teamLeagueStatus==="completed"?"SEASON COMPLETE":teamLeagueStatus.replace("_"," ").toUpperCase();
+          const teamPlayoffs=await b.listPlayoffs(leagueId).catch(()=>[]);
+          const teamLifecycle=leagueLifecycleConfig(activeLeague,{playoffs:teamPlayoffs});
+          const teamLeagueStatus=teamLifecycle.state;
+          badge.textContent=teamLifecycle.label.toUpperCase();
           badge.hidden=false;
-          leagueCompleted=teamLeagueStatus==="completed";
-          rosterMovesEnabled=teamLeagueStatus==="active";
+          leagueCompleted=teamLifecycle.readOnly;
+          rosterMovesEnabled=teamLifecycle.canManageRoster;
 
           if(leagueCompleted){
             leagueNameEl.textContent="FINAL ROSTER · "+String(activeLeague?.name||"League").toUpperCase();
@@ -3043,7 +3068,7 @@ function render(view="home",options={}){
         completedLeagueList.innerHTML=completedLeagues.map(league=>`
           <button class="league-choice-card completed-league-choice" type="button" data-review-completed-league="${h(league.id)}">
             <span class="league-choice-icon">✓</span>
-            <span><strong>${h(league.name)}</strong><small>${h(competitionName(league.settings?.competition||""))} · Season complete</small></span>
+            <span><strong>${h(league.name)}</strong><small>${h(competitionName(league.settings?.competition||""))} ${h(String(league.settings?.competitionSeason||""))}</small></span>
             <span class="league-choice-arrow">›</span>
           </button>`).join("");
 
@@ -3055,40 +3080,66 @@ function render(view="home",options={}){
             completedLeagueReviewPanel.hidden=false;
             completedLeagueReviewPanel.innerHTML='<div class="empty-state"><strong>Loading completed league…</strong><small>Preparing final results.</small></div>';
             try{
-              const [members,rounds,draft,champion]=await Promise.all([
+              const [members,bots,rounds,draft,draftPicks,champion,standings,matchups,rosters]=await Promise.all([
                 b.listLeagueMembers(league.id),
+                b.listLeagueBots(league.id).catch(()=>[]),
                 b.listFantasyRounds(league.id).catch(()=>[]),
                 b.getLeagueDraft(league.id).catch(()=>null),
-                b.getLeagueChampion(league.id).catch(()=>null)
+                b.listDraftPicks(league.id).catch(()=>[]),
+                b.getLeagueChampion(league.id).catch(()=>null),
+                b.listLeagueStandings(league.id).catch(()=>[]),
+                b.listLeagueMatchups(league.id).catch(()=>[]),
+                b.listRosters(league.id).catch(()=>[])
               ]);
               const membership=members.find(m=>String(m.user_id)===String(user.id));
               const hasScoringPeriods=Array.isArray(rounds)&&rounds.length>0;
               const hasDraft=Boolean(draft&&String(draft.status||"")==="complete");
+              const myStanding=(standings||[]).find(s=>String(s.manager_type||"human")==="human"&&String(s.manager_id)===String(user.id));
+              const myMatchups=(matchups||[]).filter(m=>
+                (String(m.home_manager_type||"human")==="human"&&String(m.home_manager_id)===String(user.id))||
+                (String(m.away_manager_type||"human")==="human"&&String(m.away_manager_id)===String(user.id))
+              );
+              const weeklyScores=myMatchups.map(m=>String(m.home_manager_id)===String(user.id)?Number(m.home_score):Number(m.away_score)).filter(Number.isFinite);
+              const bestWeek=weeklyScores.length?Math.max(...weeklyScores):null;
+              const myRosterCount=(rosters||[]).filter(r=>String(r.manager_type||"human")==="human"&&String(r.user_id)===String(user.id)).length;
+              const order=Array.isArray(draft?.manager_order)?draft.manager_order:[];
+              const draftSlot=Math.max(-1,order.findIndex(id=>String(id)===String(user.id)));
+              const championName=champion
+                ?(String(champion.manager_type||"human")==="bot"
+                  ?bots.find(x=>String(x.id)===String(champion.manager_id))?.team_name
+                  :members.find(x=>String(x.user_id)===String(champion.manager_id))?.team_name)||"Champion"
+                :"No Champion";
+              const record=myStanding?((Number(myStanding.wins)||0)+"-"+(Number(myStanding.losses)||0)+"-"+(Number(myStanding.ties)||0)):"—";
+              const finish=myStanding?.rank?"#"+Number(myStanding.rank):"—";
               const tools=[
-                {view:"standings",icon:"≡",title:"Final Standings",copy:"Final league table"},
-                ...(hasScoringPeriods?[{view:"matchup",icon:"⚔",title:"Matchup Results",copy:"Completed head-to-head results"}]:[]),
-                {view:"team",icon:"◈",title:"Final Roster",copy:"Read-only ending roster"},
-                ...(hasDraft?[{view:"draft",icon:"◎",title:"Draft Results",copy:"Final draft board & picks"}]:[])
+                {view:"standings",icon:"≡",title:"Final Standings"},
+                ...(hasScoringPeriods?[{view:"matchup",icon:"⚔",title:"Matchup Results"}]:[]),
+                {view:"team",icon:"◈",title:"Final Roster"},
+                ...(hasDraft?[{view:"draft",icon:"◎",title:"Draft Results"}]:[])
               ];
               const completionCopy=hasScoringPeriods
-                ?competitionName(league.settings?.competition||"")+" is complete. Results are locked and read-only."
-                :competitionName(league.settings?.competition||"")+" ended before this fantasy league had any scoring periods. No champion was awarded.";
+                ?"Final results are locked."
+                :"No fantasy scoring periods were played.";
               completedLeagueReviewPanel.innerHTML=`
                 <div class="completed-review-head">
                   <div><div class="eyebrow">COMPLETED LEAGUE</div><h3>${h(league.name)}</h3></div>
-                  <span class="status-pill">FINAL</span>
+                  <span class="status-pill">READ ONLY</span>
                 </div>
                 <div class="league-completion-banner completed-review-banner">
                   <strong>Season Complete</strong>
                   <small>${h(completionCopy)}</small>
                 </div>
-                <div class="league-overview-grid completed-review-meta">
-                  <div><small>Your Team</small><strong>${h(membership?.team_name||"Your team")}</strong></div>
-                  <div><small>Role</small><strong>${h(membership?.role==="owner"?"Commissioner":"Manager")}</strong></div>
-                  <div><small>Champion</small><strong>${h(champion?"Awarded":"—")}</strong></div>
+                <div class="completed-season-summary">
+                  <div><small>Finish</small><strong>${h(finish)}</strong></div>
+                  <div><small>Record</small><strong>${h(record)}</strong></div>
+                  <div><small>PF</small><strong>${myStanding?formatFantasyPoints(myStanding.points_for):"—"}</strong></div>
+                  <div><small>Best Week</small><strong>${bestWeek===null?"—":formatFantasyPoints(bestWeek)}</strong></div>
+                  <div><small>Draft Slot</small><strong>${draftSlot>=0?"#"+(draftSlot+1):"—"}</strong></div>
+                  <div><small>Final Roster</small><strong>${h(String(myRosterCount))}</strong></div>
                 </div>
+                <div class="completed-champion-row"><span>Champion</span><strong>${h(championName)}</strong></div>
                 <div class="league-quick-grid league-hub-tools completed-review-tools">
-                  ${tools.map(tool=>`<button class="league-tool-btn ${tools.length%2===1&&tool===tools[tools.length-1]?"league-tool-wide":""}" type="button" data-completed-view="${h(tool.view)}"><span class="action-icon">${tool.icon}</span><span><strong>${h(tool.title)}</strong><small>${h(tool.copy)}</small></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>`).join("")}
+                  ${tools.map(tool=>`<button class="league-tool-btn ${tools.length%2===1&&tool===tools[tools.length-1]?"league-tool-wide":""}" type="button" data-completed-view="${h(tool.view)}"><span class="action-icon">${tool.icon}</span><span><strong>${h(tool.title)}</strong></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>`).join("")}
                 </div>`;
               completedLeagueReviewPanel.querySelectorAll("[data-completed-view]").forEach(viewBtn=>{
                 viewBtn.onclick=async()=>{
@@ -3106,8 +3157,8 @@ function render(view="home",options={}){
 
       try{
         const leagues=await b.listLeagues();
-        const completedLeagues=leagues.filter(l=>String(l.status||"")==="completed");
-        const liveLeagues=leagues.filter(l=>String(l.status||"")!=="completed");
+        const completedLeagues=leagues.filter(l=>leagueLifecycleState(l)==="completed");
+        const liveLeagues=leagues.filter(playableLeague);
         renderCompletedLeagueCard(completedLeagues);
 
         let activeId=getActiveLeagueId();
