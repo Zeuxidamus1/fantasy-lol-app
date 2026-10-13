@@ -207,10 +207,14 @@ const draftPool = ((window.ESPORTS_DATA && window.ESPORTS_DATA.players) || []).m
   const n=Number(p.projection??p.fp??20);
   return {...p,fp:Number.isFinite(n)?n:20};
 });
+let mockDraftPoolOverride=null;
 function eligibleDraftPool(settings=getLeagueSettings()){
   const code=normalizeCompetitionCode(settings?.competition);
   if(settings?.simulation===true){
-    return draftPool.filter(p=>playerExplicitlyEligibleForCompetition(p,code)&&playerIsDraftable(p));
+    const source=Array.isArray(mockDraftPoolOverride)&&mockDraftPoolOverride.length
+      ?mockDraftPoolOverride
+      :draftPool;
+    return source.filter(p=>playerExplicitlyEligibleForCompetition(p,code)&&playerIsDraftable(p));
   }
   return draftPool.filter(p=>playerAvailableForAcquisition(p,code));
 }
@@ -3916,6 +3920,7 @@ function render(view="home",options={}){
   if(view==="draft"){
     if(draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
     const leagueId=getLeagueContextId();
+    mockDraftPoolOverride=null;
     const liveState=document.querySelector("#draftLiveState");
     const completeState=document.querySelector("#draftCompleteState");
     const pageEyebrow=document.querySelector("#draftPageEyebrow");
@@ -4066,7 +4071,21 @@ function render(view="home",options={}){
         const leagues=await b.listLeagues();
         const league=leagues.find(l=>String(l.id)===String(leagueId));
         const leagueCompetition=normalizeCompetitionCode(league?.settings?.competition)||"worlds";
-        const draftStatusRows=await b.listPlayerCompetitionStatus(leagueCompetition).catch(()=>[]);
+        if(league?.settings?.simulation===true){
+          const rows=await b.listMockDraftPool(leagueId);
+          mockDraftPoolOverride=(Array.isArray(rows)?rows:[]).map(p=>({
+            ...p,
+            teamCode:p.team_code??p.teamCode,
+            teamId:p.team_id??p.teamId,
+            rosterStatus:"starter",
+            fp:Number(p.fp??20)
+          }));
+        }else{
+          mockDraftPoolOverride=null;
+        }
+        const draftStatusRows=league?.settings?.simulation===true
+          ?[]
+          :await b.listPlayerCompetitionStatus(leagueCompetition).catch(()=>[]);
         cacheCompetitionStatuses(leagueCompetition,draftStatusRows);
         members=await b.listLeagueMembers(leagueId);
         bots=await b.listLeagueBots(leagueId);
