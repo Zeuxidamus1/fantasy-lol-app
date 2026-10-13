@@ -1426,6 +1426,10 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
 
 
 .creator-lab-entry{border-color:#285b52;background:linear-gradient(180deg,#0f2828,#0d1a2b)}
+.creator-lab-entry-status{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;border:1px solid #24594f;border-radius:12px;background:#0c2324}
+.creator-lab-entry-status strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.creator-lab-entry-status .live-pill{margin-left:0}
+.creator-lab-entry-status .live-pill.live{border-color:#269982;background:#103f37;color:#71f0d6}
 .creator-lab-hero{display:flex;align-items:center;justify-content:space-between;gap:16px;background:radial-gradient(circle at 100% 0,#123e42 0,#0d1a2b 58%)}
 .creator-lab-hero>div{min-width:0}
 .creator-lab-badge{flex:0 0 auto;border:1px solid #2e826f;background:#113932;color:#6af1d4;border-radius:999px;padding:8px 10px;font-size:11px;font-weight:900}
