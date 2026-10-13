@@ -3349,9 +3349,6 @@ function render(view="home",options={}){
               playoffContent.innerHTML=playoffs.map(function(x){return '<div class="playoff-row"><div><strong>'+h(x.stage==="championship"?"Championship":"Semifinal "+x.bracket_slot)+'</strong><small>Seed '+h(x.home_seed??"—")+' vs Seed '+h(x.away_seed??"—")+'</small></div><div><strong>'+formatFantasyPoints(x.home_score)+' - '+formatFantasyPoints(x.away_score)+'</strong><small>'+h(String(x.status||"upcoming").toUpperCase())+'</small></div></div>';}).join("");
             }
           }
-          const historyCard=document.querySelector("#leagueHistoryCard");
-          const historyContent=document.querySelector("#leagueHistoryContent");
-          if(historyCard&&historyContent&&history.length){historyCard.hidden=false;historyContent.innerHTML=history.map(function(x){return '<div class="history-row"><div><strong>'+h(String(x.season_key||x.competition))+'</strong><small>'+h(competitionName(x.competition))+'</small></div><div><strong>'+(x.champion_manager_id?h(managerName(x.champion_manager_id,x.champion_manager_type)):"—")+'</strong><small>Champion</small></div></div>';}).join("");}
         }catch{}
 
         const rulesToggle=document.querySelector("#leagueRulesToggle");
@@ -4015,6 +4012,11 @@ function render(view="home",options={}){
           const [members,bots,leagues]=await Promise.all([b.listLeagueMembers(activeLeagueId),b.listLeagueBots(activeLeagueId),b.listLeagues()]);
           const mine=members.find(m=>String(m.user_id)===String(user?.id));
           league=leagues.find(l=>String(l.id)===String(activeLeagueId));
+          if(leagueLifecycleConfig(league).readOnly){
+            showToast("This league is complete. League settings are read-only.");
+            render("league",{replace:true});
+            return;
+          }
           const memberList=document.querySelector("#commissionerMemberList");
           const drawMembers=()=>{
             if(!memberList)return;
