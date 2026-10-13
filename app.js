@@ -2971,6 +2971,10 @@ function render(view="home",options={}){
     const cloudList=document.querySelector("#cloudLeagueList");
     const overviewCard=document.querySelector("#leagueOverviewCard");
     const activeLeagueEntryCard=document.querySelector("#activeLeagueEntryCard");
+    const completedLeaguesCard=document.querySelector("#completedLeaguesCard");
+    const completedLeagueList=document.querySelector("#completedLeagueList");
+    const completedLeagueReviewPanel=document.querySelector("#completedLeagueReviewPanel");
+    const completedLeagueCount=document.querySelector("#completedLeagueCount");
     const managerReadiness=document.querySelector("#leagueManagerReadiness");
     const quickAccess=document.querySelector("#leagueQuickAccess");
     const toolsEyebrow=document.querySelector("#leagueToolsEyebrow");
@@ -3022,16 +3026,97 @@ function render(view="home",options={}){
         }
       };
 
+      const renderCompletedLeagueCard=completedLeagues=>{
+        if(!completedLeaguesCard||!completedLeagueList)return;
+        completedLeaguesCard.hidden=completedLeagues.length===0;
+        if(completedLeagueCount)completedLeagueCount.textContent=String(completedLeagues.length);
+        if(!completedLeagues.length){
+          completedLeaguesCard.open=false;
+          completedLeagueList.innerHTML="";
+          if(completedLeagueReviewPanel){
+            completedLeagueReviewPanel.hidden=true;
+            completedLeagueReviewPanel.innerHTML="";
+          }
+          return;
+        }
+
+        completedLeagueList.innerHTML=completedLeagues.map(league=>`
+          <button class="league-choice-card completed-league-choice" type="button" data-review-completed-league="${h(league.id)}">
+            <span class="league-choice-icon">✓</span>
+            <span><strong>${h(league.name)}</strong><small>${h(competitionName(league.settings?.competition||""))} · Season complete</small></span>
+            <span class="league-choice-arrow">›</span>
+          </button>`).join("");
+
+        completedLeagueList.querySelectorAll("[data-review-completed-league]").forEach(btn=>{
+          btn.onclick=async()=>{
+            const league=completedLeagues.find(item=>String(item.id)===String(btn.dataset.reviewCompletedLeague));
+            if(!league||!completedLeagueReviewPanel)return;
+            completedLeaguesCard.open=true;
+            completedLeagueReviewPanel.hidden=false;
+            completedLeagueReviewPanel.innerHTML='<div class="empty-state"><strong>Loading completed league…</strong><small>Preparing final results.</small></div>';
+            try{
+              const [members,rounds,draft,champion]=await Promise.all([
+                b.listLeagueMembers(league.id),
+                b.listFantasyRounds(league.id).catch(()=>[]),
+                b.getLeagueDraft(league.id).catch(()=>null),
+                b.getLeagueChampion(league.id).catch(()=>null)
+              ]);
+              const membership=members.find(m=>String(m.user_id)===String(user.id));
+              const hasScoringPeriods=Array.isArray(rounds)&&rounds.length>0;
+              const hasDraft=Boolean(draft&&String(draft.status||"")==="complete");
+              const tools=[
+                {view:"standings",icon:"≡",title:"Final Standings",copy:"Final league table"},
+                ...(hasScoringPeriods?[{view:"matchup",icon:"⚔",title:"Matchup Results",copy:"Completed head-to-head results"}]:[]),
+                {view:"team",icon:"◈",title:"Final Roster",copy:"Read-only ending roster"},
+                ...(hasDraft?[{view:"draft",icon:"◎",title:"Draft Results",copy:"Final draft board & picks"}]:[])
+              ];
+              const completionCopy=hasScoringPeriods
+                ?competitionName(league.settings?.competition||"")+" is complete. Results are locked and read-only."
+                :competitionName(league.settings?.competition||"")+" ended before this fantasy league had any scoring periods. No champion was awarded.";
+              completedLeagueReviewPanel.innerHTML=`
+                <div class="completed-review-head">
+                  <div><div class="eyebrow">COMPLETED LEAGUE</div><h3>${h(league.name)}</h3></div>
+                  <span class="status-pill">FINAL</span>
+                </div>
+                <div class="league-completion-banner completed-review-banner">
+                  <strong>Season Complete</strong>
+                  <small>${h(completionCopy)}</small>
+                </div>
+                <div class="league-overview-grid completed-review-meta">
+                  <div><small>Your Team</small><strong>${h(membership?.team_name||"Your team")}</strong></div>
+                  <div><small>Role</small><strong>${h(membership?.role==="owner"?"Commissioner":"Manager")}</strong></div>
+                  <div><small>Champion</small><strong>${h(champion?"Awarded":"—")}</strong></div>
+                </div>
+                <div class="league-quick-grid league-hub-tools completed-review-tools">
+                  ${tools.map(tool=>`<button class="league-tool-btn ${tools.length%2===1&&tool===tools[tools.length-1]?"league-tool-wide":""}" type="button" data-completed-view="${h(tool.view)}"><span class="action-icon">${tool.icon}</span><span><strong>${h(tool.title)}</strong><small>${h(tool.copy)}</small></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>`).join("")}
+                </div>`;
+              completedLeagueReviewPanel.querySelectorAll("[data-completed-view]").forEach(viewBtn=>{
+                viewBtn.onclick=async()=>{
+                  setActiveLeagueId(league.id);
+                  await loadRosterFromCloud(league.id);
+                  render(viewBtn.dataset.completedView);
+                };
+              });
+            }catch(err){
+              completedLeagueReviewPanel.innerHTML='<div class="empty-state cloud-error"><strong>Could not load completed league</strong><small>'+h(err.message||"Please try again.")+'</small></div>';
+            }
+          };
+        });
+      };
+
       try{
         const leagues=await b.listLeagues();
-        let activeId=getActiveLeagueId();
+        const completedLeagues=leagues.filter(l=>String(l.status||"")==="completed");
+        const liveLeagues=leagues.filter(l=>String(l.status||"")!=="completed");
+        renderCompletedLeagueCard(completedLeagues);
 
-        if(activeId&&!leagues.some(l=>String(l.id)===String(activeId))){
+        let activeId=getActiveLeagueId();
+        if(activeId&&!liveLeagues.some(l=>String(l.id)===String(activeId))){
           setActiveLeagueId(null);
           activeId=null;
         }
-        if(!activeId&&leagues.length){
-          activeId=String(leagues[0].id);
+        if(!activeId&&liveLeagues.length){
+          activeId=String(liveLeagues[0].id);
           setActiveLeagueId(activeId);
           await loadRosterFromCloud(activeId);
         }
@@ -3052,14 +3137,29 @@ function render(view="home",options={}){
           return;
         }
 
-        const memberships=await Promise.all(leagues.map(async league=>{
+        if(!liveLeagues.length){
+          setActiveLeagueId(null);
+          if(overviewCard)overviewCard.hidden=true;
+          if(managerReadiness)managerReadiness.hidden=true;
+          if(quickAccess)quickAccess.hidden=true;
+          if(rulesModal)rulesModal.hidden=true;
+          if(activeLeagueEntryCard){
+            activeLeagueEntryCard.hidden=false;
+            activeLeagueEntryCard.open=false;
+          }
+          if(cloudCard)cloudCard.hidden=true;
+          await applyLeaguePermissions(null);
+          return;
+        }
+
+        const memberships=await Promise.all(liveLeagues.map(async league=>{
           try{
             const members=await b.listLeagueMembers(league.id);
             return members.find(m=>String(m.user_id)===String(user.id))||null;
           }catch{return null;}
         }));
-        const activeLeague=leagues.find(l=>String(l.id)===String(activeId))||leagues[0];
-        const activeIndex=leagues.findIndex(l=>String(l.id)===String(activeLeague.id));
+        const activeLeague=liveLeagues.find(l=>String(l.id)===String(activeId))||liveLeagues[0];
+        const activeIndex=liveLeagues.findIndex(l=>String(l.id)===String(activeLeague.id));
         const activeMembership=memberships[activeIndex]||null;
         const activeSettings={
           ...defaultLeagueSettings,
@@ -3216,8 +3316,8 @@ function render(view="home",options={}){
         const switchRow=document.querySelector("#leagueSwitchRow");
         const switcher=document.querySelector("#leagueSwitcherSelect");
         if(switchRow&&switcher){
-          switchRow.hidden=leagues.length<2;
-          switcher.innerHTML=leagues.map(l=>'<option value="'+h(l.id)+'" '+(String(l.id)===String(activeId)?"selected":"")+'>'+h(l.name)+'</option>').join("");
+          switchRow.hidden=liveLeagues.length<2;
+          switcher.innerHTML=liveLeagues.map(l=>'<option value="'+h(l.id)+'" '+(String(l.id)===String(activeId)?"selected":"")+'>'+h(l.name)+'</option>').join("");
           switcher.onchange=async()=>{
             if(String(switcher.value)===String(getActiveLeagueId()))return;
             setActiveLeagueId(switcher.value);
