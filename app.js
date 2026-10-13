@@ -4571,11 +4571,43 @@ function render(view="home",options={}){
         :"Random stats update automatically every minute.";
 
       const statsRoot=document.querySelector("#creatorSimulationStats");
-      statsRoot.innerHTML=stats.length?stats.map(row=>{
-        const side=row.manager_type==="human"?"YOU":"BOT";
-        const record=row.kills+"/"+row.deaths+"/"+row.assists;
-        return `<div class="creator-sim-player"><span class="role-badge">${h(row.role||"")}</span><div class="player-info"><strong>${h(row.name||row.player_id)}</strong><small>${h(side)} · ${h(row.team||"")} · ${h(record)} · ${Number(row.cs)||0} CS${row.first_blood?" · FIRST BLOOD":""}</small></div><span class="fp">${formatFantasyPoints(row.fantasy_points||0)} FP</span></div>`;
-      }).join(""):'<div class="muted">Simulation stats will appear after the first scoring tick.</div>';
+      const lineupSlots=["TOP","JNG","MID","ADC","SUP","FLEX"];
+      const arrangeSide=managerType=>{
+        const sideRows=stats.filter(row=>row.manager_type===managerType);
+        const used=new Set();
+        const bySlot=new Map();
+        ["TOP","JNG","MID","ADC","SUP"].forEach(slot=>{
+          const index=sideRows.findIndex((row,i)=>!used.has(i)&&String(row.role||"").toUpperCase()===slot);
+          if(index>=0){used.add(index);bySlot.set(slot,sideRows[index]);}
+        });
+        const remaining=sideRows.filter((row,i)=>!used.has(i));
+        if(remaining.length)bySlot.set("FLEX",remaining[0]);
+        return bySlot;
+      };
+      const home=arrangeSide("human");
+      const away=arrangeSide("bot");
+      const playerCell=(row,side)=>{
+        if(!row)return `<div class="creator-matchup-player empty"><strong>—</strong><small>No starter</small><span>0.00 FP</span></div>`;
+        const record=(Number(row.kills)||0)+"/"+(Number(row.deaths)||0)+"/"+(Number(row.assists)||0);
+        const event=row.first_blood?' <b class="creator-first-blood">FIRST BLOOD</b>':"";
+        return `<div class="creator-matchup-player ${side}">
+          <strong>${h(row.name||row.player_id)}</strong>
+          <small>${h(row.team||"")} · ${h(record)} · ${Number(row.cs)||0} CS${event}</small>
+          <span>${formatFantasyPoints(row.fantasy_points||0)} FP</span>
+        </div>`;
+      };
+      statsRoot.innerHTML=stats.length?`<div class="creator-matchup-board">
+        <div class="creator-matchup-header">
+          <div><small>YOU</small><strong>Creator Team</strong></div>
+          <span>POSITION</span>
+          <div><small>BOT</small><strong>Rift Bot</strong></div>
+        </div>
+        ${lineupSlots.map(slot=>`<div class="creator-matchup-row">
+          ${playerCell(home.get(slot),"home")}
+          <div class="creator-matchup-role">${h(slot)}</div>
+          ${playerCell(away.get(slot),"away")}
+        </div>`).join("")}
+      </div>`:'<div class="muted">Simulation stats will appear after the first scoring tick.</div>';
     };
 
     const load=async()=>{
