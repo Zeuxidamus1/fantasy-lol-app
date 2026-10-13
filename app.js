@@ -1340,7 +1340,12 @@ function render(view="home",options={}){
             return;
           }
           const prefs=await b.getUserPreferences();
-          onboardingCard.hidden=!!prefs?.onboarding_dismissed;
+          const leagues=await b.listLeagues().catch(()=>[]);
+          const shouldAutoDismiss=Array.isArray(leagues)&&leagues.length>0;
+          if(shouldAutoDismiss&&!prefs?.onboarding_dismissed){
+            try{await b.setOnboardingDismissed(true);}catch{}
+          }
+          onboardingCard.hidden=!!prefs?.onboarding_dismissed||shouldAutoDismiss;
           if(dismiss)dismiss.onclick=async()=>{
             onboardingCard.hidden=true;
             dismiss.disabled=true;
