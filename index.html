@@ -193,12 +193,85 @@
         <button class="secondary-btn" id="signOutBtn">Sign Out</button>
       </section>
 
+      <section class="card setup-card creator-lab-entry" id="creatorLabEntry" hidden>
+        <div class="section-head">
+          <div><div class="eyebrow">CREATOR ONLY</div><h3>Creator Lab</h3></div>
+          <span class="verified-badge">ADMIN</span>
+        </div>
+        <p class="setup-footnote">Run an isolated mock draft against a bot, then simulate a 35-minute game with live fantasy scoring.</p>
+        <button class="primary-btn" id="openCreatorLabBtn" type="button">Open Mock Draft Simulator</button>
+      </section>
+
       <section class="card setup-card">
         <div class="section-head"><div><div class="eyebrow">LEGAL</div><h3>Privacy &amp; Terms</h3></div></div>
         <div class="grid-two">
           <button class="secondary-btn" type="button" data-jump="privacy">Privacy Notice</button>
           <button class="secondary-btn" type="button" data-jump="terms">Terms</button>
         </div>
+      </section>
+    </section>
+  </template>
+
+  <template id="creator-lab-template">
+    <section class="stack creator-lab-page">
+      <div class="section-title">
+        <div><div class="eyebrow">CREATOR ONLY</div><h2>Mock Draft Simulator</h2></div>
+        <button class="secondary-btn" type="button" data-jump="account">Back</button>
+      </div>
+
+      <section class="card creator-lab-hero">
+        <div>
+          <div class="eyebrow">ISOLATED TEST MODE</div>
+          <h3>Draft. Simulate. Verify.</h3>
+          <p class="muted">You draft one real Rift roster against one bot. After the draft, run a 35-minute simulated game using Rift's scoring rules.</p>
+        </div>
+        <span class="creator-lab-badge">35 MIN</span>
+      </section>
+
+      <section class="card" id="creatorLabCreateCard">
+        <div class="section-head">
+          <div><div class="eyebrow">MOCK LEAGUE</div><h3>Start a fresh test</h3></div>
+        </div>
+        <div class="settings-list creator-lab-settings">
+          <div><span>Managers</span><strong>You + 1 Bot</strong></div>
+          <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP · FLEX · Bench</strong></div>
+          <div><span>Simulation</span><strong>35 minutes</strong></div>
+          <div><span>Stats</span><strong>Random K / D / A / CS / First Blood</strong></div>
+        </div>
+        <button class="primary-btn" id="creatorCreateMockBtn" type="button">Create Mock League</button>
+      </section>
+
+      <section class="card" id="creatorLabActiveCard" hidden>
+        <div class="section-head">
+          <div><div class="eyebrow" id="creatorMockEyebrow">MOCK LEAGUE</div><h3 id="creatorMockTitle">Creator Mock Draft</h3></div>
+          <span class="status-pill" id="creatorMockStatus">PRE-DRAFT</span>
+        </div>
+        <p class="muted" id="creatorMockCopy">Use the real Draft Room to complete your roster.</p>
+        <div class="creator-lab-actions">
+          <button class="primary-btn" id="creatorOpenDraftBtn" type="button">Open Draft Room</button>
+          <button class="primary-btn" id="creatorStartSimulationBtn" type="button" hidden>Start 35-Minute Simulation</button>
+          <button class="secondary-btn" id="creatorRefreshSimulationBtn" type="button">Refresh</button>
+          <button class="secondary-btn danger-outline" id="creatorDeleteMockBtn" type="button">Delete Test League</button>
+        </div>
+      </section>
+
+      <section class="card creator-sim-card" id="creatorSimulationCard" hidden>
+        <div class="section-head">
+          <div><div class="eyebrow">LIVE TEST GAME</div><h3>Simulation Scoreboard</h3></div>
+          <span class="live-pill" id="creatorSimulationClock">0 / 35 MIN</span>
+        </div>
+        <div class="creator-sim-scoreboard">
+          <div><small>Creator Team</small><strong id="creatorHomeScore">0.00</strong></div>
+          <span>VS</span>
+          <div><small>Rift Bot</small><strong id="creatorAwayScore">0.00</strong></div>
+        </div>
+        <div class="creator-sim-progress"><span id="creatorSimulationProgress"></span></div>
+        <p class="muted" id="creatorSimulationState">Stats update automatically once per minute.</p>
+      </section>
+
+      <section class="card" id="creatorSimulationStatsCard" hidden>
+        <div class="section-head"><div><div class="eyebrow">LIVE PLAYER STATS</div><h3>Fantasy Scoring</h3></div></div>
+        <div class="creator-sim-stats" id="creatorSimulationStats"></div>
       </section>
     </section>
   </template>
