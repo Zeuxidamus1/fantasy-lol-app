@@ -167,29 +167,6 @@
     }
   }
 
-  async function getUserPreferences(){
-    const current=await session();
-    if(!current)return {onboarding_dismissed:false};
-    const user=await currentUser();
-    if(!user?.id)return {onboarding_dismissed:false};
-    const rows=await request("/rest/v1/user_preferences?select=onboarding_dismissed,updated_at&user_id=eq."+encodeURIComponent(user.id)+"&limit=1",{session:current});
-    return Array.isArray(rows)&&rows.length?rows[0]:{onboarding_dismissed:false};
-  }
-
-  async function setOnboardingDismissed(dismissed=true){
-    const current=await session();
-    if(!current)throw new Error("Sign in before saving preferences.");
-    const user=await currentUser();
-    if(!user?.id)throw new Error("Signed-in account is unavailable.");
-    const rows=await request("/rest/v1/user_preferences?on_conflict=user_id",{
-      method:"POST",
-      body:{user_id:user.id,onboarding_dismissed:!!dismissed,updated_at:new Date().toISOString()},
-      session:current,
-      headers:{"Prefer":"resolution=merge-duplicates,return=representation"}
-    });
-    return Array.isArray(rows)?rows[0]:rows;
-  }
-
   async function listLeagues(){
     const current=await session();
     if(!current)return [];
@@ -552,7 +529,6 @@
     readSession,
     onSessionChange(fn){listeners.add(fn);return()=>listeners.delete(fn);},
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
-    getUserPreferences,setOnboardingDismissed,
     listLeagues,createLeague,createBotLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,makeBotDraftPick,
     listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,listLineupLocks,listPlayerCompetitionStatus,listPlayerProjections,listPlayoffs,getLeagueChampion,listLeagueActivity,listLeagueHistory,listScoreCorrections,listWaiverPriority,saveRoster,listTransactions,
