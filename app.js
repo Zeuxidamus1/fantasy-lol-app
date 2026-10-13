@@ -1362,6 +1362,7 @@ function render(view="home",options={}){
 
   }
   if(view==="team"){
+    let completedLeagueView=false;
     const leagueId=getActiveLeagueId();
     const leagueNameEl=document.querySelector("#teamLeagueName");
     const teamNameEl=document.querySelector("#myTeamName");
@@ -2353,6 +2354,15 @@ function render(view="home",options={}){
   }
   if(view==="trade"){
     const leagueId=getActiveLeagueId();
+    if(leagueId&&cloudReady()){
+      void backend().listLeagues().then(leagues=>{
+        const league=leagues.find(l=>String(l.id)===String(leagueId));
+        if(league?.status==="completed"){
+          showToast("This league is complete. Trades are closed.");
+          render("league",{replace:true});
+        }
+      }).catch(()=>{});
+    }
     const partnerSelect=document.querySelector("#tradePartner");
     const myList=document.querySelector("#tradeMyPlayers");
     const theirList=document.querySelector("#tradeTheirPlayers");
@@ -2888,6 +2898,16 @@ function render(view="home",options={}){
     void init();
   }
   if(view==="transactions"){
+    const completedTransactionsLeagueId=getActiveLeagueId();
+    if(completedTransactionsLeagueId&&cloudReady()){
+      void backend().listLeagues().then(leagues=>{
+        const league=leagues.find(l=>String(l.id)===String(completedTransactionsLeagueId));
+        if(league?.status==="completed"){
+          showToast("This league is complete. Transactions are closed.");
+          render("league",{replace:true});
+        }
+      }).catch(()=>{});
+    }
     let tab="pending";
     const content=document.querySelector("#transactionContent");
     const count=document.querySelector("#pendingClaimCount");
@@ -2942,6 +2962,11 @@ function render(view="home",options={}){
     const activeLeagueEntryCard=document.querySelector("#activeLeagueEntryCard");
     const managerReadiness=document.querySelector("#leagueManagerReadiness");
     const quickAccess=document.querySelector("#leagueQuickAccess");
+    const toolsEyebrow=document.querySelector("#leagueToolsEyebrow");
+    const toolsTitle=document.querySelector("#leagueToolsTitle");
+    const toolsGrid=document.querySelector("#leagueToolsGrid");
+    const inviteField=document.querySelector("#leagueOverviewInviteField");
+    const commissionerBtn=document.querySelector("#leagueSetupBtn");
     const rulesModal=document.querySelector("#leagueRulesModal");
     const entryActions=document.querySelector("#leagueEntryActions");
 
@@ -3068,9 +3093,10 @@ function render(view="home",options={}){
           }
         }
         try{
-          const [playoffs,champion,history,membersNow,botsNow]=await Promise.all([
+          const [playoffs,champion,history,membersNow,botsNow,roundsNow,draftNow]=await Promise.all([
             b.listPlayoffs(activeId),b.getLeagueChampion(activeId),
-            b.listLeagueHistory(activeId),b.listLeagueMembers(activeId),b.listLeagueBots(activeId)
+            b.listLeagueHistory(activeId),b.listLeagueMembers(activeId),b.listLeagueBots(activeId),
+            b.listFantasyRounds(activeId).catch(()=>[]),b.getLeagueDraft(activeId).catch(()=>null)
           ]);
           const managerName=function(id,type){
             if(type==="bot")return botsNow.find(x=>String(x.id)===String(id))?.team_name||"Bot Manager";
@@ -3091,6 +3117,26 @@ function render(view="home",options={}){
             ? humanManagers+" human · "+botManagers+" bot"+(botManagers===1?"":"s")
             : humanManagers+" human manager"+(humanManagers===1?"":"s");
           const leagueStatus=String(activeLeague.status||"pre_draft");
+          if(leagueStatus==="completed"){
+            if(toolsEyebrow)toolsEyebrow.textContent="SEASON RESULTS";
+            if(toolsTitle)toolsTitle.textContent="Review this completed league";
+            if(inviteField)inviteField.hidden=true;
+            if(commissionerBtn)commissionerBtn.hidden=true;
+
+            const hasScoringPeriods=Array.isArray(roundsNow)&&roundsNow.length>0;
+            const hasDraft=Boolean(draftNow&&String(draftNow.status||"")==="complete");
+            const completedTools=[
+              {view:"standings",icon:"≡",title:"Final Standings",copy:"Final league table"},
+              ...(hasScoringPeriods?[{view:"matchup",icon:"⚔",title:"Matchup Results",copy:"Completed head-to-head results"}]:[]),
+              {view:"team",icon:"◈",title:"Final Roster",copy:"Read-only ending roster"},
+              ...(hasDraft?[{view:"draft",icon:"◎",title:"Draft Results",copy:"Final draft board & picks"}]:[])
+            ];
+            if(toolsGrid)toolsGrid.innerHTML=completedTools.map(tool=>`<button class="league-tool-btn ${completedTools.length%2===1&&tool===completedTools[completedTools.length-1]?"league-tool-wide":""}" data-jump="${h(tool.view)}"><span class="action-icon">${tool.icon}</span><span><strong>${h(tool.title)}</strong><small>${h(tool.copy)}</small></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>`).join("");
+          }else{
+            if(toolsEyebrow)toolsEyebrow.textContent="LEAGUE TOOLS";
+            if(toolsTitle)toolsTitle.textContent="Manage this league";
+            if(inviteField)inviteField.hidden=false;
+          }
           if(readinessTitle&&readinessCopy){
             if(leagueStatus==="pre_draft"&&readyManagers>=expectedManagers){
               readinessTitle.textContent="✓ All "+expectedManagers+" managers have joined";
@@ -3166,6 +3212,7 @@ function render(view="home",options={}){
         }
 
         await applyLeaguePermissions(activeId);
+        if(String(activeLeague.status||"")==="completed"&&commissionerBtn)commissionerBtn.hidden=true;
       }catch(err){
         if(overviewCard)overviewCard.hidden=true;
         if(quickAccess)quickAccess.hidden=true;
