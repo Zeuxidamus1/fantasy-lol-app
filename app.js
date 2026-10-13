@@ -1824,15 +1824,21 @@ function render(view="home",options={}){
           const rosterIds=new Set(rosterNow.map(playerKey));
           cacheCompetitionStatuses(competition,statusRows);
           const relevantStatus=statusRows.filter(x=>rosterIds.has(String(x.player_id)));
-          const unavailableRostered=relevantStatus.filter(x=>String(x.status)!=="starter");
+          const statusByPlayer=new Map(relevantStatus.map(row=>[String(row.player_id),row]));
+          const unavailableRostered=rosterNow.map(player=>{
+            const row=statusByPlayer.get(playerKey(player));
+            return row&&String(row.status)==="starter"?null:{
+              player,
+              status:row?.status||"unknown"
+            };
+          }).filter(Boolean);
           const availabilityBanner=document.querySelector("#teamAvailabilityBanner");
           const availabilityCopy=document.querySelector("#teamAvailabilityCopy");
           if(availabilityBanner&&availabilityCopy){
             availabilityBanner.hidden=unavailableRostered.length===0;
             if(unavailableRostered.length){
-              availabilityCopy.textContent=unavailableRostered.map(row=>{
-                const player=playerById(row.player_id);
-                return (player?.name||row.player_id)+" · "+playerAvailabilityLabel(row.status);
+              availabilityCopy.textContent=unavailableRostered.map(item=>{
+                return item.player.name+" · "+playerAvailabilityLabel(item.status);
               }).join(" · ");
             }else{
               availabilityCopy.textContent="";
