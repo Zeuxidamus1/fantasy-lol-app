@@ -4746,8 +4746,13 @@ async function loadNotifications({open=false}={}){
         case "roster_drop": return {title:`${actor} dropped ${rosterPlayer}`,body:"League roster move",view:"transactions"};
         case "roster_swap": return {title:`${actor} made a roster move`,body:"Roster swap",view:"transactions",swap:{dropped:playerName(p.dropped_player_id),added:playerName(p.added_player_id)}};
         case "waiver_submitted": return {title:`Waiver claim submitted: ${rosterPlayer}`,body:`Priority ${p.priority||1}. The claim remains subject to league lock rules.`,view:"transactions"};
-        case "waiver_won": return {title:`Waiver won: ${rosterPlayer}`,body:"The player has been added to your bench and your waiver priority moved to the back.",view:"transactions"};
-        case "waiver_lost": return {title:`Waiver not awarded: ${rosterPlayer}`,body:"Another manager had higher waiver priority.",view:"transactions"};
+        case "waiver_won": return {title:`Waiver won: ${rosterPlayer}`,body:"The player has been added to your roster and your waiver priority moved to the back.",view:"transactions"};
+        case "waiver_lost": return {title:`Waiver not awarded: ${rosterPlayer}`,body:"Another manager acquired the player first.",view:"transactions"};
+        case "waiver_failed": return {title:`Waiver failed: ${rosterPlayer}`,body:p.resolution_note||"The claim could not be completed.",view:"transactions"};
+        case "waiver_expired": return {title:`Waiver expired: ${rosterPlayer}`,body:p.resolution_note||"The player became unavailable before the claim processed.",view:"transactions"};
+        case "waiver_canceled": return {title:`Waiver canceled: ${rosterPlayer}`,body:"Your waiver claim was canceled.",view:"transactions"};
+        case "draft_started": return {title:"Draft started",body:"Your league draft is now live.",view:"draft"};
+        case "draft_complete": return {title:"Draft complete",body:"All rosters have been created. Review the draft results.",view:"draft"};
         case "league_completed": {
           const competition=competitionName(p.competition);
           return p.had_games===false
@@ -4841,8 +4846,11 @@ async function loadNotifications({open=false}={}){
 notificationBtn.onclick=()=>loadNotifications({open:true});
 document.querySelectorAll("[data-close-notifications]").forEach(el=>el.addEventListener("click",closeNotifications));
 markNotificationsReadBtn.onclick=async()=>{
+  if(markNotificationsReadBtn.disabled)return;
+  markNotificationsReadBtn.disabled=true;
   try{await backend().markNotificationsRead(null);await loadNotifications({open:true});}
   catch(err){showToast(err.message||"Could not update notifications");}
+  finally{markNotificationsReadBtn.disabled=false;}
 };
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNotifications();});
 
