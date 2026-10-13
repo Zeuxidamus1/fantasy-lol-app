@@ -2091,8 +2091,11 @@ function render(view="home",options={}){
           const roundIndex=rounds.findIndex(r=>Number(r.round_number)===Number(round.round_number));
           prevBtn.disabled=roundIndex<=0;
           nextBtn.disabled=roundIndex>=rounds.length-1;
-          prevBtn.onclick=()=>{if(roundIndex>0){selectedMatchupRound=Number(rounds[roundIndex-1].round_number);render("matchup",{replace:true});}};
-          nextBtn.onclick=()=>{if(roundIndex<rounds.length-1){selectedMatchupRound=Number(rounds[roundIndex+1].round_number);render("matchup",{replace:true});}};
+          const roundRenderOptions=()=>historicalLeagueContextId
+            ?{replace:true,historyLeagueId:leagueId}
+            :{replace:true};
+          prevBtn.onclick=()=>{if(roundIndex>0){selectedMatchupRound=Number(rounds[roundIndex-1].round_number);render("matchup",roundRenderOptions());}};
+          nextBtn.onclick=()=>{if(roundIndex<rounds.length-1){selectedMatchupRound=Number(rounds[roundIndex+1].round_number);render("matchup",roundRenderOptions());}};
 
           roundLabel.textContent=round.label||((round.stage?round.stage+" · ":"")+"Round "+round.round_number);
           roundStatus.textContent=round.status==="live"?"LIVE FANTASY PERIOD":round.status==="final"?"FINAL":"UPCOMING";
@@ -2100,15 +2103,104 @@ function render(view="home",options={}){
           const matchText=Number(round.match_count)>0?" · "+Number(round.match_count)+" pro match"+(Number(round.match_count)===1?"":"es"):"";
           roundDates.textContent=formatRoundDate(round.starts_at)+" – "+formatRoundDate(new Date(Date.parse(round.ends_at)-1))+matchText;
           
-          const [matchups,proMatches,lineupLocks]=await Promise.all([
+          const [matchups,proMatches,lineupLocks,playoffs]=await Promise.all([
             b.listLeagueMatchups(leagueId,round.round_number),
             b.listProMatches(league?.settings?.competition||null,round.starts_at,round.ends_at),
-            b.listLineupLocks(leagueId,round.round_number)
+            b.listLineupLocks(leagueId,round.round_number),
+            b.listPlayoffs(leagueId).catch(()=>[])
           ]);
           const lockMap=new Map(lineupLocks.map(lock=>[
             String(lock.manager_type)+":"+String(lock.manager_id)+":"+String(lock.player_id),
             lock
           ]));
+          const managerNames=new Map();
+          members.forEach(m=>managerNames.set(managerKey(m.user_id,"human"),m.team_name||"Unnamed Team"));
+          bots.forEach(m=>managerNames.set(managerKey(m.id,"bot"),m.team_name||"Bot Manager"));
+          const source=allFantasyPlayers();
+
+          if(String(league?.status||"")==="completed"&&historicalLeagueContextId){
+            if(leagueTitle)leagueTitle.textContent="Season Results";
+            if(eyebrow)eyebrow.textContent="READ ONLY · "+competitionName(league?.settings?.competition||"");
+
+            const roundPlayoffs=(playoffs||[]).filter(p=>Number(p.round_number)===Number(round.round_number));
+            if(roundPlayoffs.length){
+              const playoffStage=roundPlayoffs.some(p=>String(p.stage)==="championship")?"CHAMPIONSHIP":"SEMIFINALS";
+              roundStatus.textContent="FINAL · "+playoffStage;
+              roundLabel.textContent=playoffStage==="CHAMPIONSHIP"?"Championship":"Semifinals";
+            }else{
+              roundStatus.textContent="FINAL";
+            }
+            roundStatus.classList.remove("live");
+
+            const historicalRows=roundPlayoffs.length
+              ?roundPlayoffs.map(p=>({
+                  home_manager_id:p.home_manager_id,
+                  home_manager_type:p.home_manager_type||"human",
+                  away_manager_id:p.away_manager_id,
+                  away_manager_type:p.away_manager_type||"human",
+                  home_score:p.home_score,
+                  away_score:p.away_score,
+                  winner_manager_id:p.winner_manager_id,
+                  result:p.winner_manager_id
+                    ?(String(p.winner_manager_id)===String(p.home_manager_id)?"home_win":"away_win")
+                    :"tie",
+                  stage:p.stage,
+                  bracket_slot:p.bracket_slot,
+                  home_seed:p.home_seed,
+                  away_seed:p.away_seed,
+                  status:p.status
+                }))
+              :matchups;
+
+            if(!historicalRows.length){
+              board.innerHTML='<div class="empty-state"><strong>No results recorded</strong><small>No fantasy matchups were recorded for this round.</small></div>';
+              return;
+            }
+
+            board.innerHTML='<div class="season-results-list">'+historicalRows.map((m,index)=>{
+              const homeId=m.home_manager_id;
+              const awayId=m.away_manager_id;
+              const homeType=m.home_manager_type||"human";
+              const awayType=m.away_manager_type||"human";
+              const homeName=homeId?managerNames.get(managerKey(homeId,homeType))||"Home Team":"BYE";
+              const awayName=awayId?managerNames.get(managerKey(awayId,awayType))||"Away Team":"BYE";
+              const homeMine=String(homeId||"")===String(user?.id);
+              const awayMine=String(awayId||"")===String(user?.id);
+              const homeScore=Number(m.home_score);
+              const awayScore=Number(m.away_score);
+              const homeScoreText=Number.isFinite(homeScore)?formatFantasyPoints(homeScore):"—";
+              const awayScoreText=Number.isFinite(awayScore)?formatFantasyPoints(awayScore):"—";
+              const stageLabel=m.stage==="championship"
+                ?"Championship"
+                :m.stage==="semifinal"
+                  ?"Semifinal"+(m.bracket_slot?" "+m.bracket_slot:"")
+                  :"Matchup "+(index+1);
+              let resultText="FINAL";
+              if(!homeId||!awayId)resultText="BYE";
+              else if(m.result==="home_win")resultText=homeName+" WINS";
+              else if(m.result==="away_win")resultText=awayName+" WINS";
+              else if(m.result==="tie")resultText="TIE";
+
+              return `<article class="matchup-scoreboard season-result-card">
+                <div class="${homeMine?"mine":""}">
+                  <small>${h(m.home_seed?"SEED #"+m.home_seed:(homeMine?"YOU":"HOME"))}</small>
+                  <strong>${h(homeName)}</strong>
+                  <span>${h(homeScoreText)} FP</span>
+                </div>
+                <div class="matchup-versus">
+                  <span>${h(stageLabel.toUpperCase())}</span>
+                  <strong>${h(resultText)}</strong>
+                </div>
+                <div class="${awayMine?"mine":""}">
+                  <small>${h(m.away_seed?"SEED #"+m.away_seed:(awayMine?"YOU":"AWAY"))}</small>
+                  <strong>${h(awayName)}</strong>
+                  <span>${h(awayScoreText)} FP</span>
+                </div>
+              </article>`;
+            }).join("")+'</div>';
+            return;
+          }
+
           const myMatchup=matchups.find(m=>
             (String(m.home_manager_id||"")===String(user?.id))||
             (String(m.away_manager_id||"")===String(user?.id))
@@ -2117,11 +2209,6 @@ function render(view="home",options={}){
             board.innerHTML='<div class="empty-state"><strong>No matchup found</strong><small>Your team is not paired in this fantasy round.</small></div>';
             return;
           }
-
-          const managerNames=new Map();
-          members.forEach(m=>managerNames.set(managerKey(m.user_id,"human"),m.team_name||"Unnamed Team"));
-          bots.forEach(m=>managerNames.set(managerKey(m.id,"bot"),m.team_name||"Bot Manager"));
-          const source=allFantasyPlayers();
 
           const roundMatchIds=new Set(proMatches.map(m=>String(m.id)));
           const roundScores=scores.filter(s=>roundMatchIds.has(String(s.match_id)));
