@@ -1432,7 +1432,11 @@ function render(view="home",options={}){
     const recoveryCard=document.querySelector("#recoveryCard");
     if(!ready){
       authCard.classList.add("auth-disabled");
-      document.querySelector("#authHelp").textContent="Account services are temporarily unavailable. You can still use the app locally.";
+      const authHelp=document.querySelector("#authHelp");
+      if(authHelp){
+        authHelp.textContent="Account services are temporarily unavailable.";
+        authHelp.hidden=false;
+      }
     }
     (async()=>{
       const user=ready?await b.currentUser().catch(()=>null):null;
@@ -3912,7 +3916,10 @@ function render(view="home",options={}){
         if(cloudCard)cloudCard.hidden=false;
         if(cloudList)cloudList.hidden=true;
         cloudTitle.textContent="Could not load leagues";
-        cloudCopy.textContent=err.message||"A network or league-service error occurred.";
+        if(cloudCopy){
+          cloudCopy.textContent=err.message||"A network or league-service error occurred.";
+          cloudCopy.hidden=false;
+        }
       }
     })();
 
