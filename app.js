@@ -102,6 +102,17 @@ function scheduleCompetitionCode(game){
   return normalizeCompetitionCode(game?.competition||game?.leagueCode||game?.league||"");
 }
 function normalizeTeamKey(value){return String(value||"").toLowerCase().replace(/[^a-z0-9]/g,"");}
+function playerMatchesProMatch(player,match){
+  const playerTeamId=String(player?.teamId||player?.team_id||"");
+  if(playerTeamId&&(playerTeamId===String(match?.team_a_id||"")||playerTeamId===String(match?.team_b_id||"")))return true;
+  const playerName=normalizeTeamKey(player?.team);
+  const playerCode=normalizeTeamKey(player?.teamCode);
+  const teams=[
+    normalizeTeamKey(match?.team_a_name),normalizeTeamKey(match?.team_a_code),
+    normalizeTeamKey(match?.team_b_name),normalizeTeamKey(match?.team_b_code)
+  ];
+  return !!((playerName&&teams.includes(playerName))||(playerCode&&teams.includes(playerCode)));
+}
 
 // Transitional eligibility for the small legacy snapshot. Fresh roster refreshes attach
 // competition codes directly to each player and supersede these mappings.
@@ -1811,8 +1822,17 @@ function render(view="home",options={}){
           if(!leagueCompleted)await loadRosterFromCloud(leagueId);
           const rounds=await b.listFantasyRounds(leagueId);
           const activeRound=rounds.find(r=>r.status==="live");
+          const nextUpcomingRound=rounds
+            .filter(r=>r.status==="upcoming"&&Date.parse(r.starts_at||"")>Date.now())
+            .sort((a,b)=>Date.parse(a.starts_at)-Date.parse(b.starts_at))[0]||null;
+          const lockRound=activeRound||nextUpcomingRound;
           const competition=normalizeCompetitionCode(activeLeague?.settings?.competition)||"worlds";
-          const statusRows=await b.listPlayerCompetitionStatus(competition).catch(()=>[]);
+          const [statusRows,lockRoundMatches]=await Promise.all([
+            b.listPlayerCompetitionStatus(competition).catch(()=>[]),
+            lockRound
+              ?b.listProMatches(competition,lockRound.starts_at,lockRound.ends_at).catch(()=>[])
+              :Promise.resolve([])
+          ]);
           activeLineupLocks=new Map();
           if(activeRound){
             const locks=await b.listLineupLocks(leagueId,activeRound.round_number);
@@ -1844,19 +1864,29 @@ function render(view="home",options={}){
               availabilityCopy.textContent="";
             }
           }
-          const nextLockRow=relevantStatus
-            .map(x=>({...x,_lockTime:Date.parse(x.next_match_at||"")}))
-            .filter(x=>Number.isFinite(x._lockTime)&&x._lockTime>Date.now())
+          const nextLock=rosterNow
+            .filter(player=>!activeLineupLocks.has(playerKey(player)))
+            .flatMap(player=>(lockRoundMatches||[])
+              .filter(match=>{
+                const start=Date.parse(match.start_time||"");
+                const status=String(match.status||"").toUpperCase();
+                return Number.isFinite(start)
+                  &&start>Date.now()
+                  &&!["CANCELED","CANCELLED","POSTPONED"].includes(status)
+                  &&playerMatchesProMatch(player,match);
+              })
+              .map(match=>({player,match,_lockTime:Date.parse(match.start_time)})))
             .sort((a,b)=>a._lockTime-b._lockTime)[0]||null;
           const nextLockEl=document.querySelector("#teamNextLock");
           const lockStatusEl=document.querySelector("#teamLockStatus");
           if(nextLockEl){
-            if(nextLockRow){
-              const player=playerById(nextLockRow.player_id);
-              const when=new Date(nextLockRow._lockTime).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
-              nextLockEl.textContent=player?.name?when+" · "+player.name:when;
+            if(nextLock){
+              const when=new Date(nextLock._lockTime).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+              nextLockEl.textContent=when+" · "+nextLock.player.name;
+              nextLockEl.title="Locks at the official professional match start time.";
             }else{
               nextLockEl.textContent="No upcoming lock";
+              nextLockEl.title="";
             }
           }
           if(lockStatusEl){
