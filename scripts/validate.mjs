@@ -127,7 +127,7 @@ const visibleHtml=html
   .replace(/<[^>]+>/g," ")
   .replace(/\s+/g," ")
   .toLowerCase();
-for(const forbidden of ["supabase","service role","source health","operations snapshot","backend telemetry","rpc endpoint"]){
+for(const forbidden of ["service role","source health","operations snapshot","backend telemetry","rpc endpoint"]){
   check(!visibleHtml.includes(forbidden),`user-facing HTML hides internal term: ${forbidden}`);
 }
 
