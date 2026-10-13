@@ -222,7 +222,10 @@ function eligibleDraftPool(settings=getLeagueSettings()){
 const draftManagerNames = ["Baron Bandits","Zeuxidamus","Rift Raiders","Pentakill Club","Nexus Breakers","Blue Buff Boys","Dragon Slayers","Iron V","Red Side","First Blood","Scuttle Club","Elder Enjoyers"];
 let draftTimerId=null;
 let tradeTimerId=null;
+let matchupTimerId=null;
 let creatorSimulationTimerId=null;
+const matchupScoreSnapshots=new Map();
+const matchupEventLogs=new Map();
 let tradeRealtimeCleanup=null;
 const memoryStorage=new Map();
 function storageGet(key){
@@ -1220,6 +1223,7 @@ function render(view="home",options={}){
   }
   if(view!=="draft"&&draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
   if(view!=="trade"&&tradeTimerId){clearInterval(tradeTimerId);tradeTimerId=null;}
+  if(view!=="matchup"&&matchupTimerId){clearInterval(matchupTimerId);matchupTimerId=null;}
   if(view!=="trade"&&tradeRealtimeCleanup){try{tradeRealtimeCleanup();}catch{}tradeRealtimeCleanup=null;}
   if(view!=="creator-lab"&&creatorSimulationTimerId){clearInterval(creatorSimulationTimerId);creatorSimulationTimerId=null;}
   if(!options.fromHistory){
@@ -2367,6 +2371,104 @@ function render(view="home",options={}){
       </section>`;
     };
 
+    const matchupSlots=["TOP","JNG","MID","ADC","SUP","FLEX"];
+    const lineupBySlot=items=>{
+      const map=new Map();
+      items.forEach(item=>map.set(String(item?.roster?.slot||item?.player?.role||"").toUpperCase(),item));
+      return map;
+    };
+    const compactPlayerStats=score=>{
+      const b=score?.breakdown||{};
+      const stat=key=>Number(b?.[key]?.stat)||0;
+      return `${stat("kills")}/${stat("deaths")}/${stat("assists")} · ${Math.round(stat("cs"))} CS`;
+    };
+    const pairedPlayerCell=(item,side)=>{
+      if(!item)return `<div class="real-matchup-player ${side} empty"><strong>—</strong><small>No starter</small><span>0.00 FP</span></div>`;
+      const {player,score,state,locked}=item;
+      return `<div class="real-matchup-player ${side}">
+        <div class="real-matchup-player-name">
+          <strong>${h(player.name||item.roster.player_id)}</strong>
+          <span class="real-matchup-state ${state==="LIVE"?"live":state==="DATA DELAYED"?"delayed":""}">${locked?"🔒 ":""}${h(state)}</span>
+        </div>
+        <small>${h(player.team||"")}${score?.games?" · "+h(compactPlayerStats(score)):""}</small>
+        <span>${formatFantasyPoints(score?.total||0)} FP</span>
+      </div>`;
+    };
+    const buildScoringEvents=(leagueId,roundNumber,leftLineup,rightLineup)=>{
+      const cacheKey=String(leagueId)+":"+String(roundNumber);
+      const current=new Map();
+      [...leftLineup,...rightLineup].forEach(item=>{
+        const pid=String(item?.roster?.player_id||item?.player?.id||"");
+        if(!pid)return;
+        current.set(pid,{
+          name:item.player?.name||pid,
+          team:item.player?.team||"",
+          score:item.score,
+          mine:leftLineup.includes(item)
+        });
+      });
+
+      const previous=matchupScoreSnapshots.get(cacheKey);
+      const log=matchupEventLogs.get(cacheKey)||[];
+      if(previous){
+        const labels={kills:"Kill",deaths:"Death",assists:"Assist",cs:"CS",win:"Win",firstBlood:"First Blood"};
+        const additions=[];
+        current.forEach((entry,pid)=>{
+          const before=previous.get(pid);
+          if(!before)return;
+          for(const key of Object.keys(labels)){
+            const nowStat=Number(entry.score?.breakdown?.[key]?.stat)||0;
+            const oldStat=Number(before.score?.breakdown?.[key]?.stat)||0;
+            const nowPts=Number(entry.score?.breakdown?.[key]?.points)||0;
+            const oldPts=Number(before.score?.breakdown?.[key]?.points)||0;
+            const statDelta=nowStat-oldStat;
+            const pointDelta=nowPts-oldPts;
+            if(Math.abs(statDelta)<0.0001&&Math.abs(pointDelta)<0.0001)continue;
+            additions.push({
+              at:Date.now(),
+              name:entry.name,
+              team:entry.team,
+              mine:entry.mine,
+              label:labels[key],
+              statDelta,
+              pointDelta,
+              correction:statDelta<0||((key!=="deaths")&&pointDelta<0)
+            });
+          }
+        });
+        if(additions.length){
+          matchupEventLogs.set(cacheKey,[...additions.reverse(),...log].slice(0,24));
+        }
+      }
+      matchupScoreSnapshots.set(cacheKey,current);
+
+      return matchupEventLogs.get(cacheKey)||[];
+    };
+    const renderScoringFeed=events=>{
+      if(!events.length){
+        return `<section class="matchup-scoring-feed">
+          <div class="matchup-feed-head"><div><small>LIVE SCORING</small><strong>Scoring Events</strong></div><span>Waiting for stat changes</span></div>
+          <div class="matchup-feed-empty">New fantasy-point changes will appear here as live stats update.</div>
+        </section>`;
+      }
+      return `<section class="matchup-scoring-feed">
+        <div class="matchup-feed-head"><div><small>LIVE SCORING</small><strong>Scoring Events</strong></div><span>Most recent first</span></div>
+        <div class="matchup-feed-list">${events.slice(0,12).map(event=>{
+          const statText=event.label==="CS"
+            ?`+${Math.round(event.statDelta)} CS`
+            :event.correction
+              ?"Stat correction"
+              :event.label;
+          const pts=(event.pointDelta>=0?"+":"")+formatFantasyPoints(event.pointDelta)+" FP";
+          return `<div class="matchup-feed-row ${event.mine?"mine":""}">
+            <div><strong>${h(event.name)}</strong><small>${h(event.team||"")}</small></div>
+            <span>${h(statText)}</span>
+            <b class="${event.pointDelta<0?"negative":""}">${h(pts)}</b>
+          </div>`;
+        }).join("")}</div>
+      </section>`;
+    };
+
     if(!leagueId||!cloudReady()){
       board.innerHTML='<div class="empty-state"><strong>No active league</strong><small>Select a league before viewing head-to-head matchups.</small></div>';
       if(prevBtn)prevBtn.disabled=true;
@@ -2568,19 +2670,53 @@ function render(view="home",options={}){
             myMatchup.result==="tie"?"FINAL · TIE":
             myMatchup.result==="live"?"LIVE":"UPCOMING";
 
-          board.innerHTML=`<div class="matchup-scoreboard">
-              <div class="${homeMine?"mine":""}"><small>${homeMine?"YOU":"HOME"}</small><strong>${h(homeName)}</strong><span>${formatFantasyPoints(homeTotal)} FP</span></div>
-              <div class="matchup-versus"><span>${h(resultLabel)}</span><strong>VS</strong></div>
-              <div class="${awayMine?"mine":""}"><small>${awayMine?"YOU":"AWAY"}</small><strong>${h(awayName)}</strong><span>${formatFantasyPoints(awayTotal)} FP</span></div>
+          const myLineup=homeMine?homeLineup:awayLineup;
+          const opponentLineup=homeMine?awayLineup:homeLineup;
+          const myName=homeMine?homeName:awayName;
+          const opponentName=homeMine?awayName:homeName;
+          const myTotal=homeMine?homeTotal:awayTotal;
+          const opponentTotal=homeMine?awayTotal:homeTotal;
+          const mySlots=lineupBySlot(myLineup);
+          const opponentSlots=lineupBySlot(opponentLineup);
+          const myResult=myMatchup.result==="tie"
+            ?"FINAL · TIE"
+            :myMatchup.result==="home_win"
+              ?(homeMine?"FINAL · WIN":"FINAL · LOSS")
+              :myMatchup.result==="away_win"
+                ?(awayMine?"FINAL · WIN":"FINAL · LOSS")
+                :myMatchup.result==="live"
+                  ?"LIVE"
+                  :"UPCOMING";
+          const events=buildScoringEvents(leagueId,round.round_number,myLineup,opponentLineup);
+
+          board.innerHTML=`<div class="matchup-scoreboard real-matchup-scoreboard">
+              <div class="mine"><small>YOU</small><strong>${h(myName)}</strong><span>${formatFantasyPoints(myTotal)} FP</span></div>
+              <div class="matchup-versus"><span>${h(myResult)}</span><strong>VS</strong></div>
+              <div><small>OPPONENT</small><strong>${h(opponentName)}</strong><span>${formatFantasyPoints(opponentTotal)} FP</span></div>
             </div>
-            <div class="matchup-lineups-grid">
-              ${renderLineup(homeMine?"YOUR TEAM":"OPPONENT",homeName,homeLineup,homeTotal,homeMine)}
-              ${renderLineup(awayMine?"YOUR TEAM":"OPPONENT",awayName,awayLineup,awayTotal,awayMine)}
-            </div>`;
+            <div class="real-matchup-board">
+              <div class="real-matchup-header">
+                <div><small>YOUR LINEUP</small><strong>${h(myName)}</strong></div>
+                <span>POSITION</span>
+                <div><small>OPPONENT</small><strong>${h(opponentName)}</strong></div>
+              </div>
+              ${matchupSlots.map(slot=>`<article class="real-matchup-row">
+                ${pairedPlayerCell(mySlots.get(slot),"mine")}
+                <div class="real-matchup-role">${h(slot)}</div>
+                ${pairedPlayerCell(opponentSlots.get(slot),"opponent")}
+              </article>`).join("")}
+            </div>
+            ${renderScoringFeed(events)}`;
         }catch(err){
           board.innerHTML='<div class="empty-state"><strong>Could not load matchup</strong><small>'+h(err.message||"Try again later.")+'</small></div>';
         }
       })();
+      matchupTimerId=setInterval(()=>{
+        if(currentView==="matchup"){
+          const opts=historicalLeagueContextId?{replace:true,historyLeagueId:leagueId}:{replace:true};
+          render("matchup",opts);
+        }
+      },30000);
     }
   }
   if(view==="schedule"||view==="my-schedule"){
