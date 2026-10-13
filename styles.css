@@ -1482,3 +1482,15 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
   .creator-tournament-row{grid-template-columns:1fr}
   .creator-tournament-row .secondary-btn{width:100%}
 }
+
+.creator-test-mode{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.creator-test-mode>label{color:#8db5e8;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.creator-mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.creator-mode-card{min-width:0;min-height:82px;padding:12px 13px;border:1px solid #29435f;border-radius:14px;background:#0b1b2d;color:#dce9f8;text-align:left;display:flex;flex-direction:column;justify-content:space-between;gap:8px}
+.creator-mode-card.active{border-color:#28cdb0;background:#102b2d}
+.creator-mode-card span:last-child{color:#8eb2df;font-size:13px;font-weight:800}
+.creator-mode-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-width:0}
+.creator-mode-top strong{font-size:14px}
+.creator-mode-top b{flex:0 0 auto;border:1px solid #2b806f;border-radius:999px;padding:3px 6px;color:#69e5ce;font-size:7px;letter-spacing:.06em}
+.creator-lab-settings.compact{margin-top:16px}
+@media(max-width:480px){.creator-mode-grid{grid-template-columns:1fr}}
