@@ -1348,3 +1348,25 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
 }
 
 .trade-add-choice.selected{border-color:#2ddcba;background:#10322f}.trade-add-choice.selected .drop-action{color:#57ebce}.trade-accept-add-summary{border-color:#24594f!important;background:#102d29!important}.trade-accept-add-summary span{color:#58e4c6!important}
+
+/* Completed league state */
+.league-completion-banner{
+  margin:14px 0 16px;
+  padding:12px 14px;
+  border:1px solid #2a5a56;
+  border-radius:14px;
+  background:#0c2928;
+}
+.league-completion-banner[hidden]{display:none}
+.league-completion-banner strong{
+  display:block;
+  margin-bottom:3px;
+  color:#72e7d1;
+  font-size:13px;
+}
+.league-completion-banner small{
+  display:block;
+  color:#a6bbc9;
+  font-size:11px;
+  line-height:1.45;
+}
