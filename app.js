@@ -1452,9 +1452,44 @@ function render(view="home",options={}){
         document.querySelector("#signedInEmail").textContent=cloudUserEmail(user);
         const creatorEntry=document.querySelector("#creatorLabEntry");
         const creatorButton=document.querySelector("#openCreatorLabBtn");
+        const creatorEntryStatus=document.querySelector("#creatorLabEntryStatus");
+        const creatorEntryPill=document.querySelector("#creatorLabEntryPill");
+        const creatorEntryLeagueName=document.querySelector("#creatorLabEntryLeagueName");
         const admin=await b.isPlatformAdmin().catch(()=>false);
         if(creatorEntry)creatorEntry.hidden=!admin;
-        if(creatorButton&&admin)creatorButton.onclick=()=>render("creator-lab");
+        if(creatorButton&&admin){
+          let activeMock=null;
+          let mockRun=null;
+          try{
+            const leagues=await b.listLeagues();
+            activeMock=leagues.find(l=>isSimulationLeague(l))||null;
+            if(activeMock?.id)mockRun=await b.getMockSimulation(activeMock.id).catch(()=>null);
+          }catch{}
+          if(activeMock){
+            const runStatus=String(mockRun?.run?.status||"");
+            const leagueStatus=String(activeMock.status||"");
+            creatorButton.textContent=runStatus==="running"
+              ?"View Active Mock Matchup"
+              :runStatus==="completed"||leagueStatus==="completed"
+                ?"View Completed Mock League"
+                :leagueStatus==="drafting"
+                  ?"Return to Mock Draft"
+                  :"View Active Mock League";
+            if(creatorEntryStatus)creatorEntryStatus.hidden=false;
+            if(creatorEntryLeagueName)creatorEntryLeagueName.textContent=activeMock.name||"Creator Mock Draft";
+            if(creatorEntryPill){
+              creatorEntryPill.textContent=runStatus==="running"?"LIVE":runStatus==="completed"||leagueStatus==="completed"?"COMPLETE":leagueStatus==="drafting"?"DRAFTING":"ACTIVE";
+              creatorEntryPill.classList.toggle("live",runStatus==="running");
+            }
+          }else{
+            creatorButton.textContent="Open Mock Draft Simulator";
+            if(creatorEntryStatus)creatorEntryStatus.hidden=true;
+          }
+          creatorButton.onclick=()=>{
+            if(activeMock?.id)setActiveLeagueId(activeMock.id);
+            render("creator-lab");
+          };
+        }
       }else{
         authCard.hidden=false;
         recoveryCard.hidden=true;
