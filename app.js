@@ -774,6 +774,41 @@ function closeLineupSwapModal(){
   lineupSwapReturnFocus=null;
 }
 
+function openBenchReplacementChooser(starter,current,candidates,onComplete){
+  const modal=document.querySelector("#lineupSwapModal");
+  const list=document.querySelector("#lineupSwapList");
+  const copy=document.querySelector("#lineupSwapCopy");
+  if(!modal||!list||!copy)return;
+  const starterSlot=starter.slot||starter.role;
+  copy.textContent=`Choose who should replace ${starter.name} in ${starterSlot}.`;
+  list.innerHTML=candidates.map(candidate=>`<button class="drop-option" data-bench-replacement-id="${playerKey(candidate)}"><span class="role-badge">${h(candidate.slot||candidate.role)}</span><span><strong>${h(candidate.name)}</strong><small>${h(candidate.team)} · ${h(playerPosition(candidate))}</small></span><span class="drop-action">SWAP</span></button>`).join("");
+  list.querySelectorAll("[data-bench-replacement-id]").forEach(btn=>btn.onclick=async()=>{
+    const replacement=current.find(p=>playerKey(p)===btn.dataset.benchReplacementId);
+    if(!replacement)return;
+    const next=current.map(p=>{
+      if(playerKey(p)===playerKey(starter))return {...p,position:playerPosition(p),slot:"BN",role:"BN"};
+      if(playerKey(p)===playerKey(replacement))return {...p,position:playerPosition(p),slot:starterSlot,role:playerPosition(p)};
+      return p;
+    });
+    btn.disabled=true;
+    try{
+      await saveUserRoster(next);
+      closeLineupSwapModal();
+      showToast(`${replacement.name} moved into ${starterSlot}`);
+      if(typeof onComplete==="function")onComplete();
+    }catch(err){
+      showToast(err.message||"Could not update lineup");
+      btn.disabled=false;
+    }
+  });
+  lineupSwapReturnFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
+  modal.hidden=false;
+  document.body.classList.add("modal-open");
+  const shell=document.querySelector(".app-shell");
+  if(shell)shell.inert=true;
+  queueMicrotask(()=>list.querySelector("[data-bench-replacement-id]")?.focus());
+}
+
 function openLineupSwapChooser(player,current,targets,onComplete){
   const modal=document.querySelector("#lineupSwapModal");
   const list=document.querySelector("#lineupSwapList");
@@ -1026,7 +1061,7 @@ function rosterRow(p, manage=false){
   return `<div class="roster-slot ${isBench?"bench":""} ${locked?"lineup-locked":""}">
     <span class="slot-label">${h(slot)}</span>
     <div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(position||p.role)}${p.opp?" · "+h(p.opp):""}</small>${lockBadge}</div>
-    ${manage?(locked?'<div class="team-actions"><span class="locked-action">Match started</span></div>':'<div class="team-actions">'+lineupAction+'<button class="mini-btn danger" data-drop-roster="'+playerKey(p)+'">DROP</button></div>'):""}
+    ${manage?(locked?'<div class="team-actions"><span class="locked-action">Match started</span></div>':'<div class="team-actions">'+lineupAction+'</div>'):""}
   </div>`;
 }
 
@@ -1508,39 +1543,19 @@ function render(view="home",options={}){
     const refreshTeam=()=>render("team",{replace:true});
 
     const bindRosterActions=()=>{
-      document.querySelectorAll("[data-drop-roster]").forEach(btn=>btn.onclick=async()=>{
-        if(!rosterMovesEnabled)return showToast("Roster moves unlock after the draft.");
-        const currentNow=getUserRoster();
-        const player=currentNow.find(p=>playerKey(p)===btn.dataset.dropRoster);
-        if(!player)return;
-        const next=currentNow.filter(p=>playerKey(p)!==btn.dataset.dropRoster);
-        const nextStatus=validateRoster(next);
-        const warning=nextStatus.isComplete?"":` This will leave your roster incomplete. ${rosterStatusText(nextStatus)}`;
-        if(!window.confirm(`Drop ${player.name} from your roster?${warning}`))return;
-        btn.disabled=true;
-        try{
-          await saveUserRoster(next);
-          logTransaction("drop",player);
-          showToast(`${player.name} dropped`);
-          refreshTeam();
-        }catch(err){showToast(err.message||"Could not drop player");btn.disabled=false;}
-      });
-
-      document.querySelectorAll("[data-bench-roster]").forEach(btn=>btn.onclick=async()=>{
+      document.querySelectorAll("[data-bench-roster]").forEach(btn=>btn.onclick=()=>{
         if(!rosterMovesEnabled)return showToast("Lineup changes unlock after the draft.");
         const currentNow=getUserRoster();
         const player=currentNow.find(p=>playerKey(p)===btn.dataset.benchRoster);
         if(!player)return;
-        const next=currentNow.map(p=>playerKey(p)===playerKey(player)?{...p,position:playerPosition(p),slot:"BN",role:"BN"}:p);
-        if(validateRoster(currentNow).isComplete&&!validateRoster(next).isComplete){
-          if(!window.confirm(`Bench ${player.name}? This will leave your starting lineup incomplete until you start another player.`))return;
-        }
-        btn.disabled=true;
-        try{
-          await saveUserRoster(next);
-          showToast(`${player.name} moved to bench`);
-          refreshTeam();
-        }catch(err){showToast(err.message||"Could not update lineup");btn.disabled=false;}
+        const slot=player.slot||player.role;
+        const candidates=currentNow.filter(p=>{
+          if((p.slot||p.role)!=="BN")return false;
+          if(activeLineupLocks.has(playerKey(p)))return false;
+          return slot==="FLEX"?isFlexEligible(p):playerPosition(p)===slot;
+        });
+        if(!candidates.length)return showToast(`No eligible unlocked bench player can replace ${player.name} in ${slot}.`);
+        openBenchReplacementChooser(player,currentNow,candidates,refreshTeam);
       });
 
       document.querySelectorAll("[data-start-roster]").forEach(btn=>btn.onclick=async()=>{
