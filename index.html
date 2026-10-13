@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261013-riot-ready-v1" />
+  <link rel="stylesheet" href="styles.css?v=20261013-mock-modes-v1" />
 </head>
 <body>
   <a class="skip-link" href="#app">Skip to main content</a>
@@ -226,22 +226,37 @@
 
       <section class="card" id="creatorLabCreateCard" hidden>
         <div class="section-head">
-          <div><div class="eyebrow">MOCK LEAGUE</div><h3>Start a fresh test</h3></div>
+          <div><div class="eyebrow">NEW MOCK</div><h3>Set up your test</h3></div>
         </div>
+
         <div class="creator-tournament-control">
           <label for="creatorCompetitionSelect">Tournament</label>
           <select id="creatorCompetitionSelect" aria-describedby="creatorCompetitionHelp">
             <option value="worlds">Worlds</option>
           </select>
-          <small id="creatorCompetitionHelp">Choose which tournament player pool to use for this mock draft.</small>
+          <small id="creatorCompetitionHelp"></small>
         </div>
-        <div class="settings-list creator-lab-settings">
-          <div><span>Managers</span><strong>You + 1 Bot</strong></div>
+
+        <div class="creator-test-mode">
+          <label>Test Length</label>
+          <div class="creator-mode-grid" role="radiogroup" aria-label="Mock simulation length">
+            <button class="creator-mode-card active" type="button" data-mock-duration="5" aria-pressed="true">
+              <span class="creator-mode-top"><strong>Quick Test</strong><b>RECOMMENDED</b></span>
+              <span>5 minutes</span>
+            </button>
+            <button class="creator-mode-card" type="button" data-mock-duration="35" aria-pressed="false">
+              <span class="creator-mode-top"><strong>Full Simulation</strong></span>
+              <span>35 minutes</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-list creator-lab-settings compact">
+          <div><span>Matchup</span><strong>You vs Rift Bot</strong></div>
           <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP · FLEX · Bench</strong></div>
-          <div><span>Simulation</span><strong>35 minutes</strong></div>
-          <div><span>Stats</span><strong>Random K / D / A / CS / First Blood</strong></div>
         </div>
-        <button class="primary-btn" id="creatorCreateMockBtn" type="button">Create Mock League</button>
+
+        <button class="primary-btn" id="creatorCreateMockBtn" type="button">Create 5-Minute Mock</button>
       </section>
 
       <section class="card" id="creatorLabActiveCard" hidden>
@@ -260,7 +275,7 @@
         </div>
         <div class="creator-lab-actions">
           <button class="primary-btn" id="creatorOpenDraftBtn" type="button">Open Draft Room</button>
-          <button class="primary-btn" id="creatorStartSimulationBtn" type="button" hidden>Start 35-Minute Simulation</button>
+          <button class="primary-btn" id="creatorStartSimulationBtn" type="button" hidden>Start Simulation</button>
           <button class="secondary-btn" id="creatorRefreshSimulationBtn" type="button">Refresh</button>
           <button class="secondary-btn danger-outline" id="creatorDeleteMockBtn" type="button">Delete Test League</button>
         </div>
@@ -269,7 +284,7 @@
       <section class="card creator-sim-card" id="creatorSimulationCard" hidden>
         <div class="section-head">
           <div><div class="eyebrow">LIVE TEST GAME</div><h3>Simulation Scoreboard</h3></div>
-          <span class="live-pill" id="creatorSimulationClock">0 / 35 MIN</span>
+          <span class="live-pill" id="creatorSimulationClock">0 / 5 MIN</span>
         </div>
         <div class="creator-sim-scoreboard">
           <div><small>Creator Team</small><strong id="creatorHomeScore">0.00</strong></div>
@@ -1442,8 +1457,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3"></script>
   <script src="esports-data.js?v=20261013-creator-lab-v2"></script>
   <script src="backend-config.js?v=20261013-creator-lab-v2"></script>
-  <script src="backend.js?v=20261013-mock-tournament-v1"></script>
+  <script src="backend.js?v=20261013-mock-modes-v1"></script>
   <script src="player-stats.js?v=20261013-creator-lab-v2"></script>
-  <script src="app.js?v=20261013-active-mock-entry-v1"></script>
+  <script src="app.js?v=20261013-mock-modes-v1"></script>
 </body>
 </html>
