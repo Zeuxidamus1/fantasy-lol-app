@@ -210,3 +210,7 @@ begin
   return v_count;
 end;
 $$;
+
+revoke execute on function public.finish_completed_leagues() from public,anon,authenticated;
+revoke execute on function public.competition_has_future_matches(text) from public,anon,authenticated;
+revoke execute on function public.enforce_open_competition_for_league() from public,anon,authenticated;
