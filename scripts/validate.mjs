@@ -109,6 +109,7 @@ check(html.includes('id="profileProjectedFp"'),"player projection UI exists");
 check(html.includes('id="teamNextLock"'),"team lock dashboard exists");
 check(html.includes('id="leaguePlayoffCard"'),"playoff UI exists");
 check(!html.includes("Fantasy scoring is not live yet"),"obsolete fake-scoring placeholder is removed");
+check(html.includes("img-src 'self' data: https://static.lolesports.com;"),"LoL Esports image host is permitted by CSP");
 
 const buttonTags=[...html.matchAll(/<button\b([^>]*)>/gi)].map(m=>m[1]);
 const structurallyDeadButtons=buttonTags.filter(attrs=>{
