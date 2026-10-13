@@ -1540,7 +1540,7 @@ function render(view="home",options={}){
       statusBanner.classList.toggle("incomplete",!leagueCompleted&&!validation.isComplete);
       if(leagueCompleted){
         statusTitle.textContent="Season Complete";
-        statusCopy.textContent="This league has ended. Your final roster is locked.";
+        statusCopy.textContent="This league has ended. Final rosters are locked and read-only.";
       }else{
         statusTitle.textContent=validation.isComplete?"✓ Roster Complete":"⚠ Roster Incomplete";
         statusCopy.textContent=rosterStatusText(validation);
