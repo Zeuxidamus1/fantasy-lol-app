@@ -129,7 +129,7 @@ begin
     where s.run_id=r.id;
   end if;
 
-  if v_target>=case when r.duration_minutes<=5 then 1 else 3 end
+  if v_target >= (case when r.duration_minutes<=5 then 1 else 3 end)
      and not exists(
        select 1 from public.simulation_player_stats where run_id=r.id and first_blood
      )
