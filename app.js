@@ -1322,46 +1322,6 @@ function render(view="home",options={}){
   }
   if(view==="home"){
     const upcomingList=document.querySelector("#homeUpcomingMatches");
-    const onboardingCard=document.querySelector("#onboardingCard");
-    if(onboardingCard){
-      onboardingCard.hidden=true;
-      const dismiss=document.querySelector("#dismissOnboarding");
-      void (async()=>{
-        if(!cloudReady()){
-          onboardingCard.hidden=false;
-          if(dismiss)dismiss.onclick=()=>{onboardingCard.hidden=true;};
-          return;
-        }
-        try{
-          const b=backend();
-          const user=await b.currentUser().catch(()=>null);
-          if(!user){
-            onboardingCard.hidden=true;
-            return;
-          }
-          const prefs=await b.getUserPreferences();
-          const leagues=await b.listLeagues().catch(()=>[]);
-          const shouldAutoDismiss=Array.isArray(leagues)&&leagues.length>0;
-          if(shouldAutoDismiss&&!prefs?.onboarding_dismissed){
-            try{await b.setOnboardingDismissed(true);}catch{}
-          }
-          onboardingCard.hidden=!!prefs?.onboarding_dismissed||shouldAutoDismiss;
-          if(dismiss)dismiss.onclick=async()=>{
-            onboardingCard.hidden=true;
-            dismiss.disabled=true;
-            try{await b.setOnboardingDismissed(true);}
-            catch(err){
-              onboardingCard.hidden=false;
-              showToast(err.message||"Could not save onboarding preference.");
-            }finally{dismiss.disabled=false;}
-          };
-        }catch{
-          onboardingCard.hidden=false;
-          if(dismiss)dismiss.onclick=()=>{onboardingCard.hidden=true;};
-        }
-      })();
-    }
-
     const renderUpcoming=sourceRows=>{
       const rows=(sourceRows||[]).map(localScheduleRow).sort((a,b)=>{
         const ta=Date.parse(a.startTime||a.date||"");
