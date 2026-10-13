@@ -200,6 +200,9 @@ const draftPool = ((window.ESPORTS_DATA && window.ESPORTS_DATA.players) || []).m
 });
 function eligibleDraftPool(settings=getLeagueSettings()){
   const code=normalizeCompetitionCode(settings?.competition);
+  if(settings?.simulation===true){
+    return draftPool.filter(p=>playerEligibleForCompetition(p,code)&&playerIsDraftable(p));
+  }
   return draftPool.filter(p=>playerAvailableForAcquisition(p,code));
 }
 
