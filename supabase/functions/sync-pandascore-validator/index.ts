@@ -11,6 +11,10 @@ const sameTeam=(a:any,b:any)=>{
   const x=norm(a),y=norm(b);
   return !!x&&!!y&&(x===y||(x.length>4&&y.length>4&&(x.includes(y)||y.includes(x))));
 };
+const isPlaceholderTeam=(v:any)=>{
+  const x=norm(v);
+  return !x||x==="tbd"||x==="unknown"||x==="to_be_determined";
+};
 
 Deno.serve(async(req)=>{
   const token=req.headers.get("x-sync-token")||"";
@@ -82,16 +86,26 @@ Deno.serve(async(req)=>{
     const minTime=new Date(Date.now()-14*86400000).toISOString();
     const maxTime=new Date(Date.now()+30*86400000).toISOString();
     const {data:local,error}=await supabase.from("pro_matches")
-      .select("id,start_time,team_a_name,team_a_code,team_b_name,team_b_code,status")
+      .select("id,competition,start_time,team_a_name,team_a_code,team_b_name,team_b_code,status")
       .gte("start_time",minTime).lt("start_time",maxTime);
     if(error)throw error;
 
     let verified=0;
     let checked=0;
     let scheduleMismatches=0;
+    let skippedPlaceholders=0;
+    let skippedSimulation=0;
     for(const m of (local||[])){
       const mt=Date.parse(m.start_time||"");
       if(!Number.isFinite(mt))continue;
+      if(String(m.competition||"").toLowerCase()==="simulation"){
+        skippedSimulation++;
+        continue;
+      }
+      if(isPlaceholderTeam(m.team_a_name)||isPlaceholderTeam(m.team_b_name)){
+        skippedPlaceholders++;
+        continue;
+      }
       checked++;
       const hit=parsed.find((p:any)=>{
         const pt=p.beginAt.getTime();
@@ -131,6 +145,8 @@ Deno.serve(async(req)=>{
       verified_matches:verified,
       schedule_mismatches:scheduleMismatches,
       verification_ratio:Number(ratio.toFixed(3)),
+      skipped_placeholders:skippedPlaceholders,
+      skipped_simulation:skippedSimulation,
       scope:"fixtures_only"
     });
 
