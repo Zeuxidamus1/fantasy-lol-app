@@ -1494,3 +1494,10 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
 .creator-mode-top b{flex:0 0 auto;border:1px solid #2b806f;border-radius:999px;padding:3px 6px;color:#69e5ce;font-size:7px;letter-spacing:.06em}
 .creator-lab-settings.compact{margin-top:16px}
 @media(max-width:480px){.creator-mode-grid{grid-template-columns:1fr}}
+
+.creator-lab-loading{min-height:126px;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.creator-lab-loading[hidden]{display:none}
+.creator-loading-line{height:16px;border-radius:999px;background:#13263a;max-width:72%;animation:creatorLoadPulse 1.1s ease-in-out infinite alternate}
+.creator-loading-line.short{max-width:44%}
+@keyframes creatorLoadPulse{from{opacity:.45}to{opacity:.9}}
+@media(prefers-reduced-motion:reduce){.creator-loading-line{animation:none;opacity:.65}}
