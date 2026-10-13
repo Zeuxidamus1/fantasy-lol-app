@@ -308,7 +308,8 @@
       +"&start_time=lt."+encodeURIComponent(to)
       +"&order=start_time.asc";
     if(competition)path+="&competition=eq."+encodeURIComponent(String(competition));
-    return request(path,{session:current});
+    const rows=await request(path,{session:current});
+    return competition?rows:(Array.isArray(rows)?rows.filter(row=>String(row.competition||"")!=="simulation"):rows);
   }
 
   async function listFantasyRounds(leagueId){
