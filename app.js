@@ -869,8 +869,17 @@ function openDropChooser(incoming){
   const copy=document.querySelector("#transactionCopy");
   if(!modal||!list||!copy)return;
   const current=getUserRoster();
-  copy.textContent=`Your roster is full. Choose who to drop for ${incoming.name}.`;
-  list.innerHTML=current.map(p=>`<button class="drop-option" data-drop-id="${playerKey(p)}"><span class="role-badge">${h(p.slot||p.role)}</span><span><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.position||p.role)}</small></span><span class="drop-action">DROP</span></button>`).join("");
+  const incomingRole=playerPosition(incoming);
+  const compatible=current.filter(p=>{
+    const slot=p.slot||p.role;
+    if(slot==="BN")return true;
+    if(slot==="FLEX")return isFlexEligible(incoming);
+    return slot===incomingRole;
+  });
+  copy.textContent=`Your roster is full. Choose who to replace with ${incoming.name}.`;
+  list.innerHTML=compatible.length
+    ?compatible.map(p=>`<button class="drop-option" data-drop-id="${playerKey(p)}"><span class="role-badge">${h(p.slot||p.role)}</span><span><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.position||p.role)}</small></span><span class="drop-action">REPLACE</span></button>`).join("")
+    :'<div class="empty-state"><strong>No legal replacement available</strong><small>This player cannot replace any unlocked roster slot without making your lineup incomplete.</small></div>';
   list.querySelectorAll("[data-drop-id]").forEach(btn=>btn.onclick=()=>{
     const dropId=btn.dataset.dropId;
     const dropped=current.find(p=>playerKey(p)===dropId);
@@ -904,8 +913,17 @@ function openWaiverDropChooser(incoming){
   const leagueId=getActiveLeagueId();
   if(!modal||!list||!copy||!leagueId||!cloudReady())return;
   const current=getUserRoster();
-  copy.textContent="Your roster is full. Choose who would be dropped if your waiver claim for "+incoming.name+" wins.";
-  list.innerHTML=current.map(p=>'<button class="drop-option" data-waiver-drop-id="'+playerKey(p)+'"><span class="role-badge">'+h(p.slot||p.role)+'</span><span><strong>'+h(p.name)+'</strong><small>'+h(p.team)+' · '+h(p.position||p.role)+'</small></span><span class="drop-action">DROP IF WON</span></button>').join("");
+  const incomingRole=playerPosition(incoming);
+  const compatible=current.filter(p=>{
+    const slot=p.slot||p.role;
+    if(slot==="BN")return true;
+    if(slot==="FLEX")return isFlexEligible(incoming);
+    return slot===incomingRole;
+  });
+  copy.textContent="Your roster is full. Choose who would be replaced if your waiver claim for "+incoming.name+" wins.";
+  list.innerHTML=compatible.length
+    ?compatible.map(p=>'<button class="drop-option" data-waiver-drop-id="'+playerKey(p)+'"><span class="role-badge">'+h(p.slot||p.role)+'</span><span><strong>'+h(p.name)+'</strong><small>'+h(p.team)+' · '+h(p.position||p.role)+'</small></span><span class="drop-action">REPLACE IF WON</span></button>').join("")
+    :'<div class="empty-state"><strong>No legal replacement available</strong><small>This waiver player cannot replace a roster slot without making your lineup incomplete.</small></div>';
   list.querySelectorAll("[data-waiver-drop-id]").forEach(btn=>btn.onclick=async()=>{
     const dropId=btn.dataset.waiverDropId;
     btn.disabled=true;
