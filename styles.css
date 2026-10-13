@@ -32,6 +32,10 @@
 .login-divider{display:flex;align-items:center;gap:10px;color:#60748e;font-size:9px;font-weight:700}
 .login-divider::before,.login-divider::after{content:"";height:1px;flex:1;background:#1b2d43}
 .login-legal{text-align:center;color:#4f647f;font-size:8px;line-height:1.45;margin:0 auto;max-width:330px}
+.login-legal-block{display:flex;flex-direction:column;gap:8px;align-items:center}
+.riot-disclaimer{text-align:center;color:#41556f;font-size:7px;line-height:1.45;margin:0 auto;max-width:360px}
+.login-feature-strip{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:13px}
+.login-feature-strip span{border:1px solid #1d3b4a;background:#0b2130;color:#78dcca;border-radius:999px;padding:6px 9px;font-size:8px;font-weight:800;letter-spacing:.03em}
 @media(max-width:380px){.login-screen{padding-left:16px;padding-right:16px}.login-card{padding:18px}.login-help-row{flex-direction:column;gap:2px}}
 
 [hidden]{display:none!important}
