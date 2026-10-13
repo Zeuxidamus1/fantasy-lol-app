@@ -195,10 +195,22 @@
     return value===true;
   }
 
-  async function createMockLeague(){
+  async function listMockCompetitions(){
     const current=await session();
     if(!current)throw new Error("Sign in before opening Creator Lab.");
-    return request("/rest/v1/rpc/create_mock_league",{method:"POST",body:{},session:current});
+    return request("/rest/v1/rpc/list_mock_competitions",{method:"POST",body:{},session:current});
+  }
+
+  async function createMockLeague(competition="worlds"){
+    const current=await session();
+    if(!current)throw new Error("Sign in before opening Creator Lab.");
+    return request("/rest/v1/rpc/create_mock_league",{method:"POST",body:{p_competition:String(competition)},session:current});
+  }
+
+  async function setMockCompetition(leagueId,competition){
+    const current=await session();
+    if(!current)throw new Error("Sign in before changing the mock tournament.");
+    return request("/rest/v1/rpc/set_mock_competition",{method:"POST",body:{p_league_id:leagueId,p_competition:String(competition)},session:current});
   }
 
   async function getMockSimulation(leagueId){
@@ -576,7 +588,7 @@
     readSession,
     onSessionChange(fn){listeners.add(fn);return()=>listeners.delete(fn);},
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
-    listLeagues,createLeague,createBotLeague,isPlatformAdmin,createMockLeague,getMockSimulation,startMockSimulation,listMockDraftPool,deleteMockLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
+    listLeagues,createLeague,createBotLeague,isPlatformAdmin,listMockCompetitions,createMockLeague,setMockCompetition,getMockSimulation,startMockSimulation,listMockDraftPool,deleteMockLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,makeBotDraftPick,
     listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,listLineupLocks,listPlayerCompetitionStatus,listPlayerProjections,listPlayoffs,getLeagueChampion,listLeagueActivity,listLeagueHistory,listScoreCorrections,listWaiverPriority,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
