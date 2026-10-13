@@ -150,7 +150,7 @@ check(app.includes('const regularLeagues=leagues.filter(l=>!isSimulationLeague(l
 check(app.includes('if(view==="creator-lab")'),"Creator Lab route is wired");
 check(app.includes('startMockSimulation(mockLeague.id)'),"Creator Lab can start the 35-minute simulation");
 check(backend.includes('async function isPlatformAdmin()'),"creator access check exists in frontend API");
-check(backend.includes('async function createMockLeague()'),"mock league creation API exists");
+check(backend.includes('async function createMockLeague(competition="worlds")'),"mock league creation API accepts tournament selection");
 check(backend.includes('async function startMockSimulation(leagueId)'),"mock simulation start API exists");
 check(backend.includes('row.competition||"")!=="simulation"'),"normal schedule feed hides simulation matches");
 check(html.includes('id="creatorCompetitionSelect"'),"Creator Lab tournament selector exists");
