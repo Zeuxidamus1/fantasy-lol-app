@@ -66,6 +66,11 @@ async function api(path, params = {}) {
 }
 
 function clean(s) { return String(s ?? "").trim(); }
+function assetUrl(value){
+  const raw=clean(value);
+  if(!raw)return null;
+  return raw.replace(/^http:\/\//i,"https://");
+}
 function teamMatchKey(s) {
   return clean(s).toLowerCase().replace(/[^a-z0-9]/g,"");
 }
@@ -269,6 +274,8 @@ async function fetchLeaguesAndPlayers(existing) {
         existingPlayer.team=teamName;
         existingPlayer.teamId=clean(team.id)||null;
         existingPlayer.teamCode=teamCode;
+        existingPlayer.teamLogo=assetUrl(team.image||team.alternativeImage||team.backgroundImage)||existingPlayer.teamLogo||null;
+        existingPlayer.image=assetUrl(p.image||p.photo||p.imageUrl)||existingPlayer.image||null;
         existingPlayer.role=role;
         const isStarter=lastRoleIndex.get(role)===playerIndex;
         if(isStarter){
@@ -286,6 +293,8 @@ async function fetchLeaguesAndPlayers(existing) {
         team:teamName,
         teamId:clean(team.id)||null,
         teamCode,
+        teamLogo:assetUrl(team.image||team.alternativeImage||team.backgroundImage)||old?.teamLogo||null,
+        image:assetUrl(p.image||p.photo||p.imageUrl)||old?.image||old?.imageUrl||old?.photo||null,
         rank:999,
         projection:Number(old?.projection??old?.fp??20),
         verified:true,
