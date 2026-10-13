@@ -1131,12 +1131,19 @@ function showToast(message){
   setTimeout(()=>toast.classList.remove("show"),1800);
 }
 
+function playerVisual(p){
+  return p?.image||p?.imageUrl||p?.photo||p?.teamLogo||p?.team_logo||"";
+}
+function playerVisualIsTeamLogo(p){
+  return !Boolean(p?.image||p?.imageUrl||p?.photo)&&Boolean(p?.teamLogo||p?.team_logo);
+}
 function playerRow(p, add=false){
   const pid=playerKey(p);
-  const image=p.image||p.imageUrl||p.photo||"";
+  const image=playerVisual(p);
+  const imageClass=playerVisualIsTeamLogo(p)?" team-logo":" player-photo";
   return `<div class="player-row">
     <button class="player-open-btn" data-open-player="${pid}" aria-label="Open ${h(p.name)} profile">
-      ${image?`<img class="player-list-image" src="${h(image)}" alt="" loading="lazy" />`:`<span class="role-badge">${h(p.role)}</span>`}
+      ${image?`<img class="player-list-image${imageClass}" src="${h(image)}" alt="" loading="lazy" />`:`<span class="role-badge">${h(p.role)}</span>`}
       <span class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.role)}</small></span>
     </button>
     ${add ? '<div class="player-fantasy-state"><span class="player-status-label">Available</span><button class="add-btn" aria-label="Add player">ADD</button></div>' : ""}
@@ -1981,12 +1988,15 @@ function render(view="home",options={}){
     if(!p){ render("players"); return; }
     selectedPlayerId=p.id||selectedPlayerId;
     const profileImage=document.querySelector("#profileImage");
-    const playerImage=p.image||p.imageUrl||p.photo||"";
+    const playerImage=playerVisual(p);
     if(profileImage){
       profileImage.hidden=!playerImage;
+      profileImage.classList.toggle("team-logo",playerVisualIsTeamLogo(p));
       if(playerImage){
         profileImage.src=playerImage;
-        profileImage.alt=`${p.name||"Player"} profile photo`;
+        profileImage.alt=playerVisualIsTeamLogo(p)
+          ?`${p.team||"Team"} logo`
+          :`${p.name||"Player"} profile photo`;
       }
     }
     document.querySelector("#profileRole").textContent=p.role||"—";
