@@ -690,7 +690,7 @@ body{background:
 .standings-column-headings>span:nth-child(5){grid-column:5;text-align:center}
 .standings-column-headings>span:nth-child(6){grid-column:6;text-align:center}
 .standings-heading-stat{display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap}
-.standings-info{width:16px;height:16px;padding:0;border:1px solid #4b8fd4;border-radius:50%;background:#10243b;color:#78b9f4;font:900 9px/14px Inter,system-ui,sans-serif;cursor:help}
+.standings-info{display:inline-flex;align-items:center;justify-content:center;flex:0 0 16px;width:16px;height:16px;padding:0;border:1px solid #4b8fd4;border-radius:50%;background:#10243b;color:#78b9f4;font:900 9px/14px Inter,system-ui,sans-serif;cursor:help}
 .standings-info.pf-info{border-color:#22ddc5;color:#3ce6cf}
 .standings-live-list{margin:0}
 .real-standings-row{
