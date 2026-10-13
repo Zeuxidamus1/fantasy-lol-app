@@ -4662,26 +4662,27 @@ function render(view="home",options={}){
       const leagues=await b.listLeagues();
       mockLeague=leagues.find(l=>isSimulationLeague(l))||null;
 
-      if(refreshCompetitions||!mockCompetitions.length){
-        try{
-          const competitionRows=await b.listMockCompetitions();
-          mockCompetitions=Array.isArray(competitionRows)?competitionRows:[];
-          populateCompetitionSelect(createCompetition,mockLeague?.settings?.competition||"worlds");
-          updateCompetitionHelp(createCompetition,createCompetitionHelp);
-        }catch(err){
-          if(!mockLeague)throw err;
-          console.warn("Creator Lab tournament availability could not refresh",err);
-        }
-      }
-
+      // Render the known league state immediately. Tournament availability can be
+      // comparatively expensive and must never make an active mock look like a fresh test.
       createCard.hidden=!!mockLeague;
       activeCard.hidden=!mockLeague;
+
       if(!mockLeague){
-        simCard.hidden=true;statsCard.hidden=true;
+        simCard.hidden=true;
+        statsCard.hidden=true;
         if(activeTournamentControl)activeTournamentControl.hidden=true;
+
+        if(refreshCompetitions||!mockCompetitions.length){
+          const competitionRows=await b.listMockCompetitions();
+          mockCompetitions=Array.isArray(competitionRows)?competitionRows:[];
+          populateCompetitionSelect(createCompetition,"worlds");
+          updateCompetitionHelp(createCompetition,createCompetitionHelp);
+        }
         return;
       }
 
+      // An existing mock does not need the tournament-list query just to resume.
+      // Load the live state first so returning to a running matchup is immediate.
       const [snapshot,draftState,draftPicks]=await Promise.all([
         b.getMockSimulation(mockLeague.id),
         b.getLeagueDraft(mockLeague.id),
@@ -4708,6 +4709,16 @@ function render(view="home",options={}){
 
       const pickCount=Array.isArray(draftPicks)?draftPicks.length:0;
       const canChangeTournament=(leagueStatus==="pre_draft"||leagueStatus==="drafting")&&pickCount===0;
+
+      if(canChangeTournament&&(refreshCompetitions||!mockCompetitions.length)){
+        try{
+          const competitionRows=await b.listMockCompetitions();
+          mockCompetitions=Array.isArray(competitionRows)?competitionRows:[];
+        }catch(err){
+          console.warn("Creator Lab tournament availability could not refresh",err);
+        }
+      }
+
       if(activeTournamentControl)activeTournamentControl.hidden=!canChangeTournament;
       if(activeCompetition){
         populateCompetitionSelect(activeCompetition,mockLeague?.settings?.competition);
