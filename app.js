@@ -4427,7 +4427,9 @@ function render(view="home",options={}){
           const blockedForCompletion=myTurn&&mustFillMissingRole&&!missingRoleSet.has(p.role);
           const disabled=!myTurn||blockedForCompletion;
           const label=blockedForCompletion?"NEED ROLE":"DRAFT";
-          return `<div class="player-row draft-player clickable" data-open-player="${h(p.id)}" tabindex="0" role="button" aria-label="View ${h(p.name)} details"><span class="role-badge">${h(p.role)}</span><div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)}</small></div><button class="draft-btn" data-player-id="${h(p.id)}" ${disabled?"disabled":""}>${label}</button></div>`;
+          const visual=playerVisual(p);
+          const visualClass=playerVisualIsTeamLogo(p)?" team-logo":" player-photo";
+          return `<div class="player-row draft-player clickable" data-open-player="${h(p.id)}" tabindex="0" role="button" aria-label="View ${h(p.name)} details">${visual?`<img class="player-list-image${visualClass}" src="${h(visual)}" alt="" loading="lazy" />`:`<span class="role-badge">${h(p.role)}</span>`}<div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.role)}</small></div><button class="draft-btn" data-player-id="${h(p.id)}" ${disabled?"disabled":""}>${label}</button></div>`;
         }).join("")||'<div class="empty-state"><strong>No available players</strong><small>Try another role or search.</small></div>';
 
         list.querySelectorAll("[data-player-id]").forEach(btn=>btn.onclick=async e=>{
