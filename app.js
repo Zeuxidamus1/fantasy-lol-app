@@ -3142,7 +3142,12 @@ function render(view="home",options={}){
               {view:"team",icon:"◈",title:"Final Roster",copy:"Read-only ending roster"},
               ...(hasDraft?[{view:"draft",icon:"◎",title:"Draft Results",copy:"Final draft board & picks"}]:[])
             ];
-            if(toolsGrid)toolsGrid.innerHTML=completedTools.map(tool=>`<button class="league-tool-btn ${completedTools.length%2===1&&tool===completedTools[completedTools.length-1]?"league-tool-wide":""}" data-jump="${h(tool.view)}"><span class="action-icon">${tool.icon}</span><span><strong>${h(tool.title)}</strong><small>${h(tool.copy)}</small></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>`).join("");
+            if(toolsGrid){
+              toolsGrid.innerHTML=completedTools.map(tool=>`<button class="league-tool-btn ${completedTools.length%2===1&&tool===completedTools[completedTools.length-1]?"league-tool-wide":""}" data-jump="${h(tool.view)}"><span class="action-icon">${tool.icon}</span><span><strong>${h(tool.title)}</strong><small>${h(tool.copy)}</small></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>`).join("");
+              toolsGrid.querySelectorAll("[data-jump]").forEach(btn=>{
+                btn.onclick=()=>render(btn.dataset.jump);
+              });
+            }
           }else{
             if(toolsEyebrow)toolsEyebrow.textContent="LEAGUE TOOLS";
             if(toolsTitle)toolsTitle.textContent="Manage this league";
