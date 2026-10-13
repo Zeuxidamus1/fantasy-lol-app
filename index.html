@@ -232,6 +232,13 @@
         <div class="section-head">
           <div><div class="eyebrow">MOCK LEAGUE</div><h3>Start a fresh test</h3></div>
         </div>
+        <div class="creator-tournament-control">
+          <label for="creatorCompetitionSelect">Tournament</label>
+          <select id="creatorCompetitionSelect" aria-describedby="creatorCompetitionHelp">
+            <option value="worlds">Worlds</option>
+          </select>
+          <small id="creatorCompetitionHelp">Choose which tournament player pool to use for this mock draft.</small>
+        </div>
         <div class="settings-list creator-lab-settings">
           <div><span>Managers</span><strong>You + 1 Bot</strong></div>
           <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP · FLEX · Bench</strong></div>
@@ -247,6 +254,14 @@
           <span class="status-pill" id="creatorMockStatus">PRE-DRAFT</span>
         </div>
         <p class="muted" id="creatorMockCopy">Use the real Draft Room to complete your roster.</p>
+        <div class="creator-tournament-control" id="creatorActiveTournamentControl" hidden>
+          <label for="creatorActiveCompetitionSelect">Tournament</label>
+          <div class="creator-tournament-row">
+            <select id="creatorActiveCompetitionSelect"></select>
+            <button class="secondary-btn" id="creatorApplyTournamentBtn" type="button">Apply</button>
+          </div>
+          <small id="creatorActiveCompetitionHelp">Tournament can be changed until the first draft pick.</small>
+        </div>
         <div class="creator-lab-actions">
           <button class="primary-btn" id="creatorOpenDraftBtn" type="button">Open Draft Room</button>
           <button class="primary-btn" id="creatorStartSimulationBtn" type="button" hidden>Start 35-Minute Simulation</button>
