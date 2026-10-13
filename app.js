@@ -4570,10 +4570,6 @@ function render(view="home",options={}){
       const awayScore=stats.length?statAwayScore:(Number(matchup.away_score)||0);
       document.querySelector("#creatorHomeScore").textContent=formatFantasyPoints(homeScore);
       document.querySelector("#creatorAwayScore").textContent=formatFantasyPoints(awayScore);
-      document.querySelector("#creatorSimulationState").textContent=run.status==="completed"
-        ?("Simulation complete · "+String(matchup.result||"final").replaceAll("_"," ").toUpperCase())
-        :"Random stats update automatically every minute.";
-
       const statsRoot=document.querySelector("#creatorSimulationStats");
       const lineupSlots=["TOP","JNG","MID","ADC","SUP","FLEX"];
       const arrangeSide=managerType=>{
@@ -4645,15 +4641,20 @@ function render(view="home",options={}){
       document.querySelector("#creatorMockTitle").textContent=mockLeague.name||"Creator Mock Draft";
       const leagueStatus=String(mockLeague.status||"pre_draft");
       document.querySelector("#creatorMockStatus").textContent=run.status==="running"?"SIMULATING":run.status==="completed"?"COMPLETE":leagueStatus.replaceAll("_"," ").toUpperCase();
-      document.querySelector("#creatorMockCopy").textContent=leagueStatus==="pre_draft"
+      const mockCopy=document.querySelector("#creatorMockCopy");
+      const mockCopyText=leagueStatus==="pre_draft"
         ?"Open the real Draft Room and start the draft when you're ready."
         :leagueStatus==="drafting"
           ?"Your mock draft is live. The bot will make its own picks."
           :run.status==="running"
-            ?"The 35-minute scoring simulation is running automatically."
+            ?""
             :run.status==="completed"
               ?"The test game is complete. Review the final fantasy scores or delete the test league."
               :"Draft complete. Start the 35-minute scoring simulation when you're ready.";
+      if(mockCopy){
+        mockCopy.textContent=mockCopyText;
+        mockCopy.hidden=!mockCopyText;
+      }
 
       const pickCount=Array.isArray(draftPicks)?draftPicks.length:0;
       const canChangeTournament=(leagueStatus==="pre_draft"||leagueStatus==="drafting")&&pickCount===0;
