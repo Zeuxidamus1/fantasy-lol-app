@@ -142,6 +142,17 @@ for(const kind of ["draft_started","draft_complete","waiver_failed","waiver_expi
 }
 check(!app.includes('markNotificationsRead(unread.map(n=>n.id))'),"opening notifications does not auto-mark all unread items");
 check(app.includes('data-notification-round='),"notification items carry fantasy round routing context");
+
+check(html.includes('id="creator-lab-template"'),"Creator Lab template exists");
+check(html.includes('id="creatorLabEntry" hidden'),"Creator Lab entry is hidden by default");
+check(app.includes('function isSimulationLeague(league)'),"simulation leagues have a dedicated visibility guard");
+check(app.includes('const regularLeagues=leagues.filter(l=>!isSimulationLeague(l));'),"normal league views exclude simulations");
+check(app.includes('if(view==="creator-lab")'),"Creator Lab route is wired");
+check(app.includes('startMockSimulation(mockLeague.id)'),"Creator Lab can start the 35-minute simulation");
+check(backend.includes('async function isPlatformAdmin()'),"creator access check exists in frontend API");
+check(backend.includes('async function createMockLeague()'),"mock league creation API exists");
+check(backend.includes('async function startMockSimulation(leagueId)'),"mock simulation start API exists");
+check(backend.includes('row.competition||"")!=="simulation"'),"normal schedule feed hides simulation matches");
 check(backend.includes("listPlayerProjections"),"backend exposes player projections");
 check(backend.includes("listPlayoffs"),"backend exposes playoffs");
 check(backend.includes("listWaiverPriority"),"backend exposes waiver priority");
