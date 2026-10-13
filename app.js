@@ -3586,6 +3586,14 @@ function render(view="home",options={}){
       document.querySelector("#draftRecapPlayers").textContent=String(mine.length);
 
       if(historical){
+        const hero=completeState.querySelector(".draft-complete-hero");
+        const heroEyebrow=hero?.querySelector(".eyebrow");
+        const heroTitle=hero?.querySelector("h2");
+        const heroCopy=hero?.querySelector("p");
+        if(heroEyebrow)heroEyebrow.textContent="FINAL DRAFT";
+        if(heroTitle)heroTitle.textContent="Draft Results";
+        if(heroCopy)heroCopy.textContent="The draft is complete. Review every recorded selection from this finished league.";
+        if(openCompletedBoardBtn)openCompletedBoardBtn.hidden=true;
         if(completeTeamBtnLabel)completeTeamBtnLabel.textContent="View Final Rosters";
         if(completeTeamBtn){
           completeTeamBtn.removeAttribute("data-jump");
@@ -3601,6 +3609,7 @@ function render(view="home",options={}){
           return `<div class="completed-pick-row"><span class="completed-pick-round">R${h(p.round_number)}</span><div class="completed-pick-info"><strong>${h(player?.name||p.player_id)}</strong><small>${h(manager?.team_name||"Manager")} · ${h(player?.team||p.role||"")}</small></div><div class="completed-pick-number"><small>Pick</small><strong>#${h(p.pick_number)}</strong></div></div>`;
         }).join(""):'<div class="muted">No draft picks were recorded for this league.</div>';
       }else{
+        if(openCompletedBoardBtn)openCompletedBoardBtn.hidden=false;
         if(completeTeamBtnLabel)completeTeamBtnLabel.textContent="View My Team";
         if(completedListEyebrow)completedListEyebrow.textContent="YOUR DRAFT";
         if(completedListTitle)completedListTitle.textContent="Your picks";
