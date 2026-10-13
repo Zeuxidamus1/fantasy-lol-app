@@ -109,6 +109,39 @@ check(html.includes('id="profileProjectedFp"'),"player projection UI exists");
 check(html.includes('id="teamNextLock"'),"team lock dashboard exists");
 check(html.includes('id="leaguePlayoffCard"'),"playoff UI exists");
 check(!html.includes("Fantasy scoring is not live yet"),"obsolete fake-scoring placeholder is removed");
+
+const buttonTags=[...html.matchAll(/<button\b([^>]*)>/gi)].map(m=>m[1]);
+const structurallyDeadButtons=buttonTags.filter(attrs=>{
+  const type=(attrs.match(/\btype="([^"]+)"/i)||[])[1]||"";
+  const hasId=/\bid="[^"]+"/i.test(attrs);
+  const hasDataAction=/\bdata-[\w-]+(?:="[^"]*")?/i.test(attrs);
+  return type!=="submit"&&!hasId&&!hasDataAction;
+});
+check(structurallyDeadButtons.length===0,
+  `all buttons have an id, data action, or submit behavior${structurallyDeadButtons.length?": "+structurallyDeadButtons.join(" | "):""}`);
+
+const visibleHtml=html
+  .replace(/<script\b[\s\S]*?<\/script>/gi," ")
+  .replace(/<style\b[\s\S]*?<\/style>/gi," ")
+  .replace(/<!--([\s\S]*?)-->/g," ")
+  .replace(/<[^>]+>/g," ")
+  .replace(/\s+/g," ")
+  .toLowerCase();
+for(const forbidden of ["supabase","service role","source health","operations snapshot","backend telemetry","rpc endpoint"]){
+  check(!visibleHtml.includes(forbidden),`user-facing HTML hides internal term: ${forbidden}`);
+}
+
+check(app.includes('title:"Final Standings"'),"completed league exposes Final Standings when data exists");
+check(app.includes('title:"Season Results"'),"completed league exposes Season Results when data exists");
+check(app.includes('title:"Final Roster"'),"completed league exposes Final Roster");
+check(app.includes('title:"Draft Results"'),"completed league exposes Draft Results when data exists");
+check(app.includes('render(viewBtn.dataset.completedView,{historyLeagueId:league.id})'),"completed history tools preserve historical league context");
+
+for(const kind of ["draft_started","draft_complete","waiver_failed","waiver_expired","waiver_canceled","matchup_final","fantasy_period_started","league_completed"]){
+  check(app.includes(`case "${kind}"`),`notification UI handles ${kind}`);
+}
+check(!app.includes('markNotificationsRead(unread.map(n=>n.id))'),"opening notifications does not auto-mark all unread items");
+check(app.includes('data-notification-round='),"notification items carry fantasy round routing context");
 check(backend.includes("listPlayerProjections"),"backend exposes player projections");
 check(backend.includes("listPlayoffs"),"backend exposes playoffs");
 check(backend.includes("listWaiverPriority"),"backend exposes waiver priority");
