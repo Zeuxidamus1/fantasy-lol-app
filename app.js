@@ -138,7 +138,12 @@ function playerCompetitionCodes(player){
     const code=normalizeCompetitionCode(value);
     if(code)codes.add(code);
   }
-  for(const code of (LEGACY_TEAM_COMPETITIONS[normalizeTeamKey(player?.team)]||[]))codes.add(code);
+  // Legacy team mappings are only a last-resort fallback for old records.
+  // Current Riot roster/schedule data must win so former tournament teams do
+  // not remain eligible forever.
+  if(!codes.size){
+    for(const code of (LEGACY_TEAM_COMPETITIONS[normalizeTeamKey(player?.team)]||[]))codes.add(code);
+  }
   const teamName=normalizeTeamKey(player?.team);
   const teamCode=normalizeTeamKey(player?.teamCode);
   if(teamName||teamCode){
