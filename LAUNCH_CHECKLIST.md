@@ -12,6 +12,7 @@
 - [x] Scheduled job health audit
 - [x] Integrity checks show no critical fantasy-data findings
 - [x] Privacy Notice and Terms are available in the public app
+- [x] Riot-required independent-product disclaimer is visible on the public sign-in and sign-up screens
 - [x] Browser code does not expose backend operations/source-health telemetry
 
 ## Production behavior
