@@ -2048,16 +2048,50 @@ function render(view="home",options={}){
       return `<div class="profile-match"><div><strong>vs ${h(opponent||"TBD")}</strong><small>${h(g.league||"")} · ${h(g.stage||"")}</small></div><div><strong>${h(g.time||"TBD")}</strong><small>${h(g.label||"")}</small></div></div>`;
     }).join(""):'<div class="empty-state"><strong>No upcoming match found</strong><small>The schedule will populate automatically when a matching event is available.</small></div>';
 
-    const recentGames=(chain?.recent||[]).slice(0,5);
-    document.querySelector("#profileTrend").innerHTML=recentGames.length?recentGames.map(g=>{
-      const fp=fantasyPointsForGame(g,scoring);
-      const result=g.win===true?"W":g.win===false?"L":"—";
-      const date=g.date?new Date(g.date+"T12:00:00Z"):null;
-      const dateText=date&&!Number.isNaN(date.getTime())?date.toLocaleDateString([], {month:"short",day:"numeric"}):"";
-      const hasKda=[g.kills,g.deaths,g.assists].every(Number.isFinite);
-      const kda=hasKda?`${g.kills}/${g.deaths}/${g.assists}`:"";
-      return `<div class="recent-game-row"><span class="recent-result ${result==="W"?"win":result==="L"?"loss":""}">${result}</span><div class="recent-game-main"><strong>${h(g.champion||"Match")}${kda?" · "+h(kda):""}</strong><small>${h(g.opponent?"vs "+g.opponent:(g.league||"Pro match"))}${dateText?" · "+h(dateText):""}</small></div>${Number.isFinite(fp)?`<div class="recent-fp"><strong>${h(fp.toFixed(1))}</strong><small>FP</small></div>`:""}</div>`;
-    }).join(""):'<div class="empty-state"><strong>No recent ChainCC matches found</strong><small>This player may not have a matching 2026 game record yet.</small></div>';
+    const trendRoot=document.querySelector("#profileTrend");
+    const sourceRoot=document.querySelector("#profileSource");
+    const dataNote=document.querySelector("#profileDataNote");
+    const opponentNameForId=id=>{
+      const key=String(id||"");
+      if(!key)return "";
+      const sameTeam=allFantasyPlayers().find(x=>String(x.teamId||x.team_id||"")===key);
+      return sameTeam?.team||sameTeam?.teamCode||"Opponent";
+    };
+    const displayChampion=value=>String(value||"Match")
+      .replace(/([a-z])([A-Z])/g,"$1 $2")
+      .replace(/^JarvanIV$/,"Jarvan IV")
+      .replace(/^XinZhao$/,"Xin Zhao")
+      .replace(/^Khazix$/,"Kha'Zix");
+    const renderRecentGames=(games,sourceLabel)=>{
+      trendRoot.innerHTML=games.length?games.slice(0,5).map(g=>{
+        const fp=fantasyPointsForGame(g,scoring);
+        const result=g.win===true?"W":g.win===false?"L":"—";
+        const rawDate=g.date||g.completed_at||g.source_timestamp||g.updated_at||"";
+        const date=rawDate?new Date(rawDate):null;
+        const dateText=date&&!Number.isNaN(date.getTime())?date.toLocaleDateString([], {month:"short",day:"numeric"}):"";
+        const hasKda=[g.kills,g.deaths,g.assists].every(v=>Number.isFinite(Number(v)));
+        const kda=hasKda?\`\${Number(g.kills)}/\${Number(g.deaths)}/\${Number(g.assists)}\`:"";
+        const opponent=g.opponent||opponentNameForId(g.opponent_team_id);
+        return \`<div class="recent-game-row"><span class="recent-result \${result==="W"?"win":result==="L"?"loss":""}">\${result}</span><div class="recent-game-main"><strong>\${h(displayChampion(g.champion||g.champion_id))}\${kda?" · "+h(kda):""}</strong><small>\${h(opponent?"vs "+opponent:"Pro match")}\${dateText?" · "+h(dateText):""}</small></div>\${Number.isFinite(fp)?\`<div class="recent-fp"><strong>\${h(fp.toFixed(1))}</strong><small>FP</small></div>\`:""}</div>\`;
+      }).join(""):'<div class="empty-state"><strong>No recent matches found</strong></div>';
+      if(sourceRoot)sourceRoot.textContent="Recent games: "+sourceLabel;
+    };
+
+    const chainRecent=(chain?.recent||[]).slice(0,5);
+    renderRecentGames(chainRecent,"ChainCC fallback");
+    if(dataNote)dataNote.textContent=chain?"Season summary from ChainCC. Recent games refresh from finalized Rift match data when available.":"Recent games refresh from finalized Rift match data.";
+
+    if(cloudReady()&&typeof backend()?.listPlayerGameStats==="function"){
+      void backend().listPlayerGameStats({playerId:String(p.id||""),limit:20}).then(rows=>{
+        const finalized=(rows||[])
+          .filter(row=>row.finalized!==false)
+          .sort((a,b)=>Date.parse(b.source_timestamp||b.updated_at||"")-Date.parse(a.source_timestamp||a.updated_at||""));
+        if(finalized.length){
+          renderRecentGames(finalized,"Rift live/final match data");
+          if(dataNote)dataNote.textContent="Recent games are from finalized professional match data stored by Rift Fantasy. ChainCC remains a historical fallback.";
+        }
+      }).catch(()=>{});
+    }
 
     const watch=watchlistIds();
     const watchBtn=document.querySelector("#watchPlayerBtn");
