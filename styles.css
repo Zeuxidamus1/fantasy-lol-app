@@ -1568,3 +1568,6 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
 .profile-player-image:not(.team-logo){
   object-fit:cover;
 }
+
+.roster-player-visual{width:38px;height:38px;border-radius:10px;object-fit:cover;background:#102137;flex:0 0 auto}
+.roster-player-visual.team-logo{object-fit:contain;padding:4px}
