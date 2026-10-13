@@ -1593,6 +1593,20 @@ function render(view="home",options={}){
           leagueCompleted=teamLeagueStatus==="completed";
           rosterMovesEnabled=teamLeagueStatus==="active";
 
+          if(leagueCompleted){
+            leagueNameEl.textContent="FINAL ROSTER · "+String(activeLeague?.name||"League").toUpperCase();
+            renameBtn.hidden=true;
+            editor.hidden=true;
+            const addPlayersBtn=document.querySelector('.team-screen [data-jump="players"]');
+            if(addPlayersBtn)addPlayersBtn.hidden=true;
+            const nextLockRow=document.querySelector("#teamNextLockRow");
+            const lockStatusRow=document.querySelector("#teamLockStatusRow");
+            if(nextLockRow)nextLockRow.hidden=true;
+            if(lockStatusRow)lockStatusRow.hidden=true;
+          }else{
+            renameBtn.hidden=false;
+          }
+
           document.querySelectorAll('.team-screen [data-jump="players"],.team-screen [data-jump="transactions"]').forEach(el=>{
             if(el.dataset.jump==="players"){
               el.disabled=!rosterMovesEnabled;
@@ -1847,7 +1861,13 @@ function render(view="home",options={}){
           ]);
           const league=leagues.find(l=>String(l.id)===String(leagueId));
           const name=document.querySelector("#standingsLeagueName");
+          const pageTitle=document.querySelector("#standingsPageTitle");
+          const seasonPill=document.querySelector(".standings-season-pill");
           if(name)name.textContent=String(league?.name||"League").toUpperCase();
+          if(league?.status==="completed"){
+            if(pageTitle)pageTitle.textContent="Final Standings";
+            if(seasonPill)seasonPill.textContent="Season Complete";
+          }
 
           const managerNames=new Map();
           members.forEach(m=>managerNames.set("human:"+String(m.user_id),m));
@@ -1980,8 +2000,8 @@ function render(view="home",options={}){
             b.listRosters(leagueId),b.listFantasyGameScores(leagueId)
           ]);
           const league=leagues.find(l=>String(l.id)===String(leagueId));
-          if(leagueTitle)leagueTitle.textContent=String(league?.name||"Matchup");
-          if(eyebrow)eyebrow.textContent="HEAD TO HEAD · "+competitionName(league?.settings?.competition||"");
+          if(leagueTitle)leagueTitle.textContent=league?.status==="completed"?"Matchup Results":String(league?.name||"Matchup");
+          if(eyebrow)eyebrow.textContent=(league?.status==="completed"?"COMPLETED RESULTS · ":"HEAD TO HEAD · ")+competitionName(league?.settings?.competition||"");
 
           if(!rounds.length){
             const compName=competitionName(league?.settings?.competition||"");
@@ -3366,6 +3386,7 @@ function render(view="home",options={}){
         const mine=picks.filter(p=>String(p.user_id)===String(currentUser.id));
         if(draft?.status==="complete"){
           renderCompletedState(draft,mine);
+          if(league?.status==="completed"&&pageEyebrow)pageEyebrow.textContent="DRAFT RESULTS";
           await loadRosterFromCloud(leagueId);
           if(draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
           return;
