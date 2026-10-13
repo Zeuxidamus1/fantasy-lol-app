@@ -1146,6 +1146,16 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}
 .league-more-details[open] .league-more-chevron{transform:rotate(180deg)}
 .league-more-content{padding:0 16px 16px;border-top:1px solid #1c3048}
 .league-more-content .profile-copy{margin-top:14px}
+.completed-league-summary-meta{display:flex;align-items:center;gap:9px;flex:0 0 auto}
+.completed-league-summary-meta .status-pill{min-width:28px;text-align:center}
+.completed-league-choice{margin-top:8px}
+.completed-league-choice:first-child{margin-top:0}
+.completed-league-review-panel{margin-top:14px;padding-top:14px;border-top:1px solid #1c3048}
+.completed-review-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.completed-review-head h3{margin:3px 0 0;font-size:18px}
+.completed-review-banner{margin:12px 0}
+.completed-review-meta{margin-top:0}
+.completed-review-tools{margin-top:12px}
 
 @media(max-width:350px){
   .league-quick-grid.league-hub-tools{grid-template-columns:1fr}
