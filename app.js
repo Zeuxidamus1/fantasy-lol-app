@@ -145,6 +145,35 @@ function playerEligibleForCompetition(player,competition){
 function playerIsDraftable(player){
   return player?.draftable!==false && String(player?.rosterStatus||"starter").toLowerCase()!=="reserve";
 }
+const competitionStatusCache=new Map();
+function cacheCompetitionStatuses(competition,rows=[]){
+  const code=normalizeCompetitionCode(competition);
+  if(!code)return;
+  competitionStatusCache.set(code,new Map((rows||[]).map(row=>[String(row.player_id),row])));
+}
+function competitionStatusForPlayer(playerId,competition){
+  const code=normalizeCompetitionCode(competition);
+  return competitionStatusCache.get(code)?.get(String(playerId))||null;
+}
+function playerAvailableForAcquisition(player,competition){
+  if(!playerEligibleForCompetition(player,competition)||!playerIsDraftable(player))return false;
+  const code=normalizeCompetitionCode(competition);
+  const statusMap=competitionStatusCache.get(code);
+  if(!statusMap)return true;
+  const row=statusMap.get(playerKey(player));
+  return !!row&&String(row.status)==="starter"&&Number(row.remaining_matches)>0&&!!row.next_match_at;
+}
+function playerAvailabilityLabel(status){
+  switch(String(status||"")){
+    case "starter":return "ACTIVE";
+    case "substitute":return "SUBSTITUTE";
+    case "inactive":return "INACTIVE";
+    case "eliminated":return "ELIMINATED";
+    case "season_complete":return "SEASON COMPLETE";
+    case "no_upcoming_match":return "NO UPCOMING MATCH";
+    default:return "UNAVAILABLE";
+  }
+}
 function competitionHelpText(value){
   const code=normalizeCompetitionCode(value);
   const name=competitionName(code);
@@ -157,7 +186,7 @@ const draftPool = ((window.ESPORTS_DATA && window.ESPORTS_DATA.players) || []).m
 });
 function eligibleDraftPool(settings=getLeagueSettings()){
   const code=normalizeCompetitionCode(settings?.competition);
-  return draftPool.filter(p=>playerEligibleForCompetition(p,code)&&playerIsDraftable(p));
+  return draftPool.filter(p=>playerAvailableForAcquisition(p,code));
 }
 
 const draftManagerNames = ["Baron Bandits","Zeuxidamus","Rift Raiders","Pentakill Club","Nexus Breakers","Blue Buff Boys","Dragon Slayers","Iron V","Red Side","First Blood","Scuttle Club","Elder Enjoyers"];
@@ -1921,7 +1950,9 @@ function render(view="home",options={}){
         const league=leagues.find(l=>String(l.id)===String(leagueId));
         const leagueCompetition=normalizeCompetitionCode(league?.settings?.competition)||"worlds";
         const waiversEnabled=league?.settings?.waivers!==false;
-        const playerStatus=statusRows.find(x=>String(x.player_id)===playerKey(p)&&normalizeCompetitionCode(x.competition)===leagueCompetition);
+        const leagueStatusRows=statusRows.filter(x=>normalizeCompetitionCode(x.competition)===leagueCompetition);
+        cacheCompetitionStatuses(leagueCompetition,leagueStatusRows);
+        const playerStatus=leagueStatusRows.find(x=>String(x.player_id)===playerKey(p));
         const currentRound=rounds.find(r=>r.status==="live")||rounds.find(r=>r.status==="upcoming");
         const projection=projectionRows.find(x=>String(x.player_id)===playerKey(p)&&(!currentRound||Number(x.round_number)===Number(currentRound.round_number)));
         const availability=document.querySelector("#profileAvailability");
@@ -1939,13 +1970,25 @@ function render(view="home",options={}){
         const other=ownership&&!mine;
         const eligible=playerEligibleForCompetition(p,leagueCompetition);
         const draftable=playerIsDraftable(p);
+        const acquisitionAvailable=playerAvailableForAcquisition(p,leagueCompetition);
 
-        document.querySelector("#profileStatus").textContent=mine?"On your roster":other?"Rostered by another manager":!eligible?`Not eligible for ${competitionName(leagueCompetition)}`:!draftable?"Reserve · Not currently draftable":"Available";
-        if((!eligible||!draftable)&&!mine&&!other){
+        document.querySelector("#profileStatus").textContent=mine
+          ?"On your roster"
+          :other
+            ?"Rostered by another manager"
+            :!eligible
+              ?`Not eligible for ${competitionName(leagueCompetition)}`
+              :!draftable
+                ?"Reserve · Not currently draftable"
+                :acquisitionAvailable
+                  ?"Available"
+                  :playerAvailabilityLabel(playerStatus?.status);
+        if((!eligible||!draftable||!acquisitionAvailable)&&!mine&&!other){
+          const unavailableLabel=!eligible?"Not Eligible":!draftable?"Reserve":playerAvailabilityLabel(playerStatus?.status);
           addBtn.disabled=true;
-          addBtn.textContent=!eligible?"Not Eligible":"Reserve";
+          addBtn.textContent=unavailableLabel;
           waiverBtn.disabled=true;
-          waiverBtn.textContent=!eligible?"Not Eligible":"Reserve";
+          waiverBtn.textContent=unavailableLabel;
           tradeBtn.disabled=true;
           return;
         }
@@ -2558,7 +2601,7 @@ function render(view="home",options={}){
     const draw=()=>{
       const q=search.value.trim().toLowerCase();
       const source=getActiveLeagueId()?eligibleFantasyPlayers():allFantasyPlayers();
-      const hiddenStatuses=new Set(["inactive","eliminated","season_complete","substitute"]);
+      const hiddenStatuses=new Set(["inactive","eliminated","season_complete","substitute","no_upcoming_match"]);
       const filtered=source.filter(p=>{
         if(role!=="ALL"&&p.role!==role)return false;
         if(!(`${p.name} ${p.team} ${p.role}`.toLowerCase().includes(q)))return false;
@@ -2577,7 +2620,7 @@ function render(view="home",options={}){
         const state=b.closest(".player-fantasy-state")?.querySelector(".player-status-label");
         const availability=playerStatusMap.get(String(pid));
         const draftable=playerIsDraftable(p);
-        const unavailable=!draftable||(availability&&["inactive","eliminated","season_complete","substitute"].includes(String(availability.status)));
+        const unavailable=!draftable||!playerAvailableForAcquisition(p,leagueCompetition);
         if(ownership){
           if(String(ownership.user_id)===String(currentUser?.id)){
             b.textContent="OWNED";
@@ -2590,7 +2633,7 @@ function render(view="home",options={}){
           b.disabled=true;
         }else if(unavailable){
           const status=String(availability?.status||"");
-          const label=!draftable||status==="substitute"?"SUBSTITUTE":status.replaceAll("_"," ").toUpperCase();
+          const label=!draftable?"SUBSTITUTE":playerAvailabilityLabel(status);
           b.textContent="UNAVAILABLE";
           if(state)state.textContent=label;
           b.disabled=true;
@@ -2645,6 +2688,7 @@ function render(view="home",options={}){
         leagueCompetition=normalizeCompetitionCode(activeLeague.settings?.competition)||null;
         leagueWaiversEnabled=activeLeague.settings?.waivers!==false;
         const statuses=leagueCompetition?await b.listPlayerCompetitionStatus(leagueCompetition).catch(()=>[]):[];
+        cacheCompetitionStatuses(leagueCompetition,statuses);
         playerStatusMap=new Map(statuses.map(x=>[String(x.player_id),x]));
       }catch{
         leagueRosters=[];
@@ -2753,8 +2797,8 @@ function render(view="home",options={}){
     const tradeFreeAgents=()=>allFantasyPlayers().filter(p=>{
       const id=playerKey(p);
       const status=String(tradePlayerStatusMap.get(id)?.status||"");
-      if(!playerEligibleForCompetition(p,tradeCompetition)||!playerIsDraftable(p))return false;
-      if(["inactive","eliminated","season_complete","substitute"].includes(status))return false;
+      if(!playerAvailableForAcquisition(p,tradeCompetition))return false;
+      if(status!=="starter")return false;
       return !rosters.some(r=>String(r.player_id)===String(id));
     });
 
@@ -2775,6 +2819,7 @@ function render(view="home",options={}){
       const activeLeague=leagues.find(l=>String(l.id)===String(leagueId));
       tradeCompetition=normalizeCompetitionCode(activeLeague?.settings?.competition)||null;
       const tradeStatuses=tradeCompetition?await b.listPlayerCompetitionStatus(tradeCompetition).catch(()=>[]):[];
+      cacheCompetitionStatuses(tradeCompetition,tradeStatuses);
       tradePlayerStatusMap=new Map(tradeStatuses.map(x=>[String(x.player_id),x]));
       if(activeLeague?.settings){
         cacheLeagueSettings({
