@@ -2070,9 +2070,9 @@ function render(view="home",options={}){
         const date=rawDate?new Date(rawDate):null;
         const dateText=date&&!Number.isNaN(date.getTime())?date.toLocaleDateString([], {month:"short",day:"numeric"}):"";
         const hasKda=[g.kills,g.deaths,g.assists].every(v=>Number.isFinite(Number(v)));
-        const kda=hasKda?\`\${Number(g.kills)}/\${Number(g.deaths)}/\${Number(g.assists)}\`:"";
+        const kda=hasKda?`${Number(g.kills)}/${Number(g.deaths)}/${Number(g.assists)}`:"";
         const opponent=g.opponent||opponentNameForId(g.opponent_team_id);
-        return \`<div class="recent-game-row"><span class="recent-result \${result==="W"?"win":result==="L"?"loss":""}">\${result}</span><div class="recent-game-main"><strong>\${h(displayChampion(g.champion||g.champion_id))}\${kda?" · "+h(kda):""}</strong><small>\${h(opponent?"vs "+opponent:"Pro match")}\${dateText?" · "+h(dateText):""}</small></div>\${Number.isFinite(fp)?\`<div class="recent-fp"><strong>\${h(fp.toFixed(1))}</strong><small>FP</small></div>\`:""}</div>\`;
+        return `<div class="recent-game-row"><span class="recent-result ${result==="W"?"win":result==="L"?"loss":""}">${result}</span><div class="recent-game-main"><strong>${h(displayChampion(g.champion||g.champion_id))}${kda?" · "+h(kda):""}</strong><small>${h(opponent?"vs "+opponent:"Pro match")}${dateText?" · "+h(dateText):""}</small></div>${Number.isFinite(fp)?`<div class="recent-fp"><strong>${h(fp.toFixed(1))}</strong><small>FP</small></div>`:""}</div>`;
       }).join(""):'<div class="empty-state"><strong>No recent matches found</strong></div>';
       if(sourceRoot)sourceRoot.textContent="Recent games: "+sourceLabel;
     };
