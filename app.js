@@ -394,6 +394,12 @@ function setActiveLeagueId(id){
   if(id)storageSet("riftActiveLeagueId",String(id));
   else storageRemove("riftActiveLeagueId");
 }
+
+// Completed-league review is a transient viewing context, not the active gameplay league.
+let historicalLeagueContextId=null;
+function getLeagueContextId(){
+  return historicalLeagueContextId||getActiveLeagueId();
+}
 async function loadRosterFromCloud(leagueId){
   if(!leagueId||!cloudReady())return false;
   const b=backend();
@@ -1032,6 +1038,7 @@ function render(view="home",options={}){
     return;
   }
   view=requested;
+  historicalLeagueContextId=options.historyLeagueId?String(options.historyLeagueId):null;
   if(["home","league","create-league","join-league","bot-league","bot-settings","bot-confirm","bot-success","my-schedule"].includes(view)&&!backend()?.readSession?.()?.access_token){
     return render("login",{...options,replace:true});
   }
@@ -1043,10 +1050,10 @@ function render(view="home",options={}){
     if(options.replace||currentView===null){
       const depth=Number(history.state?.depth)||0;
       navigationDepth=depth;
-      history.replaceState({view,depth},"",hash);
+      history.replaceState({view,depth,historyLeagueId:historicalLeagueContextId},"",hash);
     }else if(currentView!==view){
       navigationDepth+=1;
-      history.pushState({view,depth:navigationDepth},"",hash);
+      history.pushState({view,depth:navigationDepth,historyLeagueId:historicalLeagueContextId},"",hash);
     }
   }
   currentView=view;
@@ -1377,7 +1384,7 @@ function render(view="home",options={}){
   }
   if(view==="team"){
     let completedLeagueView=false;
-    const leagueId=getActiveLeagueId();
+    const leagueId=getLeagueContextId();
     const leagueNameEl=document.querySelector("#teamLeagueName");
     const teamNameEl=document.querySelector("#myTeamName");
     const badge=document.querySelector("#teamSyncBadge");
@@ -1858,7 +1865,7 @@ function render(view="home",options={}){
   }
   if(view==="standings"){
     const list=document.querySelector("#standingsList");
-    const leagueId=getActiveLeagueId();
+    const leagueId=getLeagueContextId();
     const status=document.querySelector("#standingsStatus");
     if(!leagueId||!cloudReady()){
       list.innerHTML='<div class="empty-state"><strong>No active league</strong><small>Select a league before viewing standings.</small><button class="primary-btn" data-jump="league">Go to League</button></div>';
@@ -1934,7 +1941,7 @@ function render(view="home",options={}){
     }
   }
   if(view==="matchup"){
-    const leagueId=getActiveLeagueId();
+    const leagueId=getLeagueContextId();
     const board=document.querySelector("#matchupScoreList");
     const leagueTitle=document.querySelector("#matchupLeagueName");
     const eyebrow=document.querySelector("#matchupLeagueEyebrow");
@@ -3169,10 +3176,8 @@ function render(view="home",options={}){
                   ${tools.map(tool=>`<button class="league-tool-btn ${tools.length%2===1&&tool===tools[tools.length-1]?"league-tool-wide":""}" type="button" data-completed-view="${h(tool.view)}"><span class="action-icon">${tool.icon}</span><span><strong>${h(tool.title)}</strong></span><span class="league-tool-arrow" aria-hidden="true">›</span></button>`).join("")}
                 </div>`;
               completedLeagueReviewPanel.querySelectorAll("[data-completed-view]").forEach(viewBtn=>{
-                viewBtn.onclick=async()=>{
-                  setActiveLeagueId(league.id);
-                  await loadRosterFromCloud(league.id);
-                  render(viewBtn.dataset.completedView);
+                viewBtn.onclick=()=>{
+                  render(viewBtn.dataset.completedView,{historyLeagueId:league.id});
                 };
               });
             }catch(err){
@@ -3440,7 +3445,7 @@ function render(view="home",options={}){
   }
   if(view==="draft"){
     if(draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
-    const leagueId=getActiveLeagueId();
+    const leagueId=getLeagueContextId();
     const liveState=document.querySelector("#draftLiveState");
     const completeState=document.querySelector("#draftCompleteState");
     const pageEyebrow=document.querySelector("#draftPageEyebrow");
@@ -4201,7 +4206,13 @@ document.addEventListener("keydown",e=>{
   closeTransactionModal();
   closeLineupSwapModal();
 });
-window.addEventListener("popstate",e=>{navigationDepth=Number(e.state?.depth)||0;render(e.state?.view||location.hash.slice(1)||"home",{fromHistory:true});});
+window.addEventListener("popstate",e=>{
+  navigationDepth=Number(e.state?.depth)||0;
+  render(e.state?.view||location.hash.slice(1)||"home",{
+    fromHistory:true,
+    historyLeagueId:e.state?.historyLeagueId||null
+  });
+});
 document.querySelector("#accountBtn").onclick=()=>render("account");
 
 const notificationBtn=document.querySelector("#notificationBtn");
