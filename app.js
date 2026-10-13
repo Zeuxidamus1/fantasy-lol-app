@@ -363,6 +363,7 @@ function cacheLeagueSettings(settings,leagueId=getActiveLeagueId()){
 let selectedPlayerId=null;
 let selectedPlayerReturnView="players";
 let selectedMatchupRound=null;
+let creatorLabResumeCache=null;
 let tradePrefill={id:null,side:null};
 let tradeRouteIntent={tab:null,id:null};
 let modalReturnFocus=null;
@@ -1466,6 +1467,7 @@ function render(view="home",options={}){
             if(activeMock?.id)mockRun=await b.getMockSimulation(activeMock.id).catch(()=>null);
           }catch{}
           if(activeMock){
+            creatorLabResumeCache={league:activeMock,snapshot:mockRun,storedAt:Date.now()};
             const runStatus=String(mockRun?.run?.status||"");
             const leagueStatus=String(activeMock.status||"");
             creatorButton.textContent=runStatus==="running"
@@ -1482,6 +1484,7 @@ function render(view="home",options={}){
               creatorEntryPill.classList.toggle("live",runStatus==="running");
             }
           }else{
+            creatorLabResumeCache=null;
             creatorButton.textContent="Open Mock Draft Simulator";
             if(creatorEntryStatus)creatorEntryStatus.hidden=true;
           }
@@ -4550,6 +4553,7 @@ function render(view="home",options={}){
 
   if(view==="creator-lab"){
     const b=backend();
+    const loadingCard=document.querySelector("#creatorLabLoadingCard");
     const createCard=document.querySelector("#creatorLabCreateCard");
     const activeCard=document.querySelector("#creatorLabActiveCard");
     const simCard=document.querySelector("#creatorSimulationCard");
@@ -4669,6 +4673,35 @@ function render(view="home",options={}){
       </div>`:'<div class="muted">Simulation stats will appear after the first scoring tick.</div>';
     };
 
+
+    const primeFromResumeCache=()=>{
+      const cached=creatorLabResumeCache;
+      if(!cached?.league?.id)return false;
+      mockLeague=cached.league;
+      const snapshot=cached.snapshot||{};
+      const run=snapshot?.run||{};
+      const leagueStatus=String(mockLeague.status||"pre_draft");
+      if(loadingCard)loadingCard.hidden=true;
+      createCard.hidden=true;
+      activeCard.hidden=false;
+      document.querySelector("#creatorMockTitle").textContent=mockLeague.name||"Creator Mock Draft";
+      document.querySelector("#creatorMockStatus").textContent=run.status==="running"?"SIMULATING":run.status==="completed"?"COMPLETE":leagueStatus.replaceAll("_"," ").toUpperCase();
+
+      const mockCopy=document.querySelector("#creatorMockCopy");
+      const copy=run.status==="running"?"":run.status==="completed"?"Test complete.":leagueStatus==="drafting"?"Draft in progress.":leagueStatus==="active"?"Draft complete.":"";
+      if(mockCopy){mockCopy.textContent=copy;mockCopy.hidden=!copy;}
+
+      if(activeTournamentControl)activeTournamentControl.hidden=true;
+      openDraftBtn.hidden=run.status==="running";
+      openDraftBtn.textContent=leagueStatus==="pre_draft"||leagueStatus==="drafting"?"Open Draft Room":"Review Draft Results";
+      startBtn.hidden=!(leagueStatus==="active"&&run.status!=="running"&&run.status!=="completed");
+      refreshBtn.hidden=false;
+      drawSnapshot(snapshot);
+      return true;
+    };
+
+    primeFromResumeCache();
+
     const load=async({refreshCompetitions=false}={})=>{
       const admin=await b.isPlatformAdmin().catch(()=>false);
       if(!admin){
@@ -4681,6 +4714,7 @@ function render(view="home",options={}){
 
       // Render the known league state immediately. Tournament availability can be
       // comparatively expensive and must never make an active mock look like a fresh test.
+      if(loadingCard)loadingCard.hidden=true;
       createCard.hidden=!!mockLeague;
       activeCard.hidden=!mockLeague;
 
@@ -4706,6 +4740,7 @@ function render(view="home",options={}){
         b.listDraftPicks(mockLeague.id)
       ]);
       const run=snapshot?.run||{};
+      creatorLabResumeCache={league:mockLeague,snapshot,storedAt:Date.now()};
       document.querySelector("#creatorMockTitle").textContent=mockLeague.name||"Creator Mock Draft";
       const leagueStatus=String(mockLeague.status||"pre_draft");
       document.querySelector("#creatorMockStatus").textContent=run.status==="running"?"SIMULATING":run.status==="completed"?"COMPLETE":leagueStatus.replaceAll("_"," ").toUpperCase();
@@ -4820,6 +4855,7 @@ function render(view="home",options={}){
         await b.deleteMockLeague(id);
         if(String(getActiveLeagueId()||"")===String(id))setActiveLeagueId(null);
         mockLeague=null;
+        creatorLabResumeCache=null;
         showToast("Mock league deleted");
         await load();
       }catch(err){showToast(err.message||"Could not delete mock league");}
