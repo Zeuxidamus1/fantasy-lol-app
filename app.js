@@ -4564,8 +4564,12 @@ function render(view="home",options={}){
       const elapsed=Math.min(Number(run.duration_minutes)||35,Number(run.elapsed_minutes)||0);
       document.querySelector("#creatorSimulationClock").textContent=elapsed+" / "+(Number(run.duration_minutes)||35)+" MIN";
       document.querySelector("#creatorSimulationProgress").style.width=Math.max(0,Math.min(100,(elapsed/(Number(run.duration_minutes)||35))*100))+"%";
-      document.querySelector("#creatorHomeScore").textContent=formatFantasyPoints(matchup.home_score||0);
-      document.querySelector("#creatorAwayScore").textContent=formatFantasyPoints(matchup.away_score||0);
+      const statHomeScore=stats.filter(row=>row.manager_type==="human").reduce((sum,row)=>sum+(Number(row.fantasy_points)||0),0);
+      const statAwayScore=stats.filter(row=>row.manager_type==="bot").reduce((sum,row)=>sum+(Number(row.fantasy_points)||0),0);
+      const homeScore=stats.length?statHomeScore:(Number(matchup.home_score)||0);
+      const awayScore=stats.length?statAwayScore:(Number(matchup.away_score)||0);
+      document.querySelector("#creatorHomeScore").textContent=formatFantasyPoints(homeScore);
+      document.querySelector("#creatorAwayScore").textContent=formatFantasyPoints(awayScore);
       document.querySelector("#creatorSimulationState").textContent=run.status==="completed"
         ?("Simulation complete · "+String(matchup.result||"final").replaceAll("_"," ").toUpperCase())
         :"Random stats update automatically every minute.";
