@@ -3516,6 +3516,11 @@ function render(view="home",options={}){
     const refreshBtn=document.querySelector("#refreshDraftBtn");
     const openCompletedBoardBtn=document.querySelector("#openCompletedDraftBoard");
     const closeCompletedBoardBtn=document.querySelector("#closeCompletedDraftBoard");
+    const completeTeamBtn=document.querySelector("#draftCompleteTeamBtn");
+    const completeTeamBtnLabel=document.querySelector("#draftCompleteTeamBtnLabel");
+    const completedListEyebrow=document.querySelector("#completedDraftListEyebrow");
+    const completedListTitle=document.querySelector("#completedDraftListTitle");
+    const completedListHint=document.querySelector("#completedDraftListHint");
     let role="ALL";
     let currentUser=null;
     let members=[];
@@ -3568,10 +3573,11 @@ function render(view="home",options={}){
       }
     };
 
-    const renderCompletedState=(draftData,mine)=>{
+    const renderCompletedState=(draftData,mine,league)=>{
       liveState.hidden=true;
       completeState.hidden=false;
-      if(pageEyebrow)pageEyebrow.textContent="DRAFT SUMMARY";
+      const historical=String(league?.status||"")==="completed"&&!!historicalLeagueContextId;
+      if(pageEyebrow)pageEyebrow.textContent=historical?"DRAFT RESULTS · READ ONLY":"DRAFT SUMMARY";
       if(exitBtn)exitBtn.hidden=true;
       const order=draftData.manager_order||[];
       const position=Math.max(0,order.findIndex(id=>String(id)===String(currentUser.id)))+1;
@@ -3579,16 +3585,38 @@ function render(view="home",options={}){
       document.querySelector("#draftRecapPosition").textContent=position>0?"#"+position:"—";
       document.querySelector("#draftRecapPlayers").textContent=String(mine.length);
 
-      completedPickList.innerHTML=mine.length?mine
-        .slice()
-        .sort((x,y)=>Number(x.pick_number)-Number(y.pick_number))
-        .map(p=>{
+      if(historical){
+        if(completeTeamBtnLabel)completeTeamBtnLabel.textContent="View Final Rosters";
+        if(completeTeamBtn){
+          completeTeamBtn.removeAttribute("data-jump");
+          completeTeamBtn.onclick=()=>render("team",{historyLeagueId:leagueId});
+        }
+        if(completedListEyebrow)completedListEyebrow.textContent="LEAGUE DRAFT RESULTS";
+        if(completedListTitle)completedListTitle.textContent="Every pick";
+        if(completedListHint)completedListHint.textContent="Final draft order · read only";
+        const ordered=picks.slice().sort((a,b)=>Number(a.pick_number)-Number(b.pick_number));
+        completedPickList.innerHTML=ordered.length?ordered.map(p=>{
           const player=draftPool.find(x=>String(x.id)===String(p.player_id));
-          return `<div class="completed-pick-row clickable" data-open-player="${h(p.player_id)}" tabindex="0" role="button" aria-label="View ${h(player?.name||p.player_id)} details"><span class="completed-pick-round">R${h(p.round_number)}</span><div class="completed-pick-info"><strong>${h(player?.name||p.player_id)}</strong><small>${h(player?.team||p.role||"")}</small></div><div class="completed-pick-number"><small>Pick</small><strong>#${h(p.pick_number)}</strong></div><span class="completed-pick-chevron" aria-hidden="true">›</span></div>`;
-        }).join("")
-        :'<div class="muted">No picks were recorded for your team.</div>';
-      wireProfileRows(completedPickList);
+          const manager=memberById.get(String(p.user_id));
+          return `<div class="completed-pick-row"><span class="completed-pick-round">R${h(p.round_number)}</span><div class="completed-pick-info"><strong>${h(player?.name||p.player_id)}</strong><small>${h(manager?.team_name||"Manager")} · ${h(player?.team||p.role||"")}</small></div><div class="completed-pick-number"><small>Pick</small><strong>#${h(p.pick_number)}</strong></div></div>`;
+        }).join(""):'<div class="muted">No draft picks were recorded for this league.</div>';
+      }else{
+        if(completeTeamBtnLabel)completeTeamBtnLabel.textContent="View My Team";
+        if(completedListEyebrow)completedListEyebrow.textContent="YOUR DRAFT";
+        if(completedListTitle)completedListTitle.textContent="Your picks";
+        if(completedListHint)completedListHint.textContent="Tap a player for details.";
+        completedPickList.innerHTML=mine.length?mine
+          .slice()
+          .sort((x,y)=>Number(x.pick_number)-Number(y.pick_number))
+          .map(p=>{
+            const player=draftPool.find(x=>String(x.id)===String(p.player_id));
+            return `<div class="completed-pick-row clickable" data-open-player="${h(p.player_id)}" tabindex="0" role="button" aria-label="View ${h(player?.name||p.player_id)} details"><span class="completed-pick-round">R${h(p.round_number)}</span><div class="completed-pick-info"><strong>${h(player?.name||p.player_id)}</strong><small>${h(player?.team||p.role||"")}</small></div><div class="completed-pick-number"><small>Pick</small><strong>#${h(p.pick_number)}</strong></div><span class="completed-pick-chevron" aria-hidden="true">›</span></div>`;
+          }).join("")
+          :'<div class="muted">No picks were recorded for your team.</div>';
+        wireProfileRows(completedPickList);
+      }
       renderBoard(completedFullBoard,draftData,picks);
+      if(historical&&completedFullBoardCard)completedFullBoardCard.hidden=false;
     };
 
     const refresh=async()=>{
@@ -3619,9 +3647,8 @@ function render(view="home",options={}){
 
         const mine=picks.filter(p=>String(p.user_id)===String(currentUser.id));
         if(draft?.status==="complete"){
-          renderCompletedState(draft,mine);
-          if(league?.status==="completed"&&pageEyebrow)pageEyebrow.textContent="DRAFT RESULTS · READ ONLY";
-          await loadRosterFromCloud(leagueId);
+          renderCompletedState(draft,mine,league);
+          if(league?.status!=="completed")await loadRosterFromCloud(leagueId);
           if(draftTimerId){clearInterval(draftTimerId);draftTimerId=null;}
           return;
         }
