@@ -1296,28 +1296,33 @@ function render(view="home",options={}){
       if(dismiss)dismiss.onclick=function(){try{localStorage.setItem("riftOnboardingDismissed","1");}catch{} onboardingCard.hidden=true;};
     }
 
-    const rows=proSchedule.map(localScheduleRow).sort((a,b)=>{
-      const ta=Date.parse(a.startTime||a.date||"");
-      const tb=Date.parse(b.startTime||b.date||"");
-      if(Number.isFinite(ta)&&Number.isFinite(tb))return ta-tb;
-      return 0;
-    });
-
-    const upcoming=rows.filter(g=>g.day!=="past").slice(0,3);
-
-    if(upcomingList){
+    const renderUpcoming=sourceRows=>{
+      const rows=(sourceRows||[]).map(localScheduleRow).sort((a,b)=>{
+        const ta=Date.parse(a.startTime||a.date||"");
+        const tb=Date.parse(b.startTime||b.date||"");
+        if(Number.isFinite(ta)&&Number.isFinite(tb))return ta-tb;
+        return 0;
+      });
+      const upcoming=rows.filter(g=>g.day!=="past"&&!["CANCELED","POSTPONED"].includes(displayMatchStatus(g.status))).slice(0,3);
+      if(!upcomingList)return;
       upcomingList.innerHTML=upcoming.length?upcoming.map(g=>`
         <div class="home-match-row">
           <div class="home-match-teams">
             <strong>${h(g.a||"TBD")} <span>vs</span> ${h(g.b||"TBD")}</strong>
-            <small>${h(g.league||"LoL Esports")}${g.stage?" · "+h(g.stage):""}</small>
+            <small>${h(g.league||competitionName(g.competition)||"LoL Esports")}${g.stage?" · "+h(g.stage):""}</small>
           </div>
           <div class="home-match-time">
             <strong>${h(g.time||"TBD")}</strong>
             <small>${h(g.label||"Upcoming")}</small>
           </div>
         </div>`).join("")
-        :'<div class="empty-state"><strong>No upcoming matches</strong><small>Check back after the next esports-data refresh.</small></div>';
+        :'<div class="empty-state"><strong>No upcoming matches</strong><small>No future professional matches are currently available.</small></div>';
+    };
+    renderUpcoming(proSchedule);
+    if(cloudReady()&&backend()?.listProMatches){
+      void backend().listProMatches().then(matches=>{
+        if(Array.isArray(matches)&&matches.length)renderUpcoming(matches.map(databaseMatchToSchedule));
+      }).catch(()=>{});
     }
 
   }
