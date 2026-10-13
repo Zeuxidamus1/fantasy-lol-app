@@ -161,6 +161,11 @@ check(backend.includes('async function listMockDraftPool(leagueId)'),"mock Draft
 check(app.includes('b.listMockCompetitions()'),"Creator Lab loads mock tournament availability");
 check(app.includes('b.setMockCompetition(mockLeague.id,activeCompetition.value)'),"Creator Lab applies selected tournament");
 check(app.includes('b.listMockDraftPool(leagueId)'),"Draft Room loads authoritative mock pool");
+check(html.includes('data-mock-duration="5"')&&html.includes('data-mock-duration="35"'),"Creator Lab exposes both quick and full test modes");
+check(app.includes('let mockDuration=5;'),"Creator Lab defaults to the 5-minute quick test");
+const mockDurationMigration=read("supabase/migrations/20261013093000_fix_mock_simulation_duration_and_cleanup_overloads.sql");
+check(mockDurationMigration.includes("v_duration:=case when coalesce(v_run.duration_minutes,5)=35 then 35 else 5 end;"),"mock simulation start honors the selected duration");
+check(mockDurationMigration.includes("period_source,'simulation'")||mockDurationMigration.includes("'simulation',false"),"mock rounds remain isolated from real schedule reconciliation");
 check(backend.includes("listPlayerProjections"),"backend exposes player projections");
 check(backend.includes("listPlayoffs"),"backend exposes playoffs");
 check(backend.includes("listWaiverPriority"),"backend exposes waiver priority");
