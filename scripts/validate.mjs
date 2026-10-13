@@ -153,6 +153,14 @@ check(backend.includes('async function isPlatformAdmin()'),"creator access check
 check(backend.includes('async function createMockLeague()'),"mock league creation API exists");
 check(backend.includes('async function startMockSimulation(leagueId)'),"mock simulation start API exists");
 check(backend.includes('row.competition||"")!=="simulation"'),"normal schedule feed hides simulation matches");
+check(html.includes('id="creatorCompetitionSelect"'),"Creator Lab tournament selector exists");
+check(html.includes('id="creatorActiveCompetitionSelect"'),"active mock tournament selector exists");
+check(backend.includes('async function listMockCompetitions()'),"mock tournament options come from backend");
+check(backend.includes('async function setMockCompetition(leagueId,competition)'),"creator can change tournament before first pick");
+check(backend.includes('async function listMockDraftPool(leagueId)'),"mock Draft Room uses authoritative server pool");
+check(app.includes('b.listMockCompetitions()'),"Creator Lab loads mock tournament availability");
+check(app.includes('b.setMockCompetition(mockLeague.id,activeCompetition.value)'),"Creator Lab applies selected tournament");
+check(app.includes('b.listMockDraftPool(leagueId)'),"Draft Room loads authoritative mock pool");
 check(backend.includes("listPlayerProjections"),"backend exposes player projections");
 check(backend.includes("listPlayoffs"),"backend exposes playoffs");
 check(backend.includes("listWaiverPriority"),"backend exposes waiver priority");
