@@ -614,13 +614,17 @@
       <section class="card league-overview-card" id="leagueOverviewCard">
         <div class="league-overview-head">
           <div>
-            <div class="eyebrow">ACTIVE LEAGUE</div>
+            <div class="eyebrow" id="leagueOverviewEyebrow">ACTIVE LEAGUE</div>
             <h3 id="leagueOverviewName">No league selected</h3>
           </div>
           <div class="league-overview-actions">
             <button class="secondary-btn league-rules-toggle" id="leagueRulesToggle" type="button" aria-expanded="false">Rules</button>
             <button class="secondary-btn league-commissioner-btn commissioner-only" id="leagueSetupBtn" data-jump="setup" hidden>Commissioner Tools</button>
           </div>
+        </div>
+        <div class="league-completion-banner" id="leagueCompletionBanner" hidden>
+          <strong id="leagueCompletionTitle">Season Complete</strong>
+          <small id="leagueCompletionCopy">This fantasy league has ended.</small>
         </div>
         <div class="league-overview-grid">
           <div>
