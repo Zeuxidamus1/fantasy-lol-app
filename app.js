@@ -3162,8 +3162,16 @@ function render(view="home",options={}){
       draw();
     };
 
-    search.oninput=draw;
+    let playerSearchTimer=null;
+    search.oninput=()=>{
+      clearTimeout(playerSearchTimer);
+      playerSearchTimer=setTimeout(draw,80);
+    };
     document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{role=c.dataset.role;document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));c.classList.add("active");draw();});
+
+    // Paint the local player directory immediately. Cloud ownership and availability
+    // hydrate afterward instead of making the whole Players screen wait on the network.
+    draw();
     void refreshOwnership();
   }
   if(view==="trade"){
