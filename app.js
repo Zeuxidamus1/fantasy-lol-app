@@ -231,6 +231,8 @@ let matchupTimerId=null;
 let creatorSimulationTimerId=null;
 const matchupScoreSnapshots=new Map();
 const matchupEventLogs=new Map();
+let appWarmupAt=0;
+let appWarmupPending=false;
 let tradeRealtimeCleanup=null;
 const memoryStorage=new Map();
 function storageGet(key){
@@ -1127,6 +1129,40 @@ function cloudReady(){
   const b=backend();
   return !!(b&&typeof b.request==="function"&&typeof b.currentUser==="function");
 }
+
+function warmCommonLeagueData(){
+  if(!cloudReady()||appWarmupPending||Date.now()-appWarmupAt<30000)return;
+  const leagueId=getActiveLeagueId();
+  if(!leagueId)return;
+  appWarmupPending=true;
+  const b=backend();
+  void Promise.all([
+    b.currentUser().catch(()=>null),
+    b.listLeagues().catch(()=>[])
+  ]).then(async([user,leagues])=>{
+    const league=(leagues||[]).find(l=>String(l.id)===String(leagueId));
+    const competition=normalizeCompetitionCode(league?.settings?.competition)||null;
+    await Promise.allSettled([
+      b.listLeagueMembers(leagueId),
+      b.listLeagueBots(leagueId),
+      b.listRosters(leagueId),
+      b.listFantasyRounds(leagueId),
+      b.listLeagueStandings(leagueId),
+      competition?b.listPlayerCompetitionStatus(competition):Promise.resolve([]),
+      competition?b.listProMatches(competition):Promise.resolve([])
+    ]);
+    appWarmupAt=Date.now();
+  }).finally(()=>{appWarmupPending=false;});
+}
+
+function scheduleCommonWarmup(){
+  const run=()=>warmCommonLeagueData();
+  if(typeof requestIdleCallback==="function"){
+    requestIdleCallback(run,{timeout:1200});
+  }else{
+    setTimeout(run,500);
+  }
+}
 function cloudUserEmail(user){
   return user?.email||user?.user_metadata?.email||"Manager";
 }
@@ -1259,6 +1295,9 @@ function render(view="home",options={}){
   currentView=view;
   app.innerHTML="";
   app.appendChild(template.content.cloneNode(true));
+  if((view==="home"||view==="league")&&backend()?.readSession?.()?.access_token){
+    scheduleCommonWarmup();
+  }
   const titles={login:"Sign In",signup:"Create Account",verify:"Verify Email",home:"Home",account:"Account","creator-lab":"Mock Draft Simulator",team:"My Team",matchup:"Matchup",standings:"Standings",schedule:"Schedule","my-schedule":"My Schedule",players:"Players",player:"Player",league:"League","create-league":"Create League","join-league":"Join League","bot-league":"Create Bot League","bot-settings":"Bot League Settings","bot-confirm":"Confirm Bot League","bot-success":"League Created",transactions:"Transactions",trade:"Trades",draft:"Draft Room",setup:"League Setup",privacy:"Privacy Notice",terms:"Terms"};
   document.title=`${titles[view]||"Rift Fantasy"} · Rift Fantasy`;
   document.body.classList.toggle("login-view",["login","signup","verify"].includes(view));
@@ -2177,20 +2216,24 @@ function render(view="home",options={}){
       }
       try{
         const b=backend();
-        const [user,rosters,leagues,statusRows,projectionRows,rounds]=await Promise.all([
-          b.currentUser(),b.listRosters(leagueId),b.listLeagues(),
-          b.listPlayerCompetitionStatus().catch(()=>[]),
-          b.listPlayerProjections(leagueId).catch(()=>[]),
+        const [user,rosters,leagues,rounds]=await Promise.all([
+          b.currentUser(),
+          b.listRosters(leagueId),
+          b.listLeagues(),
           b.listFantasyRounds(leagueId).catch(()=>[])
         ]);
         const league=leagues.find(l=>String(l.id)===String(leagueId));
         const leagueCompetition=normalizeCompetitionCode(league?.settings?.competition)||"worlds";
         const waiversEnabled=league?.settings?.waivers!==false;
-        const leagueStatusRows=statusRows.filter(x=>normalizeCompetitionCode(x.competition)===leagueCompetition);
+        const currentRound=rounds.find(r=>r.status==="live")||rounds.find(r=>r.status==="upcoming");
+
+        const [leagueStatusRows,projectionRows]=await Promise.all([
+          b.listPlayerCompetitionStatus(leagueCompetition).catch(()=>[]),
+          b.listPlayerProjections(leagueId,currentRound?.round_number??null).catch(()=>[])
+        ]);
         cacheCompetitionStatuses(leagueCompetition,leagueStatusRows);
         const playerStatus=leagueStatusRows.find(x=>String(x.player_id)===playerKey(p));
-        const currentRound=rounds.find(r=>r.status==="live")||rounds.find(r=>r.status==="upcoming");
-        const projection=projectionRows.find(x=>String(x.player_id)===playerKey(p)&&(!currentRound||Number(x.round_number)===Number(currentRound.round_number)));
+        const projection=projectionRows.find(x=>String(x.player_id)===playerKey(p));
         const availability=document.querySelector("#profileAvailability");
         if(availability)availability.textContent=String(playerStatus?.status||"unknown").replaceAll("_"," ").toUpperCase();
         const projected=document.querySelector("#profileProjectedFp");
