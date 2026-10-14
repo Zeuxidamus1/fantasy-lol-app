@@ -1627,3 +1627,93 @@ body.schedule-modal-open{overflow:hidden}
   .schedule-bracket-round{min-width:205px;flex-basis:205px}
   .schedule-modal-grid{grid-template-columns:1fr}
 }
+
+
+/* True draggable bracket canvas */
+.schedule-bracket-board{
+  position:relative;
+  display:block;
+  overflow-x:auto;
+  overflow-y:hidden;
+  width:100%;
+  padding:34px 4px 16px;
+  cursor:grab;
+  touch-action:pan-x pan-y;
+  overscroll-behavior-x:contain;
+  scrollbar-width:thin;
+  scrollbar-color:#294b68 #091624
+}
+.schedule-bracket-board.is-dragging{cursor:grabbing;user-select:none}
+.schedule-bracket-pan-hint{
+  position:sticky;
+  left:8px;
+  top:0;
+  z-index:5;
+  width:max-content;
+  margin:-26px 0 8px;
+  border:1px solid #24425e;
+  background:rgba(9,22,36,.92);
+  color:#7f9cba;
+  border-radius:999px;
+  padding:5px 9px;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.5px;
+  pointer-events:none
+}
+.schedule-bracket-canvas{
+  display:flex;
+  align-items:flex-start;
+  gap:52px;
+  min-width:max(100%,calc(var(--bracket-rounds) * 260px));
+  width:max-content;
+  min-height:calc(var(--bracket-max-matches) * 138px + 90px);
+  padding:0 24px 24px 4px
+}
+.schedule-bracket-round{
+  min-width:220px;
+  width:220px;
+  flex:0 0 220px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  position:relative;
+  padding-top:calc(var(--round-index) * 54px)
+}
+.schedule-bracket-round:not(:last-child)::after{
+  content:"";
+  position:absolute;
+  top:76px;
+  right:-30px;
+  width:30px;
+  height:1px;
+  background:#31546f
+}
+.schedule-bracket-round:not(:first-child)::before{
+  content:"";
+  position:absolute;
+  top:76px;
+  left:-22px;
+  width:22px;
+  height:1px;
+  background:#31546f
+}
+.schedule-bracket-round-matches{
+  display:flex;
+  flex-direction:column;
+  gap:calc(10px + (var(--round-index) * 24px))
+}
+.schedule-bracket-match{
+  min-height:112px;
+  box-shadow:0 8px 18px rgba(0,0,0,.12)
+}
+.schedule-bracket-round:nth-child(2) .schedule-bracket-round-matches{padding-top:52px}
+.schedule-bracket-round:nth-child(3) .schedule-bracket-round-matches{padding-top:118px}
+.schedule-bracket-round:nth-child(4) .schedule-bracket-round-matches{padding-top:186px}
+.schedule-bracket-round:nth-child(n+5) .schedule-bracket-round-matches{padding-top:240px}
+@media(max-width:430px){
+  .schedule-bracket-panel{margin-left:-6px;margin-right:-6px;padding-left:10px;padding-right:10px}
+  .schedule-bracket-canvas{gap:44px;min-width:max(100%,calc(var(--bracket-rounds) * 245px))}
+  .schedule-bracket-round{min-width:205px;width:205px;flex-basis:205px}
+  .schedule-bracket-pan-hint{left:4px}
+}
