@@ -1010,8 +1010,12 @@ function openWaiverDropChooser(incoming){
   queueMicrotask(()=>list.querySelector("[data-waiver-drop-id]")?.focus());
 }
 
+const fantasyPlayerCache=((window.ESPORTS_DATA&&window.ESPORTS_DATA.players)||[]).map(p=>({
+  ...p,
+  fp:Number(p.projection??p.fp??0)
+}));
 function allFantasyPlayers(){
-  return ((window.ESPORTS_DATA&&window.ESPORTS_DATA.players)||[]).map(p=>({...p,fp:Number(p.projection??p.fp??0)}));
+  return fantasyPlayerCache;
 }
 function eligibleFantasyPlayers(settings=getLeagueSettings()){
   const code=normalizeCompetitionCode(settings?.competition);
