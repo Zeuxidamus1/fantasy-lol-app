@@ -429,7 +429,7 @@
 
       <section class="card compact team-summary-card">
         <div class="stat-row"><span>Roster</span><strong id="teamRosterCount">0/0</strong></div>
-        <div class="stat-row"><span>Starting lineup</span><strong id="teamStarterCount">0/6</strong></div>
+        <div class="stat-row"><span>Starting lineup</span><strong id="teamStarterCount">0/5</strong></div>
         <div class="stat-row" id="teamNextLockRow">
           <span class="lock-label">Next Lineup Lock <button class="lock-help-btn" type="button" data-lock-help="next" aria-label="What is Next Lineup Lock?" aria-expanded="false">?</button></span>
           <strong id="teamNextLock">—</strong>
@@ -460,25 +460,8 @@
           <div id="starterRosterList" class="roster"></div>
         </div>
 
-        <div class="roster-subsection" hidden>
-          <div class="section-head">
-            <div class="roster-heading-with-help">
-              <h3>FLEX</h3>
-              <button class="roster-help-btn" type="button" data-roster-help="flex" aria-label="What is FLEX?" aria-expanded="false">?</button>
-            </div>
-          </div>
-          <div id="flexRosterList" class="roster"></div>
-        </div>
-
-        <div class="roster-subsection" hidden>
-          <div class="section-head">
-            <div class="roster-heading-with-help">
-              <h3>Bench</h3>
-              <button class="roster-help-btn" type="button" data-roster-help="bench" aria-label="What is the Bench?" aria-expanded="false">?</button>
-            </div>
-          </div>
-          <div id="benchRosterList" class="roster"></div>
-        </div>
+        <div id="flexRosterList" hidden></div>
+        <div id="benchRosterList" hidden></div>
       </section>
 
       <div class="roster-help-popover" id="rosterHelpPopover" role="dialog" aria-live="polite" hidden>
