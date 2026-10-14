@@ -285,16 +285,11 @@ function rosterNeedsForManager(state,managerIndex){
 }
 
 function canDraftPlayer(state,managerIndex,player){
-  const settings=getLeagueSettings();
   const picks=managerPicks(state,managerIndex);
-  const maxRoster=5;
-  if(picks.length>=maxRoster)return false;
-  const needs=rosterNeedsForManager(state,managerIndex);
-  const benchSpots=Number(settings.bench||3);
-  const startersFilled=5-needs.length;
-  const benchUsed=Math.max(0,picks.length-startersFilled-1);
-  if(needs.length>0 && benchUsed>=benchSpots && !needs.includes(player.role)) return false;
-  return true;
+  if(picks.length>=5)return false;
+  const role=String(player?.role||"").toUpperCase();
+  if(!ROSTER_RULES.starterSlots.includes(role))return false;
+  return !picks.some(p=>String(p.role||"").toUpperCase()===role);
 }
 
 function bestAvailableDraftPlayer(state,managerIndex=draftOrderForPick(state.pickIndex,state.managerCount)){
@@ -2403,7 +2398,7 @@ function render(view="home",options={}){
       return "NO GAME";
     };
     const lineupFor=(rosters,managerId,managerType,players,scoreMap,matches,lockMap)=>{
-      const order={TOP:0,JNG:1,MID:2,ADC:3,SUP:4,FLEX:5};
+      const order={TOP:0,JNG:1,MID:2,ADC:3,SUP:4};
       return rosters
         .filter(r=>String(r.user_id)===String(managerId)&&String(r.manager_type||"human")===String(managerType||"human")&&String(r.slot||"").toUpperCase()!=="BN")
         .sort((a,b)=>(order[String(a.slot).toUpperCase()]??99)-(order[String(b.slot).toUpperCase()]??99))
@@ -2433,7 +2428,7 @@ function render(view="home",options={}){
       </section>`;
     };
 
-    const matchupSlots=["TOP","JNG","MID","ADC","SUP","FLEX"];
+    const matchupSlots=["TOP","JNG","MID","ADC","SUP"];
     const lineupBySlot=items=>{
       const map=new Map();
       items.forEach(item=>map.set(String(item?.roster?.slot||item?.player?.role||"").toUpperCase(),item));
@@ -4844,7 +4839,7 @@ function render(view="home",options={}){
       document.querySelector("#creatorHomeScore").textContent=formatFantasyPoints(homeScore);
       document.querySelector("#creatorAwayScore").textContent=formatFantasyPoints(awayScore);
       const statsRoot=document.querySelector("#creatorSimulationStats");
-      const lineupSlots=["TOP","JNG","MID","ADC","SUP","FLEX"];
+      const lineupSlots=["TOP","JNG","MID","ADC","SUP"];
       const arrangeSide=managerType=>{
         const sideRows=stats.filter(row=>row.manager_type===managerType);
         const used=new Set();
@@ -4853,8 +4848,6 @@ function render(view="home",options={}){
           const index=sideRows.findIndex((row,i)=>!used.has(i)&&String(row.role||"").toUpperCase()===slot);
           if(index>=0){used.add(index);bySlot.set(slot,sideRows[index]);}
         });
-        const remaining=sideRows.filter((row,i)=>!used.has(i));
-        if(remaining.length)bySlot.set("FLEX",remaining[0]);
         return bySlot;
       };
       const home=arrangeSide("human");
@@ -5278,8 +5271,8 @@ function render(view="home",options={}){
       }
       const next=btn.dataset.lockHelp==="next";
       panel.innerHTML=next
-        ? "<strong>Next Lineup Lock</strong><small>The next time one of your rostered players becomes locked because their scheduled match is starting. Once locked, that player cannot be moved between the starting lineup, FLEX, and bench until the lock clears.</small>"
-        : "<strong>Lock Status</strong><small>Shows how many players on your roster are currently locked versus still available to move. A locked player has already reached their lineup lock for the active scoring period.</small>";
+        ? "<strong>Next Lineup Lock</strong><small>The next time one of your rostered players becomes locked because their scheduled professional match is starting. Once locked, that roster spot cannot be changed until the lock clears.</small>"
+        : "<strong>Lock Status</strong><small>Shows how many roster spots are currently locked versus still eligible for a replacement. A locked player has already reached their lineup lock for the active scoring period.</small>";
       panel.dataset.helpType=btn.dataset.lockHelp;
       panel.hidden=false;
       btn.setAttribute("aria-expanded","true");
