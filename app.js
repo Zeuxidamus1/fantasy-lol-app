@@ -2778,22 +2778,35 @@ function render(view="home",options={}){
   }
   if(view==="schedule"||view==="my-schedule"){
     const list=document.querySelector("#scheduleList");
-    const rosterOnly=view==="my-schedule";
+    const tournamentSelect=document.querySelector("#scheduleTournamentSelect");
+    const matchesTab=document.querySelector("#scheduleMatchesTab");
+    const bracketTab=document.querySelector("#scheduleBracketTab");
+    const rosterTab=document.querySelector("#scheduleRosterTab");
+    const matchFilters=document.querySelector("#scheduleMatchFilters");
+    const bracketPanel=document.querySelector("#scheduleBracketPanel");
+    const bracketBoard=document.querySelector("#scheduleBracketBoard");
+    const bracketTitle=document.querySelector("#scheduleBracketTitle");
+    const bracketStatus=document.querySelector("#scheduleBracketStatus");
+    const modeHelp=document.querySelector("#scheduleModeHelp");
+    const intel=document.querySelector("#scheduleIntelligenceCard");
+    const modal=document.querySelector("#scheduleMatchModal");
+    const modalBody=document.querySelector("#scheduleMatchModalBody");
+    const modalTitle=document.querySelector("#scheduleMatchModalTitle");
+    const modalEyebrow=document.querySelector("#scheduleMatchModalEyebrow");
+    let mode=view==="my-schedule"?"roster":"matches";
     let day="today";
     let rosterPlayers=[];
     let scheduleRows=proSchedule.filter(g=>!!scheduleCompetitionCode(g));
     let leagueCompetition=null;
+    let selectedCompetition=null;
     let leagueCompleted=false;
+    let currentLeague=null;
+    let currentRounds=[];
+    let currentMatchups=[];
+    let currentAllRosters=[];
+    let currentUser=null;
     const title=document.querySelector("#schedulePageTitle");
     const copy=document.querySelector("#scheduleScopeCopy");
-    const fullBtn=document.querySelector("#fullScheduleBtn");
-    const myBtn=document.querySelector("#myScheduleBtn");
-    if(title)title.textContent=rosterOnly?"My Schedule":"Schedule";
-    if(copy)copy.textContent=rosterOnly
-      ?"Only matches involving teams represented by players on your current fantasy roster."
-      :"Today and upcoming professional matches.";
-    if(fullBtn)fullBtn.classList.toggle("schedule-view-active",!rosterOnly);
-    if(myBtn)myBtn.classList.toggle("schedule-view-active",rosterOnly);
 
     const normalizeTeam=value=>String(value||"").toLowerCase().replace(/[^a-z0-9]/g,"");
     const rosterMatchForTeam=(teamId,teamName,teamCode)=>{
@@ -2822,21 +2835,89 @@ function render(view="home",options={}){
                (codeKey&&(pName===codeKey||pCode===codeKey));
       });
     };
+    const isBracketStage=stage=>{
+      const s=String(stage||"").toLowerCase();
+      return /quarter|semi|final|knockout|playoff|elimination|bracket|round of|ro8|ro4/.test(s);
+    };
+    const bracketRank=stage=>{
+      const s=String(stage||"").toLowerCase();
+      if(/quarter|round of 8|ro8/.test(s))return 10;
+      if(/semi|round of 4|ro4/.test(s))return 20;
+      if(/grand final|final/.test(s))return 30;
+      if(/knockout|playoff|elimination|bracket/.test(s))return 15;
+      return 99;
+    };
+    const stageLabel=stage=>{
+      const s=String(stage||"").trim();
+      if(!s)return "Playoffs";
+      return s.replace(/[_-]+/g," ").replace(/\b\w/g,m=>m.toUpperCase());
+    };
+    const selectedRows=()=>scheduleRows.filter(g=>scheduleCompetitionCode(g)===selectedCompetition);
+    const bracketRows=()=>selectedRows().filter(g=>isBracketStage(g.stage));
+    const setMode=next=>{
+      mode=next;
+      [matchesTab,bracketTab,rosterTab].forEach(btn=>{
+        if(!btn)return;
+        const active=(btn===matchesTab&&mode==="matches")||(btn===bracketTab&&mode==="bracket")||(btn===rosterTab&&mode==="roster");
+        btn.classList.toggle("active",active);
+        btn.setAttribute("aria-selected",active?"true":"false");
+      });
+      if(matchFilters)matchFilters.hidden=mode==="bracket";
+      if(list)list.hidden=mode==="bracket";
+      if(bracketPanel)bracketPanel.hidden=mode!=="bracket";
+      if(intel)intel.hidden=mode!=="roster";
+      if(modeHelp)modeHelp.textContent=mode==="bracket"
+        ?"Interactive playoff view. Select a matchup for details."
+        :mode==="roster"
+          ?"Only upcoming matches involving players on your current fantasy roster."
+          :"Today, tomorrow, and upcoming matches only.";
+      drawSchedule();
+      drawBracket();
+      drawRosterIntelligence();
+    };
+    const openMatchModal=g=>{
+      if(!modal||!modalBody)return;
+      const aRoster=rosterMatchForTeam(g.aId,g.a,g.aCode);
+      const bRoster=rosterMatchForTeam(g.bId,g.b,g.bCode);
+      if(modalEyebrow)modalEyebrow.textContent=[competitionName(selectedCompetition),stageLabel(g.stage)].filter(Boolean).join(" · ").toUpperCase();
+      if(modalTitle)modalTitle.textContent=(g.a||"TBD")+" vs "+(g.b||"TBD");
+      modalBody.innerHTML=`
+        <div class="schedule-modal-matchup">
+          <div><span class="team-mark">${h(g.aCode||"TBD")}</span><strong>${h(g.a||"TBD")}</strong></div>
+          <span>VS</span>
+          <div><span class="team-mark">${h(g.bCode||"TBD")}</span><strong>${h(g.b||"TBD")}</strong></div>
+        </div>
+        <div class="schedule-modal-grid">
+          <div><small>Date & time</small><strong>${h(localScheduleRow(g).label||"TBD")} · ${h(localScheduleRow(g).time||"TBD")}</strong></div>
+          <div><small>Stage</small><strong>${h(stageLabel(g.stage))}</strong></div>
+          <div><small>Format</small><strong>${Number(g.count)>0?"BO"+h(g.count):"TBD"}</strong></div>
+          <div><small>Status</small><strong>${h(displayMatchStatus(g.status))}</strong></div>
+        </div>
+        ${aRoster.length||bRoster.length?`<div class="schedule-modal-fantasy"><small>YOUR FANTASY PLAYERS IN THIS MATCH</small><strong>${h([...aRoster,...bRoster].map(p=>p.name).filter(Boolean).join(", "))}</strong></div>`:""}
+      `;
+      modal.hidden=false;
+      document.body.classList.add("schedule-modal-open");
+    };
+    const closeMatchModal=()=>{
+      if(modal)modal.hidden=true;
+      document.body.classList.remove("schedule-modal-open");
+    };
+    document.querySelector("#scheduleMatchModalClose")?.addEventListener("click",closeMatchModal);
+    document.querySelector("#scheduleMatchBackdrop")?.addEventListener("click",closeMatchModal);
 
     const drawSchedule=()=>{
-      const rows=scheduleRows.map(localScheduleRow).sort((a,b)=>{
+      if(!list||mode==="bracket")return;
+      const rows=selectedRows().map(localScheduleRow).sort((a,b)=>{
         const ta=Date.parse(a.startTime||"");
         const tb=Date.parse(b.startTime||"");
         if(Number.isFinite(ta)&&Number.isFinite(tb))return ta-tb;
         return 0;
       });
       const filtered=rows.filter(g=>{
-        // Schedule is forward-looking only. Historical dates never appear here.
         if(g.day==="past")return false;
         const dayMatches=g.day===day||(day==="upcoming"&&g.day==="upcoming");
         if(!dayMatches)return false;
-        if(leagueCompetition&&scheduleCompetitionCode(g)!==leagueCompetition)return false;
-        if(!rosterOnly)return true;
+        if(mode!=="roster")return true;
         return rosterMatchForTeam(g.aId,g.a,g.aCode).length>0 || rosterMatchForTeam(g.bId,g.b,g.bCode).length>0;
       });
       let lastLabel="";
@@ -2849,102 +2930,184 @@ function render(view="home",options={}){
         const bOwned=bRoster.length>0;
         const aNote=aOwned?aRoster.map(p=>p.name).filter(Boolean).join(", "):"";
         const bNote=bOwned?bRoster.map(p=>p.name).filter(Boolean).join(", "):"";
-        return heading+`<div class="game-card ${aOwned||bOwned?"roster-match":""}">
+        return heading+`<button class="game-card schedule-game-button ${aOwned||bOwned?"roster-match":""}" type="button" data-schedule-match="${h(g.matchId||g.eventId||g.startTime||"")}">
           <div class="game-team ${aOwned?"my-roster-team":""}"><span class="team-mark">${h(g.aCode||"TBD")}</span><div><strong>${h(g.a||"TBD")}</strong><small>${h(aNote)}</small></div></div>
           <div class="game-meta"><span class="game-time">${h(g.time||"TBD")}</span><span class="game-league">${h(competitionName(g.competition||g.leagueCode)||g.league||"LoL Esports")}</span><span class="game-stage">${h([g.stage,Number(g.count)>0?"BO"+g.count:""].filter(Boolean).join(" · "))}</span><span class="game-status ${displayMatchStatus(g.status)==="LIVE"?"live":""} ${["POSTPONED","CANCELED"].includes(displayMatchStatus(g.status))?"canceled":""}">${h(displayMatchStatus(g.status))}</span></div>
           <div class="game-team right ${bOwned?"my-roster-team":""}"><div><strong>${h(g.b||"TBD")}</strong><small>${h(bNote)}</small></div><span class="team-mark">${h(g.bCode||"TBD")}</span></div>
-        </div>`;
-      }).join(""):(leagueCompleted
-        ? '<div class="empty-state"><strong>Season complete</strong><small>'+h(competitionName(leagueCompetition))+' has no remaining scheduled matches.</small></div>'
-        : rosterOnly
+        </button>`;
+      }).join(""):(leagueCompleted&&selectedCompetition===leagueCompetition
+        ? '<div class="empty-state"><strong>Season complete</strong><small>'+h(competitionName(selectedCompetition))+' has no remaining scheduled matches.</small></div>'
+        : mode==="roster"
           ? '<div class="empty-state"><strong>No roster games found</strong><small>There are no scheduled matches for players on your current roster in this time filter.</small></div>'
-          : '<div class="empty-state"><strong>No matches found</strong><small>Try another filter or check back after the next data refresh.</small></div>');
+          : '<div class="empty-state"><strong>No matches found</strong><small>Try another day or check back after the next schedule refresh.</small></div>');
+      list.querySelectorAll("[data-schedule-match]").forEach(btn=>btn.onclick=()=>{
+        const key=btn.dataset.scheduleMatch;
+        const g=selectedRows().find(x=>String(x.matchId||x.eventId||x.startTime||"")===String(key));
+        if(g)openMatchModal(g);
+      });
+    };
+
+    const drawBracket=()=>{
+      if(!bracketBoard||!bracketTab)return;
+      const rows=bracketRows().slice().sort((a,b)=>{
+        const rank=bracketRank(a.stage)-bracketRank(b.stage);
+        if(rank)return rank;
+        return Date.parse(a.startTime||"")-Date.parse(b.startTime||"");
+      });
+      bracketTab.disabled=rows.length===0;
+      bracketTab.title=rows.length?"View playoff bracket":"Bracket appears when playoff-stage matches are available";
+      if(mode==="bracket"&&!rows.length){mode="matches";setMode("matches");return;}
+      if(mode!=="bracket")return;
+      if(bracketTitle)bracketTitle.textContent=competitionName(selectedCompetition)+" Bracket";
+      if(bracketStatus)bracketStatus.textContent=rows.length+" playoff matchup"+(rows.length===1?"":"s");
+      if(!rows.length){
+        bracketBoard.innerHTML='<div class="empty-state"><strong>Bracket not available yet</strong><small>This tournament does not currently have playoff-stage matches in the schedule feed.</small></div>';
+        return;
+      }
+      const grouped=[];
+      rows.forEach(g=>{
+        const key=stageLabel(g.stage);
+        let group=grouped.find(x=>x.key===key);
+        if(!group){group={key,rank:bracketRank(g.stage),rows:[]};grouped.push(group);}
+        group.rows.push(g);
+      });
+      grouped.sort((a,b)=>a.rank-b.rank);
+      bracketBoard.innerHTML=grouped.map((group,idx)=>`
+        <div class="schedule-bracket-round">
+          <div class="schedule-bracket-round-title"><small>ROUND ${idx+1}</small><strong>${h(group.key)}</strong></div>
+          <div class="schedule-bracket-round-matches">
+            ${group.rows.map(g=>`<button class="schedule-bracket-match" type="button" data-bracket-match="${h(g.matchId||g.eventId||g.startTime||"")}">
+              <div class="bracket-team"><span>${h(g.aCode||"TBD")}</span><strong>${h(g.a||"TBD")}</strong></div>
+              <div class="bracket-team"><span>${h(g.bCode||"TBD")}</span><strong>${h(g.b||"TBD")}</strong></div>
+              <div class="bracket-match-meta"><small>${h(localScheduleRow(g).time||"TBD")}</small><b>${h(displayMatchStatus(g.status))}${Number(g.count)>0?" · BO"+h(g.count):""}</b></div>
+            </button>`).join("")}
+          </div>
+        </div>
+      `).join("");
+      bracketBoard.querySelectorAll("[data-bracket-match]").forEach(btn=>btn.onclick=()=>{
+        const key=btn.dataset.bracketMatch;
+        const g=rows.find(x=>String(x.matchId||x.eventId||x.startTime||"")===String(key));
+        if(g)openMatchModal(g);
+      });
+    };
+
+    const drawRosterIntelligence=()=>{
+      if(!intel)return;
+      if(mode!=="roster"){intel.hidden=true;return;}
+      const currentRound=currentRounds.find(x=>x.status==="live")||currentRounds.find(x=>x.status==="upcoming");
+      if(!currentRound){intel.hidden=true;return;}
+      intel.hidden=false;
+      const periodRows=selectedRows().filter(row=>{
+        const t=Date.parse(row.startTime||row.date||"");
+        return Number.isFinite(t)&&t>=Date.parse(currentRound.starts_at)&&t<Date.parse(currentRound.ends_at);
+      });
+      const rowsForPlayers=players=>periodRows.filter(row=>
+        rosterMatchForPlayers(players,row.aId,row.a,row.aCode)||
+        rosterMatchForPlayers(players,row.bId,row.b,row.bCode)
+      );
+      const myRows=rowsForPlayers(rosterPlayers);
+      const playersWithGames=rosterPlayers.filter(player=>myRows.some(row=>
+        rosterMatchForPlayers([player],row.aId,row.a,row.aCode)||
+        rosterMatchForPlayers([player],row.bId,row.b,row.bCode)
+      ));
+      const noGames=rosterPlayers.filter(player=>!playersWithGames.some(x=>playerKey(x)===playerKey(player)));
+      const myMatch=currentMatchups.find(m=>Number(m.round_number)===Number(currentRound.round_number)&&(
+        String(m.home_manager_id||"")===String(currentUser?.id)||
+        String(m.away_manager_id||"")===String(currentUser?.id)
+      ));
+      let opponentRows=[];
+      if(myMatch){
+        const opponentId=String(myMatch.home_manager_id||"")===String(currentUser?.id)?myMatch.away_manager_id:myMatch.home_manager_id;
+        const opponentRosterIds=currentAllRosters.filter(x=>String(x.user_id)===String(opponentId)).map(x=>String(x.player_id));
+        const source=allFantasyPlayers();
+        const opponentPlayers=opponentRosterIds.map(id=>source.find(p=>playerKey(p)===id||String(p.id||"")===id)).filter(Boolean);
+        opponentRows=rowsForPlayers(opponentPlayers);
+      }
+      document.querySelector("#scheduleIntelPeriod").textContent=currentRound.label||("Fantasy Round "+currentRound.round_number);
+      document.querySelector("#scheduleIntelMyGames").textContent=String(myRows.length);
+      document.querySelector("#scheduleIntelOpponentGames").textContent=myMatch?String(opponentRows.length):"—";
+      document.querySelector("#scheduleIntelActivePlayers").textContent=String(playersWithGames.length);
+      document.querySelector("#scheduleIntelNoGames").textContent=String(noGames.length);
+      const warnings=document.querySelector("#scheduleIntelWarnings");
+      if(warnings)warnings.innerHTML=noGames.length
+        ?'<div class="roster-status-banner incomplete"><strong>Players with no game scheduled</strong><small>'+h(noGames.map(p=>p.name).join(", "))+'</small></div>'
+        :'<div class="roster-status-banner complete"><strong>✓ Every rostered player has a scheduled match</strong><small>Based on the current fantasy scoring period.</small></div>';
+    };
+
+    const syncHeading=()=>{
+      if(title)title.textContent=selectedCompetition?competitionName(selectedCompetition)+" Schedule":"Schedule";
+      if(copy)copy.textContent=selectedCompetition
+        ?"View "+competitionName(selectedCompetition)+" matches, playoff bracket, or only games involving your fantasy roster."
+        :"Choose a tournament to view its schedule.";
+    };
+    const populateTournamentSelect=()=>{
+      if(!tournamentSelect)return;
+      const codes=Object.keys(COMPETITION_META);
+      tournamentSelect.innerHTML=codes.map(code=>`<option value="${h(code)}">${h(COMPETITION_META[code].name)} · ${h(COMPETITION_META[code].region)}</option>`).join("");
+      tournamentSelect.value=selectedCompetition||"worlds";
+    };
+    const loadCompetition=async code=>{
+      selectedCompetition=normalizeCompetitionCode(code)||"worlds";
+      if(tournamentSelect)tournamentSelect.value=selectedCompetition;
+      syncHeading();
+      if(cloudReady()){
+        try{
+          const year=Number(currentLeague?.settings?.competitionSeason)||new Date().getFullYear();
+          const from=new Date(Date.UTC(year,0,1));
+          const to=new Date(Date.UTC(year+1,0,1));
+          const rows=await backend().listProMatches?.(selectedCompetition,from,to);
+          if(Array.isArray(rows))scheduleRows=[
+            ...scheduleRows.filter(g=>scheduleCompetitionCode(g)!==selectedCompetition),
+            ...rows.map(databaseMatchToSchedule)
+          ];
+        }catch{}
+      }
+      drawSchedule();
+      drawBracket();
+      drawRosterIntelligence();
     };
 
     document.querySelectorAll("[data-day]").forEach(c=>c.onclick=()=>{day=c.dataset.day;document.querySelectorAll("[data-day]").forEach(x=>x.classList.remove("active"));c.classList.add("active");drawSchedule();});
+    matchesTab&& (matchesTab.onclick=()=>setMode("matches"));
+    bracketTab&& (bracketTab.onclick=()=>setMode("bracket"));
+    rosterTab&& (rosterTab.onclick=()=>setMode("roster"));
+    tournamentSelect&& (tournamentSelect.onchange=()=>void loadCompetition(tournamentSelect.value));
+
     (async()=>{
       const leagueId=getActiveLeagueId();
       if(leagueId&&cloudReady()){
         try{
           const leagues=await backend().listLeagues();
-          const league=leagues.find(l=>String(l.id)===String(leagueId));
-          if(league){
-            leagueCompetition=normalizeCompetitionCode(league.settings?.competition)||null;
-            leagueCompleted=String(league.status)==="completed";
-            if(title&&leagueCompetition)title.textContent=rosterOnly?"My "+competitionName(leagueCompetition)+" Schedule":competitionName(leagueCompetition)+" Schedule";
-            if(copy&&leagueCompetition)copy.textContent=leagueCompleted
-              ? competitionName(leagueCompetition)+" season complete · no future matches remain."
-              : rosterOnly
-                ?"Only "+competitionName(leagueCompetition)+" matches involving players on your current fantasy roster."
-                :"Official upcoming "+competitionName(leagueCompetition)+" matches.";
-            const season=Number(league.settings?.competitionSeason)||new Date().getFullYear();
-            const scheduleFrom=leagueCompleted?new Date(Date.UTC(season,0,1)):null;
-            const scheduleTo=leagueCompleted?new Date(Date.UTC(season+1,0,1)):null;
-            const [loaded,matches,user,rounds,matchups,allRosters]=await Promise.all([
+          currentLeague=leagues.find(l=>String(l.id)===String(leagueId))||null;
+          if(currentLeague){
+            leagueCompetition=normalizeCompetitionCode(currentLeague.settings?.competition)||null;
+            leagueCompleted=String(currentLeague.status)==="completed";
+            selectedCompetition=leagueCompetition||"worlds";
+            const [loaded,user,rounds,matchups,allRosters]=await Promise.all([
               loadRosterFromCloud(leagueId),
-              backend().listProMatches?.(leagueCompetition,scheduleFrom,scheduleTo),
               backend().currentUser(),
               backend().listFantasyRounds(leagueId).catch(()=>[]),
               backend().listLeagueMatchups(leagueId).catch(()=>[]),
               backend().listRosters(leagueId).catch(()=>[])
             ]);
             rosterPlayers=loaded?getUserRoster():[];
-            if(Array.isArray(matches)&&matches.length)scheduleRows=matches.map(databaseMatchToSchedule);
-
-            if(rosterOnly){
-              const intel=document.querySelector("#scheduleIntelligenceCard");
-              const currentRound=rounds.find(x=>x.status==="live")||rounds.find(x=>x.status==="upcoming");
-              if(intel&&currentRound){
-                intel.hidden=false;
-                const periodRows=scheduleRows.filter(row=>{
-                  const t=Date.parse(row.startTime||row.date||"");
-                  return Number.isFinite(t)&&t>=Date.parse(currentRound.starts_at)&&t<Date.parse(currentRound.ends_at);
-                });
-                const rowsForPlayers=players=>periodRows.filter(row=>
-                  rosterMatchForPlayers(players,row.aId,row.a,row.aCode)||
-                  rosterMatchForPlayers(players,row.bId,row.b,row.bCode)
-                );
-                const myRows=rowsForPlayers(rosterPlayers);
-                const playersWithGames=rosterPlayers.filter(player=>myRows.some(row=>
-                  rosterMatchForPlayers([player],row.aId,row.a,row.aCode)||
-                  rosterMatchForPlayers([player],row.bId,row.b,row.bCode)
-                ));
-                const noGames=rosterPlayers.filter(player=>!playersWithGames.some(x=>playerKey(x)===playerKey(player)));
-
-                const myMatch=matchups.find(m=>Number(m.round_number)===Number(currentRound.round_number)&&(
-                  String(m.home_manager_id||"")===String(user?.id)||
-                  String(m.away_manager_id||"")===String(user?.id)
-                ));
-                let opponentRows=[];
-                if(myMatch){
-                  const opponentId=String(myMatch.home_manager_id||"")===String(user?.id)?myMatch.away_manager_id:myMatch.home_manager_id;
-                  const opponentRosterIds=allRosters.filter(x=>String(x.user_id)===String(opponentId)).map(x=>String(x.player_id));
-                  const source=allFantasyPlayers();
-                  const opponentPlayers=opponentRosterIds.map(id=>source.find(p=>playerKey(p)===id||String(p.id||"")===id)).filter(Boolean);
-                  opponentRows=rowsForPlayers(opponentPlayers);
-                }
-
-                document.querySelector("#scheduleIntelPeriod").textContent=currentRound.label||("Fantasy Round "+currentRound.round_number);
-                document.querySelector("#scheduleIntelMyGames").textContent=String(myRows.length);
-                document.querySelector("#scheduleIntelOpponentGames").textContent=myMatch?String(opponentRows.length):"—";
-                document.querySelector("#scheduleIntelActivePlayers").textContent=String(playersWithGames.length);
-                document.querySelector("#scheduleIntelNoGames").textContent=String(noGames.length);
-                const warnings=document.querySelector("#scheduleIntelWarnings");
-                if(warnings)warnings.innerHTML=noGames.length
-                  ?'<div class="roster-status-banner incomplete"><strong>Players with no game scheduled</strong><small>'+h(noGames.map(p=>p.name).join(", "))+'</small></div>'
-                  :'<div class="roster-status-banner complete"><strong>✓ Every rostered player has a scheduled match</strong><small>Based on the current fantasy scoring period.</small></div>';
-              }
-            }
-          }else{
-            rosterPlayers=[];
+            currentUser=user;
+            currentRounds=Array.isArray(rounds)?rounds:[];
+            currentMatchups=Array.isArray(matchups)?matchups:[];
+            currentAllRosters=Array.isArray(allRosters)?allRosters:[];
           }
         }catch{
           rosterPlayers=[];
         }
-      }else{
-        rosterPlayers=[];
       }
-      drawSchedule();
+      if(!selectedCompetition){
+        const available=Object.keys(COMPETITION_META).find(code=>scheduleRows.some(g=>scheduleCompetitionCode(g)===code));
+        selectedCompetition=available||"worlds";
+      }
+      populateTournamentSelect();
+      syncHeading();
+      await loadCompetition(selectedCompetition);
+      setMode(mode);
     })();
   }
   if(view==="players"){
