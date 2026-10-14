@@ -163,6 +163,10 @@ check(app.includes('b.listMockCompetitions()'),"Creator Lab loads mock tournamen
 check(app.includes('b.setMockCompetition(mockLeague.id,activeCompetition.value)'),"Creator Lab applies selected tournament");
 check(app.includes('b.listMockDraftPool(leagueId)'),"Draft Room loads authoritative mock pool");
 check(app.includes("if(!Number.isFinite(start)||start<=now)return false;"),"player profiles reject past matches from upcoming schedule");
+check(app.includes('totalRequired:5'),"five-role fantasy roster model");
+check(app.includes('function rosterLimit(){\n  return 5;'),"roster limit is exactly five players");
+check(!html.includes('<h3>FLEX</h3>')||html.includes('<div class="roster-subsection" hidden>'),"FLEX is not an active roster section");
+check(html.includes('<span>TOP</span><span>JNG</span><span>MID</span><span>ADC</span><span>SUP</span>'),"league setup shows five starting roles");
 check(app.includes("backend().listProMatches(null,new Date().toISOString()"),"player profiles refresh upcoming matches from current backend schedule");
 check(html.includes('data-mock-duration="5"')&&html.includes('data-mock-duration="35"'),"Creator Lab exposes both quick and full test modes");
 check(app.includes('let mockDuration=5;'),"Creator Lab defaults to the 5-minute quick test");
