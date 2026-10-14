@@ -4499,16 +4499,16 @@ function render(view="home",options={}){
       const createBtn=document.querySelector("#confirmCreateLeagueBtn");
       const defaults=getLeagueSettings();
       competition.value=normalizeCompetitionCode(defaults.competition)||"lcs";
-      if(competitionCapacity(competition.value,benchSelect.value).maxManagers<1)competition.value="lcs";
+      if(competitionCapacity(competition.value).maxManagers<1)competition.value="lcs";
       const competitionHelp=document.querySelector("#createCompetitionHelp");
       const capacityHelp=document.querySelector("#createManagerCapacityHelp");
       const capacityCard=document.querySelector("#createPoolCapacity");
       const updateCreateCapacity=()=>{
-        const cap=competitionCapacity(competition.value,benchSelect.value);
+        const cap=competitionCapacity(competition.value);
         if(competitionHelp)competitionHelp.textContent=competitionHelpText(competition.value);
-        if(capacityHelp)capacityHelp.textContent=capacityMessage(competition.value,benchSelect.value);
+        if(capacityHelp)capacityHelp.textContent=capacityMessage(competition.value);
         if(capacityCard)capacityCard.innerHTML=cap.maxManagers
-          ? `<strong>${cap.maxManagers} max managers</strong><small>${cap.poolSize} eligible draftable players · ${cap.rosterSize} roster spots per team</small>`
+          ? `<strong>${cap.maxManagers} max managers</strong><small>${cap.poolSize} eligible draftable players · TOP / JNG / MID / ADC / SUP</small>`
           : `<strong>Draft unavailable</strong><small>No complete eligible ${competitionName(competition.value)} player pool is available yet.</small>`;
         document.querySelectorAll("[data-create-managers]").forEach(btn=>{
           const value=Number(btn.dataset.createManagers);
@@ -4522,7 +4522,6 @@ function render(view="home",options={}){
         createBtn.disabled=cap.maxManagers<1;
       };
       competition.addEventListener("change",updateCreateCapacity);
-      benchSelect.addEventListener("change",updateCreateCapacity);
       document.querySelectorAll("[data-create-managers]").forEach(btn=>btn.onclick=()=>{
         if(btn.disabled)return;
         managerSelect.value=btn.dataset.createManagers;
@@ -4536,7 +4535,7 @@ function render(view="home",options={}){
         const teamName=teamInput.value.trim();
         if(!name)return showToast("Enter a league name.");
         if(!teamName)return showToast("Enter your team name.");
-        const capacity=competitionCapacity(competition.value,benchSelect.value);
+        const capacity=competitionCapacity(competition.value);
         if(capacity.maxManagers<1)return showToast(`${competitionName(competition.value)} is not open for fantasy drafting yet.`);
         if(Number(managerSelect.value)>capacity.maxManagers)return showToast(`This ${competitionName(competition.value)} league supports up to ${capacity.maxManagers} managers with the current roster size.`);
 
@@ -4545,7 +4544,7 @@ function render(view="home",options={}){
           ...defaultLeagueSettings,
           name,
           managers:managerSelect.value,
-          bench:benchSelect.value,
+          bench:"0",
           draftType:"Snake",
           scoringFormat:"Head-to-head",
           competition:normalizeCompetitionCode(competition.value)||"worlds",
