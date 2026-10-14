@@ -2964,7 +2964,7 @@ function render(view="home",options={}){
         bracketBoard.innerHTML='<div class="empty-state"><strong>Bracket not available yet</strong><small>This tournament does not currently have playoff-stage matches in the schedule feed.</small></div>';
         return;
       }
-      const grouped=[];
+      let grouped=[];
       rows.forEach(g=>{
         const key=stageLabel(g.stage);
         let group=grouped.find(x=>x.key===key);
@@ -2972,23 +2972,94 @@ function render(view="home",options={}){
         group.rows.push(g);
       });
       grouped.sort((a,b)=>a.rank-b.rank);
-      bracketBoard.innerHTML=grouped.map((group,idx)=>`
-        <div class="schedule-bracket-round">
-          <div class="schedule-bracket-round-title"><small>ROUND ${idx+1}</small><strong>${h(group.key)}</strong></div>
-          <div class="schedule-bracket-round-matches">
-            ${group.rows.map(g=>`<button class="schedule-bracket-match" type="button" data-bracket-match="${h(g.matchId||g.eventId||g.startTime||"")}">
-              <div class="bracket-team"><span>${h(g.aCode||"TBD")}</span><strong>${h(g.a||"TBD")}</strong></div>
-              <div class="bracket-team"><span>${h(g.bCode||"TBD")}</span><strong>${h(g.b||"TBD")}</strong></div>
-              <div class="bracket-match-meta"><small>${h(localScheduleRow(g).time||"TBD")}</small><b>${h(displayMatchStatus(g.status))}${Number(g.count)>0?" · BO"+h(g.count):""}</b></div>
-            </button>`).join("")}
-          </div>
-        </div>
-      `).join("");
+
+      // Some feeds label every postseason series simply "Playoffs". When that
+      // happens, split the stage into chronological rounds so the UI still reads
+      // like a real bracket instead of one giant vertical list.
+      if(grouped.length<=2){
+        const generic=grouped.find(g=>/playoff|knockout|bracket|elimination/i.test(g.key)&&g.rows.length>3);
+        if(generic){
+          const byDate=[];
+          generic.rows
+            .slice()
+            .sort((a,b)=>Date.parse(a.startTime||"")-Date.parse(b.startTime||""))
+            .forEach(match=>{
+              const d=new Date(match.startTime||"");
+              const key=Number.isNaN(d.getTime())?"TBD":d.toISOString().slice(0,10);
+              let bucket=byDate.find(x=>x.dateKey===key);
+              if(!bucket){
+                bucket={dateKey:key,key:"Playoffs",rank:generic.rank,rows:[]};
+                byDate.push(bucket);
+              }
+              bucket.rows.push(match);
+            });
+          if(byDate.length>1){
+            byDate.forEach((bucket,idx)=>{
+              bucket.key=idx===byDate.length-1&&bucket.rows.length===1?"Late Playoffs":"Playoff Round "+(idx+1);
+              bucket.rank=generic.rank+idx;
+            });
+            grouped=[...grouped.filter(g=>g!==generic),...byDate].sort((a,b)=>a.rank-b.rank);
+          }
+        }
+      }
+
+      const maxMatches=Math.max(...grouped.map(g=>g.rows.length),1);
+      bracketBoard.innerHTML=`
+        <div class="schedule-bracket-pan-hint" aria-hidden="true">↔ Drag to explore bracket</div>
+        <div class="schedule-bracket-canvas" style="--bracket-rounds:${grouped.length};--bracket-max-matches:${maxMatches}">
+          ${grouped.map((group,idx)=>`
+            <div class="schedule-bracket-round" style="--round-index:${idx};--round-total:${grouped.length}">
+              <div class="schedule-bracket-round-title"><small>ROUND ${idx+1}</small><strong>${h(group.key)}</strong></div>
+              <div class="schedule-bracket-round-matches">
+                ${group.rows.map((g,matchIdx)=>`<button class="schedule-bracket-match" style="--match-index:${matchIdx}" type="button" data-bracket-match="${h(g.matchId||g.eventId||g.startTime||"")}">
+                  <div class="bracket-team"><span>${h(g.aCode||"TBD")}</span><strong>${h(g.a||"TBD")}</strong></div>
+                  <div class="bracket-team"><span>${h(g.bCode||"TBD")}</span><strong>${h(g.b||"TBD")}</strong></div>
+                  <div class="bracket-match-meta"><small>${h(localScheduleRow(g).time||"TBD")}</small><b>${h(displayMatchStatus(g.status))}${Number(g.count)>0?" · BO"+h(g.count):""}</b></div>
+                </button>`).join("")}
+              </div>
+            </div>
+          `).join("")}
+        </div>`;
       bracketBoard.querySelectorAll("[data-bracket-match]").forEach(btn=>btn.onclick=()=>{
         const key=btn.dataset.bracketMatch;
         const g=rows.find(x=>String(x.matchId||x.eventId||x.startTime||"")===String(key));
         if(g)openMatchModal(g);
       });
+
+      // Grab-to-pan on mouse/pen. Touch keeps native horizontal swiping.
+      if(!bracketBoard.dataset.panBound){
+        bracketBoard.dataset.panBound="true";
+        let dragging=false,startX=0,startScroll=0,moved=false;
+        bracketBoard.addEventListener("pointerdown",e=>{
+          if(e.pointerType==="touch"||e.button!==0)return;
+          dragging=true;moved=false;startX=e.clientX;startScroll=bracketBoard.scrollLeft;
+          bracketBoard.classList.add("is-dragging");
+          bracketBoard.setPointerCapture?.(e.pointerId);
+        });
+        bracketBoard.addEventListener("pointermove",e=>{
+          if(!dragging)return;
+          const delta=e.clientX-startX;
+          if(Math.abs(delta)>4)moved=true;
+          bracketBoard.scrollLeft=startScroll-delta;
+        });
+        const stopDrag=e=>{
+          if(!dragging)return;
+          dragging=false;
+          bracketBoard.classList.remove("is-dragging");
+          try{bracketBoard.releasePointerCapture?.(e.pointerId);}catch{}
+        };
+        bracketBoard.addEventListener("pointerup",stopDrag);
+        bracketBoard.addEventListener("pointercancel",stopDrag);
+        bracketBoard.addEventListener("click",e=>{
+          if(moved){e.preventDefault();e.stopPropagation();moved=false;}
+        },true);
+        bracketBoard.addEventListener("wheel",e=>{
+          if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){
+            bracketBoard.scrollLeft+=e.deltaY;
+            e.preventDefault();
+          }
+        },{passive:false});
+      }
     };
 
     const drawRosterIntelligence=()=>{
