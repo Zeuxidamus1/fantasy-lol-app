@@ -5271,7 +5271,7 @@ function render(view="home",options={}){
       }
       const next=btn.dataset.lockHelp==="next";
       panel.innerHTML=next
-        ? "<strong>Next Lineup Lock</strong><small>The next time one of your rostered players becomes locked because their scheduled professional match is starting. Once locked, that roster spot cannot be changed until the lock clears.</small>"
+        ? "<strong>Next Lineup Lock</strong><small>The next time one of your rostered players becomes locked because their scheduled match is starting. Once locked, that roster spot cannot be changed until the lock clears.</small>"
         : "<strong>Lock Status</strong><small>Shows how many roster spots are currently locked versus still eligible for a replacement. A locked player has already reached their lineup lock for the active scoring period.</small>";
       panel.dataset.helpType=btn.dataset.lockHelp;
       panel.hidden=false;
