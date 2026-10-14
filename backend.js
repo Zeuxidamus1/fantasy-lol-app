@@ -34,30 +34,72 @@
     };
   }
 
+  const readCache=new Map();
+  const inflightReads=new Map();
+
+  function readCacheTtl(path){
+    if(path.startsWith("/auth/v1/user"))return 30000;
+    if(path.includes("/pro_matches?")||path.includes("/player_competition_status?"))return 30000;
+    if(path.includes("/fantasy_game_scores?")||path.includes("/league_matchups?"))return 5000;
+    if(path.includes("/player_projections?"))return 15000;
+    return 10000;
+  }
+
+  function clearReadCache(){
+    readCache.clear();
+    inflightReads.clear();
+  }
+
   async function request(path,{method="GET",body,session=readSession(),headers={}}={}){
     if(!isConfigured())throw new Error("Cloud backend is not configured.");
-    const controller=new AbortController();
-    const timer=setTimeout(()=>controller.abort(),15000);
-    try{
-      const res=await fetch(base+path,{
-        method,
-        headers:authHeaders(session,headers),
-        body:body===undefined?undefined:JSON.stringify(body),
-        signal:controller.signal
-      });
-      const text=await res.text();
-      let payload=null;
-      try{payload=text?JSON.parse(text):null;}catch{payload=text||null;}
-      if(!res.ok){
-        const message=payload?.msg||payload?.message||payload?.error_description||payload?.error||("Request failed ("+res.status+")");
-        const err=new Error(message);
-        err.status=res.status;
-        throw err;
-      }
-      return payload;
-    }finally{
-      clearTimeout(timer);
+
+    const upperMethod=String(method||"GET").toUpperCase();
+    const canCache=upperMethod==="GET";
+    const sessionKey=String(session?.access_token||"").slice(-16);
+    const cacheKey=sessionKey+"|"+path;
+
+    if(canCache){
+      const cached=readCache.get(cacheKey);
+      if(cached&&cached.expiresAt>Date.now())return cached.value;
+      const pending=inflightReads.get(cacheKey);
+      if(pending)return pending;
+    }else{
+      clearReadCache();
     }
+
+    const run=async()=>{
+      const controller=new AbortController();
+      const timer=setTimeout(()=>controller.abort(),15000);
+      try{
+        const res=await fetch(base+path,{
+          method:upperMethod,
+          headers:authHeaders(session,headers),
+          body:body===undefined?undefined:JSON.stringify(body),
+          signal:controller.signal
+        });
+        const text=await res.text();
+        let payload=null;
+        try{payload=text?JSON.parse(text):null;}catch{payload=text||null;}
+        if(!res.ok){
+          const message=payload?.msg||payload?.message||payload?.error_description||payload?.error||("Request failed ("+res.status+")");
+          const err=new Error(message);
+          err.status=res.status;
+          throw err;
+        }
+        if(canCache){
+          readCache.set(cacheKey,{value:payload,expiresAt:Date.now()+readCacheTtl(path)});
+        }
+        return payload;
+      }finally{
+        clearTimeout(timer);
+      }
+    };
+
+    if(!canCache)return run();
+
+    const pending=run().finally(()=>inflightReads.delete(cacheKey));
+    inflightReads.set(cacheKey,pending);
+    return pending;
   }
 
   function publicAppUrl(){
