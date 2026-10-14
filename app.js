@@ -2865,7 +2865,7 @@ function render(view="home",options={}){
   if(view==="schedule"||view==="my-schedule"){
     const list=document.querySelector("#scheduleList");
     const rosterOnly=view==="my-schedule";
-    let day="all";
+    let day="today";
     let rosterPlayers=[];
     let scheduleRows=proSchedule.filter(g=>!!scheduleCompetitionCode(g));
     let leagueCompetition=null;
@@ -2877,7 +2877,7 @@ function render(view="home",options={}){
     if(title)title.textContent=rosterOnly?"My Schedule":"Schedule";
     if(copy)copy.textContent=rosterOnly
       ?"Only matches involving teams represented by players on your current fantasy roster."
-      :"All scheduled professional matches in the current feed.";
+      :"Today and upcoming professional matches.";
     if(fullBtn)fullBtn.classList.toggle("schedule-view-active",!rosterOnly);
     if(myBtn)myBtn.classList.toggle("schedule-view-active",rosterOnly);
 
@@ -2917,7 +2917,9 @@ function render(view="home",options={}){
         return 0;
       });
       const filtered=rows.filter(g=>{
-        const dayMatches=day==="all"||g.day===day||(day==="upcoming"&&g.day==="upcoming");
+        // Schedule is forward-looking only. Historical dates never appear here.
+        if(g.day==="past")return false;
+        const dayMatches=g.day===day||(day==="upcoming"&&g.day==="upcoming");
         if(!dayMatches)return false;
         if(leagueCompetition&&scheduleCompetitionCode(g)!==leagueCompetition)return false;
         if(!rosterOnly)return true;
@@ -2939,7 +2941,7 @@ function render(view="home",options={}){
           <div class="game-team right ${bOwned?"my-roster-team":""}"><div><strong>${h(g.b||"TBD")}</strong><small>${h(bNote)}</small></div><span class="team-mark">${h(g.bCode||"TBD")}</span></div>
         </div>`;
       }).join(""):(leagueCompleted
-        ? '<div class="empty-state"><strong>Season complete</strong><small>'+h(competitionName(leagueCompetition))+' has no remaining matches. Use All to review completed matches.</small></div>'
+        ? '<div class="empty-state"><strong>Season complete</strong><small>'+h(competitionName(leagueCompetition))+' has no remaining scheduled matches.</small></div>'
         : rosterOnly
           ? '<div class="empty-state"><strong>No roster games found</strong><small>There are no scheduled matches for players on your current roster in this time filter.</small></div>'
           : '<div class="empty-state"><strong>No matches found</strong><small>Try another filter or check back after the next data refresh.</small></div>');
@@ -2960,7 +2962,7 @@ function render(view="home",options={}){
               ? competitionName(leagueCompetition)+" season complete · no future matches remain."
               : rosterOnly
                 ?"Only "+competitionName(leagueCompetition)+" matches involving players on your current fantasy roster."
-                :"Official "+competitionName(leagueCompetition)+" matches in the current schedule window.";
+                :"Official upcoming "+competitionName(leagueCompetition)+" matches.";
             const season=Number(league.settings?.competitionSeason)||new Date().getFullYear();
             const scheduleFrom=leagueCompleted?new Date(Date.UTC(season,0,1)):null;
             const scheduleTo=leagueCompleted?new Date(Date.UTC(season+1,0,1)):null;
