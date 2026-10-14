@@ -3904,32 +3904,14 @@ function render(view="home",options={}){
           return;
         }
 
-        const summaries=await Promise.all(completedLeagues.map(async league=>{
-          try{
-            const [standings,champion,members,bots]=await Promise.all([
-              b.listLeagueStandings(league.id).catch(()=>[]),
-              b.getLeagueChampion(league.id).catch(()=>null),
-              b.listLeagueMembers(league.id).catch(()=>[]),
-              b.listLeagueBots(league.id).catch(()=>[])
-            ]);
-            const mine=(standings||[]).find(s=>String(s.manager_type||"human")==="human"&&String(s.manager_id)===String(user.id));
-            let championName="No Champion";
-            if(champion){
-              championName=(String(champion.manager_type||"human")==="bot"
-                ?bots.find(x=>String(x.id)===String(champion.manager_id))?.team_name
-                :members.find(x=>String(x.user_id)===String(champion.manager_id))?.team_name)||"Champion";
-            }
-            return {league,finish:mine?.rank?"#"+Number(mine.rank):"—",championName};
-          }catch{
-            return {league,finish:"—",championName:"—"};
-          }
-        }));
-        completedLeagueList.innerHTML=summaries.map(({league,finish,championName})=>`
+        // Keep the League page fast: render completed leagues immediately.
+        // Final standings/champion/roster data is fetched only when a league is opened.
+        completedLeagueList.innerHTML=completedLeagues.map(league=>`
           <button class="league-choice-card completed-league-choice" type="button" data-review-completed-league="${h(league.id)}">
             <span class="league-choice-icon">✓</span>
             <span>
               <strong>${h(league.name)}</strong>
-              <small>${h(competitionName(league.settings?.competition||""))} ${h(String(league.settings?.competitionSeason||""))} · Finish ${h(finish)} · ${h(championName)}</small>
+              <small>${h(competitionName(league.settings?.competition||""))} ${h(String(league.settings?.competitionSeason||""))} · Season Complete</small>
             </span>
             <span class="league-choice-arrow">›</span>
           </button>`).join("");
