@@ -259,7 +259,7 @@
 
         <div class="settings-list creator-lab-settings compact">
           <div><span>Matchup</span><strong>You vs Rift Bot</strong></div>
-          <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP · FLEX · Bench</strong></div>
+          <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP · Bench</strong></div>
         </div>
 
         <button class="primary-btn" id="creatorCreateMockBtn" type="button">Create 5-Minute Mock</button>
@@ -460,7 +460,7 @@
           <div id="starterRosterList" class="roster"></div>
         </div>
 
-        <div class="roster-subsection">
+        <div class="roster-subsection" hidden>
           <div class="section-head">
             <div class="roster-heading-with-help">
               <h3>FLEX</h3>
@@ -470,7 +470,7 @@
           <div id="flexRosterList" class="roster"></div>
         </div>
 
-        <div class="roster-subsection">
+        <div class="roster-subsection" hidden>
           <div class="section-head">
             <div class="roster-heading-with-help">
               <h3>Bench</h3>
@@ -858,7 +858,7 @@
             <div><span>Teams</span><strong>8</strong></div>
             <div><span>Draft</span><strong>Snake</strong></div>
             <div><span>Scoring</span><strong>Head-to-head</strong></div>
-            <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP · FLEX</strong></div>
+            <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP</strong></div>
           </div>
 
           <div class="league-scoring-details">
@@ -1301,16 +1301,14 @@
         <div class="form-grid">
           <div class="form-group">
             <label for="managerCount">Managers</label>
-          <small class="field-help" id="managerCapacityHelp">Maximum managers are based on the competition's draftable player pool and bench size.</small>
+          <small class="field-help" id="managerCapacityHelp">Maximum managers are based on available players at TOP, JNG, MID, ADC, and SUP.</small>
             <select id="managerCount" class="form-control">
               <option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
             </select>
           </div>
-          <div class="form-group">
+          <div class="form-group" hidden>
             <label for="benchCount">Bench spots</label>
-            <select id="benchCount" class="form-control">
-              <option selected>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-            </select>
+            <select id="benchCount" class="form-control"><option selected value="0">0</option></select>
           </div>
         </div>
 
@@ -1354,7 +1352,7 @@
         <div class="form-group">
           <label>Starting roster</label>
           <div class="position-grid">
-            <span>TOP</span><span>JNG</span><span>MID</span><span>ADC</span><span>SUP</span><span>FLEX</span>
+            <span>TOP</span><span>JNG</span><span>MID</span><span>ADC</span><span>SUP</span>
           </div>
           <label class="toggle-row">
             <span><strong>Team slot</strong><small>Coming soon. Team-objective scoring is not active yet.</small></span>
@@ -1463,6 +1461,6 @@
   <script src="backend-config.js?v=20261013-creator-lab-v2"></script>
   <script src="backend.js?v=20261013-performance-v2"></script>
   <script src="player-stats.js?v=20261013-creator-lab-v2"></script>
-  <script src="app.js?v=20261013-schedule-future-only-v1"></script>
+  <script src="app.js?v=20261014-five-role-rosters-v1"></script>
 </body>
 </html>
