@@ -1130,22 +1130,16 @@ function playerRow(p, add=false){
   </div>`;
 }
 
-function rosterRow(p, manage=false){
-  const slot=p.slot||p.role;
-  const position=playerPosition(p);
+function rosterRow(p){
+  const slot=playerPosition(p)||String(p.slot||p.role||"").toUpperCase();
   const visual=playerVisual(p);
   const visualClass=playerVisualIsTeamLogo(p)?" team-logo":" player-photo";
-  const isBench=slot==="BN";
   const locked=!!p.lineupLock;
-  const lineupAction=isBench
-    ? '<button class="mini-btn" data-start-roster="'+playerKey(p)+'">START</button>'
-    : '<button class="mini-btn" data-bench-roster="'+playerKey(p)+'">BENCH</button>';
   const lockBadge=locked?'<span class="lineup-lock-badge" title="This player is locked for the current fantasy period">🔒 LOCKED</span>':"";
-  return `<div class="roster-slot ${isBench?"bench":""} ${locked?"lineup-locked":""}">
+  return `<div class="roster-slot ${locked?"lineup-locked":""}">
     <span class="slot-label">${h(slot)}</span>
     ${visual?`<img class="roster-player-visual${visualClass}" src="${h(visual)}" alt="" loading="lazy" />`:""}
-    <div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(position||p.role)}${p.opp?" · "+h(p.opp):""}</small>${lockBadge}</div>
-    ${manage?(locked?'<div class="team-actions"><span class="locked-action">Match started</span></div>':'<div class="team-actions">'+lineupAction+'</div>'):""}
+    <div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(slot)}${p.opp?" · "+h(p.opp):""}</small>${lockBadge}</div>
   </div>`;
 }
 
@@ -1731,11 +1725,9 @@ function render(view="home",options={}){
       const sourceRoster=Array.isArray(historicalRosterOverride)?historicalRosterOverride:getUserRoster();
       const current=sourceRoster.map(p=>({...p,lineupLock:activeLineupLocks.get(playerKey(p))||null}));
       const validation=validateRoster(current);
-      const starters=current.filter(p=>ROSTER_RULES.starterSlots.includes(p.slot||p.role));
-      const flex=current.filter(p=>(p.slot||p.role)==="FLEX");
-      const bench=current.filter(p=>(p.slot||p.role)==="BN");
-      rosterCount.textContent=`${current.length}/${validation.totalRequired}`;
-      starterCount.textContent=`${starters.length+flex.length}/6`;
+      const starters=current.filter(p=>ROSTER_RULES.starterSlots.includes(playerPosition(p)));
+      rosterCount.textContent=`${starters.length}/5`;
+      starterCount.textContent=`${starters.length}/5`;
 
       statusBanner.classList.toggle("complete",leagueCompleted||validation.isComplete);
       statusBanner.classList.toggle("incomplete",!leagueCompleted&&!validation.isComplete);
@@ -1748,20 +1740,12 @@ function render(view="home",options={}){
       }
 
       starterList.innerHTML=ROSTER_RULES.starterSlots.map(role=>{
-        const p=starters.find(x=>(x.slot||x.role)===role);
-        if(p)return rosterRow(p,rosterMovesEnabled);
-        const hasRoleOnBench=bench.some(x=>playerPosition(x)===role);
-        return `<div class="roster-slot empty-roster-slot"><span class="slot-label">${role}</span><div class="player-info"><strong>Empty ${role} slot</strong><small>${hasRoleOnBench?"A bench player can fill this spot":"No "+role+" player is on your roster"}</small></div></div>`;
+        const p=starters.find(x=>playerPosition(x)===role);
+        if(p)return rosterRow(p);
+        return `<div class="roster-slot empty-roster-slot"><span class="slot-label">${role}</span><div class="player-info"><strong>Empty ${role} slot</strong><small>Add an eligible ${role} player.</small></div></div>`;
       }).join("");
-
-      flexList.innerHTML=flex.length
-        ?rosterRow(flex[0],rosterMovesEnabled)
-        :'<div class="roster-slot empty-roster-slot"><span class="slot-label">FLEX</span><div class="player-info"><strong>Empty FLEX slot</strong><small>Any eligible player can fill this spot.</small></div></div>';
-
-      benchList.innerHTML=bench.length
-        ?bench.map(p=>rosterRow(p,rosterMovesEnabled)).join("")
-        :'<div class="empty-state"><strong>Bench is empty</strong><small>Add enough players to meet your league bench requirement.</small></div>';
-      bindRosterActions();
+      if(flexList)flexList.innerHTML="";
+      if(benchList)benchList.innerHTML="";
     };
 
     if(!leagueId||!cloudReady()){
