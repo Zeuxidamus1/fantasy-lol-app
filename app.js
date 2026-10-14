@@ -287,7 +287,7 @@ function rosterNeedsForManager(state,managerIndex){
 function canDraftPlayer(state,managerIndex,player){
   const settings=getLeagueSettings();
   const picks=managerPicks(state,managerIndex);
-  const maxRoster=6+Number(settings.bench||3);
+  const maxRoster=5;
   if(picks.length>=maxRoster)return false;
   const needs=rosterNeedsForManager(state,managerIndex);
   const benchSpots=Number(settings.bench||3);
@@ -310,7 +310,7 @@ function makeDraftPick(state,player,managerIndex){
   state.pickIndex++;
   state.seconds=30;
   const settings=getLeagueSettings();
-  const rounds=6+Number(settings.bench||3);
+  const rounds=5;
   state.complete=state.pickIndex>=Math.min(rounds*state.managerCount,eligibleDraftPool().length);
   saveDraftState(state);
 }
@@ -331,7 +331,7 @@ function runCpuPicks(state){
 const defaultLeagueSettings = {
   name:"Fantasy League",
   managers:"4",
-  bench:"1",
+  bench:"0",
   draftType:"Snake",
   scoringFormat:"Head-to-head",
   competition:"worlds",
@@ -540,11 +540,7 @@ async function loadRosterFromCloud(leagueId){
       const leagues=await b.listLeagues().catch(()=>[]);
       const leagueStatus=String(leagues.find(l=>String(l.id)===String(leagueId))?.status||"");
       if(leagueStatus==="active"){
-        const missing=[
-          ...validation.missingStarterPositions,
-          ...(validation.missingFlexSlots?["FLEX"]:[]),
-          ...(validation.missingBenchSlots?["BENCH"]:[])
-        ];
+        const missing=[...validation.missingStarterPositions];
         const alertKey="riftRosterAlert:"+leagueId+":"+user.id+":"+normalized.length+":"+missing.join(",");
         let alreadyShown=false;
         try{alreadyShown=sessionStorage.getItem(alertKey)==="1";}catch{}
@@ -666,7 +662,7 @@ function completeIncomingTrade(offer,accept){
     const incoming=playerById(offer.theirPlayerId) || {id:offer.theirPlayerId,name:offer.theirPlayer,team:offer.theirTeam,role:offer.theirRole,fp:offer.theirFp};
     if(!outgoing||!incoming){showToast("Trade could not be completed.");return;}
     const next=rosterNow.filter(p=>playerKey(p)!==offer.userPlayerId);
-    next.push({...incoming,id:playerKey(incoming),position:incoming.position||incoming.role,slot:"BN"});
+    next.push({...incoming,id:playerKey(incoming),position:incomingRole,slot:incomingRole,role:incomingRole});
     saveUserRoster(arrangeUserRoster(next));
     logTransaction("drop",outgoing,{tradeWith:offer.partner});
     logTransaction("add",incoming,{tradeWith:offer.partner});
@@ -683,134 +679,85 @@ function completeIncomingTrade(offer,accept){
 }
 
 const ROSTER_RULES=Object.freeze({
-  starterSlots:Object.freeze(["TOP","JNG","MID","ADC","SUP"]),
-  flexSlot:"FLEX",
-  benchSlot:"BN",
-  flexEligibleRoles:Object.freeze(["TOP","JNG","MID","ADC","SUP"])
+  starterSlots:Object.freeze(["TOP","JNG","MID","ADC","SUP"])
 });
 
 function playerPosition(player){
-  const role=String(player?.position||player?.role||"").toUpperCase();
+  const role=String(player?.position||player?.role||player?.slot||"").toUpperCase();
   return ROSTER_RULES.starterSlots.includes(role)?role:"";
 }
 
-function isFlexEligible(player){
-  return ROSTER_RULES.flexEligibleRoles.includes(playerPosition(player));
+function isFlexEligible(){
+  return false;
 }
 
-function rosterRequirements(settings=getLeagueSettings()){
-  const benchRequired=Math.max(1,Number(settings?.bench||1));
+function rosterRequirements(){
   return {
     starterSlots:[...ROSTER_RULES.starterSlots],
-    flexSlots:1,
-    benchRequired,
-    totalRequired:ROSTER_RULES.starterSlots.length+1+benchRequired
+    flexSlots:0,
+    benchRequired:0,
+    totalRequired:5
   };
 }
 
-function validateRoster(players,settings=getLeagueSettings()){
+function validateRoster(players){
   const roster=Array.isArray(players)?players:[];
-  const req=rosterRequirements(settings);
-  const filledStarterSlots=req.starterSlots.filter(slot=>roster.some(p=>(p.slot||p.role)===slot&&playerPosition(p)===slot));
-  const missingStarterPositions=req.starterSlots.filter(slot=>!filledStarterSlots.includes(slot));
-  const flexPlayers=roster.filter(p=>(p.slot||p.role)===ROSTER_RULES.flexSlot&&isFlexEligible(p));
-  const benchPlayers=roster.filter(p=>(p.slot||p.role)===ROSTER_RULES.benchSlot);
-  const missingFlexSlots=Math.max(0,1-flexPlayers.length);
-  const missingBenchSlots=Math.max(0,req.benchRequired-benchPlayers.length);
-  const totalPlayersMissing=Math.max(0,req.totalRequired-roster.length);
-  const isComplete=missingStarterPositions.length===0&&missingFlexSlots===0&&missingBenchSlots===0&&roster.length===req.totalRequired;
+  const roleCounts=new Map(ROSTER_RULES.starterSlots.map(role=>[
+    role,roster.filter(p=>playerPosition(p)===role).length
+  ]));
+  const filledStarterSlots=ROSTER_RULES.starterSlots.filter(role=>roleCounts.get(role)===1);
+  const missingStarterPositions=ROSTER_RULES.starterSlots.filter(role=>roleCounts.get(role)===0);
+  const duplicateRoles=ROSTER_RULES.starterSlots.filter(role=>roleCounts.get(role)>1);
+  const isComplete=roster.length===5&&missingStarterPositions.length===0&&duplicateRoles.length===0;
   return {
     isComplete,
-    requiredStartingSlots:req.starterSlots,
+    requiredStartingSlots:[...ROSTER_RULES.starterSlots],
     filledStartingSlots:filledStarterSlots,
     missingStarterPositions,
     missingStarterSlots:missingStarterPositions.length,
-    missingFlexSlots,
-    requiredBenchSize:req.benchRequired,
-    currentBenchSize:benchPlayers.length,
-    missingBenchSlots,
-    totalPlayersMissing,
-    totalRequired:req.totalRequired,
+    missingFlexSlots:0,
+    requiredBenchSize:0,
+    currentBenchSize:0,
+    missingBenchSlots:0,
+    duplicateRoles,
+    totalPlayersMissing:Math.max(0,5-roster.length),
+    totalRequired:5,
     currentTotal:roster.length
   };
 }
 
 function rosterStatusText(status){
-  if(status.isComplete){
-    return `All 5 starting positions, FLEX, and ${status.requiredBenchSize} bench ${status.requiredBenchSize===1?"player":"players"} are filled.`;
-  }
+  if(status.isComplete)return "TOP, JNG, MID, ADC, and SUP are filled.";
   const parts=[];
-  if(status.missingStarterSlots){
-    parts.push(`${status.missingStarterPositions.join(", ")} starting ${status.missingStarterSlots===1?"position":"positions"}`);
-  }
-  if(status.missingFlexSlots)parts.push("1 FLEX");
-  if(status.missingBenchSlots)parts.push(`${status.missingBenchSlots} Bench ${status.missingBenchSlots===1?"Player":"Players"}`);
+  if(status.missingStarterSlots)parts.push(status.missingStarterPositions.join(", "));
+  if(status.duplicateRoles?.length)parts.push("duplicate "+status.duplicateRoles.join(", "));
   return parts.length?`You still need: ${parts.join(" · ")}.`:"Your roster needs attention.";
 }
 
 function draftAssignments(picks){
-  const ordered=[...(picks||[])].sort((x,y)=>Number(x.pick_number||x.pick||0)-Number(y.pick_number||y.pick||0));
-  const usedRoles=new Set();
-  let flexUsed=false;
-  return ordered.map(p=>{
-    const role=String(p.role||"").toUpperCase();
-    let slot="BN";
-    if(ROSTER_RULES.starterSlots.includes(role)&&!usedRoles.has(role)){
-      usedRoles.add(role);
-      slot=role;
-    }else if(!flexUsed&&ROSTER_RULES.flexEligibleRoles.includes(role)){
-      flexUsed=true;
-      slot="FLEX";
-    }
-    return {...p,position:role,slot};
-  });
+  return [...(picks||[])]
+    .sort((x,y)=>Number(x.pick_number||x.pick||0)-Number(y.pick_number||y.pick||0))
+    .map(p=>{
+      const role=String(p.role||"").toUpperCase();
+      return {...p,position:role,slot:role};
+    });
 }
 
 function arrangeUserRoster(players){
-  const used=new Set();
-  const arranged=[];
-  ROSTER_RULES.starterSlots.forEach(role=>{
-    const idx=players.findIndex((p,i)=>!used.has(i)&&playerPosition(p)===role);
-    if(idx>=0){
-      used.add(idx);
-      arranged.push({...players[idx],position:role,slot:role,role});
-    }
-  });
-  const flexIdx=players.findIndex((p,i)=>!used.has(i)&&isFlexEligible(p));
-  if(flexIdx>=0){
-    used.add(flexIdx);
-    const p=players[flexIdx];
-    arranged.push({...p,position:playerPosition(p),slot:"FLEX",role:playerPosition(p)});
+  const byRole=new Map();
+  for(const p of (players||[])){
+    const role=playerPosition(p);
+    if(role&&!byRole.has(role))byRole.set(role,{...p,position:role,slot:role,role});
   }
-  players.forEach((p,i)=>{
-    if(!used.has(i)){
-      const position=playerPosition(p);
-      arranged.push({...p,position,slot:"BN",role:"BN"});
-    }
-  });
-  return arranged;
+  return ROSTER_RULES.starterSlots.map(role=>byRole.get(role)).filter(Boolean);
 }
 
 function normalizeUserRoster(players){
-  const usedStarters=new Set();
-  let flexUsed=false;
-  return (players||[]).map(p=>{
-    const position=playerPosition(p);
-    const requested=String(p.slot||p.role||"BN").toUpperCase();
-    if(position&&requested===position&&!usedStarters.has(position)){
-      usedStarters.add(position);
-      return {...p,position,slot:position,role:position};
-    }
-    if(requested===ROSTER_RULES.flexSlot&&position&&isFlexEligible({...p,position})&&!flexUsed){
-      flexUsed=true;
-      return {...p,position,slot:"FLEX",role:position};
-    }
-    return {...p,position,slot:"BN",role:"BN"};
-  });
+  return arrangeUserRoster(players);
 }
 
 function rosterLimit(){
-  return rosterRequirements().totalRequired;
+  return 5;
 }
 
 function isOwned(player){
@@ -923,7 +870,9 @@ async function addPlayerToRoster(player){
   if(isOwned(player)){showToast(`${player.name} is already on your team.`);return;}
   let current=getUserRoster();
   if(current.length<rosterLimit()){
-    current.push({...player,id:playerKey(player),position:player.position||player.role,slot:"BN"});
+    const role=playerPosition(player);
+    if(current.some(p=>playerPosition(p)===role))return openDropChooser(player);
+    current.push({...player,id:playerKey(player),position:role,slot:role,role});
     try{
       await saveUserRoster(current);
       logTransaction("add",player);
@@ -941,12 +890,7 @@ function openDropChooser(incoming){
   if(!modal||!list||!copy)return;
   const current=getUserRoster();
   const incomingRole=playerPosition(incoming);
-  const compatible=current.filter(p=>{
-    const slot=p.slot||p.role;
-    if(slot==="BN")return true;
-    if(slot==="FLEX")return isFlexEligible(incoming);
-    return slot===incomingRole;
-  });
+  const compatible=current.filter(p=>playerPosition(p)===incomingRole);
   copy.textContent=`Your roster is full. Choose who to replace with ${incoming.name}.`;
   list.innerHTML=compatible.length
     ?compatible.map(p=>`<button class="drop-option" data-drop-id="${playerKey(p)}"><span class="role-badge">${h(p.slot||p.role)}</span><span><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.position||p.role)}</small></span><span class="drop-action">REPLACE</span></button>`).join("")
@@ -985,12 +929,7 @@ function openWaiverDropChooser(incoming){
   if(!modal||!list||!copy||!leagueId||!cloudReady())return;
   const current=getUserRoster();
   const incomingRole=playerPosition(incoming);
-  const compatible=current.filter(p=>{
-    const slot=p.slot||p.role;
-    if(slot==="BN")return true;
-    if(slot==="FLEX")return isFlexEligible(incoming);
-    return slot===incomingRole;
-  });
+  const compatible=current.filter(p=>playerPosition(p)===incomingRole);
   copy.textContent="Your roster is full. Choose who would be replaced if your waiver claim for "+incoming.name+" wins.";
   list.innerHTML=compatible.length
     ?compatible.map(p=>'<button class="drop-option" data-waiver-drop-id="'+playerKey(p)+'"><span class="role-badge">'+h(p.slot||p.role)+'</span><span><strong>'+h(p.name)+'</strong><small>'+h(p.team)+' · '+h(p.position||p.role)+'</small></span><span class="drop-action">REPLACE IF WON</span></button>').join("")
@@ -1023,22 +962,18 @@ function eligibleFantasyPlayers(settings=getLeagueSettings()){
   const code=normalizeCompetitionCode(settings?.competition);
   return allFantasyPlayers().filter(p=>playerEligibleForCompetition(p,code));
 }
-function competitionCapacity(competition,bench=1){
+function competitionCapacity(competition){
   const code=normalizeCompetitionCode(competition);
-  const benchCount=Math.max(0,Number(bench)||0);
   const pool=allFantasyPlayers().filter(p=>playerAvailableForAcquisition(p,code));
   const roleCounts=Object.fromEntries(["TOP","JNG","MID","ADC","SUP"].map(role=>[role,pool.filter(p=>p.role===role).length]));
-  const roleLimit=Math.min(...Object.values(roleCounts));
-  const rosterSize=6+benchCount;
-  const totalLimit=Math.floor(pool.length/rosterSize);
-  const maxManagers=Math.max(0,Math.min(10,roleLimit,totalLimit));
-  return {code,poolSize:pool.length,roleCounts,rosterSize,maxManagers};
+  const maxManagers=Math.max(0,Math.min(10,...Object.values(roleCounts)));
+  return {code,poolSize:pool.length,roleCounts,rosterSize:5,maxManagers};
 }
-function capacityMessage(competition,bench=1){
-  const cap=competitionCapacity(competition,bench);
+function capacityMessage(competition){
+  const cap=competitionCapacity(competition);
   const name=competitionName(cap.code);
   if(cap.maxManagers<1)return `${name} is not open for fantasy drafting yet because there is no complete eligible player pool.`;
-  return `${name}: ${cap.poolSize} draftable players · up to ${cap.maxManagers} manager${cap.maxManagers===1?"":"s"} with ${Number(bench)||0} bench spot${Number(bench)===1?"":"s"}.`;
+  return `${name}: ${cap.poolSize} draftable players · up to ${cap.maxManagers} managers with TOP, JNG, MID, ADC, and SUP.`;
 }
 async function applyCompetitionScheduleAvailability(select,onChange){
   if(!select||!cloudReady()||typeof backend()?.listProMatches!=="function")return;
@@ -1078,7 +1013,7 @@ async function applyCompetitionScheduleAvailability(select,onChange){
     option.textContent=closed?option.dataset.baseLabel+" · Season Complete":option.dataset.baseLabel;
   }
   if(select.selectedOptions[0]?.disabled){
-    const next=[...select.options].find(option=>!option.disabled&&competitionCapacity(option.value,1).maxManagers>0);
+    const next=[...select.options].find(option=>!option.disabled&&competitionCapacity(option.value).maxManagers>0);
     if(next)select.value=next.value;
   }
   if(typeof onChange==="function")onChange();
@@ -3834,7 +3769,7 @@ function render(view="home",options={}){
         <div><span>Draft</span><strong>${h(summarySettings.draftType)}</strong></div>
         <div><span>Scoring</span><strong>${h(summarySettings.scoringFormat)}</strong></div>
         <div><span>Competition</span><strong>${h(competitionName(summarySettings.competition))}</strong></div>
-        <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP · FLEX · ${h(String(summarySettings.bench))} BN</strong></div>`;
+        <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP</strong></div>`;
       const signedScore=value=>{
         const n=Number(value);
         if(!Number.isFinite(n))return "—";
@@ -4707,13 +4642,13 @@ function render(view="home",options={}){
     let difficulty=stored.difficulty||"competitive";
     const competition=document.querySelector("#botSetupCompetition");
     competition.value=normalizeCompetitionCode(stored.competition)||"lcs";
-    if(competitionCapacity(competition.value,1).maxManagers<1)competition.value="lcs";
+    if(competitionCapacity(competition.value).maxManagers<1)competition.value="lcs";
     const botCountEl=document.querySelector("#botManagerCount");
     const capacityEl=document.querySelector("#botPoolCapacity");
     const competitionHelp=document.querySelector("#botSetupCompetitionHelp");
     const nextBtn=document.querySelector("#botSetupNext");
     const update=()=>{
-      const cap=competitionCapacity(competition.value,1);
+      const cap=competitionCapacity(competition.value);
       if(total>cap.maxManagers&&cap.maxManagers>0)total=cap.maxManagers;
       if(cap.maxManagers<1)total=0;
       humans=Math.min(humans,total||1);
@@ -4742,7 +4677,7 @@ function render(view="home",options={}){
     document.querySelectorAll("[data-human-count]").forEach(btn=>btn.onclick=()=>{if(btn.disabled)return;humans=Number(btn.dataset.humanCount);update();});
     document.querySelectorAll("[data-bot-difficulty]").forEach(btn=>btn.onclick=()=>{difficulty=btn.dataset.botDifficulty;update();});
     nextBtn.onclick=()=>{
-      const cap=competitionCapacity(competition.value,1);
+      const cap=competitionCapacity(competition.value);
       if(total<1||total>cap.maxManagers)return showToast("Choose an available league size.");
       sessionStorage.setItem("riftBotLeagueSetup",JSON.stringify({
         totalManagers:total,
@@ -5169,7 +5104,7 @@ function render(view="home",options={}){
       const managerSelect=document.querySelector("#managerCount");
       if([...managerSelect.options].some(o=>o.value===String(settings.managers)))managerSelect.value=String(settings.managers);
       else managerSelect.value="4";
-      document.querySelector("#benchCount").value=settings.bench;
+      document.querySelector("#benchCount").value="0";
       const competitionSelect=document.querySelector("#competition");
       competitionSelect.value=normalizeCompetitionCode(settings.competition)||"worlds";
       const competitionHelp=document.querySelector("#competitionHelp");
@@ -5202,9 +5137,9 @@ function render(view="home",options={}){
       document.querySelector("#scoreWin").value=settings.scoring.win;
       document.querySelector("#scoreFb").value=settings.scoring.firstBlood;
       const applyCapacity=()=>{
-        const cap=competitionCapacity(competitionSelect.value,document.querySelector("#benchCount").value);
+        const cap=competitionCapacity(competitionSelect.value);
         const help=document.querySelector("#managerCapacityHelp");
-        if(help)help.textContent=capacityMessage(competitionSelect.value,document.querySelector("#benchCount").value);
+        if(help)help.textContent=capacityMessage(competitionSelect.value);
         [...managerSelect.options].forEach(option=>{option.disabled=Number(option.value)>cap.maxManagers||cap.maxManagers<1;});
         if(cap.maxManagers>0&&Number(managerSelect.value)>cap.maxManagers)managerSelect.value=String(cap.maxManagers);
       };
@@ -5213,7 +5148,7 @@ function render(view="home",options={}){
         if(fantasyFormat)fantasyFormat.value=inferredFormat(competitionSelect.value);
         syncFormatHelp();
       };
-      document.querySelector("#benchCount").onchange=applyCapacity;
+      
       applyCapacity();
     };
 
@@ -5318,7 +5253,7 @@ function render(view="home",options={}){
         const next={
           name:document.querySelector("#leagueName").value.trim()||"Fantasy League",
           managers:document.querySelector("#managerCount").value,
-          bench:document.querySelector("#benchCount").value,
+          bench:"0",
           draftType:"Snake",
           scoringFormat:"Head-to-head",
           competition:normalizeCompetitionCode(document.querySelector("#competition").value)||"worlds",
