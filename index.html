@@ -259,7 +259,7 @@
 
         <div class="settings-list creator-lab-settings compact">
           <div><span>Matchup</span><strong>You vs Rift Bot</strong></div>
-          <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP · Bench</strong></div>
+          <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP</strong></div>
         </div>
 
         <button class="primary-btn" id="creatorCreateMockBtn" type="button">Create 5-Minute Mock</button>
@@ -1087,11 +1087,9 @@
               <button type="button" class="number-choice " data-create-managers="1">1</button><button type="button" class="number-choice " data-create-managers="2">2</button><button type="button" class="number-choice " data-create-managers="3">3</button><button type="button" class="number-choice active" data-create-managers="4">4</button><button type="button" class="number-choice " data-create-managers="5">5</button><button type="button" class="number-choice " data-create-managers="6">6</button><button type="button" class="number-choice " data-create-managers="7">7</button><button type="button" class="number-choice " data-create-managers="8">8</button><button type="button" class="number-choice " data-create-managers="9">9</button><button type="button" class="number-choice " data-create-managers="10">10</button>
             </div>
           </div>
-          <div class="form-group">
+          <div class="form-group" hidden>
             <label for="createBenchCount">Bench Spots</label>
-            <select id="createBenchCount" class="form-control">
-              <option selected>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-            </select>
+            <select id="createBenchCount" class="form-control"><option selected value="0">0</option></select>
           </div>
         </div>
 
@@ -1461,6 +1459,6 @@
   <script src="backend-config.js?v=20261013-creator-lab-v2"></script>
   <script src="backend.js?v=20261013-performance-v2"></script>
   <script src="player-stats.js?v=20261013-creator-lab-v2"></script>
-  <script src="app.js?v=20261014-five-role-rosters-v1"></script>
+  <script src="app.js?v=20261014-five-role-rosters-v2"></script>
 </body>
 </html>
