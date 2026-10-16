@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-16T15:35:09.691Z",
+  "updatedAt": "2026-10-16T18:59:15.457Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -523,7 +523,7 @@ window.ESPORTS_DATA = {
       "bId": "107251245690956393",
       "b": "MVK Esports",
       "bCode": "MVK",
-      "status": "UNSTARTED",
+      "status": "INPROGRESS",
       "strategy": "bestOf",
       "count": 5
     },
