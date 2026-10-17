@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-17T08:36:51.447Z",
+  "updatedAt": "2026-10-17T12:23:02.613Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "116957100120526824",
-      "eventId": "",
-      "competition": "lpl",
-      "competitionType": "regional",
-      "startTime": "2026-09-17T09:00:00Z",
-      "league": "LPL",
-      "leagueCode": "lpl",
-      "stage": "Regional Qualifier",
-      "aId": "99566404854685458",
-      "a": "TOP ESPORTS",
-      "aCode": "TES",
-      "bId": "99566404848691211",
-      "b": "Invictus Gaming",
-      "bCode": "IG",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "116957100120526830",
       "eventId": "",
