@@ -2136,6 +2136,7 @@ function render(view="home",options={}){
           b.listLeagues(),
           b.listFantasyRounds(leagueId).catch(()=>[])
         ]);
+        if(currentView!=="player"||!document.querySelector("#profileStatus"))return;
         const league=leagues.find(l=>String(l.id)===String(leagueId));
         const leagueCompetition=normalizeCompetitionCode(league?.settings?.competition)||"worlds";
         const waiversEnabled=league?.settings?.waivers!==false;
@@ -2145,6 +2146,7 @@ function render(view="home",options={}){
           b.listPlayerCompetitionStatus(leagueCompetition).catch(()=>[]),
           b.listPlayerProjections(leagueId,currentRound?.round_number??null).catch(()=>[])
         ]);
+        if(currentView!=="player"||!document.querySelector("#profileStatus"))return;
         cacheCompetitionStatuses(leagueCompetition,leagueStatusRows);
         const playerStatus=leagueStatusRows.find(x=>String(x.player_id)===playerKey(p));
         const projection=projectionRows.find(x=>String(x.player_id)===playerKey(p));
@@ -4157,10 +4159,12 @@ function render(view="home",options={}){
 
       try{
         const leagues=await b.listLeagues();
+        if(currentView!=="league"||!cloudCard?.isConnected)return;
         const regularLeagues=leagues.filter(l=>!isSimulationLeague(l));
         const completedLeagues=regularLeagues.filter(l=>leagueLifecycleState(l)==="completed");
         const liveLeagues=regularLeagues.filter(playableLeague);
         await renderCompletedLeagueCard(completedLeagues);
+        if(currentView!=="league"||!cloudCard?.isConnected)return;
 
         let activeId=getActiveLeagueId();
         if(activeId&&!liveLeagues.some(l=>String(l.id)===String(activeId))){
@@ -4213,6 +4217,7 @@ function render(view="home",options={}){
             return members.find(m=>String(m.user_id)===String(user.id))||null;
           }catch{return null;}
         }));
+        if(currentView!=="league"||!cloudCard?.isConnected)return;
         const activeLeague=liveLeagues.find(l=>String(l.id)===String(activeId))||liveLeagues[0];
         const activeIndex=liveLeagues.findIndex(l=>String(l.id)===String(activeLeague.id));
         const activeMembership=memberships[activeIndex]||null;
@@ -4578,6 +4583,7 @@ function render(view="home",options={}){
         ]);
         draft=await b.getLeagueDraft(leagueId);
         picks=await b.listDraftPicks(leagueId);
+        if(currentView!=="draft"||!startBtn.isConnected)return;
         const me=memberById.get(String(currentUser.id));
         document.querySelector("#draftMyTeamName").textContent=me?.team_name||"My Team";
 
@@ -4681,6 +4687,7 @@ function render(view="home",options={}){
           return `<div class="draft-roster-slot filled-start"><small>${h(p.slot)}</small><strong>${h(player?.name||p.player_id)}</strong></div>`;
         }).join(""):'<div class="muted">Your picks will appear here.</div>';
       }catch(err){
+        if(currentView!=="draft"||!startBtn.isConnected)return;
         completeState.hidden=true;
         liveState.hidden=false;
         if(pageEyebrow)pageEyebrow.textContent="LIVE LEAGUE DRAFT";
@@ -4863,7 +4870,8 @@ function render(view="home",options={}){
       const cap=competitionCapacity(competition.value);
       if(total>cap.maxManagers&&cap.maxManagers>0)total=cap.maxManagers;
       if(cap.maxManagers<1)total=0;
-      humans=Math.min(humans,total||1);
+      else if(total<1)total=Math.min(cap.maxManagers,4);
+      humans=Math.min(Math.max(1,humans),total||1);
       document.querySelectorAll("[data-bot-size]").forEach(btn=>{
         const value=Number(btn.dataset.botSize);
         btn.disabled=value>cap.maxManagers||cap.maxManagers<1;
@@ -4877,10 +4885,10 @@ function render(view="home",options={}){
       });
       document.querySelectorAll("[data-bot-difficulty]").forEach(btn=>btn.classList.toggle("active",btn.dataset.botDifficulty===difficulty));
       const bots=Math.max(0,total-humans);
-      botCountEl.textContent=total>0?`${bots} Bot Manager${bots===1?"":"s"}`:"No league size available";
+      if(botCountEl)botCountEl.textContent=total>0?`${bots} Bot Manager${bots===1?"":"s"}`:"No league size available";
       if(competitionHelp)competitionHelp.textContent=capacityMessage(competition.value,1);
       if(capacityEl)capacityEl.innerHTML=cap.maxManagers
-        ? `<strong>${cap.maxManagers} max managers</strong><small>${cap.poolSize} eligible draftable players · 7 roster spots per team</small>`
+        ? `<strong>${cap.maxManagers} max managers</strong><small>${cap.poolSize} eligible draftable players · TOP / JNG / MID / ADC / SUP</small>`
         : `<strong>Draft unavailable</strong><small>${competitionName(competition.value)} does not have a complete eligible fantasy pool yet.</small>`;
       nextBtn.disabled=cap.maxManagers<1||total<1;
     };
