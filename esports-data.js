@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-17T15:47:31.731Z",
+  "updatedAt": "2026-10-17T17:57:46.535Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -542,7 +542,7 @@ window.ESPORTS_DATA = {
       "bId": "100205576309502431",
       "b": "FURIA",
       "bCode": "FUR",
-      "status": "UNSTARTED",
+      "status": "INPROGRESS",
       "strategy": "bestOf",
       "count": 5
     },
