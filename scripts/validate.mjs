@@ -40,6 +40,10 @@ const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
 const idCounts=new Map();
 for(const id of ids) idCounts.set(id,(idCounts.get(id)||0)+1);
 check([...idCounts.values()].every(n=>n===1),"HTML IDs are unique");
+// Regression: Bot League's initial update() must have a real destination for its manager count.
+// Without this element, every visit raises a null.textContent exception and prevents Next from updating.
+check(html.includes('id="botManagerCount"'),"Bot League manager count is mounted in its template");
+check(app.includes('if(botCountEl)botCountEl.textContent'),"Bot League handles an unavailable manager count element safely");
 
 const templates=new Set([...html.matchAll(/<template\s+id="([^"]+)-template"/g)].map(m=>m[1]));
 const routeTargets=new Set([
