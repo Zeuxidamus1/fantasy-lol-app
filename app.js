@@ -4885,7 +4885,7 @@ function render(view="home",options={}){
       });
       document.querySelectorAll("[data-bot-difficulty]").forEach(btn=>btn.classList.toggle("active",btn.dataset.botDifficulty===difficulty));
       const bots=Math.max(0,total-humans);
-      botCountEl.textContent=total>0?`${bots} Bot Manager${bots===1?"":"s"}`:"No league size available";
+      if(botCountEl)botCountEl.textContent=total>0?`${bots} Bot Manager${bots===1?"":"s"}`:"No league size available";
       if(competitionHelp)competitionHelp.textContent=capacityMessage(competition.value,1);
       if(capacityEl)capacityEl.innerHTML=cap.maxManagers
         ? `<strong>${cap.maxManagers} max managers</strong><small>${cap.poolSize} eligible draftable players · TOP / JNG / MID / ADC / SUP</small>`
