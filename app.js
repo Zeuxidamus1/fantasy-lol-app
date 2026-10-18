@@ -2975,36 +2975,9 @@ function render(view="home",options={}){
       });
       grouped.sort((a,b)=>a.rank-b.rank);
 
-      // Some feeds label every postseason series simply "Playoffs". When that
-      // happens, split the stage into chronological rounds so the UI still reads
-      // like a real bracket instead of one giant vertical list.
-      if(grouped.length<=2){
-        const generic=grouped.find(g=>/playoff|knockout|bracket|elimination/i.test(g.key)&&g.rows.length>3);
-        if(generic){
-          const byDate=[];
-          generic.rows
-            .slice()
-            .sort((a,b)=>Date.parse(a.startTime||"")-Date.parse(b.startTime||""))
-            .forEach(match=>{
-              const d=new Date(match.startTime||"");
-              const key=Number.isNaN(d.getTime())?"TBD":d.toISOString().slice(0,10);
-              let bucket=byDate.find(x=>x.dateKey===key);
-              if(!bucket){
-                bucket={dateKey:key,key:"Playoffs",rank:generic.rank,rows:[]};
-                byDate.push(bucket);
-              }
-              bucket.rows.push(match);
-            });
-          if(byDate.length>1){
-            byDate.forEach((bucket,idx)=>{
-              bucket.key=idx===byDate.length-1&&bucket.rows.length===1?"Late Playoffs":"Playoff Round "+(idx+1);
-              bucket.rank=generic.rank+idx;
-            });
-            grouped=[...grouped.filter(g=>g!==generic),...byDate].sort((a,b)=>a.rank-b.rank);
-          }
-        }
-      }
-
+      // Do not fabricate rounds from match dates. A series on another day does
+      // not imply progression to a new stage. Keep generic playoffs together
+      // until the source supplies real stage information.
       const maxMatches=Math.max(...grouped.map(g=>g.rows.length),1);
       bracketBoard.innerHTML=`
         <div class="schedule-bracket-canvas" style="--bracket-rounds:${grouped.length};--bracket-max-matches:${maxMatches}">
