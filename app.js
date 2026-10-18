@@ -4824,7 +4824,7 @@ function planSeasonHeadToHead(managers,roundCount){
           });
           const rounds=planAdaptiveSeasonRounds(matchesForSplit);
           roundPreview.innerHTML=rounds.length
-            ?'<strong>'+rounds.length+' provisional windows found in '+year+'</strong><small>These reflect observed regular-season matches for the region, not yet verified for the selected split. Windows will require commissioner review before publishing.</small>'+rounds.slice(0,4).map(r=>'<div>Round '+r.round+' · '+new Date(r.startsAt).toLocaleDateString()+' · '+r.matchCount+' scheduled series</div>').join("")
+            ?'<strong>'+rounds.length+' provisional windows found in '+year+'</strong><small>These reflect observed regular-season matches for the region, not yet verified for the selected split. Windows will require commissioner review before publishing.</small>'+rounds.slice(0,4).map(r=>'<div>Round '+r.round+' · '+new Date(r.startsAt).toLocaleDateString()+' · '+r.matchCount+' series · '+r.knownTeams+' teams'+(r.warnings.length?' · ⚠ '+h(r.warnings.join('; ')):' · Schedule balance appears even')+'</div>').join("")
             :'<strong>No verified regional matches available</strong><small>Rounds cannot be generated without schedule data.</small>';
         }catch{
           if(seq===previewSeq)roundPreview.textContent="Schedule preview unavailable. No rounds have been generated.";
