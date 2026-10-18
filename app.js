@@ -4735,6 +4735,24 @@ function render(view="home",options={}){
       const teamInput=document.querySelector("#createTeamName");
       const createBtn=document.querySelector("#confirmCreateLeagueBtn");
       const defaults=getLeagueSettings();
+      const gameMode=document.querySelector("#createGameMode");
+      const seasonOptions=document.querySelector("#createSeasonSettings");
+      const seasonSplit=document.querySelector("#createSeasonSplit");
+      const seasonHelp=document.querySelector("#createGameModeHelp");
+      const regionalCodes=new Set(["lcs","cblol","lec","lck","lpl","lcp"]);
+      const applyMode=()=>{
+        const isSeason=gameMode?.value==="season";
+        if(seasonOptions)seasonOptions.hidden=!isSeason;
+        if(seasonHelp)seasonHelp.textContent=isSeason
+          ?"Season Fantasy: one regional competition per split, five roles, adaptive rounds. The scoring engine is not activated yet."
+          :"Tournament Fantasy: the existing event-based fantasy rules.";
+        [...competition.options].forEach(opt=>{
+          opt.disabled=isSeason&&!regionalCodes.has(opt.value);
+        });
+        if(isSeason&&!regionalCodes.has(competition.value))competition.value="lcs";
+        updateCreateCapacity();
+      };
+      gameMode?.addEventListener("change",applyMode);
       competition.value=normalizeCompetitionCode(defaults.competition)||"lcs";
       if(competitionCapacity(competition.value).maxManagers<1)competition.value="lcs";
       const competitionHelp=document.querySelector("#createCompetitionHelp");
@@ -4764,7 +4782,7 @@ function render(view="home",options={}){
         managerSelect.value=btn.dataset.createManagers;
         document.querySelectorAll("[data-create-managers]").forEach(x=>x.classList.toggle("active",x===btn));
       });
-      updateCreateCapacity();
+      applyMode();
       void applyCompetitionScheduleAvailability(competition,updateCreateCapacity);
 
       createBtn.onclick=async()=>{
@@ -4787,6 +4805,19 @@ function render(view="home",options={}){
           competition:normalizeCompetitionCode(competition.value)||"worlds",
           competitionSeason:2026,
           competitionType:competitionType(competition.value),
+          fantasyMode:gameMode?.value==="season"?"season":"tournament",
+          seasonConfig:gameMode?.value==="season"?{
+            version:1,
+            region:normalizeCompetitionCode(competition.value),
+            split:seasonSplit?.value||"split_1",
+            seasonYear:2026,
+            scheduling:"adaptive",
+            seriesRule:"best_eligible_series",
+            seriesAggregation:"per_game_average",
+            startingRoles:["TOP","JNG","MID","ADC","SUP"],
+            engineStatus:"pending",
+            roundsGenerated:false
+          }:null,
           teamSlot:false,
           waivers:document.querySelector("#leagueWaivers")?.checked!==false,
           trades:document.querySelector("#leagueTrades")?.checked!==false,
