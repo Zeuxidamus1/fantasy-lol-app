@@ -1817,3 +1817,9 @@ body.schedule-modal-open{overflow:hidden}
 .rf-round-preview strong{font-size:13px;color:#e3f8f7}
 .rf-round-preview small{color:#9abbbd}
 .rf-round-preview>div{padding-top:6px;border-top:1px solid #20494d}
+
+.rf-season-publisher{display:grid;gap:13px}
+.rf-season-publisher[hidden]{display:none}
+.rf-publish-matches{display:grid;gap:8px;max-height:350px;overflow-y:auto}
+.rf-season-check{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #284962;border-radius:9px;cursor:pointer;font-size:12px}
+.rf-season-check input{width:18px;height:18px;flex:none}
