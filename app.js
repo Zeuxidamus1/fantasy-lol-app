@@ -1583,6 +1583,12 @@ function render(view="home",options={}){
         :'<div class="rf-news-empty"><strong>No upcoming matches available</strong><p>Check the full schedule for tournament dates and updates.</p></div>';
     };
     renderUpcoming(proSchedule);
+    const heroTitle=document.querySelector("#rfHeroTitle");
+    const upcomingCompetition=proSchedule.map(localScheduleRow).find(row=>row.day!=="past"&&row.competition);
+    if(heroTitle&&upcomingCompetition){
+      const name=competitionName(upcomingCompetition.competition);
+      if(name&&name!=="Unknown")heroTitle.textContent=name+" is Calling";
+    }
     if(cloudReady()&&backend()?.listProMatches){
       void backend().listProMatches().then(matches=>{
         if(Array.isArray(matches)&&matches.length)renderUpcoming(matches.map(databaseMatchToSchedule));
