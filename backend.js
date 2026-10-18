@@ -376,6 +376,12 @@
     return competition?rows:(Array.isArray(rows)?rows.filter(row=>String(row.competition||"")!=="simulation"):rows);
   }
 
+  async function publishSeasonRounds(leagueId,rounds){
+    const current=await session();
+    if(!current)throw new Error("Sign in to publish season rounds.");
+    return request("/rest/v1/rpc/publish_season_rounds",{method:"POST",body:{p_league_id:leagueId,p_rounds:rounds},session:current});
+  }
+
   async function listSeasonRoundPlans(leagueId){
     const current=await session();
     if(!current)return [];
@@ -643,7 +649,7 @@
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
     listLeagues,createLeague,createBotLeague,isPlatformAdmin,listMockCompetitions,createMockLeague,setMockCompetition,getMockSimulation,startMockSimulation,listMockDraftPool,deleteMockLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,makeBotDraftPick,
-    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listSeasonRoundPlans,listLeagueMatchups,listLeagueStandings,listLineupLocks,listPlayerCompetitionStatus,listPlayerProjections,listPlayoffs,getLeagueChampion,listLeagueActivity,listLeagueHistory,listScoreCorrections,listWaiverPriority,saveRoster,listTransactions,
+    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listSeasonRoundPlans,publishSeasonRounds,listLeagueMatchups,listLeagueStandings,listLineupLocks,listPlayerCompetitionStatus,listPlayerProjections,listPlayoffs,getLeagueChampion,listLeagueActivity,listLeagueHistory,listScoreCorrections,listWaiverPriority,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
     listNotifications,markNotificationsRead,
     listTrades,subscribeLeagueTradeUpdates,createTrade,createCounterTrade,updateTrade,acceptTrade,reviewTrade,
