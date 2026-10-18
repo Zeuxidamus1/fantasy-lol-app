@@ -1687,3 +1687,48 @@ body.schedule-modal-open{overflow:hidden}
   .schedule-bracket-round{min-width:210px!important;width:210px!important;max-width:210px!important}
 }
 @media(prefers-reduced-motion:reduce){.schedule-bracket-board{scroll-behavior:auto}}
+
+/* Rift Fantasy redesigned esports home */
+.rf-home{display:grid;gap:28px;min-width:0;padding-bottom:20px}
+.rf-hero{position:relative;isolation:isolate;min-height:275px;overflow:hidden;display:flex;align-items:center;border:1px solid #255377;border-radius:20px;padding:clamp(20px,4vw,35px);background:radial-gradient(circle at 76% 35%,#185a8a 0%,transparent 38%),linear-gradient(120deg,#071726 5%,#0b294b 62%,#07121f);color:#f4faff}
+.rf-hero::after{content:"";position:absolute;inset:0;z-index:-1;opacity:.23;background:repeating-linear-gradient(135deg,transparent 0 38px,#2a8bc0 40px,transparent 42px)}
+.rf-hero-copy{max-width:480px;position:relative;z-index:1}
+.rf-kicker{display:inline-block;padding:7px 10px;border:1px solid #00d9c0;border-radius:7px;background:#06373e;color:#67f5df;font-size:11px;font-weight:800;letter-spacing:.7px}
+.rf-hero h2{font-size:clamp(28px,4.8vw,43px);line-height:1.12;letter-spacing:-.8px;margin:15px 0 10px;color:#fff}
+.rf-hero p{color:#c2d7e9;font-size:14px;line-height:1.65;margin:0 0 19px;max-width:370px}
+.rf-hero-btn{border:1px solid #00efd7;border-radius:99px;background:#076b74;color:white;padding:12px 19px;font:inherit;font-weight:800;cursor:pointer}
+.rf-hero-btn span{margin-left:15px}
+.rf-hero-mark{position:absolute;right:5%;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;opacity:.3;text-align:center}
+.rf-hero-mark span{font-weight:900;font-size:clamp(80px,12vw,150px);line-height:1;color:#a0eaff;letter-spacing:-12px}
+.rf-hero-mark small{letter-spacing:2px;color:#d2f6ff}
+.rf-home-section{min-width:0}
+.rf-section-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:0 0 13px}
+.rf-section-heading h3{margin:0;color:#f1f8ff;font-size:19px;display:flex;align-items:center;gap:10px}
+.rf-section-heading h3 span{color:#33e4d2;font-size:22px}
+.rf-section-heading .text-btn{color:#6cd9f3;white-space:nowrap;font-size:12px}
+.rf-match-grid,.rf-quick-grid,.rf-player-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.rf-match-card{border:1px solid #244666;background:linear-gradient(160deg,#0b2037,#091827);border-radius:15px;padding:15px;min-width:0}
+.rf-match-header{display:flex;justify-content:space-between;gap:8px;color:#b7cde5;font-size:11px}
+.rf-match-header em{font-style:normal;color:#8fcfee;background:#122d46;padding:2px 5px;border-radius:4px}
+.rf-match-versus{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center;margin:18px 0}
+.rf-match-team{min-width:0;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center}
+.rf-team-initials{display:grid;place-items:center;height:46px;min-width:55px;color:#64e5ec;font-weight:900;font-size:17px}
+.rf-match-team strong{font-size:12px;color:white;overflow-wrap:anywhere}
+.rf-vs{color:#5f819e;font-size:12px}
+.rf-match-stage{border:1px solid #22445f;border-radius:999px;color:#b3c6d9;text-align:center;font-size:11px;padding:5px}
+.rf-quick{display:flex;align-items:center;text-align:left;gap:12px;min-width:0;min-height:96px;border-radius:15px;padding:15px;color:white;cursor:pointer;font:inherit}
+.rf-quick-create{border:1px solid #00bfa9;background:linear-gradient(125deg,#084d47,#0b3235)}
+.rf-quick-join{border:1px solid #278cf2;background:linear-gradient(125deg,#0c3b73,#0b2447)}
+.rf-quick-bracket{border:1px solid #8965ed;background:linear-gradient(125deg,#38256c,#1b2147)}
+.rf-action-icon{flex:none;display:grid;place-items:center;background:#ffffff14;border-radius:11px;width:48px;height:48px;font-size:28px}
+.rf-quick strong,.rf-quick small{display:block}
+.rf-quick strong{font-size:14px}.rf-quick small{font-size:11px;color:#bad0de;margin-top:5px}
+.rf-news-empty{border:1px solid #23445f;border-radius:15px;padding:23px;background:#0b1d2e;color:#d9eaff;grid-column:1/-1}
+.rf-news-empty strong{font-size:15px}.rf-news-empty p{color:#98b1c9;font-size:13px;line-height:1.5;margin:8px 0}
+.rf-player-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.rf-featured-player{min-width:0;display:flex;gap:10px;align-items:center;background:#0b2033;border:1px solid #24506a;border-radius:14px;color:white;padding:13px;text-align:left;font:inherit;cursor:pointer}
+.rf-player-avatar{width:43px;height:49px;border-radius:9px;background:linear-gradient(145deg,#123e57,#0a253a);display:grid;place-items:center;flex:none;font-weight:900;color:#58dcd4}
+.rf-featured-player strong,.rf-featured-player small{display:block;overflow:hidden;text-overflow:ellipsis}
+.rf-featured-player strong{font-size:13px}.rf-featured-player small{font-size:10px;color:#8dbbd4;margin-top:4px}
+@media(max-width:700px){.rf-match-grid,.rf-quick-grid{grid-template-columns:1fr}.rf-player-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rf-hero-mark{opacity:.12;right:0}.rf-hero{min-height:280px}.rf-quick{min-height:85px}.rf-section-heading h3{font-size:17px}}
+@media(max-width:360px){.rf-player-grid{grid-template-columns:1fr}.rf-section-heading .text-btn{font-size:10px}}
