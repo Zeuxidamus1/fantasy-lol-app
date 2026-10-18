@@ -1600,8 +1600,8 @@ function render(view="home",options={}){
       const visible=candidates.filter(p=>p&&p.name&&p.role).slice(0,4);
       featured.innerHTML=visible.length?visible.map(p=>`
         <button type="button" class="rf-featured-player" data-jump="players">
-          <div class="rf-player-avatar" aria-hidden="true">${h(String(p.name).slice(0,2).toUpperCase())}</div>
-          <div><strong>${h(p.name)}</strong><small>${h(p.team_name||p.team||"Pro player")} · ${h(p.role)}</small></div>
+          <div class="rf-player-avatar" aria-hidden="true">${/^https:\/\/static\.lolesports\.com\//.test(p.image||"")?`<img loading="lazy" src="${h(p.image)}" alt="" onerror="this.remove()">`:h(String(p.name).slice(0,2).toUpperCase())}</div>
+          <div class="rf-featured-copy"><div class="rf-featured-name"><strong>${h(p.name)}</strong>${/^https:\/\/static\.lolesports\.com\//.test(p.teamLogo||"")?`<img class="rf-team-logo" loading="lazy" src="${h(p.teamLogo)}" alt="" onerror="this.remove()">`:""}</div><small>${h(p.team_name||p.team||p.teamCode||"Pro player")} · ${h(p.role)}</small></div>
         </button>`).join("")
         :'<div class="rf-news-empty"><strong>Player profiles are loading</strong><p>Browse the Players tab to explore available competitors.</p></div>';
     }
