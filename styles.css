@@ -1807,3 +1807,8 @@ body.schedule-modal-open{overflow:hidden}
 .rf-featured-name strong{flex:1;min-width:0}
 .rf-team-logo{width:24px;height:24px;object-fit:contain;flex:none}
 @media(max-width:700px){.rf-news-grid{grid-template-columns:1fr}.rf-article-card{display:grid;grid-template-columns:112px minmax(0,1fr)}.rf-article-visual{height:100%;min-height:118px}.rf-article-visual span{font-size:12px}.rf-article-copy{padding:12px}.rf-article-copy strong{font-size:13px}}
+
+/* Season Fantasy configuration */
+#createSeasonSettings{border:1px solid #28665e;background:#0c282c;border-radius:13px;padding:14px}
+#createSeasonSettings .field-help{display:block;margin-top:9px;color:#b6d3d2;line-height:1.5}
+#createGameMode{border-color:#337c83}
