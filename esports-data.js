@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-18T06:26:16.908Z",
+  "updatedAt": "2026-10-18T11:30:14.071Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "116957100120526830",
-      "eventId": "",
-      "competition": "lpl",
-      "competitionType": "regional",
-      "startTime": "2026-09-18T09:00:00Z",
-      "league": "LPL",
-      "leagueCode": "lpl",
-      "stage": "Regional Qualifier",
-      "aId": "98767991887166787",
-      "a": "Xi'an Team WE",
-      "aCode": "WE",
-      "bId": "99566404852189289",
-      "b": "Beijing JDG Esports",
-      "bCode": "JDG",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "115548681803406321",
       "eventId": "",
