@@ -1566,23 +1566,21 @@ function render(view="home",options={}){
       const rows=(sourceRows||[]).map(localScheduleRow).sort((a,b)=>{
         const ta=Date.parse(a.startTime||a.date||"");
         const tb=Date.parse(b.startTime||b.date||"");
-        if(Number.isFinite(ta)&&Number.isFinite(tb))return ta-tb;
-        return 0;
+        return (Number.isFinite(ta)?ta:Infinity)-(Number.isFinite(tb)?tb:Infinity);
       });
       const upcoming=rows.filter(g=>g.day!=="past"&&!["CANCELED","POSTPONED"].includes(displayMatchStatus(g.status))).slice(0,3);
       if(!upcomingList)return;
       upcomingList.innerHTML=upcoming.length?upcoming.map(g=>`
-        <div class="home-match-row">
-          <div class="home-match-teams">
-            <strong>${h(g.a||"TBD")} <span>vs</span> ${h(g.b||"TBD")}</strong>
-            <small>${h(g.league||competitionName(g.competition)||"LoL Esports")}${g.stage?" · "+h(g.stage):""}</small>
+        <article class="rf-match-card">
+          <div class="rf-match-header"><span>${h(g.label||"Upcoming")} · ${h(g.time||"TBD")}</span><em>${h(g.league||competitionName(g.competition)||"Esports")}</em></div>
+          <div class="rf-match-versus">
+            <div class="rf-match-team"><span class="rf-team-initials">${h(g.aCode||"TBD")}</span><strong>${h(g.a||"TBD")}</strong></div>
+            <span class="rf-vs">VS</span>
+            <div class="rf-match-team"><span class="rf-team-initials">${h(g.bCode||"TBD")}</span><strong>${h(g.b||"TBD")}</strong></div>
           </div>
-          <div class="home-match-time">
-            <strong>${h(g.time||"TBD")}</strong>
-            <small>${h(g.label||"Upcoming")}</small>
-          </div>
-        </div>`).join("")
-        :'<div class="empty-state"><strong>No upcoming matches</strong><small>No future professional matches are currently available.</small></div>';
+          <div class="rf-match-stage">${h(g.stage||"Scheduled")}</div>
+        </article>`).join("")
+        :'<div class="rf-news-empty"><strong>No upcoming matches available</strong><p>Check the full schedule for tournament dates and updates.</p></div>';
     };
     renderUpcoming(proSchedule);
     if(cloudReady()&&backend()?.listProMatches){
@@ -1590,7 +1588,17 @@ function render(view="home",options={}){
         if(Array.isArray(matches)&&matches.length)renderUpcoming(matches.map(databaseMatchToSchedule));
       }).catch(()=>{});
     }
-
+    const featured=document.querySelector("#homeFeaturedPlayers");
+    if(featured){
+      const candidates=typeof allFantasyPlayers==="function"?allFantasyPlayers():[];
+      const visible=candidates.filter(p=>p&&p.name&&p.role).slice(0,4);
+      featured.innerHTML=visible.length?visible.map(p=>`
+        <button type="button" class="rf-featured-player" data-jump="players">
+          <div class="rf-player-avatar" aria-hidden="true">${h(String(p.name).slice(0,2).toUpperCase())}</div>
+          <div><strong>${h(p.name)}</strong><small>${h(p.team_name||p.team||"Pro player")} · ${h(p.role)}</small></div>
+        </button>`).join("")
+        :'<div class="rf-news-empty"><strong>Player profiles are loading</strong><p>Browse the Players tab to explore available competitors.</p></div>';
+    }
   }
   if(view==="team"){
     let completedLeagueView=false;
