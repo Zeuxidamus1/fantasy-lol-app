@@ -1784,3 +1784,26 @@ body.schedule-modal-open{overflow:hidden}
 }
 @media(max-width:380px){.rf-hero h2{font-size:27px}.rf-quick{padding:12px}.rf-player-grid{grid-template-columns:1fr 1fr}.rf-featured-player{padding:10px}}
 @media(prefers-reduced-motion:reduce){.rf-hero-btn,.rf-quick,.rf-featured-player,.rf-news-link{transition:none}}
+
+/* Verified LoL Esports news and official player imagery */
+.rf-news-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.rf-article-card{display:block;min-width:0;overflow:hidden;border:1px solid #28506c;border-radius:15px;background:#0b1c2e;color:#f2f9ff;text-decoration:none;transition:border-color .2s ease,transform .2s ease}
+.rf-article-card:hover{border-color:#49b8ce;transform:translateY(-2px)}
+.rf-article-card:focus-visible{outline:2px solid #67ecd5;outline-offset:3px}
+.rf-article-visual{position:relative;height:125px;display:grid;place-items:center;text-align:center;overflow:hidden;padding:16px;background:radial-gradient(ellipse at 50% 35%,#286da3 0%,#102e53 46%,#061728 100%)}
+.rf-article-visual::after{content:"";position:absolute;inset:14px;border:1px solid #77c5e94d;transform:skew(-8deg)}
+.rf-article-visual span{z-index:1;font-weight:900;letter-spacing:1.5px;font-size:17px;text-shadow:0 3px 12px #000}
+.rf-art-anthem{background:radial-gradient(ellipse at 45% 50%,#72414f,#301c40 48%,#081522)}
+.rf-art-merch{background:radial-gradient(ellipse at 50% 50%,#3a607b,#172d43 55%,#091522)}
+.rf-article-copy{padding:15px;display:grid;gap:8px}
+.rf-article-copy small{color:#68d9df;font-size:10px}
+.rf-article-copy strong{font-size:14px;line-height:1.35}
+.rf-article-copy p{font-size:12px;color:#a3bdd2;line-height:1.5;margin:0}
+.rf-source-note{font-size:11px;color:#829bb6;margin:9px 2px 0}
+.rf-player-avatar{overflow:hidden;position:relative}
+.rf-player-avatar img{position:absolute;width:100%;height:100%;inset:0;object-fit:cover;object-position:top center}
+.rf-featured-copy{min-width:0;flex:1}
+.rf-featured-name{display:flex;align-items:center;gap:6px;min-width:0}
+.rf-featured-name strong{flex:1;min-width:0}
+.rf-team-logo{width:24px;height:24px;object-fit:contain;flex:none}
+@media(max-width:700px){.rf-news-grid{grid-template-columns:1fr}.rf-article-card{display:grid;grid-template-columns:112px minmax(0,1fr)}.rf-article-visual{height:100%;min-height:118px}.rf-article-visual span{font-size:12px}.rf-article-copy{padding:12px}.rf-article-copy strong{font-size:13px}}
