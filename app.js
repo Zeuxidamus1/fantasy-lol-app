@@ -3007,11 +3007,10 @@ function render(view="home",options={}){
 
       const maxMatches=Math.max(...grouped.map(g=>g.rows.length),1);
       bracketBoard.innerHTML=`
-        <div class="schedule-bracket-pan-hint" aria-hidden="true">↔ Drag to explore bracket</div>
         <div class="schedule-bracket-canvas" style="--bracket-rounds:${grouped.length};--bracket-max-matches:${maxMatches}">
           ${grouped.map((group,idx)=>`
-            <div class="schedule-bracket-round" style="--round-index:${idx};--round-total:${grouped.length}">
-              <div class="schedule-bracket-round-title"><small>ROUND ${idx+1}</small><strong>${h(group.key)}</strong></div>
+            <section class="schedule-bracket-round" style="--round-index:${idx};--round-total:${grouped.length}" aria-label="${h(group.key)}">
+              <div class="schedule-bracket-round-title"><small>STAGE ${idx+1}</small><strong>${h(group.key)}</strong></div>
               <div class="schedule-bracket-round-matches">
                 ${group.rows.map((g,matchIdx)=>`<button class="schedule-bracket-match" style="--match-index:${matchIdx}" type="button" data-bracket-match="${h(g.matchId||g.eventId||g.startTime||"")}">
                   <div class="bracket-team"><span>${h(g.aCode||"TBD")}</span><strong>${h(g.a||"TBD")}</strong></div>
@@ -3019,7 +3018,7 @@ function render(view="home",options={}){
                   <div class="bracket-match-meta"><small>${h(localScheduleRow(g).time||"TBD")}</small><b>${h(displayMatchStatus(g.status))}${Number(g.count)>0?" · BO"+h(g.count):""}</b></div>
                 </button>`).join("")}
               </div>
-            </div>
+            </section>
           `).join("")}
         </div>`;
       bracketBoard.querySelectorAll("[data-bracket-match]").forEach(btn=>btn.onclick=()=>{
@@ -3028,40 +3027,6 @@ function render(view="home",options={}){
         if(g)openMatchModal(g);
       });
 
-      // Grab-to-pan on mouse/pen. Touch keeps native horizontal swiping.
-      if(!bracketBoard.dataset.panBound){
-        bracketBoard.dataset.panBound="true";
-        let dragging=false,startX=0,startScroll=0,moved=false;
-        bracketBoard.addEventListener("pointerdown",e=>{
-          if(e.pointerType==="touch"||e.button!==0)return;
-          dragging=true;moved=false;startX=e.clientX;startScroll=bracketBoard.scrollLeft;
-          bracketBoard.classList.add("is-dragging");
-          bracketBoard.setPointerCapture?.(e.pointerId);
-        });
-        bracketBoard.addEventListener("pointermove",e=>{
-          if(!dragging)return;
-          const delta=e.clientX-startX;
-          if(Math.abs(delta)>4)moved=true;
-          bracketBoard.scrollLeft=startScroll-delta;
-        });
-        const stopDrag=e=>{
-          if(!dragging)return;
-          dragging=false;
-          bracketBoard.classList.remove("is-dragging");
-          try{bracketBoard.releasePointerCapture?.(e.pointerId);}catch{}
-        };
-        bracketBoard.addEventListener("pointerup",stopDrag);
-        bracketBoard.addEventListener("pointercancel",stopDrag);
-        bracketBoard.addEventListener("click",e=>{
-          if(moved){e.preventDefault();e.stopPropagation();moved=false;}
-        },true);
-        bracketBoard.addEventListener("wheel",e=>{
-          if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){
-            bracketBoard.scrollLeft+=e.deltaY;
-            e.preventDefault();
-          }
-        },{passive:false});
-      }
     };
 
     const drawRosterIntelligence=()=>{
