@@ -4389,6 +4389,60 @@ function render(view="home",options={}){
           };
         }
 
+        const seasonPanel=document.querySelector("#seasonPublisher");
+        const seasonStatus=document.querySelector("#seasonPublisherStatus");
+        const seasonMatches=document.querySelector("#seasonPublisherMatches");
+        const publishBtn=document.querySelector("#publishSeasonRoundsBtn");
+        if(seasonPanel){
+          const isSeason=activeSettings.fantasyMode==="season";
+          const commissioner=activeMembership?.role==="owner";
+          seasonPanel.hidden=!isSeason;
+          if(isSeason){
+            const published=await b.listSeasonRoundPlans(activeLeague.id).catch(()=>[]);
+            if(published.length){
+              seasonStatus.textContent=published.length+" approved fantasy rounds published. The league schedule is locked.";
+              seasonMatches.innerHTML=published.map(r=>'<div>Round '+h(String(r.round_number))+' · '+h(new Date(r.starts_at).toLocaleDateString())+' · '+h(String(r.match_ids?.length||0))+' matches</div>').join("");
+              publishBtn.hidden=true;
+            }else if(!commissioner){
+              seasonStatus.textContent="Your commissioner must approve the official regional schedule before Season Fantasy can start.";
+              publishBtn.hidden=true;
+            }else{
+              publishBtn.hidden=false;
+              publishBtn.disabled=true;
+              const draft=await b.getLeagueDraft(activeLeague.id).catch(()=>null);
+              if(draft?.status!=="complete"){
+                seasonStatus.textContent="Complete the draft before approving and publishing the season schedule.";
+              }else{
+                const year=Number(activeSettings.seasonConfig?.seasonYear)||new Date().getFullYear();
+                const all=await b.listProMatches(activeSettings.competition,new Date(Date.UTC(year,0,1)),new Date(Date.UTC(year+1,0,1))).catch(()=>[]);
+                const upcoming=all.filter(m=>Date.parse(m.start_time)>Date.now()&&
+                  m.team_a_id&&m.team_b_id&&!/cancel|postpon|playoff|knockout|final|worlds|msi/i.test(String(m.status||"")+" "+String(m.stage||"")));
+                seasonStatus.textContent="Select confirmed matches for this exact regional split. Matches are grouped by date gaps; publishing locks the schedule and cannot be undone here.";
+                seasonMatches.innerHTML=upcoming.length?upcoming.map(m=>'<label class="rf-season-check"><input type="checkbox" data-season-match="'+h(m.id)+'"><span>'+h(new Date(m.start_time).toLocaleDateString())+' · '+h(m.team_a_name||m.team_a_code||"TBD")+' vs '+h(m.team_b_name||m.team_b_code||"TBD")+' · '+h(m.stage||"Regional")+'</span></label>').join("")
+                  :'<div class="empty-state">No confirmed future matches available for this competition.</div>';
+                const selected=()=>upcoming.filter(m=>seasonMatches.querySelector('input[data-season-match="'+CSS.escape(m.id)+'"]')?.checked);
+                const review=()=>{
+                  const rows=selected(),rounds=planAdaptiveSeasonRounds(rows);
+                  const errors=rounds.flatMap(r=>r.warnings);
+                  publishBtn.disabled=!rounds.length||errors.length>0;
+                  publishBtn.textContent=errors.length?"Resolve schedule warnings":"Publish "+rounds.length+" Approved Rounds";
+                };
+                seasonMatches.onchange=review;
+                publishBtn.onclick=async()=>{
+                  const rounds=planAdaptiveSeasonRounds(selected());
+                  if(!rounds.length||rounds.some(r=>r.warnings.length))return;
+                  if(!confirm("Publish these season rounds permanently? Confirm you selected the correct regional split."))return;
+                  publishBtn.disabled=true;
+                  try{
+                    const count=await b.publishSeasonRounds(activeLeague.id,rounds.map(r=>({matchIds:r.matchIds})));
+                    showToast("Published "+count+" Season Fantasy rounds.");
+                    render("league",{replace:true});
+                  }catch(error){showToast(error.message||"Could not publish season rounds");review();}
+                };
+              }
+            }
+          }
+        }
         await applyLeaguePermissions(activeId);
         if(String(activeLeague.status||"")==="completed"&&commissionerBtn)commissionerBtn.hidden=true;
       }catch(err){
