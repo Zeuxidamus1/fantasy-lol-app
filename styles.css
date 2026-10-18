@@ -1629,49 +1629,61 @@ body.schedule-modal-open{overflow:hidden}
 }
 
 
-/* Traditional connected bracket, one page, native horizontal swipe/scroll. */
+/* Fixed-width horizontal tournament canvas, never shrink individual rounds. */
 .schedule-bracket-board{
-  width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;
+  display:block!important;position:relative;width:100%!important;max-width:100%;
+  min-width:0;overflow-x:auto!important;overflow-y:hidden!important;
   overscroll-behavior-x:contain;touch-action:pan-x pan-y;
   -webkit-overflow-scrolling:touch;scroll-behavior:smooth;
-  scrollbar-width:thin;scrollbar-color:#446b86 #0a1929;padding:8px 0 18px
+  scrollbar-width:thin;scrollbar-color:#446b86 #0a1929;
+  padding:10px 2px 18px;box-sizing:border-box
 }
 .schedule-bracket-canvas{
-  position:relative;display:flex;align-items:stretch;gap:52px;
-  width:max-content;min-width:100%;
-  min-height:calc(var(--bracket-max-matches) * 146px + 65px);
-  padding:0 18px 12px 4px
+  position:relative;display:grid!important;grid-auto-flow:column!important;
+  grid-auto-columns:230px!important;grid-template-columns:none!important;
+  align-items:stretch;gap:52px;width:max-content!important;min-width:100%;
+  max-width:none!important;min-height:calc(var(--bracket-max-matches) * 146px + 65px);
+  padding:0 20px 12px 4px;box-sizing:border-box
 }
 .schedule-bracket-connectors{
-  position:absolute;top:0;left:0;pointer-events:none;overflow:visible;z-index:0
+  position:absolute;top:0;left:0;z-index:0;pointer-events:none;overflow:visible
 }
 .schedule-bracket-round{
-  position:relative;z-index:1;display:flex;flex-direction:column;gap:0;
-  width:230px;min-width:230px;flex:0 0 230px;padding:0
+  position:relative;z-index:1;display:flex!important;flex-direction:column;
+  gap:0;min-width:230px!important;width:230px!important;max-width:230px!important;
+  flex:none!important;padding:0!important;white-space:normal;
+  overflow:visible;box-sizing:border-box
 }
 .schedule-bracket-round::before,.schedule-bracket-round::after{display:none!important}
 .schedule-bracket-round-title{
   display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
-  gap:4px;height:54px;min-height:54px;border:0;padding:0 3px
+  gap:4px;height:54px;min-height:54px;border:0;padding:0 3px;
+  white-space:normal;word-break:normal;overflow-wrap:normal
 }
 .schedule-bracket-round-title small{color:#84a6c5;font-size:10px;font-weight:800;letter-spacing:.8px}
-.schedule-bracket-round-title strong{color:#e0ecfa;font-size:14px;text-align:left}
+.schedule-bracket-round-title strong{
+  color:#e0ecfa;font-size:14px;line-height:1.3;
+  text-align:left;white-space:normal;word-break:normal;overflow-wrap:normal
+}
 .schedule-bracket-round-matches{
-  position:relative;display:block;flex:1;min-height:calc(var(--bracket-max-matches) * 146px);
-  padding:0!important;margin:0;gap:0
+  position:relative;display:block!important;flex:1;
+  min-height:calc(var(--bracket-max-matches) * 146px);
+  padding:0!important;margin:0!important;gap:0
 }
 .schedule-bracket-match{
-  position:absolute;left:0;right:0;
+  position:absolute!important;left:0;right:0;
   top:calc((var(--match-index) + .5) * 100% / var(--round-match-count));
   transform:translateY(-50%);height:120px;min-height:120px;
-  width:100%;min-width:0;margin:0;box-shadow:0 5px 14px rgba(0,0,0,.12)
+  width:100%!important;min-width:0;margin:0;box-sizing:border-box;
+  box-shadow:0 5px 14px rgba(0,0,0,.12);white-space:normal;
+  word-break:normal;overflow-wrap:normal
 }
 .schedule-bracket-match:focus-visible{outline:2px solid #60e7cd;outline-offset:3px}
-.bracket-team strong{font-size:12px;min-width:0}
-.bracket-match-meta small,.bracket-match-meta b{font-size:10px}
+.bracket-team strong{font-size:12px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bracket-match-meta small,.bracket-match-meta b{font-size:10px;white-space:nowrap}
 @media(max-width:430px){
   .schedule-bracket-panel{min-width:0;margin-left:0;margin-right:0;padding-left:10px;padding-right:10px}
-  .schedule-bracket-round{width:210px;min-width:210px;flex:0 0 210px}
-  .schedule-bracket-canvas{gap:48px}
+  .schedule-bracket-canvas{grid-auto-columns:210px!important;gap:48px}
+  .schedule-bracket-round{min-width:210px!important;width:210px!important;max-width:210px!important}
 }
 @media(prefers-reduced-motion:reduce){.schedule-bracket-board{scroll-behavior:auto}}
