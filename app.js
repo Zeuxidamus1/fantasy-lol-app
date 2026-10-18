@@ -3008,8 +3008,9 @@ function render(view="home",options={}){
       const maxMatches=Math.max(...grouped.map(g=>g.rows.length),1);
       bracketBoard.innerHTML=`
         <div class="schedule-bracket-canvas" style="--bracket-rounds:${grouped.length};--bracket-max-matches:${maxMatches}">
+          <svg class="schedule-bracket-connectors" aria-hidden="true" focusable="false"></svg>
           ${grouped.map((group,idx)=>`
-            <section class="schedule-bracket-round" style="--round-index:${idx};--round-total:${grouped.length}" aria-label="${h(group.key)}">
+            <section class="schedule-bracket-round" style="--round-index:${idx};--round-total:${grouped.length};--round-match-count:${group.rows.length}" aria-label="${h(group.key)}">
               <div class="schedule-bracket-round-title"><small>STAGE ${idx+1}</small><strong>${h(group.key)}</strong></div>
               <div class="schedule-bracket-round-matches">
                 ${group.rows.map((g,matchIdx)=>`<button class="schedule-bracket-match" style="--match-index:${matchIdx}" type="button" data-bracket-match="${h(g.matchId||g.eventId||g.startTime||"")}">
@@ -3026,6 +3027,54 @@ function render(view="home",options={}){
         const g=rows.find(x=>String(x.matchId||x.eventId||x.startTime||"")===String(key));
         if(g)openMatchModal(g);
       });
+      // Draw connectors directly between the centers of the actual matchup
+      // cards. The SVG is an overlay, so scrolling stays entirely native.
+      bracketBoard._bracketObserver?.disconnect();
+      const drawConnectors=()=>{
+        const canvas=bracketBoard.querySelector(".schedule-bracket-canvas");
+        const svg=canvas?.querySelector(".schedule-bracket-connectors");
+        if(!canvas||!svg)return;
+        const rounds=[...canvas.querySelectorAll(".schedule-bracket-round")];
+        const width=canvas.offsetWidth,height=canvas.offsetHeight;
+        if(!width||!height)return;
+        svg.setAttribute("viewBox","0 0 "+width+" "+height);
+        svg.setAttribute("width",width);
+        svg.setAttribute("height",height);
+        const lines=[];
+        const paths=[];
+        for(let i=0;i<rounds.length-1;i++){
+          const from=[...rounds[i].querySelectorAll(".schedule-bracket-match")];
+          const to=[...rounds[i+1].querySelectorAll(".schedule-bracket-match")];
+          if(!from.length||!to.length)continue;
+          // Pair consecutive games in a normal elimination bracket.
+          // If feeds are irregular, connect by proportional position.
+          for(let j=0;j<to.length;j++){
+            const first=Math.floor(j*from.length/to.length);
+            const last=Math.max(first,Math.ceil((j+1)*from.length/to.length)-1);
+            const target=to[j];
+            const tx=target.offsetLeft+rounds[i+1].offsetLeft;
+            const ty=rounds[i+1].offsetTop+target.offsetTop+target.offsetHeight/2;
+            const sources=from.slice(first,last+1);
+            const points=sources.map(source=>({
+              x:rounds[i].offsetLeft+source.offsetLeft+source.offsetWidth,
+              y:rounds[i].offsetTop+source.offsetTop+source.offsetHeight/2
+            }));
+            if(!points.length)continue;
+            const bend=points[0].x+(tx-points[0].x)/2;
+            for(const p of points){
+              paths.push("M "+p.x+" "+p.y+" H "+bend);
+              paths.push("M "+bend+" "+p.y+" V "+ty+" H "+tx);
+            }
+          }
+        }
+        svg.innerHTML=paths.map(d=>'<path d="'+d+'" fill="none" stroke="#6fabc5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>').join("");
+      };
+      drawConnectors();
+      if(typeof ResizeObserver!=="undefined"){
+        bracketBoard._bracketObserver=new ResizeObserver(drawConnectors);
+        bracketBoard._bracketObserver.observe(bracketBoard.querySelector(".schedule-bracket-canvas"));
+      }
+
 
     };
 
