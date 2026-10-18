@@ -376,6 +376,13 @@
     return competition?rows:(Array.isArray(rows)?rows.filter(row=>String(row.competition||"")!=="simulation"):rows);
   }
 
+  async function listSeasonRoundPlans(leagueId){
+    const current=await session();
+    if(!current)return [];
+    return request("/rest/v1/season_round_plans?league_id=eq."+encodeURIComponent(leagueId)
+      +"&select=round_number,competition,split,starts_at,ends_at,lock_at,match_ids,participating_teams,warnings,status&order=round_number.asc",{session:current});
+  }
+
   async function listFantasyRounds(leagueId){
     const current=await session();
     if(!current)return [];
@@ -636,7 +643,7 @@
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
     listLeagues,createLeague,createBotLeague,isPlatformAdmin,listMockCompetitions,createMockLeague,setMockCompetition,getMockSimulation,startMockSimulation,listMockDraftPool,deleteMockLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,makeBotDraftPick,
-    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listLeagueMatchups,listLeagueStandings,listLineupLocks,listPlayerCompetitionStatus,listPlayerProjections,listPlayoffs,getLeagueChampion,listLeagueActivity,listLeagueHistory,listScoreCorrections,listWaiverPriority,saveRoster,listTransactions,
+    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listSeasonRoundPlans,listLeagueMatchups,listLeagueStandings,listLineupLocks,listPlayerCompetitionStatus,listPlayerProjections,listPlayoffs,getLeagueChampion,listLeagueActivity,listLeagueHistory,listScoreCorrections,listWaiverPriority,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
     listNotifications,markNotificationsRead,
     listTrades,subscribeLeagueTradeUpdates,createTrade,createCounterTrade,updateTrade,acceptTrade,reviewTrade,
