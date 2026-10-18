@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-18T14:44:28.163Z",
+  "updatedAt": "2026-10-18T17:34:24.015Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "115548681803406321",
-      "eventId": "",
-      "competition": "lec",
-      "competitionType": "regional",
-      "startTime": "2026-09-18T15:00:00Z",
-      "league": "LEC",
-      "leagueCode": "lec",
-      "stage": "Playoffs",
-      "aId": "103461966965149786",
-      "a": "Movistar KOI",
-      "aCode": "MKOI",
-      "bId": "114868016111590239",
-      "b": "Natus Vincere",
-      "bCode": "NAVI",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "115565004607949399",
       "eventId": "",
