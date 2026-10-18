@@ -376,23 +376,39 @@
   </template>
 
   <template id="home-template">
-    <section class="stack home-esports">
-      <div class="section-title">
-        <div><div class="eyebrow">PRO LEAGUE OF LEGENDS</div><h2>Home</h2></div>
-        <div class="schedule-title-actions">
-          <button class="text-btn" data-jump="schedule">Full Schedule</button>
-          <button class="text-btn my-schedule-link" data-jump="my-schedule">My Schedule</button>
+    <section class="rf-home">
+      <section class="rf-hero" aria-label="Esports tournaments">
+        <div class="rf-hero-copy"><span class="rf-kicker">✦ PROFESSIONAL ESPORTS</span>
+          <h2>Welcome to Rift Fantasy</h2>
+          <p>Follow the biggest League of Legends tournaments, explore the brackets, and build your championship roster.</p>
+          <button type="button" class="rf-hero-btn" data-jump="schedule">Explore Tournaments <span aria-hidden="true">→</span></button>
         </div>
-      </div>
-
-      <section class="card">
-        <div class="section-head">
-          <div><div class="eyebrow">UP NEXT</div><h3>Upcoming matches</h3></div>
-          <button class="text-btn" data-jump="schedule">See All</button>
-        </div>
-        <div id="homeUpcomingMatches" class="stack tight home-match-list"></div>
+        <div class="rf-hero-mark" aria-hidden="true"><span>RF</span><small>THE RIFT AWAITS</small></div>
       </section>
 
+      <section class="rf-home-section">
+        <header class="rf-section-heading"><h3><span aria-hidden="true">▦</span> Upcoming Matches</h3><button type="button" class="text-btn" data-jump="schedule">Full Schedule →</button></header>
+        <div id="homeUpcomingMatches" class="rf-match-grid" aria-live="polite"></div>
+      </section>
+
+      <section class="rf-home-section">
+        <header class="rf-section-heading"><h3><span aria-hidden="true">ϟ</span> Quick Actions</h3></header>
+        <div class="rf-quick-grid">
+          <button type="button" class="rf-quick rf-quick-create" data-jump="league"><span class="rf-action-icon">♧</span><span><strong>Create a League</strong><small>Start your fantasy league</small></span></button>
+          <button type="button" class="rf-quick rf-quick-join" data-jump="league"><span class="rf-action-icon">＋</span><span><strong>Join a League</strong><small>Connect with other managers</small></span></button>
+          <button type="button" class="rf-quick rf-quick-bracket" data-jump="schedule"><span class="rf-action-icon">♜</span><span><strong>View Bracket</strong><small>Follow tournament playoffs</small></span></button>
+        </div>
+      </section>
+
+      <section class="rf-home-section">
+        <header class="rf-section-heading"><h3><span aria-hidden="true">▤</span> Latest News</h3></header>
+        <div class="rf-news-empty"><strong>League of Legends esports updates</strong><p>Verified news headlines will appear here when a news source is connected. Until then, explore official match schedules and tournament results.</p><button type="button" class="text-btn" data-jump="schedule">Explore Schedule →</button></div>
+      </section>
+
+      <section class="rf-home-section">
+        <header class="rf-section-heading"><h3><span aria-hidden="true">★</span> Featured Players</h3><button type="button" class="text-btn" data-jump="players">View Players →</button></header>
+        <div id="homeFeaturedPlayers" class="rf-player-grid"></div>
+      </section>
     </section>
   </template>
 
