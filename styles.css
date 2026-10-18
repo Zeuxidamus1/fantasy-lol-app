@@ -1812,3 +1812,8 @@ body.schedule-modal-open{overflow:hidden}
 #createSeasonSettings{border:1px solid #28665e;background:#0c282c;border-radius:13px;padding:14px}
 #createSeasonSettings .field-help{display:block;margin-top:9px;color:#b6d3d2;line-height:1.5}
 #createGameMode{border-color:#337c83}
+
+.rf-round-preview{display:grid;gap:7px;margin-top:12px;padding:12px;background:#081f27;border:1px solid #34736e;border-radius:12px;color:#c7e8ea;font-size:12px;line-height:1.5}
+.rf-round-preview strong{font-size:13px;color:#e3f8f7}
+.rf-round-preview small{color:#9abbbd}
+.rf-round-preview>div{padding-top:6px;border-top:1px solid #20494d}
