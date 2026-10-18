@@ -4726,35 +4726,57 @@ function render(view="home",options={}){
 // Phase 2: deterministic preview planner. Never infer a match from absent data.
 // Split boundaries are verified separately: this planner only groups observed series.
 function planAdaptiveSeasonRounds(rows, now=Date.now()){
-  const matchRows=(Array.isArray(rows)?rows:[]).filter(x=>{
-    const date=Date.parse(x.start_time||x.startTime||"");
-    const status=String(x.status||"").toLowerCase();
-    return Number.isFinite(date)&&!/(cancel|postpon|void)/.test(status);
+  const excluded=/cancel|postpon|void|tbd/i;
+  const matches=(Array.isArray(rows)?rows:[]).filter(m=>{
+    const t=Date.parse(m.start_time||m.startTime||"");
+    return Number.isFinite(t)&&!excluded.test(String(m.status||""))&&
+      !/playoff|knockout|final|worlds|msi/i.test(String(m.stage||""));
   }).sort((a,b)=>Date.parse(a.start_time||a.startTime)-Date.parse(b.start_time||b.startTime));
   const buckets=[];
-  for(const match of matchRows){
-    const time=Date.parse(match.start_time||match.startTime);
-    const a=String(match.team_a_id||match.teamAId||match.team_a_name||match.a||"").trim();
-    const b=String(match.team_b_id||match.teamBId||match.team_b_name||match.b||"").trim();
-    const last=buckets[buckets.length-1];
-    // A gap of 4+ calendar days begins a new competition-based period.
-    // Otherwise use no more than a seven-day window.
-    if(!last||time-last.last>=4*86400000||time-last.start>=7*86400000){
-      buckets.push({start:time,last:time,rows:[match],teams:new Set([a,b].filter(Boolean))});
-    }else{
-      last.last=time;last.rows.push(match);if(a)last.teams.add(a);if(b)last.teams.add(b);
-    }
+  for(const match of matches){
+    const t=Date.parse(match.start_time||match.startTime);
+    const prev=buckets[buckets.length-1];
+    if(!prev||t-prev.last>=4*86400000||t-prev.first>=7*86400000) buckets.push({first:t,last:t,matches:[match]});
+    else {prev.last=t;prev.matches.push(match);}
   }
-  return buckets.map((bucket,index)=>({
-    round: index+1,
-    startsAt:new Date(bucket.start).toISOString(),
-    endsAt:new Date(bucket.last+86400000).toISOString(),
-    lockAt:new Date(bucket.start).toISOString(),
-    matchCount:bucket.rows.length,
-    knownTeams:bucket.teams.size,
-    status:bucket.last<now?"historical":"provisional",
-    matchIds:bucket.rows.map(m=>String(m.id||m.event_id||"")).filter(Boolean)
-  }));
+  return buckets.map((bucket,i)=>{
+    const teams=new Map(),unknown=[];
+    for(const m of bucket.matches){
+      const a=String(m.team_a_id||m.team_a_code||m.team_a_name||"").trim();
+      const b=String(m.team_b_id||m.team_b_code||m.team_b_name||"").trim();
+      if(!a||!b||a==="TBD"||b==="TBD"){unknown.push(String(m.id||m.event_id||"unknown"));continue;}
+      teams.set(a,(teams.get(a)||0)+1);teams.set(b,(teams.get(b)||0)+1);
+    }
+    const counts=[...teams.values()];
+    const coverage=counts.length?Math.min(...counts):0;
+    const uneven=counts.length>0&&Math.max(...counts)!==Math.min(...counts);
+    const warnings=[
+      ...(unknown.length?["Unconfirmed teams in "+unknown.length+" series"]:[]),
+      ...(coverage===0?["Missing participating team coverage"]:[]),
+      ...(uneven?["Unequal series counts between teams"]:[]),
+      ...(bucket.matches.length<2?["Only one series scheduled"]:[])
+    ];
+    return {round:i+1,startsAt:new Date(bucket.first).toISOString(),
+      endsAt:new Date(bucket.last+86400000).toISOString(),
+      lockAt:new Date(bucket.first).toISOString(),
+      matchCount:bucket.matches.length,knownTeams:teams.size,
+      warnings,approved:false,status:bucket.last<now?"historical":"provisional",
+      matchIds:bucket.matches.map(m=>String(m.id||m.event_id||"")).filter(Boolean)};
+  });
+}
+function planSeasonHeadToHead(managers,roundCount){
+  const ids=[...new Set((managers||[]).map(m=>String(m.id||m.user_id||"")).filter(Boolean))];
+  if(ids.length<2||ids.length>10||roundCount<1)return [];
+  const slots=ids.length%2?[...ids,null]:ids.slice();
+  const output=[];
+  for(let round=0;round<roundCount;round++){
+    for(let j=0;j<slots.length/2;j++){
+      const home=slots[j],away=slots[slots.length-1-j];
+      output.push({round:round+1,pair:j+1,home,away,bye:home===null||away===null});
+    }
+    slots.splice(1,0,slots.pop());
+  }
+  return output;
 }
 
   if(view==="create-league"){
