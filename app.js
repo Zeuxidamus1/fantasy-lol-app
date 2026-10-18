@@ -4723,6 +4723,40 @@ function render(view="home",options={}){
     draftTimerId=setInterval(refresh,3000);
   }
 
+// Phase 2: deterministic preview planner. Never infer a match from absent data.
+// Split boundaries are verified separately: this planner only groups observed series.
+function planAdaptiveSeasonRounds(rows, now=Date.now()){
+  const matchRows=(Array.isArray(rows)?rows:[]).filter(x=>{
+    const date=Date.parse(x.start_time||x.startTime||"");
+    const status=String(x.status||"").toLowerCase();
+    return Number.isFinite(date)&&!/(cancel|postpon|void)/.test(status);
+  }).sort((a,b)=>Date.parse(a.start_time||a.startTime)-Date.parse(b.start_time||b.startTime));
+  const buckets=[];
+  for(const match of matchRows){
+    const time=Date.parse(match.start_time||match.startTime);
+    const a=String(match.team_a_id||match.teamAId||match.team_a_name||match.a||"").trim();
+    const b=String(match.team_b_id||match.teamBId||match.team_b_name||match.b||"").trim();
+    const last=buckets[buckets.length-1];
+    // A gap of 4+ calendar days begins a new competition-based period.
+    // Otherwise use no more than a seven-day window.
+    if(!last||time-last.last>=4*86400000||time-last.start>=7*86400000){
+      buckets.push({start:time,last:time,rows:[match],teams:new Set([a,b].filter(Boolean))});
+    }else{
+      last.last=time;last.rows.push(match);if(a)last.teams.add(a);if(b)last.teams.add(b);
+    }
+  }
+  return buckets.map((bucket,index)=>({
+    round: index+1,
+    startsAt:new Date(bucket.start).toISOString(),
+    endsAt:new Date(bucket.last+86400000).toISOString(),
+    lockAt:new Date(bucket.start).toISOString(),
+    matchCount:bucket.rows.length,
+    knownTeams:bucket.teams.size,
+    status:bucket.last<now?"historical":"provisional",
+    matchIds:bucket.rows.map(m=>String(m.id||m.event_id||"")).filter(Boolean)
+  }));
+}
+
   if(view==="create-league"){
     if(!cloudReady()){
       showToast("League services are unavailable.");
@@ -4752,6 +4786,31 @@ function render(view="home",options={}){
         if(isSeason&&!regionalCodes.has(competition.value))competition.value="lcs";
         updateCreateCapacity();
       };
+      const roundPreview=document.querySelector("#createSeasonRoundPreview");
+      let previewSeq=0;
+      const refreshRoundPreview=async()=>{
+        if(gameMode?.value!=="season"||!roundPreview)return;
+        const seq=++previewSeq;
+        roundPreview.textContent="Checking verified regional schedule…";
+        try{
+          const year=2026;
+          const matches=await backend().listProMatches(competition.value,new Date(Date.UTC(year,0,1)),new Date(Date.UTC(year+1,0,1)));
+          if(seq!==previewSeq)return;
+          const matchesForSplit=(matches||[]).filter(row=>{
+            // Do not mislabel matches as an individual split without a verified split ID.
+            return !/playoff|worlds|international/i.test(String(row.stage||""));
+          });
+          const rounds=planAdaptiveSeasonRounds(matchesForSplit);
+          roundPreview.innerHTML=rounds.length
+            ?'<strong>'+rounds.length+' provisional windows found in '+year+'</strong><small>These reflect observed regular-season matches for the region, not yet verified for the selected split. Windows will require commissioner review before publishing.</small>'+rounds.slice(0,4).map(r=>'<div>Round '+r.round+' · '+new Date(r.startsAt).toLocaleDateString()+' · '+r.matchCount+' scheduled series</div>').join("")
+            :'<strong>No verified regional matches available</strong><small>Rounds cannot be generated without schedule data.</small>';
+        }catch{
+          if(seq===previewSeq)roundPreview.textContent="Schedule preview unavailable. No rounds have been generated.";
+        }
+      };
+      gameMode?.addEventListener("change",()=>{void refreshRoundPreview();});
+      seasonSplit?.addEventListener("change",()=>{void refreshRoundPreview();});
+      competition.addEventListener("change",()=>{void refreshRoundPreview();});
       gameMode?.addEventListener("change",applyMode);
       competition.value=normalizeCompetitionCode(defaults.competition)||"lcs";
       if(competitionCapacity(competition.value).maxManagers<1)competition.value="lcs";
@@ -4783,6 +4842,7 @@ function render(view="home",options={}){
         document.querySelectorAll("[data-create-managers]").forEach(x=>x.classList.toggle("active",x===btn));
       });
       applyMode();
+      void refreshRoundPreview();
       void applyCompetitionScheduleAvailability(competition,updateCreateCapacity);
 
       createBtn.onclick=async()=>{
