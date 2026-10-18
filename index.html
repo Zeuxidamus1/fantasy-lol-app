@@ -1124,6 +1124,23 @@
         </div>
 
         <div class="form-group">
+          <label for="createGameMode">Fantasy Format</label>
+          <select id="createGameMode" class="form-control">
+            <option value="tournament">Tournament Fantasy · Existing format</option>
+            <option value="season">Season Fantasy · Regional split</option>
+          </select>
+          <small class="field-help" id="createGameModeHelp">Tournament Fantasy uses the existing competition rules. Season Fantasy saves regional split configuration for adaptive rounds.</small>
+        </div>
+        <div class="form-group" id="createSeasonSettings" hidden>
+          <label for="createSeasonSplit">Regional Split</label>
+          <select id="createSeasonSplit" class="form-control">
+            <option value="split_1">Split 1</option>
+            <option value="split_2">Split 2</option>
+            <option value="split_3">Split 3</option>
+          </select>
+          <small class="field-help">Rounds adapt to the verified regional schedule. Season scoring, automatic matchups and playoffs are coming in the next phases. A season league created now is not ready for competitive play.</small>
+        </div>
+        <div class="form-group">
           <label for="createCompetition">Competition Focus</label>
           <select id="createCompetition" class="form-control">
             <optgroup label="International">
