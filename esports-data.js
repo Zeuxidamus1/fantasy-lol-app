@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-19T19:58:47.768Z",
+  "updatedAt": "2026-10-19T23:17:27.859Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "115565004607949387",
-      "eventId": "",
-      "competition": "lcs",
-      "competitionType": "regional",
-      "startTime": "2026-09-19T20:00:00Z",
-      "league": "LCS",
-      "leagueCode": "lcs",
-      "stage": "Playoffs",
-      "aId": "99566405941863385",
-      "a": "LYON",
-      "aCode": "LYON",
-      "bId": "98767991877340524",
-      "b": "Cloud9 Kia",
-      "bCode": "C9",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "115548681803406333",
       "eventId": "",
