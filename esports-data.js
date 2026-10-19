@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-19T06:54:51.841Z",
+  "updatedAt": "2026-10-19T14:13:42.945Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "116957100120526836",
-      "eventId": "",
-      "competition": "lpl",
-      "competitionType": "regional",
-      "startTime": "2026-09-19T09:00:00Z",
-      "league": "LPL",
-      "leagueCode": "lpl",
-      "stage": "Regional Qualifier",
-      "aId": "99566404852189289",
-      "a": "Beijing JDG Esports",
-      "aCode": "JDG",
-      "bId": "99566404848691211",
-      "b": "Invictus Gaming",
-      "bCode": "IG",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "115548681803406327",
       "eventId": "",
