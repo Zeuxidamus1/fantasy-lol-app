@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-20T12:16:17.612Z",
+  "updatedAt": "2026-10-20T17:13:19.932Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,44 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "115548681803406333",
-      "eventId": "",
-      "competition": "lec",
-      "competitionType": "regional",
-      "startTime": "2026-09-20T15:00:00Z",
-      "league": "LEC",
-      "leagueCode": "lec",
-      "stage": "Finals",
-      "aId": "98767991926151025",
-      "a": "G2 Esports",
-      "aCode": "G2",
-      "bId": "103461966965149786",
-      "b": "Movistar KOI",
-      "bCode": "MKOI",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
-    {
-      "matchId": "115565671526468629",
-      "eventId": "",
-      "competition": "cblol",
-      "competitionType": "regional",
-      "startTime": "2026-09-20T16:00:00Z",
-      "league": "CBLOL",
-      "leagueCode": "cblol-brazil",
-      "stage": "Playoffs",
-      "aId": "99566408221961358",
-      "a": "RED Kalunga",
-      "aCode": "RED",
-      "bId": "99566408217955692",
-      "b": "paiN Gaming",
-      "bCode": "PAIN",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "115565004607949393",
       "eventId": "",
