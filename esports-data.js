@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-20T17:13:19.932Z",
+  "updatedAt": "2026-10-20T20:38:46.711Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "115565004607949393",
-      "eventId": "",
-      "competition": "lcs",
-      "competitionType": "regional",
-      "startTime": "2026-09-20T20:00:00Z",
-      "league": "LCS",
-      "leagueCode": "lcs",
-      "stage": "Playoffs",
-      "aId": "98926509885559666",
-      "a": "Team Liquid Alienware",
-      "aCode": "TLAW",
-      "bId": "98926509892121852",
-      "b": "FlyQuest",
-      "bCode": "FLY",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "115565004607949411",
       "eventId": "",
