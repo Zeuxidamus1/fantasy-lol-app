@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-25T19:19:54.880Z",
+  "updatedAt": "2026-10-25T21:53:09.354Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "115565004607949411",
-      "eventId": "",
-      "competition": "lcs",
-      "competitionType": "regional",
-      "startTime": "2026-09-25T20:00:00Z",
-      "league": "LCS",
-      "leagueCode": "lcs",
-      "stage": "Playoffs",
-      "aId": "111504538396430510",
-      "a": "Shopify Rebellion",
-      "aCode": "SR",
-      "bId": "98926509892121852",
-      "b": "FlyQuest",
-      "bCode": "FLY",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "115565671526468635",
       "eventId": "",
@@ -732,7 +713,7 @@ window.ESPORTS_DATA = {
       "bId": "100725845018863243",
       "b": "Dplus KIA",
       "bCode": "DK",
-      "status": "INPROGRESS",
+      "status": "COMPLETED",
       "strategy": "bestOf",
       "count": 3
     },
@@ -745,13 +726,13 @@ window.ESPORTS_DATA = {
       "league": "Worlds",
       "leagueCode": "worlds",
       "stage": "Swiss",
-      "aId": "100205573495116443",
-      "a": "Gen.G Esports",
-      "aCode": "GEN",
-      "bId": "99566405941863385",
-      "b": "LYON",
-      "bCode": "LYON",
-      "status": "UNSTARTED",
+      "aId": "99566405941863385",
+      "a": "LYON",
+      "aCode": "LYON",
+      "bId": "100205573495116443",
+      "b": "Gen.G Esports",
+      "bCode": "GEN",
+      "status": "INPROGRESS",
       "strategy": "bestOf",
       "count": 3
     },
