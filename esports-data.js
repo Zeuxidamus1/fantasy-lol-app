@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-25T21:53:09.354Z",
+  "updatedAt": "2026-10-25T23:41:54.049Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -732,7 +732,7 @@ window.ESPORTS_DATA = {
       "bId": "100205573495116443",
       "b": "Gen.G Esports",
       "bCode": "GEN",
-      "status": "INPROGRESS",
+      "status": "COMPLETED",
       "strategy": "bestOf",
       "count": 3
     },
