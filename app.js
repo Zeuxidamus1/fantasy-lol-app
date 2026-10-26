@@ -1807,10 +1807,17 @@ function render(view="home",options={}){
           const teamPlayoffs=await b.listPlayoffs(leagueId).catch(()=>[]);
           const teamLifecycle=leagueLifecycleConfig(activeLeague,{playoffs:teamPlayoffs});
           const teamLeagueStatus=teamLifecycle.state;
-          badge.textContent=teamLifecycle.readOnly?"READ ONLY":teamLifecycle.label.toUpperCase();
+          const eliminatedFromSeasonPlayoffs=activeLeague?.settings?.fantasyMode==="season"&&teamPlayoffs.some(p=>
+            p.status==="final"&&p.winner_manager_id&&String(p.winner_manager_id)!==String(user.id)&&
+            ((p.home_manager_type==="human"&&String(p.home_manager_id)===String(user.id))||
+             (p.away_manager_type==="human"&&String(p.away_manager_id)===String(user.id)))
+          );
+          badge.textContent=eliminatedFromSeasonPlayoffs?"ELIMINATED":(teamLifecycle.readOnly?"READ ONLY":teamLifecycle.label.toUpperCase());
           badge.hidden=false;
           leagueCompleted=teamLifecycle.readOnly;
-          rosterMovesEnabled=teamLifecycle.canManageRoster;
+          rosterMovesEnabled=teamLifecycle.canManageRoster&&!eliminatedFromSeasonPlayoffs;
+
+          if(eliminatedFromSeasonPlayoffs)showToast("Your team was eliminated from the fantasy playoffs. Roster moves are locked.");
 
           if(leagueCompleted){
             leagueNameEl.textContent="FINAL ROSTERS · "+String(activeLeague?.name||"League").toUpperCase();
