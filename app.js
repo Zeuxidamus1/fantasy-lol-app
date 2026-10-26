@@ -1818,6 +1818,49 @@ function render(view="home",options={}){
           rosterMovesEnabled=teamLifecycle.canManageRoster&&!eliminatedFromSeasonPlayoffs;
 
           if(eliminatedFromSeasonPlayoffs)showToast("Your team was eliminated from the fantasy playoffs. Roster moves are locked.");
+          const replacementCard=document.querySelector("#emergencyReplacementCard");
+          if(replacementCard&&!eliminatedFromSeasonPlayoffs&&!teamLifecycle.readOnly){
+            const statusRows=await b.listPlayerCompetitionStatus(activeLeague?.settings?.competition).catch(()=>[]);
+            const statusById=new Map(statusRows.map(x=>[String(x.player_id),String(x.status||"")]));
+            const owned=getUserRoster();
+            const outgoing=owned.filter(p=>statusById.get(String(playerKey(p)))==="eliminated");
+            const taken=new Set((await b.listRosters(leagueId).catch(()=>[])).map(r=>String(r.player_id)));
+            const outgoingSelect=document.querySelector("#emergencyOutgoing");
+            const incomingSelect=document.querySelector("#emergencyIncoming");
+            const confirmReplace=document.querySelector("#confirmEmergencyReplace");
+            const eligiblePlayers=allFantasyPlayers().filter(p=>
+              !taken.has(String(playerKey(p)))&&
+              ["starter","substitute"].includes(statusById.get(String(playerKey(p))))&&
+              playerEligibleForCompetition(p,activeLeague?.settings?.competition)
+            );
+            if(outgoing.length&&eligiblePlayers.length){
+              replacementCard.hidden=false;
+              outgoingSelect.innerHTML=outgoing.map(p=>'<option value="'+h(playerKey(p))+'">'+h(p.name)+' · '+h(playerPosition(p))+'</option>').join("");
+              const updateEligible=()=>{
+                const departing=outgoing.find(p=>String(playerKey(p))===outgoingSelect.value);
+                const peers=eligiblePlayers.filter(p=>playerPosition(p)===playerPosition(departing));
+                incomingSelect.innerHTML=peers.length?peers.map(p=>'<option value="'+h(playerKey(p))+'">'+h(p.name)+' · '+h(p.team||p.teamCode||"Pro team")+'</option>').join("")
+                  :'<option value="">No available same-role player</option>';
+                confirmReplace.disabled=!peers.length;
+              };
+              outgoingSelect.onchange=updateEligible;
+              updateEligible();
+              confirmReplace.onclick=async()=>{
+                if(!incomingSelect.value||!outgoingSelect.value)return;
+                if(!confirm("Replace this eliminated pro player? The replacement must be eligible and unlocked."))return;
+                confirmReplace.disabled=true;
+                try{
+                  await b.emergencyReplaceEliminatedPlayer(leagueId,outgoingSelect.value,incomingSelect.value);
+                  showToast("Emergency replacement successful.");
+                  render("team",{replace:true});
+                }catch(err){
+                  showToast(err.message||"Emergency replacement unavailable.");
+                  confirmReplace.disabled=false;
+                }
+              };
+            }
+          }
+
 
           if(leagueCompleted){
             leagueNameEl.textContent="FINAL ROSTERS · "+String(activeLeague?.name||"League").toUpperCase();
