@@ -4405,7 +4405,7 @@ function render(view="home",options={}){
             const published=await b.listSeasonRoundPlans(activeLeague.id).catch(()=>[]);
             if(published.length){
               seasonStatus.textContent=published.length+" approved fantasy rounds published. The league schedule is locked.";
-              seasonMatches.innerHTML=published.map(r=>'<div>Round '+h(String(r.round_number))+' · '+h(new Date(r.starts_at).toLocaleDateString())+' · '+h(String(r.match_ids?.length||0))+' matches</div>').join("");
+              seasonMatches.innerHTML=published.map((r,i)=>'<div><strong>'+h(i===published.length-1?'CHAMPIONSHIP':(published.length>=4&&i===published.length-2?'FANTASY SEMIFINAL':'REGULAR SEASON'))+'</strong> · Round '+h(String(r.round_number))+' · '+h(new Date(r.starts_at).toLocaleDateString())+' · '+h(String(r.match_ids?.length||0))+' matches</div>').join("");
               publishBtn.hidden=true;
             }else if(!commissioner){
               seasonStatus.textContent="Your commissioner must approve the official regional schedule before Season Fantasy can start.";
@@ -4432,6 +4432,8 @@ function render(view="home",options={}){
                   publishBtn.textContent=errors.length?"Resolve schedule warnings":"Publish "+rounds.length+" Approved Rounds";
                 };
                 seasonMatches.onchange=review;
+                const defaultPublishLabel="Review confirmed matches";
+                if(seasonStatus)seasonStatus.textContent+=" The last "+(Number(activeSettings.managers)>=6?"two":"one")+" approved rounds form the fantasy playoffs; earlier losses only affect standings.";
                 publishBtn.onclick=async()=>{
                   const rounds=planAdaptiveSeasonRounds(selected());
                   if(!rounds.length||rounds.some(r=>r.warnings.length))return;
