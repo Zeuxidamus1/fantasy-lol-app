@@ -382,6 +382,14 @@
     return request("/rest/v1/rpc/publish_season_rounds",{method:"POST",body:{p_league_id:leagueId,p_rounds:rounds},session:current});
   }
 
+  async function emergencyReplaceEliminatedPlayer(leagueId,oldPlayerId,newPlayerId){
+    const current=await session();
+    if(!current)throw new Error("Sign in to replace an eliminated player.");
+    return request("/rest/v1/rpc/emergency_replace_eliminated_player",{
+      method:"POST",body:{p_league_id:leagueId,p_old_player_id:oldPlayerId,p_new_player_id:newPlayerId},session:current
+    });
+  }
+
   async function listSeasonRoundPlans(leagueId){
     const current=await session();
     if(!current)return [];
@@ -649,7 +657,7 @@
     signUp,resendSignup,requestPasswordReset,updatePassword,isRecoveryMode,signIn,signOut,currentUser,
     listLeagues,createLeague,createBotLeague,isPlatformAdmin,listMockCompetitions,createMockLeague,setMockCompetition,getMockSimulation,startMockSimulation,listMockDraftPool,deleteMockLeague,joinLeague,updateLeagueSettings,updateTeamName,removeLeagueMember,deleteLeague,listLeagueMembers,listLeagueBots,
     getLeagueDraft,listDraftPicks,startLeagueDraft,makeDraftPick,makeBotDraftPick,
-    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listSeasonRoundPlans,publishSeasonRounds,listLeagueMatchups,listLeagueStandings,listLineupLocks,listPlayerCompetitionStatus,listPlayerProjections,listPlayoffs,getLeagueChampion,listLeagueActivity,listLeagueHistory,listScoreCorrections,listWaiverPriority,saveRoster,listTransactions,
+    listRosters,listProMatches,listProGames,listPlayerGameStats,listFantasyGameScores,listFantasyRounds,listSeasonRoundPlans,publishSeasonRounds,emergencyReplaceEliminatedPlayer,listLeagueMatchups,listLeagueStandings,listLineupLocks,listPlayerCompetitionStatus,listPlayerProjections,listPlayoffs,getLeagueChampion,listLeagueActivity,listLeagueHistory,listScoreCorrections,listWaiverPriority,saveRoster,listTransactions,
     listWaivers,createWaiver,cancelWaiver,
     listNotifications,markNotificationsRead,
     listTrades,subscribeLeagueTradeUpdates,createTrade,createCounterTrade,updateTrade,acceptTrade,reviewTrade,
