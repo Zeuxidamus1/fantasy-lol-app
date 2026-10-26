@@ -1823,3 +1823,8 @@ body.schedule-modal-open{overflow:hidden}
 .rf-publish-matches{display:grid;gap:8px;max-height:350px;overflow-y:auto}
 .rf-season-check{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #284962;border-radius:9px;cursor:pointer;font-size:12px}
 .rf-season-check input{width:18px;height:18px;flex:none}
+
+.rf-fantasy-how-it-works{border:1px solid #28556b;background:linear-gradient(120deg,#092634,#0a192a);border-radius:13px;padding:15px;margin:12px 0;color:#d5e9f1}
+.rf-fantasy-how-it-works>strong{display:block;color:#6ce5d7;font-size:14px;margin-bottom:8px}
+.rf-fantasy-how-it-works p{margin:8px 0;font-size:12px;line-height:1.55;color:#b5ccdb}
+.rf-fantasy-how-it-works p strong{color:#eefbff}
