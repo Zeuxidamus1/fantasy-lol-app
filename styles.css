@@ -1828,3 +1828,6 @@ body.schedule-modal-open{overflow:hidden}
 .rf-fantasy-how-it-works>strong{display:block;color:#6ce5d7;font-size:14px;margin-bottom:8px}
 .rf-fantasy-how-it-works p{margin:8px 0;font-size:12px;line-height:1.55;color:#b5ccdb}
 .rf-fantasy-how-it-works p strong{color:#eefbff}
+
+.rf-publish-matches>div{padding:10px 12px;border-radius:9px;background:#0b2633;border:1px solid #28556b;color:#bdd6e4;font-size:12px}
+.rf-publish-matches>div strong{color:#61e0d6}
