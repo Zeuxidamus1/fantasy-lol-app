@@ -3985,7 +3985,11 @@ function render(view="home",options={}){
         <div><span>Draft</span><strong>${h(summarySettings.draftType)}</strong></div>
         <div><span>Scoring</span><strong>${h(summarySettings.scoringFormat)}</strong></div>
         <div><span>Competition</span><strong>${h(competitionName(summarySettings.competition))}</strong></div>
-        <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP</strong></div>`;
+        <div><span>Roster</span><strong>TOP · JNG · MID · ADC · SUP</strong></div>
+        <div><span>Fantasy competition</span><strong>Manager vs. Manager</strong></div>
+        <div><span>Player eligibility</span><strong>Players may represent different pro teams</strong></div>
+        <div><span>Regular-season losses</span><strong>Count toward standings; no elimination</strong></div>
+        <div><span>Elimination</span><strong>Fantasy playoffs only</strong></div>`;
       const signedScore=value=>{
         const n=Number(value);
         if(!Number.isFinite(n))return "—";
