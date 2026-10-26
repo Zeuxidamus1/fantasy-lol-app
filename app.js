@@ -4405,7 +4405,16 @@ function render(view="home",options={}){
               playoffContent.innerHTML='<div class="champion-banner"><strong>🏆 '+h(championName)+'</strong><small>League Champion · Seed #'+h(champion.seed||"—")+'</small></div>';
               if(overviewStatus==="completed"&&completionCopy)completionCopy.textContent=competitionName(activeSettings.competition)+" is complete · Champion: "+championName+".";
             }else{
-              playoffContent.innerHTML=playoffs.map(function(x){return '<div class="playoff-row"><div><strong>'+h(x.stage==="championship"?"Championship":"Semifinal "+x.bracket_slot)+'</strong><small>Seed '+h(x.home_seed??"—")+' vs Seed '+h(x.away_seed??"—")+'</small></div><div><strong>'+formatFantasyPoints(x.home_score)+' - '+formatFantasyPoints(x.away_score)+'</strong><small>'+h(String(x.status||"upcoming").toUpperCase())+'</small></div></div>';}).join("");
+              playoffContent.innerHTML=playoffs.map(function(x){
+                const settled=x.status==="final"&&x.winner_manager_id;
+                const winner=settled?managerName(x.winner_manager_id,x.winner_manager_type||((String(x.winner_manager_id)===String(x.home_manager_id))?x.home_manager_type:x.away_manager_type)):"";
+                const home=managerName(x.home_manager_id,x.home_manager_type);
+                const away=managerName(x.away_manager_id,x.away_manager_type);
+                const outcome=settled
+                  ?("✓ "+winner+" advances · Opponent eliminated")
+                  :(x.status==="live"?"LIVE · Scores provisional":"Awaiting fantasy matchup");
+                return '<div class="playoff-row"><div><strong>'+h(x.stage==="championship"?"Championship":"Semifinal "+x.bracket_slot)+'</strong><small>'+h(home)+' vs '+h(away)+'</small></div><div><strong>'+formatFantasyPoints(x.home_score)+' - '+formatFantasyPoints(x.away_score)+'</strong><small>'+h(outcome)+'</small></div></div>';
+              }).join("");
             }
           }
         }catch{}
