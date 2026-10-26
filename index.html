@@ -448,6 +448,16 @@
         </div>
       </section>
 
+      <section class="card rf-emergency-replacement" id="emergencyReplacementCard" hidden>
+        <div class="section-head"><div><div class="eyebrow">PRO PLAYER ELIMINATED</div><h3>Emergency Replacement</h3></div></div>
+        <p class="field-help">If one of your professional players is confirmed eliminated, you may replace them with an available player of the same role. Already locked players cannot be changed mid-round.</p>
+        <label for="emergencyOutgoing">Replace eliminated player</label>
+        <select id="emergencyOutgoing" class="form-control"></select>
+        <label for="emergencyIncoming">Available replacement</label>
+        <select id="emergencyIncoming" class="form-control"></select>
+        <button type="button" class="primary-btn" id="confirmEmergencyReplace">Confirm Emergency Replacement</button>
+      </section>
+
       <section class="card compact team-summary-card">
         <div class="stat-row"><span>Roster</span><strong id="teamRosterCount">0/0</strong></div>
         <div class="stat-row"><span>Starting lineup</span><strong id="teamStarterCount">0/5</strong></div>
