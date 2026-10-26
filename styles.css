@@ -1831,3 +1831,8 @@ body.schedule-modal-open{overflow:hidden}
 
 .rf-publish-matches>div{padding:10px 12px;border-radius:9px;background:#0b2633;border:1px solid #28556b;color:#bdd6e4;font-size:12px}
 .rf-publish-matches>div strong{color:#61e0d6}
+
+.rf-emergency-replacement{display:grid;gap:10px}
+.rf-emergency-replacement[hidden]{display:none}
+.rf-emergency-replacement label{color:#d7e7f3;font-size:12px;font-weight:700}
+.rf-emergency-replacement .field-help{line-height:1.55;color:#9abdc9}
