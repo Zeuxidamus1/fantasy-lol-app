@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-27T14:04:32.642Z",
+  "updatedAt": "2026-10-27T19:23:29.602Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "115565671526468623",
-      "eventId": "",
-      "competition": "cblol",
-      "competitionType": "regional",
-      "startTime": "2026-09-27T16:00:00Z",
-      "league": "CBLOL",
-      "leagueCode": "cblol-brazil",
-      "stage": "Playoffs",
-      "aId": "105397404796640412",
-      "a": "LOUD",
-      "aCode": "LOUD",
-      "bId": "109480204628225868",
-      "b": "LOS",
-      "bCode": "LOS",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "115565004607949405",
       "eventId": "",
