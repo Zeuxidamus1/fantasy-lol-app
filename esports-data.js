@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-29T00:03:33.933Z",
+  "updatedAt": "2026-10-29T05:38:01.012Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -770,7 +770,7 @@ window.ESPORTS_DATA = {
       "bId": "99566404848691211",
       "b": "Invictus Gaming",
       "bCode": "IG",
-      "status": "INPROGRESS",
+      "status": "COMPLETED",
       "strategy": "bestOf",
       "count": 3
     },
