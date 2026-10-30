@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-29T21:58:20.623Z",
+  "updatedAt": "2026-10-30T01:31:28.361Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -789,7 +789,7 @@ window.ESPORTS_DATA = {
       "bId": "107700199633958891",
       "b": "CTBC Flying Oyster",
       "bCode": "CFO",
-      "status": "INPROGRESS",
+      "status": "COMPLETED",
       "strategy": "bestOf",
       "count": 3
     },
@@ -808,7 +808,7 @@ window.ESPORTS_DATA = {
       "bId": "99566404854685458",
       "b": "TOP ESPORTS",
       "bCode": "TES",
-      "status": "UNSTARTED",
+      "status": "COMPLETED",
       "strategy": "bestOf",
       "count": 3
     },
