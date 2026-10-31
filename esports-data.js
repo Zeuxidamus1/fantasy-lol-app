@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-31T14:40:03.008Z",
+  "updatedAt": "2026-10-31T18:44:41.247Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -859,13 +859,13 @@ window.ESPORTS_DATA = {
       "league": "Worlds",
       "leagueCode": "worlds",
       "stage": "Swiss",
-      "aId": "103461966965149786",
-      "a": "Movistar KOI",
-      "aCode": "MKOI",
-      "bId": "111692118851466302",
-      "b": "Karmine Corp",
-      "bCode": "KC",
-      "status": "UNSTARTED",
+      "aId": "111692118851466302",
+      "a": "Karmine Corp",
+      "aCode": "KC",
+      "bId": "103461966965149786",
+      "b": "Movistar KOI",
+      "bCode": "MKOI",
+      "status": "INPROGRESS",
       "strategy": "bestOf",
       "count": 3
     },
@@ -1670,8 +1670,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "cblol",
       "competitions": [
         "cblol"
@@ -7750,8 +7750,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "cblol",
       "competitions": [
         "cblol"
