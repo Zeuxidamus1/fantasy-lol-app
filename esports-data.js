@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-10-31T08:29:27.430Z",
+  "updatedAt": "2026-10-31T14:40:03.008Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
