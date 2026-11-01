@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import {runHistoricalSeasonReplay} from "./lib/season-replay.mjs";
+import vm from "node:vm";
 
 const fixture=JSON.parse(await fs.readFile(new URL("./fixtures/worlds-2026-swiss-replay.json",import.meta.url),"utf8"));
 assert.equal(fixture.competition,"Worlds 2026 Swiss");
@@ -14,6 +15,24 @@ for(const manager of [1,2,3,4]){
   assert.ok(new Set(roster.map(p=>p.teamId)).size>=3,"independent professional organizations");
 }
 assert.equal(fixture.players.filter(p=>p.manager===null).length,5,"unowned replacement pool");
+
+const actualApp=await fs.readFile(new URL("../app.js",import.meta.url),"utf8");
+const plannerStart=actualApp.indexOf("function planAdaptiveSeasonRounds(");
+const plannerEnd=actualApp.indexOf('\\n  if(view==="create-league")',plannerStart);
+assert.ok(plannerStart>=0&&plannerEnd>plannerStart,"Rift app planner must be available");
+const sandbox={Date,Set,Map,Array,Number,String,Math};
+vm.createContext(sandbox);
+vm.runInContext(actualApp.slice(plannerStart,plannerEnd)+"\\nthis.plan=planAdaptiveSeasonRounds;",sandbox,{timeout:3000});
+const planned=sandbox.plan(fixture.matches.map(m=>({
+ id:m.id,start_time:m.start,status:"COMPLETED",stage:"Swiss",
+ team_a_id:m.teamAId,team_b_id:m.teamBId
+})),Date.parse("2026-11-01T16:00:00Z"));
+assert.equal(planned.length,2,"Actual app planner must not manufacture five fair rounds from this schedule");
+assert.ok(planned.every(p=>p.warnings.includes("Unequal series counts between teams")),
+ "Actual app planner must flag unbalanced team coverage");
+for(let i=1;i<planned.length;i++)
+ assert.ok(Date.parse(planned[i-1].endsAt)<=Date.parse(planned[i].startsAt),
+ "Adaptive fantasy periods must not overlap");
 
 const realCalendar=runHistoricalSeasonReplay(fixture,{mode:"calendar"});
 assert.equal(realCalendar.blocked,true,"incomplete calendar windows cannot finalize");
@@ -59,6 +78,7 @@ assert.equal(tieReplay.champion,1);
 
 console.log("PASS: 4 managers, 20 drafted players, five cross-team roles");
 console.log("PASS: 205 archived player-game records, five replay rounds");
+console.log("PASS: actual app adaptive planner flags unfair rounds and never overlaps periods");
 console.log("PASS: real calendar blocks unfair rounds without declaring a champion");
 console.log("PASS: synchronized (counterfactual) history replay resolves standings, semifinals and final");
 console.log("PASS: emergency replacement leaves past scoring unchanged");
