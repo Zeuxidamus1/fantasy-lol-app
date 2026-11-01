@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#07131f">
+  <meta name="description" content="Rift Fantasy historical season gameplay replay. Read-only development demo using archived professional game statistics.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'">
+  <title>Historical Fantasy Replay | Rift Fantasy</title>
+  <style>
+    :root{color-scheme:dark;--bg:#061321;--panel:#0b2134;--panel2:#102a40;--line:#21465c;--teal:#53ebdb;--muted:#abc1d1;--red:#ff8994;--text:#f0f9ff}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0%,#123a57,transparent 420px),var(--bg);font-family:Inter,system-ui,-apple-system,sans-serif;color:var(--text);line-height:1.45}
+    a{color:var(--teal)}button{font:inherit}.frame{max-width:1170px;margin:auto;padding:20px 20px 60px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:10px 0 30px}header strong{font-size:22px;letter-spacing:.02em}header strong span{color:var(--teal)}.link{font-size:13px;font-weight:700;text-decoration:none}
+    .hero{border:1px solid #287a86;border-radius:21px;padding:34px 29px;background:linear-gradient(115deg,#12344d,#071929 75%);box-shadow:0 15px 45px #0005}.eyebrow{letter-spacing:1.8px;color:var(--teal);font-size:11px;font-weight:900}.hero h1{font-size:clamp(27px,5vw,46px);line-height:1.12;margin:12px 0}.hero p{max-width:700px;color:#c1d6e6;font-size:14px;margin-bottom:0}.status{border:1px solid #bc8453;color:#ffd5a3;border-radius:99px;padding:7px 11px;display:inline-block;font-size:11px;font-weight:800;margin-top:18px}
+    .controls{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}.mode{cursor:pointer;border:1px solid var(--line);color:#b4cedb;background:#0b2436;padding:12px 16px;border-radius:12px;font-weight:800}.mode[aria-pressed=true]{border-color:var(--teal);background:#104448;color:white}.mode:focus-visible{outline:2px solid white;outline-offset:3px}
+    #summary{border:1px solid var(--line);border-radius:15px;padding:17px 18px;background:#0a2638;margin-bottom:19px}#summary strong{color:var(--teal)}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:18px}.stat span{display:block;color:var(--muted);font-size:12px}.stat strong{display:block;font-size:27px;margin-top:5px}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:19px;margin-bottom:16px}.card h2{font-size:19px;margin:0 0 13px}.card h3{font-size:14px;margin:10px 0;color:var(--teal)}.sub{font-size:12px;color:var(--muted);margin:0 0 13px}
+    .rows{display:grid;gap:9px}.item{background:var(--panel2);border:1px solid #294d66;border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px}.item small{color:var(--muted);display:block}.item strong{font-size:14px}.winner{color:var(--teal)}.alert{background:#37232c;border:1px solid #9a5764;padding:13px;border-radius:12px;color:#ffd0d3;font-size:13px;margin:10px 0}.warn{color:#ffb0aa}.good{color:var(--teal)}.score{font-variant-numeric:tabular-nums;font-weight:900}
+    .rosters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.role{font-size:11px;border:1px solid #295b67;border-radius:6px;padding:4px 6px;color:var(--teal);font-weight:900}.roster-player{display:flex;gap:9px;align-items:center;background:var(--panel2);border-radius:9px;padding:9px;margin-bottom:7px}.roster-player>div{min-width:0}.roster-player strong{font-size:13px;display:block;overflow-wrap:anywhere}.roster-player small{color:var(--muted);font-size:11px;display:block}
+    .round-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px}.round-tile{background:var(--panel2);border:1px solid #2a516d;border-radius:12px;padding:14px}.round-tile h3{margin:0 0 10px}.round-line{font-size:12px;display:flex;justify-content:space-between;gap:5px;padding:5px 0;border-top:1px solid #24455b}
+    footer{color:#94aec2;font-size:12px;padding-top:10px}.hidden{display:none!important}
+    @media(max-width:950px){.rosters{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:680px){.frame{padding:14px 12px 50px}.hero{padding:23px 18px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:1fr}.rosters{grid-template-columns:1fr}.mode{flex:1;min-width:145px}.stat strong{font-size:23px}}
+  </style>
+  <script src="./scripts/replay-visualizer.js" defer></script>
+</head>
+<body>
+  <div class="frame">
+    <header><strong><span>RF</span> RIFT FANTASY</strong><a class="link" href="./index.html">Back to Rift Fantasy</a></header>
+    <section class="hero">
+      <div class="eyebrow">DEVELOPMENT TEST · HISTORICAL DATA</div>
+      <h1>Fantasy Season Replay</h1>
+      <p>Watch four fantasy managers compete using archived League of Legends professional game statistics. Each five-player roster combines players from multiple professional organizations. Examine how head-to-head standings, playoff elimination, emergency replacements, and schedule fairness work.</p>
+      <span class="status">SIMULATION ONLY · NOT A LIVE FANTASY LEAGUE</span>
+    </section>
+    <nav class="controls" aria-label="Replay scenario">
+      <button class="mode" data-mode="calendar" aria-pressed="false">Actual calendar · Blocked</button>
+      <button class="mode" data-mode="synchronized" aria-pressed="true">Controlled season · Complete</button>
+      <button class="mode" data-mode="emergencyReplacement" aria-pressed="false">Replacement scenario</button>
+    </nav>
+    <div id="summary" role="status" aria-live="polite">Loading archived replay…</div>
+    <div class="stats" id="stats"></div>
+    <div class="two">
+      <section class="card"><h2>Fantasy Standings</h2><div class="rows" id="standings"></div></section>
+      <section class="card"><h2>Fantasy Playoff Bracket</h2><div class="rows" id="bracket"></div></section>
+    </div>
+    <section class="card"><h2>Round-by-Round Scoring</h2><p class="sub">Points are calculated from archived game statistics, not random scores.</p><div class="round-grid" id="rounds"></div></section>
+    <section class="card"><h2>Five-Player Fantasy Rosters</h2><p class="sub">Each manager drafts five roles; their professional players can represent different teams.</p><div class="rosters" id="rosters"></div></section>
+    <footer>Source: archived finalized Worlds 2026 Swiss-stage statistics from Rift Fantasy's database (source fields: Riot LoL Esports / ChainCC). The synchronized round order is a retrospective test construction, not an actual tournament schedule. No production fantasy league data was changed.</footer>
+  </div>
+</body>
+</html>
