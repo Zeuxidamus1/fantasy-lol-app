@@ -40,7 +40,7 @@ assert.equal(realCalendar.champion,null,"no fake champion from missing schedules
 assert.deepEqual(realCalendar.calendarBlockers.map(r=>r.round),[3,4]);
 assert.equal(realCalendar.calendarBlockers[0].missing.length,10);
 
-const controlled=runHistoricalSeasonReplay(fixture,{mode:"synchronized"});
+const controlled=runHistoricalSeasonReplay(fixture,{mode:"synchronized",playoffTeams:4});
 assert.equal(controlled.blocked,false);
 assert.equal(controlled.rounds.length,5);
 assert.ok(controlled.rounds.every(r=>r.ready && r.managerScores.every(s=>s.active===5)));
@@ -51,7 +51,16 @@ assert.deepEqual(controlled.playoffs.map(p=>p.stage),["semifinal","semifinal","c
 assert.equal(new Set(controlled.playoffs.map(p=>p.eliminated)).size,3,"losing playoff teams eliminated");
 assert.equal(controlled.champion,1,"championship won using archived game stats");
 
-const replaced=runHistoricalSeasonReplay(fixture,{mode:"synchronized",replacement:true});
+const standard=runHistoricalSeasonReplay(fixture,{mode:"synchronized"});
+assert.equal(standard.playoffTeams,2,"Four-manager default is a top-two championship");
+assert.equal(standard.rounds.length,4,"The standard final occurs in round four");
+assert.equal(standard.playoffs.length,1,"Only two managers qualify for default championship");
+assert.equal(standard.playoffs[0].stage,"championship");
+assert.deepEqual([standard.playoffs[0].home,standard.playoffs[0].away],[3,4],
+ "Only the top two regular-season managers enter the final");
+assert.equal(standard.champion,4,"The higher final scorer wins the default championship");
+
+const replaced=runHistoricalSeasonReplay(fixture,{mode:"synchronized",replacement:true,playoffTeams:4});
 assert.equal(replaced.replacement.synthetic,true,"replacement scenario is explicitly hypothetical");
 assert.equal(replaced.replacement.sameRole,true);
 assert.equal(replaced.replacement.confirmedInHistoricalData,false);
@@ -80,6 +89,7 @@ console.log("PASS: 4 managers, 20 drafted players, five cross-team roles");
 console.log("PASS: 205 archived player-game records, five replay rounds");
 console.log("PASS: actual app adaptive planner flags unfair rounds and never overlaps periods");
 console.log("PASS: real calendar blocks unfair rounds without declaring a champion");
-console.log("PASS: synchronized (counterfactual) history replay resolves standings, semifinals and final");
+console.log("PASS: default four-manager season advances only the top two to the championship");
+console.log("PASS: optional all-manager bracket stress test resolves semifinals and final");
 console.log("PASS: emergency replacement leaves past scoring unchanged");
 console.log("PASS: invalid/missing/duplicate game stats and tied playoffs handled");
