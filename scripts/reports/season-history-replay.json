@@ -1,0 +1,867 @@
+{
+  "generatedFrom": "Committed historical fixture",
+  "archivedCompetition": "Worlds 2026 Swiss",
+  "sourceDetails": "stats_source=riot_lolesports; result_source=chaincc",
+  "officialResult": false,
+  "reason": "Retrospective fantasy stress test; the series-aligned schedule is counterfactual and not a published event schedule.",
+  "verification": [
+    {
+      "name": "Four fantasy managers with exactly five players",
+      "passed": true
+    },
+    {
+      "name": "Each manager's roster spans at least three professional teams",
+      "passed": true
+    },
+    {
+      "name": "Historic calendar blocks missing coverage",
+      "passed": true
+    },
+    {
+      "name": "Counterfactual replay scores all players",
+      "passed": true
+    },
+    {
+      "name": "Regular season produces six matchups",
+      "passed": true
+    },
+    {
+      "name": "Four manager fantasy playoffs produce two semifinals and final",
+      "passed": true
+    },
+    {
+      "name": "Playoff champion follows archived fantasy scores",
+      "passed": true
+    },
+    {
+      "name": "Hypothetical emergency replacement doesn't rewrite earlier round scores",
+      "passed": true
+    }
+  ],
+  "calendar": {
+    "mode": "calendar",
+    "official": false,
+    "historicalSource": "Rift Fantasy archived finalized player_game_stats",
+    "competition": "Worlds 2026 Swiss",
+    "simulatedSeason": "3 regular fantasy rounds, 2 fantasy playoff rounds",
+    "note": "Actual archived dates grouped into two-day windows. Incomplete fantasy rosters block scoring and championship finalization.",
+    "draftedManagers": 4,
+    "rosterSize": 5,
+    "professionalTeams": 4,
+    "freeAgents": 5,
+    "archivedMatches": 33,
+    "archivedPlayerGameRecords": 205,
+    "rounds": [
+      {
+        "round": 1,
+        "ready": true,
+        "managerScores": [
+          {
+            "manager": 1,
+            "points": 190.6,
+            "active": 5
+          },
+          {
+            "manager": 2,
+            "points": 181.54,
+            "active": 5
+          },
+          {
+            "manager": 3,
+            "points": 215.4,
+            "active": 5
+          },
+          {
+            "manager": 4,
+            "points": 203.54,
+            "active": 5
+          }
+        ]
+      },
+      {
+        "round": 2,
+        "ready": true,
+        "managerScores": [
+          {
+            "manager": 1,
+            "points": 100.85,
+            "active": 5
+          },
+          {
+            "manager": 2,
+            "points": 85.22,
+            "active": 5
+          },
+          {
+            "manager": 3,
+            "points": 113.55,
+            "active": 5
+          },
+          {
+            "manager": 4,
+            "points": 86.23,
+            "active": 5
+          }
+        ]
+      },
+      {
+        "round": 3,
+        "ready": false,
+        "managerScores": [
+          {
+            "manager": 1,
+            "points": 34.59,
+            "active": 2
+          },
+          {
+            "manager": 2,
+            "points": 42.82,
+            "active": 3
+          },
+          {
+            "manager": 3,
+            "points": 33.39,
+            "active": 2
+          },
+          {
+            "manager": 4,
+            "points": 38.19,
+            "active": 3
+          }
+        ]
+      },
+      {
+        "round": 4,
+        "ready": false,
+        "managerScores": [
+          {
+            "manager": 1,
+            "points": 92.55,
+            "active": 3
+          },
+          {
+            "manager": 2,
+            "points": 65.24,
+            "active": 2
+          },
+          {
+            "manager": 3,
+            "points": 66.25,
+            "active": 3
+          },
+          {
+            "manager": 4,
+            "points": 68.3,
+            "active": 2
+          }
+        ]
+      },
+      {
+        "round": 5,
+        "ready": true,
+        "managerScores": [
+          {
+            "manager": 1,
+            "points": 120.23,
+            "active": 5
+          },
+          {
+            "manager": 2,
+            "points": 115.23,
+            "active": 5
+          },
+          {
+            "manager": 3,
+            "points": 130.19,
+            "active": 5
+          },
+          {
+            "manager": 4,
+            "points": 122.15,
+            "active": 5
+          }
+        ]
+      }
+    ],
+    "regularGames": [
+      {
+        "round": 1,
+        "home": 1,
+        "away": 4,
+        "homeScore": 190.6,
+        "awayScore": 203.54,
+        "result": "away_win"
+      },
+      {
+        "round": 1,
+        "home": 2,
+        "away": 3,
+        "homeScore": 181.54,
+        "awayScore": 215.4,
+        "result": "away_win"
+      },
+      {
+        "round": 2,
+        "home": 1,
+        "away": 3,
+        "homeScore": 100.85,
+        "awayScore": 113.55,
+        "result": "away_win"
+      },
+      {
+        "round": 2,
+        "home": 4,
+        "away": 2,
+        "homeScore": 86.23,
+        "awayScore": 85.22,
+        "result": "home_win"
+      },
+      {
+        "round": 3,
+        "home": 1,
+        "away": 2,
+        "homeScore": 34.59,
+        "awayScore": 42.82,
+        "result": "blocked"
+      },
+      {
+        "round": 3,
+        "home": 3,
+        "away": 4,
+        "homeScore": 33.39,
+        "awayScore": 38.19,
+        "result": "blocked"
+      }
+    ],
+    "standings": [
+      {
+        "manager": 3,
+        "wins": 2,
+        "losses": 0,
+        "ties": 0,
+        "pf": 328.95,
+        "pa": 282.39,
+        "seed": 1
+      },
+      {
+        "manager": 4,
+        "wins": 2,
+        "losses": 0,
+        "ties": 0,
+        "pf": 289.77,
+        "pa": 275.82,
+        "seed": 2
+      },
+      {
+        "manager": 1,
+        "wins": 0,
+        "losses": 2,
+        "ties": 0,
+        "pf": 291.45,
+        "pa": 317.09,
+        "seed": 3
+      },
+      {
+        "manager": 2,
+        "wins": 0,
+        "losses": 2,
+        "ties": 0,
+        "pf": 266.76,
+        "pa": 301.63,
+        "seed": 4
+      }
+    ],
+    "playoffs": [],
+    "champion": null,
+    "blocked": true,
+    "calendarBlockers": [
+      {
+        "round": 3,
+        "missing": [
+          "Manager 1 TOP: Zeus",
+          "Manager 1 MID: Knight",
+          "Manager 1 SUP: Delight",
+          "Manager 2 JNG: Kanavi",
+          "Manager 2 ADC: Viper",
+          "Manager 3 TOP: Bin",
+          "Manager 3 MID: Zeka",
+          "Manager 3 SUP: ON",
+          "Manager 4 JNG: Xun",
+          "Manager 4 ADC: Gumayusi"
+        ]
+      },
+      {
+        "round": 4,
+        "missing": [
+          "Manager 1 JNG: Inspired",
+          "Manager 1 ADC: Supa",
+          "Manager 2 TOP: Myrwn",
+          "Manager 2 MID: Saint",
+          "Manager 2 SUP: Alvaro",
+          "Manager 3 JNG: Elyoya",
+          "Manager 3 ADC: Berserker",
+          "Manager 4 TOP: Dhokla",
+          "Manager 4 MID: Jojopyun",
+          "Manager 4 SUP: Isles"
+        ]
+      }
+    ],
+    "replacement": null
+  },
+  "synchronized": {
+    "mode": "synchronized",
+    "official": false,
+    "historicalSource": "Rift Fantasy archived finalized player_game_stats",
+    "competition": "Worlds 2026 Swiss",
+    "simulatedSeason": "3 regular fantasy rounds, 2 fantasy playoff rounds",
+    "note": "Counterfactual scheduling: each professional team's nth played series is mapped to fantasy round n. This DOES NOT represent actual simultaneous calendar windows.",
+    "draftedManagers": 4,
+    "rosterSize": 5,
+    "professionalTeams": 4,
+    "freeAgents": 5,
+    "archivedMatches": 33,
+    "archivedPlayerGameRecords": 205,
+    "rounds": [
+      {
+        "round": 1,
+        "ready": true,
+        "managerScores": [
+          {
+            "manager": 1,
+            "points": 190.04,
+            "active": 5
+          },
+          {
+            "manager": 2,
+            "points": 171.78,
+            "active": 5
+          },
+          {
+            "manager": 3,
+            "points": 209.96,
+            "active": 5
+          },
+          {
+            "manager": 4,
+            "points": 194.56,
+            "active": 5
+          }
+        ]
+      },
+      {
+        "round": 2,
+        "ready": true,
+        "managerScores": [
+          {
+            "manager": 1,
+            "points": 132.02,
+            "active": 5
+          },
+          {
+            "manager": 2,
+            "points": 148.4,
+            "active": 5
+          },
+          {
+            "manager": 3,
+            "points": 165.98,
+            "active": 5
+          },
+          {
+            "manager": 4,
+            "points": 150.14,
+            "active": 5
+          }
+        ]
+      },
+      {
+        "round": 3,
+        "ready": true,
+        "managerScores": [
+          {
+            "manager": 1,
+            "points": 97.87,
+            "active": 5
+          },
+          {
+            "manager": 2,
+            "points": 85.22,
+            "active": 5
+          },
+          {
+            "manager": 3,
+            "points": 113.55,
+            "active": 5
+          },
+          {
+            "manager": 4,
+            "points": 86.23,
+            "active": 5
+          }
+        ]
+      },
+      {
+        "round": 4,
+        "ready": true,
+        "managerScores": [
+          {
+            "manager": 1,
+            "points": 127.13,
+            "active": 5
+          },
+          {
+            "manager": 2,
+            "points": 108.05,
+            "active": 5
+          },
+          {
+            "manager": 3,
+            "points": 99.64,
+            "active": 5
+          },
+          {
+            "manager": 4,
+            "points": 106.49,
+            "active": 5
+          }
+        ]
+      },
+      {
+        "round": 5,
+        "ready": true,
+        "managerScores": [
+          {
+            "manager": 1,
+            "points": 120.23,
+            "active": 5
+          },
+          {
+            "manager": 2,
+            "points": 115.23,
+            "active": 5
+          },
+          {
+            "manager": 3,
+            "points": 130.19,
+            "active": 5
+          },
+          {
+            "manager": 4,
+            "points": 122.15,
+            "active": 5
+          }
+        ]
+      }
+    ],
+    "regularGames": [
+      {
+        "round": 1,
+        "home": 1,
+        "away": 4,
+        "homeScore": 190.04,
+        "awayScore": 194.56,
+        "result": "away_win"
+      },
+      {
+        "round": 1,
+        "home": 2,
+        "away": 3,
+        "homeScore": 171.78,
+        "awayScore": 209.96,
+        "result": "away_win"
+      },
+      {
+        "round": 2,
+        "home": 1,
+        "away": 3,
+        "homeScore": 132.02,
+        "awayScore": 165.98,
+        "result": "away_win"
+      },
+      {
+        "round": 2,
+        "home": 4,
+        "away": 2,
+        "homeScore": 150.14,
+        "awayScore": 148.4,
+        "result": "home_win"
+      },
+      {
+        "round": 3,
+        "home": 1,
+        "away": 2,
+        "homeScore": 97.87,
+        "awayScore": 85.22,
+        "result": "home_win"
+      },
+      {
+        "round": 3,
+        "home": 3,
+        "away": 4,
+        "homeScore": 113.55,
+        "awayScore": 86.23,
+        "result": "home_win"
+      }
+    ],
+    "standings": [
+      {
+        "manager": 3,
+        "wins": 3,
+        "losses": 0,
+        "ties": 0,
+        "pf": 489.49,
+        "pa": 390.03,
+        "seed": 1
+      },
+      {
+        "manager": 4,
+        "wins": 2,
+        "losses": 1,
+        "ties": 0,
+        "pf": 430.93,
+        "pa": 451.99,
+        "seed": 2
+      },
+      {
+        "manager": 1,
+        "wins": 1,
+        "losses": 2,
+        "ties": 0,
+        "pf": 419.93,
+        "pa": 445.76,
+        "seed": 3
+      },
+      {
+        "manager": 2,
+        "wins": 0,
+        "losses": 3,
+        "ties": 0,
+        "pf": 405.4,
+        "pa": 457.97,
+        "seed": 4
+      }
+    ],
+    "playoffs": [
+      {
+        "stage": "semifinal",
+        "round": 4,
+        "home": 3,
+        "away": 2,
+        "homeScore": 99.64,
+        "awayScore": 108.05,
+        "winner": 2,
+        "eliminated": 3,
+        "tiebreaker": null
+      },
+      {
+        "stage": "semifinal",
+        "round": 4,
+        "home": 4,
+        "away": 1,
+        "homeScore": 106.49,
+        "awayScore": 127.13,
+        "winner": 1,
+        "eliminated": 4,
+        "tiebreaker": null
+      },
+      {
+        "stage": "championship",
+        "round": 5,
+        "home": 2,
+        "away": 1,
+        "homeScore": 115.23,
+        "awayScore": 120.23,
+        "winner": 1,
+        "eliminated": 2,
+        "tiebreaker": null
+      }
+    ],
+    "champion": 1,
+    "blocked": false,
+    "calendarBlockers": [],
+    "replacement": null
+  },
+  "emergencyReplacement": {
+    "mode": "synchronized",
+    "official": false,
+    "historicalSource": "Rift Fantasy archived finalized player_game_stats",
+    "competition": "Worlds 2026 Swiss",
+    "simulatedSeason": "3 regular fantasy rounds, 2 fantasy playoff rounds",
+    "note": "Counterfactual scheduling: each professional team's nth played series is mapped to fantasy round n. This DOES NOT represent actual simultaneous calendar windows.",
+    "draftedManagers": 4,
+    "rosterSize": 5,
+    "professionalTeams": 4,
+    "freeAgents": 5,
+    "archivedMatches": 33,
+    "archivedPlayerGameRecords": 205,
+    "rounds": [
+      {
+        "round": 1,
+        "ready": true,
+        "managerScores": [
+          {
+            "manager": 1,
+            "points": 190.04,
+            "active": 5
+          },
+          {
+            "manager": 2,
+            "points": 171.78,
+            "active": 5
+          },
+          {
+            "manager": 3,
+            "points": 209.96,
+            "active": 5
+          },
+          {
+            "manager": 4,
+            "points": 194.56,
+            "active": 5
+          }
+        ]
+      },
+      {
+        "round": 2,
+        "ready": true,
+        "managerScores": [
+          {
+            "manager": 1,
+            "points": 132.02,
+            "active": 5
+          },
+          {
+            "manager": 2,
+            "points": 148.4,
+            "active": 5
+          },
+          {
+            "manager": 3,
+            "points": 165.98,
+            "active": 5
+          },
+          {
+            "manager": 4,
+            "points": 150.14,
+            "active": 5
+          }
+        ]
+      },
+      {
+        "round": 3,
+        "ready": true,
+        "managerScores": [
+          {
+            "manager": 1,
+            "points": 97.87,
+            "active": 5
+          },
+          {
+            "manager": 2,
+            "points": 85.22,
+            "active": 5
+          },
+          {
+            "manager": 3,
+            "points": 113.55,
+            "active": 5
+          },
+          {
+            "manager": 4,
+            "points": 86.23,
+            "active": 5
+          }
+        ]
+      },
+      {
+        "round": 4,
+        "ready": true,
+        "managerScores": [
+          {
+            "manager": 1,
+            "points": 126.53,
+            "active": 5
+          },
+          {
+            "manager": 2,
+            "points": 108.05,
+            "active": 5
+          },
+          {
+            "manager": 3,
+            "points": 99.64,
+            "active": 5
+          },
+          {
+            "manager": 4,
+            "points": 106.49,
+            "active": 5
+          }
+        ]
+      },
+      {
+        "round": 5,
+        "ready": true,
+        "managerScores": [
+          {
+            "manager": 1,
+            "points": 131.97,
+            "active": 5
+          },
+          {
+            "manager": 2,
+            "points": 115.23,
+            "active": 5
+          },
+          {
+            "manager": 3,
+            "points": 130.19,
+            "active": 5
+          },
+          {
+            "manager": 4,
+            "points": 122.15,
+            "active": 5
+          }
+        ]
+      }
+    ],
+    "regularGames": [
+      {
+        "round": 1,
+        "home": 1,
+        "away": 4,
+        "homeScore": 190.04,
+        "awayScore": 194.56,
+        "result": "away_win"
+      },
+      {
+        "round": 1,
+        "home": 2,
+        "away": 3,
+        "homeScore": 171.78,
+        "awayScore": 209.96,
+        "result": "away_win"
+      },
+      {
+        "round": 2,
+        "home": 1,
+        "away": 3,
+        "homeScore": 132.02,
+        "awayScore": 165.98,
+        "result": "away_win"
+      },
+      {
+        "round": 2,
+        "home": 4,
+        "away": 2,
+        "homeScore": 150.14,
+        "awayScore": 148.4,
+        "result": "home_win"
+      },
+      {
+        "round": 3,
+        "home": 1,
+        "away": 2,
+        "homeScore": 97.87,
+        "awayScore": 85.22,
+        "result": "home_win"
+      },
+      {
+        "round": 3,
+        "home": 3,
+        "away": 4,
+        "homeScore": 113.55,
+        "awayScore": 86.23,
+        "result": "home_win"
+      }
+    ],
+    "standings": [
+      {
+        "manager": 3,
+        "wins": 3,
+        "losses": 0,
+        "ties": 0,
+        "pf": 489.49,
+        "pa": 390.03,
+        "seed": 1
+      },
+      {
+        "manager": 4,
+        "wins": 2,
+        "losses": 1,
+        "ties": 0,
+        "pf": 430.93,
+        "pa": 451.99,
+        "seed": 2
+      },
+      {
+        "manager": 1,
+        "wins": 1,
+        "losses": 2,
+        "ties": 0,
+        "pf": 419.93,
+        "pa": 445.76,
+        "seed": 3
+      },
+      {
+        "manager": 2,
+        "wins": 0,
+        "losses": 3,
+        "ties": 0,
+        "pf": 405.4,
+        "pa": 457.97,
+        "seed": 4
+      }
+    ],
+    "playoffs": [
+      {
+        "stage": "semifinal",
+        "round": 4,
+        "home": 3,
+        "away": 2,
+        "homeScore": 99.64,
+        "awayScore": 108.05,
+        "winner": 2,
+        "eliminated": 3,
+        "tiebreaker": null
+      },
+      {
+        "stage": "semifinal",
+        "round": 4,
+        "home": 4,
+        "away": 1,
+        "homeScore": 106.49,
+        "awayScore": 126.53,
+        "winner": 1,
+        "eliminated": 4,
+        "tiebreaker": null
+      },
+      {
+        "stage": "championship",
+        "round": 5,
+        "home": 2,
+        "away": 1,
+        "homeScore": 115.23,
+        "awayScore": 131.97,
+        "winner": 1,
+        "eliminated": 2,
+        "tiebreaker": null
+      }
+    ],
+    "champion": 1,
+    "blocked": false,
+    "calendarBlockers": [],
+    "replacement": {
+      "synthetic": true,
+      "confirmedInHistoricalData": false,
+      "afterRound": 3,
+      "manager": 1,
+      "outgoing": "Zeus",
+      "incoming": "Canna",
+      "role": "TOP",
+      "sameRole": true,
+      "pastRoundsUnchanged": true
+    }
+  }
+}
