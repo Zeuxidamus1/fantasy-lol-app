@@ -12,7 +12,8 @@
     "preflight": "node scripts/deployment-preflight.mjs",
     "release:check": "npm run check && npm run smoke && npm run e2e && npm run preflight",
     "replay:season": "node scripts/run-historical-season-replay.mjs",
-    "replay:season:report": "node scripts/run-historical-season-replay.mjs --write"
+    "replay:season:report": "node scripts/run-historical-season-replay.mjs --write",
+    "stress:season": "node scripts/stress-season-engine.mjs"
   },
   "engines": {
     "node": ">=24"
