@@ -3,6 +3,14 @@
 **Date:** 2026-11-01  
 **Status:** Controlled development replay. No production leagues, manager accounts, rosters, or existing standings were modified.
 
+## Interactive replay dashboard
+
+The read-only dashboard is `season-replay.html` at the repository root. When GitHub Pages has deployed this commit, it can be opened at:
+
+https://zeuxidamus1.github.io/fantasy-lol-app/season-replay.html
+
+Switch between **Actual calendar (blocked)**, **Counterfactual synchronized season (completed)**, and **Hypothetical emergency replacement**. The dashboard loads the immutable fixture and generated report without modifying Supabase or any user league. `scripts/test-replay-dashboard.mjs` verifies all three views in a lightweight simulated DOM.
+
 ## Archived input
 
 - **Competition:** Worlds 2026 Swiss stage (October 23–31, 2026).
