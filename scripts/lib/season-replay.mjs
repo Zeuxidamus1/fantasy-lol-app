@@ -1,7 +1,8 @@
-export function runHistoricalSeasonReplay(data,{mode="synchronized",replacement=false}={}){
+export function runHistoricalSeasonReplay(data,{mode="synchronized",replacement=false,playoffTeams=4}={}){
   const requiredRoles=["TOP","JNG","MID","ADC","SUP"];
   const fail=message=>{throw new Error("Historical replay: "+message);};
   if(!["synchronized","calendar"].includes(mode))fail("Invalid replay mode");
+  if(![2,4].includes(playoffTeams))fail("Playoff size must be two or four");
   if(!data||!Array.isArray(data.players)||!Array.isArray(data.matches)||!Array.isArray(data.games))fail("Missing archived data");
   if(data.players.length!==25||data.matches.length!==33)fail("Unexpected historical fixture size");
   const teams=new Set(data.players.filter(p=>p.manager).map(p=>p.teamId));
@@ -87,28 +88,42 @@ export function runHistoricalSeasonReplay(data,{mode="synchronized",replacement=
   const standings=Object.values(standing).sort((a,b)=>b.wins-a.wins||b.ties-a.ties||b.pf-a.pf||a.manager-b.manager)
     .map((s,i)=>({...s,seed:i+1,pf:Math.round(s.pf*100)/100,pa:Math.round(s.pa*100)/100}));
   const calendarBlockers=[];
-  for(let round=1;round<=5;round++)if(!records[round].ready)
+  for(let round=1;round<=(playoffTeams===4?5:4);round++)if(!records[round].ready)
     calendarBlockers.push({round,missing:members.flatMap(manager=>records[round].participants[manager].missing.map(x=>"Manager "+manager+" "+x))});
   const playoffs=[];
   let champion=null;
   const ready=calendarBlockers.length===0;
   if(ready){
-    const semis=[[standings[0],standings[3]],[standings[1],standings[2]]];
-    for(const [a,b] of semis){
+    if(playoffTeams===2){
+      // Default small-league rules: top two after the regular season,
+      // single championship final in the next eligible scoring round.
+      const [a,b]=[standings[0],standings[1]];
       const sa=records[4].participants[a.manager].points,sb=records[4].participants[b.manager].points;
-      const winner=sa>=sb?a:b;
-      playoffs.push({stage:"semifinal",round:4,home:a.manager,away:b.manager,
-        homeScore:sa,awayScore:sb,winner:winner.manager,eliminated:winner.manager===a.manager?b.manager:a.manager,
+      const winner=sa>sb?a:sb>sa?b:(a.seed<b.seed?a:b);
+      champion=winner.manager;
+      playoffs.push({stage:"championship",round:4,home:a.manager,away:b.manager,
+        homeScore:sa,awayScore:sb,winner:champion,eliminated:champion===a.manager?b.manager:a.manager,
+        tiebreaker:sa===sb?"higher seed":null});
+    }else{
+      // Optional bracket stress-test configuration: all four managers
+      // enter two semifinals followed by a championship.
+      const semis=[[standings[0],standings[3]],[standings[1],standings[2]]];
+      for(const [a,b] of semis){
+        const sa=records[4].participants[a.manager].points,sb=records[4].participants[b.manager].points;
+        const winner=sa>=sb?a:b;
+        playoffs.push({stage:"semifinal",round:4,home:a.manager,away:b.manager,
+          homeScore:sa,awayScore:sb,winner:winner.manager,eliminated:winner.manager===a.manager?b.manager:a.manager,
+          tiebreaker:sa===sb?"higher seed":null});
+      }
+      const finalists=playoffs.map(p=>standings.find(s=>s.manager===p.winner));
+      const [a,b]=finalists;
+      const sa=records[5].participants[a.manager].points,sb=records[5].participants[b.manager].points;
+      const winner=sa>sb?a:sb>sa?b:(a.seed<b.seed?a:b);
+      champion=winner.manager;
+      playoffs.push({stage:"championship",round:5,home:a.manager,away:b.manager,
+        homeScore:sa,awayScore:sb,winner:champion,eliminated:champion===a.manager?b.manager:a.manager,
         tiebreaker:sa===sb?"higher seed":null});
     }
-    const finalists=playoffs.map(p=>standings.find(s=>s.manager===p.winner));
-    const [a,b]=finalists;
-    const sa=records[5].participants[a.manager].points,sb=records[5].participants[b.manager].points;
-    const winner=sa>sb?a:sb>sa?b:(a.seed<b.seed?a:b);
-    champion=winner.manager;
-    playoffs.push({stage:"championship",round:5,home:a.manager,away:b.manager,
-      homeScore:sa,awayScore:sb,winner:champion,eliminated:champion===a.manager?b.manager:a.manager,
-      tiebreaker:sa===sb?"higher seed":null});
   }
   const roundSummary=Object.values(records).map(r=>({
     round:r.round,ready:r.ready,managerScores:members.map(id=>({manager:id,
@@ -116,7 +131,8 @@ export function runHistoricalSeasonReplay(data,{mode="synchronized",replacement=
   }));
   return {
     mode,official:false,historicalSource:data.source,competition:data.competition,
-    simulatedSeason:"3 regular fantasy rounds, 2 fantasy playoff rounds",
+    simulatedSeason:playoffTeams===2?"3 regular fantasy rounds, top-two championship in round 4":"3 regular fantasy rounds, 2 fantasy playoff rounds",
+    playoffTeams,
     note:mode==="synchronized"
       ?"Counterfactual scheduling: each professional team's nth played series is mapped to fantasy round n. This DOES NOT represent actual simultaneous calendar windows."
       :"Actual archived dates grouped into two-day windows. Incomplete fantasy rosters block scoring and championship finalization.",
