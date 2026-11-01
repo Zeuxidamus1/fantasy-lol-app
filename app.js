@@ -4859,6 +4859,10 @@ function planAdaptiveSeasonRounds(rows, now=Date.now()){
     else {prev.last=t;prev.matches.push(match);}
   }
   return buckets.map((bucket,i)=>{
+    // Published scoring periods must never overlap. A previous series may
+    // finish shortly before the next period's first scheduled series.
+    const nextStart=buckets[i+1]?.first??Infinity;
+    const end=Math.min(bucket.last+12*60*60*1000,nextStart);
     const teams=new Map(),unknown=[];
     for(const m of bucket.matches){
       const a=String(m.team_a_id||m.team_a_code||m.team_a_name||"").trim();
@@ -4876,7 +4880,7 @@ function planAdaptiveSeasonRounds(rows, now=Date.now()){
       ...(bucket.matches.length<2?["Only one series scheduled"]:[])
     ];
     return {round:i+1,startsAt:new Date(bucket.first).toISOString(),
-      endsAt:new Date(bucket.last+86400000).toISOString(),
+      endsAt:new Date(end).toISOString(),
       lockAt:new Date(bucket.first).toISOString(),
       matchCount:bucket.matches.length,knownTeams:teams.size,
       warnings,approved:false,status:bucket.last<now?"historical":"provisional",
