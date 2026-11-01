@@ -34,7 +34,7 @@ The application's actual adaptive period planner was also tested against the sam
 
 For **development testing only**, every pro team's first Swiss series was mapped to fantasy round 1, its second series to round 2, and so on through five series. These were actual archived game statistics, but **this schedule never existed as a real simultaneous competition**. It is not suitable for live scheduling or historical official results.
 
-The first three fantasy rounds are a round-robin regular season. The last two are fantasy semifinals and a championship.
+The first three fantasy rounds form a round-robin regular season. We ran two different playoff configurations to validate both the correct small-league default and an optional semifinal stress test.
 
 ### Regular-season standings
 
@@ -47,7 +47,21 @@ The first three fantasy rounds are a round-robin regular season. The last two ar
 
 No one was eliminated by a regular-season loss.
 
-### Fantasy playoff bracket
+### Standard four-manager format: top two advance
+
+**This is the recommended default**, and the replay dashboard opens in this mode. The best two regular-season managers qualify for a single championship in round four:
+
+| Matchup | Score | Champion |
+|---|---|---|
+| Manager 3 (seed 1) vs Manager 4 (seed 2) | 99.64–106.49 | **Manager 4** |
+
+Managers 1 and 2 do **not** qualify for playoffs. Only the runner-up loses the championship game. The remaining fifth recorded pro-series sequence is not part of this default four-manager season.
+
+### Optional four-team playoff bracket stress test
+
+This non-default test lets all four managers enter semifinals so we can exercise playoff advancement and elimination, even though it is not the recommended format for a four-manager league.
+
+
 
 | Round | Matchup | Score | Advanced |
 |---|---|---|---|
@@ -55,7 +69,7 @@ No one was eliminated by a regular-season loss.
 | Semifinal | Manager 4 (seed 2) vs Manager 1 (seed 3) | 106.49–127.13 | Manager 1 |
 | Championship | Manager 2 vs Manager 1 | 115.23–120.23 | **Manager 1** |
 
-**Counterfactual champion: Manager 1.** Managers 3 and 4 lost semifinals, Manager 2 lost the championship. All elimination is at the fantasy-manager level, not at the level of individual professional players' teams.
+**Counterfactual champion of the optional four-team playoff test: Manager 1.** Managers 3 and 4 lost semifinals, Manager 2 lost the championship. All elimination is at the fantasy-manager level, not at the level of individual professional players' teams.
 
 ## Emergency replacement test
 
@@ -75,6 +89,8 @@ The repository includes `scripts/test-historical-season-replay.mjs`, linked to `
 - Checking the actual production adaptive-round planner for uneven coverage and non-overlapping windows.
 
 Run `npm test`, `npm run replay:season`, or `npm run replay:season:report` in a local checkout.
+
+**Rule verified:** Four-manager Season Fantasy defaults to a top-two final, not a four-team playoff where every participant automatically qualifies. The optional four-team bracket is retained only for stress testing.
 
 **Limitations:** The replay engine is independent of Supabase's live authenticated league/draft/publishing RPC transaction flow. Playwright and the complete release suite have not been executed in this session, and no real current regional regular-season schedule has been published. The full user-facing live-season workflow is not yet production-certified.
 
