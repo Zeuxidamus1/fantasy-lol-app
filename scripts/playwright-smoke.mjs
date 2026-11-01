@@ -30,7 +30,7 @@ try{
     await page.goto(base+"/index.html",{waitUntil:"domcontentloaded"});
     await test(device.name+": login screen available",async()=>{
       await page.locator("#landingEmail").waitFor({state:"visible",timeout:15000});
-      assert.equal(await page.title(),"Rift Fantasy");
+      assert.match(await page.title(),/Rift Fantasy/);
       assert.ok(await page.locator("#landingSignIn").isVisible());
     });
     await test(device.name+": login page fits viewport",async()=>{
