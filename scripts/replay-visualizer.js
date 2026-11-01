@@ -13,7 +13,7 @@ const fetchJSON=async path=>{
       fetchJSON("./scripts/reports/season-history-replay.json"),
       fetchJSON("./scripts/fixtures/worlds-2026-swiss-replay.json")
     ]);
-    const labels={calendar:"Actual-calendar replay",synchronized:"Counterfactual synchronized season",emergencyReplacement:"Hypothetical emergency replacement"};
+    const labels={calendar:"Actual calendar",standard:"Default top-two final",synchronized:"Optional four-team playoff stress test",emergencyReplacement:"Hypothetical emergency replacement"};
     const show=mode=>{
       const result=report[mode];
       if(!result)return;
@@ -51,7 +51,7 @@ const fetchJSON=async path=>{
       }).join("");
     };
     document.querySelectorAll("[data-mode]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.mode)));
-    show("synchronized");
+    show("standard");
   }catch(error){
     byId("summary").textContent="Replay could not load: "+String(error.message||error);
   }
