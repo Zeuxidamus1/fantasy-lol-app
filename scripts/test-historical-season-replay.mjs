@@ -18,11 +18,11 @@ assert.equal(fixture.players.filter(p=>p.manager===null).length,5,"unowned repla
 
 const actualApp=await fs.readFile(new URL("../app.js",import.meta.url),"utf8");
 const plannerStart=actualApp.indexOf("function planAdaptiveSeasonRounds(");
-const plannerEnd=actualApp.indexOf('\\n  if(view==="create-league")',plannerStart);
+const plannerEnd=actualApp.indexOf('\n  if(view==="create-league")',plannerStart);
 assert.ok(plannerStart>=0&&plannerEnd>plannerStart,"Rift app planner must be available");
 const sandbox={Date,Set,Map,Array,Number,String,Math};
 vm.createContext(sandbox);
-vm.runInContext(actualApp.slice(plannerStart,plannerEnd)+"\\nthis.plan=planAdaptiveSeasonRounds;",sandbox,{timeout:3000});
+vm.runInContext(actualApp.slice(plannerStart,plannerEnd)+"\nthis.plan=planAdaptiveSeasonRounds;",sandbox,{timeout:3000});
 const planned=sandbox.plan(fixture.matches.map(m=>({
  id:m.id,start_time:m.start,status:"COMPLETED",stage:"Swiss",
  team_a_id:m.teamAId,team_b_id:m.teamBId
