@@ -1,4 +1,4 @@
-export function runHistoricalSeasonReplay(data,{mode="synchronized",replacement=false,playoffTeams=4}={}){
+export function runHistoricalSeasonReplay(data,{mode="synchronized",replacement=false,playoffTeams=2}={}){
   const requiredRoles=["TOP","JNG","MID","ADC","SUP"];
   const fail=message=>{throw new Error("Historical replay: "+message);};
   if(!["synchronized","calendar"].includes(mode))fail("Invalid replay mode");
@@ -125,7 +125,7 @@ export function runHistoricalSeasonReplay(data,{mode="synchronized",replacement=
         tiebreaker:sa===sb?"higher seed":null});
     }
   }
-  const roundSummary=Object.values(records).map(r=>({
+  const roundSummary=Object.values(records).filter(r=>r.round<=(playoffTeams===4?5:4)).map(r=>({
     round:r.round,ready:r.ready,managerScores:members.map(id=>({manager:id,
       points:r.participants[id].points,active:r.participants[id].players.filter(p=>p.points!==null).length}))
   }));
