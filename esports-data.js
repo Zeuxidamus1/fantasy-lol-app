@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-11-03T15:29:27.764Z",
+  "updatedAt": "2026-11-03T21:12:08.030Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "115565004607949429",
-      "eventId": "",
-      "competition": "lcs",
-      "competitionType": "regional",
-      "startTime": "2026-10-04T20:00:00Z",
-      "league": "LCS",
-      "leagueCode": "lcs",
-      "stage": "Finals",
-      "aId": "98926509885559666",
-      "a": "Team Liquid Alienware",
-      "aCode": "TLAW",
-      "bId": "99566405941863385",
-      "b": "LYON",
-      "bCode": "LYON",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "115565671526468647",
       "eventId": "",
