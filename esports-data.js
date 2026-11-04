@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-11-04T01:19:02.825Z",
+  "updatedAt": "2026-11-04T07:33:28.371Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -865,7 +865,7 @@ window.ESPORTS_DATA = {
       "bId": "99566404854685458",
       "b": "TOP ESPORTS",
       "bCode": "TES",
-      "status": "INPROGRESS",
+      "status": "COMPLETED",
       "strategy": "bestOf",
       "count": 5
     },
@@ -938,9 +938,9 @@ window.ESPORTS_DATA = {
       "aId": null,
       "a": "TBD",
       "aCode": "TBD",
-      "bId": null,
-      "b": "TBD",
-      "bCode": "TBD",
+      "bId": "99566404848691211",
+      "b": "Invictus Gaming",
+      "bCode": "IG",
       "status": "UNSTARTED",
       "strategy": "bestOf",
       "count": 5
