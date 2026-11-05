@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-11-04T21:32:28.945Z",
+  "updatedAt": "2026-11-05T01:45:28.903Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -884,7 +884,7 @@ window.ESPORTS_DATA = {
       "bId": "99566405941863385",
       "b": "LYON",
       "bCode": "LYON",
-      "status": "UNSTARTED",
+      "status": "COMPLETED",
       "strategy": "bestOf",
       "count": 5
     },
@@ -935,9 +935,9 @@ window.ESPORTS_DATA = {
       "league": "Worlds",
       "leagueCode": "worlds",
       "stage": "Semifinals",
-      "aId": null,
-      "a": "TBD",
-      "aCode": "TBD",
+      "aId": "100205573495116443",
+      "a": "Gen.G Esports",
+      "aCode": "GEN",
       "bId": "99566404848691211",
       "b": "Invictus Gaming",
       "bCode": "IG",
