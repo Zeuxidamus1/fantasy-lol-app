@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-11-05T22:21:06.911Z",
+  "updatedAt": "2026-11-06T02:33:54.028Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -903,7 +903,7 @@ window.ESPORTS_DATA = {
       "bId": "100725845018863243",
       "b": "Dplus KIA",
       "bCode": "DK",
-      "status": "INPROGRESS",
+      "status": "COMPLETED",
       "strategy": "bestOf",
       "count": 5
     },
@@ -957,9 +957,9 @@ window.ESPORTS_DATA = {
       "aId": null,
       "a": "TBD",
       "aCode": "TBD",
-      "bId": null,
-      "b": "TBD",
-      "bCode": "TBD",
+      "bId": "99566404853854212",
+      "b": "BILIBILI GAMING",
+      "bCode": "BLG",
       "status": "UNSTARTED",
       "strategy": "bestOf",
       "count": 5
