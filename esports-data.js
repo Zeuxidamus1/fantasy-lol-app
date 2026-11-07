@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-11-06T21:54:17.807Z",
+  "updatedAt": "2026-11-07T01:29:24.366Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -922,7 +922,7 @@ window.ESPORTS_DATA = {
       "bId": "111692118851466302",
       "b": "Karmine Corp",
       "bCode": "KC",
-      "status": "UNSTARTED",
+      "status": "INPROGRESS",
       "strategy": "bestOf",
       "count": 5
     },
