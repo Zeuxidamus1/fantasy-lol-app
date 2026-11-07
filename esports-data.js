@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-11-07T01:29:24.366Z",
+  "updatedAt": "2026-11-07T07:34:08.839Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -922,7 +922,7 @@ window.ESPORTS_DATA = {
       "bId": "111692118851466302",
       "b": "Karmine Corp",
       "bCode": "KC",
-      "status": "INPROGRESS",
+      "status": "COMPLETED",
       "strategy": "bestOf",
       "count": 5
     },
@@ -954,9 +954,9 @@ window.ESPORTS_DATA = {
       "league": "Worlds",
       "leagueCode": "worlds",
       "stage": "Semifinals",
-      "aId": null,
-      "a": "TBD",
-      "aCode": "TBD",
+      "aId": "98767991853197861",
+      "a": "T1",
+      "aCode": "T1",
       "bId": "99566404853854212",
       "b": "BILIBILI GAMING",
       "bCode": "BLG",
