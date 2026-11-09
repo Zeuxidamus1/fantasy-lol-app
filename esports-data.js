@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-11-09T09:39:17.519Z",
+  "updatedAt": "2026-11-09T20:02:03.575Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "115565671526468647",
-      "eventId": "",
-      "competition": "cblol",
-      "competitionType": "regional",
-      "startTime": "2026-10-10T16:00:00Z",
-      "league": "CBLOL",
-      "leagueCode": "cblol-brazil",
-      "stage": "Finals",
-      "aId": "100205576309502431",
-      "a": "FURIA",
-      "aCode": "FUR",
-      "bId": "109480204628225868",
-      "b": "LOS",
-      "bCode": "LOS",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "115660588583171786",
       "eventId": "",
