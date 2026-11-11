@@ -1836,3 +1836,168 @@ body.schedule-modal-open{overflow:hidden}
 .rf-emergency-replacement[hidden]{display:none}
 .rf-emergency-replacement label{color:#d7e7f3;font-size:12px;font-weight:700}
 .rf-emergency-replacement .field-help{line-height:1.55;color:#9abdc9}
+
+
+/* Rift Fantasy design pass: Matchup, Home and player cards.
+   Scoped additions preserve existing event handlers and league behavior. */
+.rf-matchup-main-card{border:1px solid #2d5c72;background:linear-gradient(160deg,#0c2234,#071522);padding:clamp(12px,2.8vw,24px)}
+.rf-matchup-hero-summary{border:1px solid #2d6772;border-radius:19px;padding:clamp(15px,3vw,24px);background:radial-gradient(ellipse at 20% 5%,#155a6261,transparent 55%),linear-gradient(125deg,#12354b,#0b1f32 72%);box-shadow:inset 0 1px #70fbe919;margin-bottom:19px;min-width:0}
+.rf-matchup-hero-head,.rf-matchup-hero-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.rf-matchup-kicker{font-size:11px;letter-spacing:.09em;font-weight:850;color:#7de7db;overflow-wrap:anywhere}
+.rf-matchup-result-pill{border:1px solid #386a78;background:#133a45;color:#c2f9f1;font-size:10px;letter-spacing:.055em;font-weight:900;border-radius:30px;padding:7px 11px;text-align:center;flex:none}
+.rf-matchup-result-pill.final{background:#173f36;border-color:#33806a;color:#8ef5bc}
+.rf-matchup-hero-score{grid-template-columns:minmax(0,1fr) 65px minmax(0,1fr);gap:10px;border:0;margin:16px 0 8px;padding:0;align-items:center}
+.rf-matchup-hero-score>div:not(.matchup-versus){min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px 10px;min-height:136px;border:1px solid #31546b;border-radius:14px;background:#071b2dbf}
+.rf-matchup-hero-score .mine{background:linear-gradient(160deg,#154951aa,#103145ba);border-color:#3b8b88!important}
+.rf-matchup-hero-score>div:not(.matchup-versus)>small{font-size:10px;color:#8fc9d0;letter-spacing:.08em;font-weight:900}
+.rf-matchup-hero-score>div:not(.matchup-versus)>strong{font-size:clamp(12px,1.8vw,18px);font-weight:900;line-height:1.25;overflow-wrap:anywhere}
+.rf-matchup-hero-score>div:not(.matchup-versus)>span{font-size:clamp(23px,3.5vw,38px);font-weight:950;line-height:1.1;font-variant-numeric:tabular-nums;color:#f6fcff}
+.rf-matchup-hero-score>div:not(.matchup-versus)>span small{font-size:10px;color:#85c1ca;vertical-align:middle}
+.rf-matchup-hero-score.leading .mine>span{color:#6ef4da}
+.rf-matchup-hero-score .matchup-versus{align-self:center;display:grid;justify-items:center;gap:7px}
+.rf-matchup-hero-score .matchup-versus span{font-size:9px;color:#90aebc;line-height:1.3}
+.rf-matchup-hero-score .matchup-versus strong{display:grid;place-items:center;border:1px solid #3a5b70;border-radius:50%;background:#0a2232;width:46px;height:46px;font-size:12px;color:#cde7f3}
+.rf-matchup-hero-foot{border-top:1px solid #2b576c;padding-top:11px;color:#9dc0ce;font-size:11px;line-height:1.4}
+.rf-matchup-roster-heading{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:2px 0 12px}
+.rf-matchup-roster-heading>div{display:flex;flex-direction:column;gap:4px}
+.rf-matchup-roster-heading small{font-size:10px;color:#6fded7;font-weight:900;letter-spacing:.1em}
+.rf-matchup-roster-heading strong{font-size:19px;color:#edf8ff}
+.rf-matchup-roster-heading>span{font-size:11px;color:#96b5c4}
+.rf-premium-matchup-board{gap:10px}
+.rf-premium-matchup-board .real-matchup-row{grid-template-columns:minmax(0,1fr) 47px minmax(0,1fr);gap:9px;border-color:#2c4c62;border-radius:14px;padding:11px;background:linear-gradient(120deg,#0d2739,#0b1d2e);min-width:0}
+.rf-premium-matchup-board .real-matchup-header{grid-template-columns:minmax(0,1fr) 47px minmax(0,1fr);gap:9px;padding:3px 10px 6px}
+.rf-premium-matchup-board .real-matchup-header strong{font-size:12px}
+.rf-premium-matchup-board .real-matchup-player{gap:7px;min-width:0;width:100%;text-align:left;align-items:stretch}
+.rf-premium-matchup-board .real-matchup-player.opponent{text-align:right}
+.rf-matchup-person{display:flex;align-items:center;gap:9px;min-width:0;width:100%}
+.rf-premium-matchup-board .opponent .rf-matchup-person{flex-direction:row-reverse}
+.rf-matchup-portrait{width:48px;height:48px;flex:none;display:grid;place-items:center;border:1px solid #397184;background:linear-gradient(145deg,#18546b,#092638);border-radius:12px;overflow:hidden;font-size:13px;font-weight:900;color:#a0efee}
+.rf-matchup-portrait img{display:block;width:100%;height:100%;object-fit:cover;object-position:center top}
+.rf-matchup-portrait img.team-logo{object-fit:contain;padding:5px}
+.rf-matchup-identity{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.rf-matchup-identity strong{font-size:14px;line-height:1.2;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rf-matchup-identity small{display:flex;align-items:center;gap:5px;min-width:0;font-size:10px;color:#9db9cb;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rf-premium-matchup-board .opponent .rf-matchup-identity small{justify-content:flex-end}
+.rf-matchup-identity small img{width:17px;height:17px;object-fit:contain;flex:none}
+.rf-matchup-point-line{display:flex;align-items:center;justify-content:space-between;gap:7px;min-width:0}
+.rf-premium-matchup-board .opponent .rf-matchup-point-line{flex-direction:row-reverse}
+.rf-matchup-player-points{font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap;color:#f2faff;font-weight:900}
+.rf-matchup-player-points small{font-size:9px;color:#80a4bd}
+.rf-premium-matchup-board .real-matchup-state{font-size:9px;letter-spacing:0;max-width:100%;white-space:normal;text-align:right}
+.rf-premium-matchup-board .real-matchup-state.live{color:#52f6d2}
+.rf-premium-matchup-board .real-matchup-state.delayed{color:#f0c47c}
+.rf-premium-matchup-board .rf-matchup-kda{font-size:10px;color:#97bdd1;margin:0}
+.rf-premium-matchup-board .real-matchup-role{min-width:0;width:100%;min-height:36px;border-radius:10px;border-color:#367780;background:#0f3c46;color:#a9f7e9;font-size:10px;font-weight:900;letter-spacing:.02em}
+.rf-matchup-main-card .matchup-scoring-feed{margin-top:22px;border-top-color:#2b4b64}
+.rf-matchup-main-card .matchup-feed-head strong{color:#e7f9ff}
+
+/* Personalized fantasy-first Home */
+.rf-home-league-hub[hidden]{display:none}
+.rf-home-league-hub{display:grid;gap:17px;min-width:0;padding:clamp(17px,3vw,27px);border:1px solid #277f82;border-radius:21px;background:radial-gradient(ellipse at 90% 0,#0b716844,transparent 48%),linear-gradient(120deg,#103d49,#0b1d31 65%);box-shadow:0 14px 42px #0003,inset 0 1px #a9fff225}
+.rf-home-league-top,.rf-home-league-heading,.rf-home-duel-label,.rf-home-league-links{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.rf-home-league-pill{color:#a5f6dc;background:#14483f;border:1px solid #337967;border-radius:40px;padding:7px 11px;font-size:10px;font-weight:850;letter-spacing:.06em}
+.rf-home-league-heading{align-items:flex-end}
+.rf-home-league-heading>div{min-width:0}
+.rf-home-league-heading h2{font-size:clamp(24px,3.5vw,36px);margin:0 0 5px;overflow-wrap:anywhere;line-height:1.1}
+.rf-home-league-heading p{font-size:12px;color:#a7c9d2;line-height:1.5;margin:0}
+.rf-home-league-action{border:1px solid #61ddc8;background:#0f6362;color:#f3fffd;border-radius:12px;padding:12px 15px;font:inherit;font-size:12px;font-weight:900;cursor:pointer;flex:none}
+.rf-home-duel{min-width:0;border:1px solid #326476;background:#071d2aaf;border-radius:15px;padding:16px}
+.rf-home-duel-label{color:#7bdbc9;font-size:11px;font-weight:900;letter-spacing:.04em;margin-bottom:10px}
+.rf-home-duel-scores{display:grid;grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr);align-items:center;gap:8px;text-align:center}
+.rf-home-duel-scores>div{display:grid;justify-items:center;gap:5px;min-width:0}
+.rf-home-duel-scores small{font-size:9px;font-weight:900;color:#95b7cc;letter-spacing:.1em}
+.rf-home-duel-scores strong{font-size:clamp(12px,2vw,17px);overflow-wrap:anywhere;line-height:1.3}
+.rf-home-duel-scores b{font-size:clamp(22px,3vw,34px);color:#eafdff;font-variant-numeric:tabular-nums}
+.rf-home-duel-scores>div:first-child b{color:#65f2df}
+.rf-home-duel-vs{font-weight:900;color:#6da4ab;font-size:11px}
+.rf-home-duel-placeholder{display:flex;flex-direction:column;gap:5px;min-height:45px;justify-content:center;color:#e7f7ff}
+.rf-home-duel-placeholder small{color:#aac9d2;font-size:11px}
+.rf-home-league-links{justify-content:flex-start;flex-wrap:wrap}
+.rf-home-league-links button{font:inherit;font-size:12px;font-weight:750;color:#b5e9ef;background:#143347;border:1px solid #326072;border-radius:10px;padding:10px 13px;cursor:pointer}
+.rf-home-league-action:hover,.rf-home-league-links button:hover{border-color:#77eee0;filter:brightness(1.12)}
+.rf-home-league-action:focus-visible,.rf-home-league-links button:focus-visible{outline:2px solid #93f6e7;outline-offset:2px}
+.rf-home.has-league .rf-hero{min-height:205px;padding:21px 27px}
+.rf-home.has-league .rf-hero-copy h2{font-size:clamp(23px,3vw,30px)}
+.rf-home.has-league .rf-hero-mark{max-width:180px}
+
+/* Consistent player and roster presentation */
+.rf-players-intro{margin:-8px 0 2px;color:#a3bfcd;font-size:13px;line-height:1.5}
+.rf-players-screen .search{border-color:#31576b;background:#0d2736;box-shadow:inset 0 1px #ffffff0a}
+.rf-directory-player{border-color:#28475b;background:linear-gradient(135deg,#0e2a3c,#0b1d2c);border-radius:15px;min-width:0;gap:10px;padding:10px 12px;min-height:83px}
+.rf-directory-player:hover{border-color:#3a8c91}
+.rf-directory-player .player-open-btn{min-width:0;display:flex;flex:1;align-items:center;gap:12px;text-align:left}
+.rf-directory-player .player-info{min-width:0;flex:1}
+.rf-player-avatar-frame{width:56px;height:58px;display:grid;place-items:center;flex:none;position:relative;border-radius:12px;overflow:hidden;border:1px solid #33687c;background:linear-gradient(155deg,#164862,#0c273b)}
+.rf-player-avatar-frame .player-list-image{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;position:static}
+.rf-player-avatar-frame .player-list-image.team-logo{object-fit:contain;padding:8px}
+.rf-avatar-fallback{font-size:15px;font-weight:900;color:#87e5db}
+.rf-player-name-line{display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0}
+.rf-player-name-line strong{font-size:15px;font-weight:900;line-height:1.25;overflow-wrap:anywhere;max-width:100%}
+.rf-player-role-chip{display:inline-flex;align-items:center;border:1px solid #316f78;background:#133e47;color:#92f0de;padding:3px 7px;border-radius:7px;font-size:10px;font-weight:900;letter-spacing:.02em}
+.rf-directory-player .player-info .rf-player-team-line{margin-top:6px;display:flex;align-items:center;gap:6px;font-size:11px;line-height:1.35;color:#a5bfd0;white-space:normal;overflow-wrap:anywhere}
+.rf-player-team-mark{width:19px;height:19px;object-fit:contain;flex:none}
+.rf-directory-player .player-fantasy-state{min-width:75px}
+.rf-directory-player .player-status-label{font-size:10px}
+.rf-directory-player .add-btn{font-size:11px;min-height:33px}
+.rf-roster-player{min-width:0;border-color:#315165;background:linear-gradient(125deg,#102b3d,#0c2032);border-radius:14px;padding:10px 12px}
+.rf-roster-player .slot-label{width:42px;flex:none;text-align:center;padding:8px 3px;border-radius:8px;background:#153f46;border:1px solid #31747a;color:#a4faea;font-weight:900}
+.rf-roster-avatar{display:grid;place-items:center;width:51px;height:52px;flex:none;overflow:hidden;border:1px solid #32697c;border-radius:11px;background:linear-gradient(135deg,#1c4b5d,#0d2535)}
+.rf-roster-avatar .roster-player-visual{width:100%;height:100%;object-fit:cover;object-position:top center;position:static}
+.rf-roster-avatar .roster-player-visual.team-logo{object-fit:contain;padding:7px}
+.rf-roster-fallback{color:#9feadf;font-size:13px;font-weight:900}
+.rf-roster-player .player-info strong{color:#f1fbff;font-size:15px;line-height:1.25;overflow-wrap:anywhere}
+.rf-roster-player .player-info small{display:flex;align-items:center;gap:5px;font-size:11px;margin-top:5px;white-space:normal;overflow-wrap:anywhere;color:#a2c2d3}
+.rf-roster-team-mark{width:17px;height:17px;object-fit:contain;flex:none}
+.rf-roster-opponent{display:block;margin-top:3px;font-size:10px;color:#7fc9d5}
+.rf-roster-player.lineup-locked{border-color:#51677c}
+.rf-directory-player .player-open-btn:focus-visible{outline:2px solid #77eddd;outline-offset:3px;border-radius:9px}
+@media(max-width:700px){
+  .rf-premium-matchup-board .real-matchup-row,.rf-premium-matchup-board .real-matchup-header{grid-template-columns:minmax(0,1fr) 42px minmax(0,1fr);gap:6px}
+  .rf-matchup-portrait{width:38px;height:42px}
+  .rf-matchup-person{gap:6px}
+  .rf-matchup-identity strong{font-size:12px}
+  .rf-matchup-identity small{font-size:9px}
+  .rf-matchup-player-points{font-size:14px}
+  .rf-home-league-heading{align-items:flex-start;flex-wrap:wrap}
+}
+@media(max-width:420px){
+  .rf-matchup-main-card{padding:11px}
+  .rf-matchup-hero-summary{padding:12px}
+  .rf-matchup-hero-score{grid-template-columns:minmax(0,1fr) 38px minmax(0,1fr);gap:5px}
+  .rf-matchup-hero-score>div:not(.matchup-versus){min-height:115px;padding:10px 5px}
+  .rf-matchup-hero-score .matchup-versus strong{width:34px;height:34px;font-size:10px}
+  .rf-matchup-hero-score>div:not(.matchup-versus)>span{font-size:23px}
+  .rf-matchup-hero-score>div:not(.matchup-versus)>strong{font-size:12px}
+  .rf-matchup-kicker{font-size:9px}
+  .rf-matchup-result-pill{font-size:9px;padding:6px}
+  .rf-matchup-hero-foot,.rf-matchup-roster-heading>span{font-size:9px}
+  .rf-premium-matchup-board .real-matchup-row{padding:9px 5px;grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr);gap:4px}
+  .rf-premium-matchup-board .real-matchup-header{grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr);gap:4px;padding:2px 4px}
+  .rf-premium-matchup-board .real-matchup-role{min-height:29px;padding:0 3px;font-size:9px}
+  .rf-premium-matchup-board .rf-matchup-person{flex-direction:column;align-items:flex-start;gap:4px}
+  .rf-premium-matchup-board .opponent .rf-matchup-person{flex-direction:column;align-items:flex-end}
+  .rf-matchup-portrait{width:35px;height:36px}
+  .rf-matchup-identity{width:100%}
+  .rf-matchup-identity strong{font-size:11px;white-space:normal;overflow-wrap:anywhere;line-height:1.2}
+  .rf-matchup-point-line{align-items:flex-start;flex-direction:column!important;gap:4px}
+  .rf-premium-matchup-board .opponent .rf-matchup-point-line{align-items:flex-end}
+  .rf-premium-matchup-board .real-matchup-state{font-size:8px}
+  .rf-home-league-hub{gap:12px;padding:15px}
+  .rf-home-league-top{flex-wrap:wrap}
+  .rf-home-league-heading h2{font-size:24px}
+  .rf-home-league-action{width:100%}
+  .rf-home-duel{padding:11px}
+  .rf-home-duel-scores{grid-template-columns:minmax(0,1fr) 25px minmax(0,1fr);gap:4px}
+  .rf-home-duel-scores b{font-size:23px}
+  .rf-directory-player{padding:9px;gap:7px}
+  .rf-directory-player .player-open-btn{gap:8px}
+  .rf-player-avatar-frame{width:43px;height:47px}
+  .rf-player-name-line strong{font-size:13px}
+  .rf-directory-player .player-fantasy-state{min-width:65px}
+  .rf-directory-player .add-btn{padding:7px;font-size:10px}
+  .rf-roster-player{gap:8px}
+  .rf-roster-avatar{width:42px;height:45px}
+}
+@media(prefers-reduced-motion:reduce){
+  .rf-home-league-action,.rf-home-league-links button,.rf-directory-player{transition:none}
+}
