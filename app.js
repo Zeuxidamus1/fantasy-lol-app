@@ -1603,6 +1603,75 @@ function render(view="home",options={}){
         :'<div class="rf-news-empty"><strong>No upcoming matches available</strong><p>Check the full schedule for tournament dates and updates.</p></div>';
     };
     renderUpcoming(proSchedule);
+    const hydrateHomeLeague=async()=>{
+  const hub=document.querySelector("#rfHomeLeagueHub");
+  const activeHomeLeagueId=getActiveLeagueId();
+  if(!hub||!activeHomeLeagueId||!cloudReady())return;
+  const b=backend();
+  try{
+    const [user,leagues]=await Promise.all([b.currentUser(),b.listLeagues()]);
+    if(currentView!=="home"||!user)return;
+    const league=(leagues||[]).find(x=>String(x.id)===String(activeHomeLeagueId));
+    if(!league)return;
+    hub.hidden=false;
+    hub.closest(".rf-home")?.classList.add("has-league");
+    const title=hub.querySelector("#rfHomeLeagueTitle");
+    const description=hub.querySelector("#rfHomeLeagueDescription");
+    const status=hub.querySelector("#rfHomeLeagueStatus");
+    const preview=hub.querySelector("#rfHomeMatchupPreview");
+    title.textContent=league.name||"Your fantasy league";
+    const isCompleted=league.status==="completed";
+    status.textContent=isCompleted?"SEASON COMPLETE":String(league.status||"Active").replace(/_/g," ").toUpperCase();
+    description.textContent=isCompleted?"Review the season results and final standings.":"Your next fantasy matchup, roster and standings in one place.";
+    preview.innerHTML='<div class="rf-home-duel-placeholder">Loading your fantasy round…</div>';
+    try{
+      const [rounds,members,bots]=await Promise.all([
+        b.listFantasyRounds(activeHomeLeagueId),
+        b.listLeagueMembers(activeHomeLeagueId),
+        b.listLeagueBots(activeHomeLeagueId)
+      ]);
+      if(currentView!=="home"||getActiveLeagueId()!==activeHomeLeagueId)return;
+      const round=(rounds||[]).find(x=>x.status==="live")
+        ||(rounds||[]).find(x=>x.status==="upcoming")
+        ||(rounds||[]).at(-1);
+      if(!round){
+        preview.innerHTML='<div class="rf-home-duel-placeholder"><strong>Waiting for the first fantasy round</strong><small>Your league matchup will appear after an eligible schedule is published.</small></div>';
+        return;
+      }
+      const matchups=await b.listLeagueMatchups(activeHomeLeagueId,round.round_number);
+      if(currentView!=="home"||getActiveLeagueId()!==activeHomeLeagueId)return;
+      const matchup=(matchups||[]).find(x=>
+        String(x.home_manager_id||"")===String(user.id)||
+        String(x.away_manager_id||"")===String(user.id));
+      if(!matchup){
+        preview.innerHTML='<div class="rf-home-duel-placeholder"><strong>No head-to-head pairing this round</strong><small>Open Matchup for current round details.</small></div>';
+        return;
+      }
+      const home=String(matchup.home_manager_id||"")===String(user.id);
+      const opponentId=home?matchup.away_manager_id:matchup.home_manager_id;
+      const opponentType=home?matchup.away_manager_type:matchup.home_manager_type;
+      const managerName=(id,type)=>{
+        if(type==="bot")return (bots||[]).find(x=>String(x.id)===String(id))?.team_name||"Bot Manager";
+        return (members||[]).find(m=>String(m.user_id)===String(id))?.team_name||"Fantasy manager";
+      };
+      const mine=managerName(user.id,"human");
+      const opponent=opponentId?managerName(opponentId,opponentType):"BYE";
+      const score=home?matchup.home_score:matchup.away_score;
+      const opponentScore=home?matchup.away_score:matchup.home_score;
+      const scoreText=value=>value===null||value===undefined?"—":formatFantasyPoints(value);
+      const roundState=String(round.status||"upcoming").toUpperCase();
+      preview.innerHTML=`<div class="rf-home-duel-label"><span>${h(round.label||"Fantasy Round "+round.round_number)}</span><span>${h(roundState)}</span></div>
+        <div class="rf-home-duel-scores">
+          <div><small>YOU</small><strong>${h(mine)}</strong><b>${h(scoreText(score))}</b></div>
+          <span class="rf-home-duel-vs">VS</span>
+          <div><small>${opponentId?"OPPONENT":"BYE"}</small><strong>${h(opponent)}</strong><b>${opponentId?h(scoreText(opponentScore)):"—"}</b></div>
+        </div>`;
+    }catch{
+      preview.innerHTML='<div class="rf-home-duel-placeholder"><strong>Matchup details temporarily unavailable</strong><small>Your league is ready. Open Matchup to try again.</small></div>';
+    }
+  }catch{}
+};
+    void hydrateHomeLeague();
     const heroTitle=document.querySelector("#rfHeroTitle");
     const upcomingCompetition=proSchedule.map(localScheduleRow).find(row=>row.day!=="past"&&row.competition);
     if(heroTitle&&upcomingCompetition){
