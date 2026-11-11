@@ -1116,12 +1116,23 @@ function playerRow(p, add=false){
   const pid=playerKey(p);
   const image=playerVisual(p);
   const imageClass=playerVisualIsTeamLogo(p)?" team-logo":" player-photo";
-  return `<div class="player-row">
-    <button class="player-open-btn" data-open-player="${pid}" aria-label="Open ${h(p.name)} profile">
-      ${image?`<img class="player-list-image${imageClass}" src="${h(image)}" alt="" loading="lazy" />`:`<span class="role-badge">${h(p.role)}</span>`}
-      <span class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.role)}</small></span>
+  const role=String(playerPosition(p)||p.role||"").toUpperCase();
+  const logo=p?.teamLogo||p?.team_logo||"";
+  const team=String(p.team_name||p.team||p.teamCode||"Professional team");
+  const fallback=h(String(p.name||"?").slice(0,2).toUpperCase());
+  const avatar=image
+    ?`<span class="rf-player-avatar-frame"><img class="player-list-image${imageClass}" src="${h(image)}" alt="" loading="lazy" decoding="async"/></span>`
+    :`<span class="rf-player-avatar-frame rf-avatar-fallback" aria-hidden="true">${fallback}</span>`;
+  const smallLogo=logo&&logo!==image?`<img class="rf-player-team-mark" src="${h(logo)}" alt="" loading="lazy" decoding="async"/>`:"";
+  return `<div class="player-row rf-directory-player">
+    <button type="button" class="player-open-btn" data-open-player="${h(pid)}" aria-label="Open ${h(p.name)} profile">
+      ${avatar}
+      <span class="player-info">
+        <span class="rf-player-name-line"><strong>${h(p.name)}</strong><span class="rf-player-role-chip">${h(role)}</span></span>
+        <small class="rf-player-team-line">${smallLogo}${h(team)}</small>
+      </span>
     </button>
-    ${add ? '<div class="player-fantasy-state"><span class="player-status-label">Available</span><button class="add-btn" aria-label="Add player">ADD</button></div>' : ""}
+    ${add?'<div class="player-fantasy-state"><span class="player-status-label">Available</span><button type="button" class="add-btn" aria-label="Add player">ADD</button></div>':""}
   </div>`;
 }
 
@@ -1131,10 +1142,19 @@ function rosterRow(p){
   const visualClass=playerVisualIsTeamLogo(p)?" team-logo":" player-photo";
   const locked=!!p.lineupLock;
   const lockBadge=locked?'<span class="lineup-lock-badge" title="This player is locked for the current fantasy period">🔒 LOCKED</span>':"";
-  return `<div class="roster-slot ${locked?"lineup-locked":""}">
+  const image=visual?`<img class="roster-player-visual${visualClass}" src="${h(visual)}" alt="" loading="lazy" decoding="async"/>`
+    :`<span class="rf-roster-fallback" aria-hidden="true">${h(String(p.name||"?").slice(0,2).toUpperCase())}</span>`;
+  const teamLogo=p?.teamLogo||p?.team_logo||"";
+  const mark=teamLogo&&teamLogo!==visual?`<img class="rf-roster-team-mark" src="${h(teamLogo)}" alt="" loading="lazy" decoding="async"/>`:"";
+  return `<div class="roster-slot rf-roster-player ${locked?"lineup-locked":""}">
     <span class="slot-label">${h(slot)}</span>
-    ${visual?`<img class="roster-player-visual${visualClass}" src="${h(visual)}" alt="" loading="lazy" />`:""}
-    <div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(slot)}${p.opp?" · "+h(p.opp):""}</small>${lockBadge}</div>
+    <span class="rf-roster-avatar">${image}</span>
+    <div class="player-info">
+      <strong>${h(p.name)}</strong>
+      <small>${mark}${h(p.team||p.team_name||"Pro team")}</small>
+      ${p.opp?`<span class="rf-roster-opponent">${h(p.opp)}</span>`:""}
+      ${lockBadge}
+    </div>
   </div>`;
 }
 
