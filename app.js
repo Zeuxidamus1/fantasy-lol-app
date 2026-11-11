@@ -2506,15 +2506,23 @@ function render(view="home",options={}){
       return `${stat("kills")}/${stat("deaths")}/${stat("assists")} · ${Math.round(stat("cs"))} CS`;
     };
     const pairedPlayerCell=(item,side)=>{
-      if(!item)return `<div class="real-matchup-player ${side} empty"><strong>—</strong><small>No starter</small><span>0.00 FP</span></div>`;
+      if(!item)return `<div class="real-matchup-player ${side} empty"><span class="rf-versus-identity"><span class="rf-versus-avatar" aria-hidden="true">—</span><span class="rf-versus-name"><strong>Empty slot</strong><small>No starter assigned</small></span></span><span class="rf-versus-points">—</span></div>`;
       const {player,score,state,locked}=item;
+      const visual=playerVisual(player);
+      const imageClass=playerVisualIsTeamLogo(player)?" team-logo":" player-photo";
+      const portrait=visual?`<img src="${h(visual)}" class="rf-versus-avatar${imageClass}" alt="" loading="lazy" />`:
+        `<span class="rf-versus-avatar" aria-hidden="true">${h(String(player.name||"?").slice(0,2).toUpperCase())}</span>`;
+      const hasPoints=Number(score?.games)>0;
       return `<div class="real-matchup-player ${side}">
-        <div class="real-matchup-player-name">
-          <strong>${h(player.name||item.roster.player_id)}</strong>
-          <span class="real-matchup-state ${state==="LIVE"?"live":state==="DATA DELAYED"?"delayed":""}">${locked?"🔒 ":""}${h(state)}</span>
+        <div class="rf-versus-identity">
+          ${portrait}
+          <div class="rf-versus-name"><strong>${h(player.name||item.roster.player_id)}</strong><small>${h(player.team||"Pro team")}</small></div>
         </div>
-        <small>${h(player.team||"")}${score?.games?" · "+h(compactPlayerStats(score)):""}</small>
-        <span>${formatFantasyPoints(score?.total||0)} FP</span>
+        <div class="rf-versus-foot">
+          <span class="real-matchup-state ${state==="LIVE"?"live":state==="DATA DELAYED"?"delayed":""}">${locked?"🔒 ":""}${h(state)}</span>
+          <strong class="rf-versus-points">${hasPoints?formatFantasyPoints(score.total):"—"} <small>FP</small></strong>
+        </div>
+        ${hasPoints?`<small class="rf-versus-statline">${h(compactPlayerStats(score))}</small>`:""}
       </div>`;
     };
     const buildScoringEvents=(leagueId,roundNumber,leftLineup,rightLineup)=>{
@@ -2812,10 +2820,24 @@ function render(view="home",options={}){
                   :"UPCOMING";
           const events=buildScoringEvents(leagueId,round.round_number,myLineup,opponentLineup);
 
-          board.innerHTML=`<div class="matchup-scoreboard real-matchup-scoreboard">
-              <div class="mine"><small>YOU</small><strong>${h(myName)}</strong><span>${formatFantasyPoints(myTotal)} FP</span></div>
-              <div class="matchup-versus"><span>${h(myResult)}</span><strong>VS</strong></div>
-              <div><small>OPPONENT</small><strong>${h(opponentName)}</strong><span>${formatFantasyPoints(opponentTotal)} FP</span></div>
+          const isFinal=round.status==="final"||["home_win","away_win","tie"].includes(myMatchup.result);
+          const isLive=round.status==="live"&&!isFinal;
+          const winningSide=isFinal?(myTotal>opponentTotal?"mine":opponentTotal>myTotal?"opponent":"tie"):"";
+          const leadingSide=isLive?(myTotal>opponentTotal?"mine":opponentTotal>myTotal?"opponent":"tie"):"";
+          board.innerHTML=`<div class="matchup-scoreboard real-matchup-scoreboard rf-score-hero" aria-label="Your fantasy matchup">
+              <div class="mine rf-score-team ${winningSide==="mine"?"winner":leadingSide==="mine"?"leader":""}">
+                <span class="rf-manager-emblem" aria-hidden="true">${h(String(myName).trim().slice(0,2).toUpperCase())}</span>
+                <small>YOUR FANTASY TEAM</small><strong>${h(myName)}</strong>
+                <span class="rf-score-number">${formatFantasyPoints(myTotal)}<small>FP</small></span>
+                ${winningSide==="mine"?'<span class="rf-result-tag">WINNER</span>':""}
+              </div>
+              <div class="matchup-versus rf-score-center"><span class="${isLive?"live":""}">${h(myResult)}</span><strong>VS</strong><small>${isFinal?"FINAL SCORE":isLive?"SCORING IN PROGRESS":"ROUND PREVIEW"}</small></div>
+              <div class="rf-score-team ${winningSide==="opponent"?"winner":leadingSide==="opponent"?"leader":""}">
+                <span class="rf-manager-emblem" aria-hidden="true">${h(String(opponentName).trim().slice(0,2).toUpperCase())}</span>
+                <small>OPPONENT</small><strong>${h(opponentName)}</strong>
+                <span class="rf-score-number">${formatFantasyPoints(opponentTotal)}<small>FP</small></span>
+                ${winningSide==="opponent"?'<span class="rf-result-tag">WINNER</span>':""}
+              </div>
             </div>
             <div class="real-matchup-board">
               <div class="real-matchup-header">
