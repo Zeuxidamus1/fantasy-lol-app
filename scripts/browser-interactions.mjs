@@ -140,6 +140,11 @@ try{
 
   await route("players");
   await expect("players route renders","document.title.includes('Players') && !!document.querySelector('#playerSearch')");
+  await expect("player cards use consistent portraits and role chips","!!document.querySelector('#freeAgentList .rf-directory-player .rf-player-avatar-frame') && !!document.querySelector('#freeAgentList .rf-player-role-chip')");
+  await expect("player actions remain separately clickable","!!document.querySelector('#freeAgentList .rf-directory-player .player-open-btn') && !!document.querySelector('#freeAgentList .rf-directory-player .add-btn')");
+  await expect("matchup and Home visual sections are present","!!document.querySelector('#matchup-template').content.querySelector('#matchupScoreList') && !!document.querySelector('#home-template').content.querySelector('#rfHomeLeagueHub')");
+  await expect("Home create and join actions route independently","(()=>{const t=document.querySelector('#home-template').content;return !!t.querySelector('[data-jump=create-league]') && !!t.querySelector('[data-jump=join-league]')})()");
+
   await evaluate("(()=>{const i=document.querySelector('#playerSearch'); i.value='Faker'; i.dispatchEvent(new Event('input',{bubbles:true}));})()");
   await expect("player search filters","document.querySelectorAll('#freeAgentList .player-row').length >= 1");
   await evaluate("document.querySelector('#freeAgentList [data-open-player]').click()");
@@ -171,6 +176,8 @@ try{
 
   await route("team");
   await expect("team route renders","document.title.includes('My Team') && !!document.querySelector('#teamNoLeague')");
+  await expect("roster design retains five-role starter container","!!document.querySelector('#starterRosterList') && !!document.querySelector('#teamRosterCount') && !!document.querySelector('#teamStarterCount')");
+
   await expect("team shows no-league state without active league","document.querySelector('#teamNoLeague').hidden === false");
   await evaluate("document.querySelector('[data-lock-help=next]').click()");
   await expect("next-lock help opens","document.querySelector('#lineupLockHelp').hidden===false && document.querySelector('#lineupLockHelp').textContent.includes('scheduled match is starting')");

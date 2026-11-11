@@ -1116,12 +1116,23 @@ function playerRow(p, add=false){
   const pid=playerKey(p);
   const image=playerVisual(p);
   const imageClass=playerVisualIsTeamLogo(p)?" team-logo":" player-photo";
-  return `<div class="player-row">
-    <button class="player-open-btn" data-open-player="${pid}" aria-label="Open ${h(p.name)} profile">
-      ${image?`<img class="player-list-image${imageClass}" src="${h(image)}" alt="" loading="lazy" />`:`<span class="role-badge">${h(p.role)}</span>`}
-      <span class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(p.role)}</small></span>
+  const role=String(playerPosition(p)||p.role||"").toUpperCase();
+  const logo=p?.teamLogo||p?.team_logo||"";
+  const team=String(p.team_name||p.team||p.teamCode||"Professional team");
+  const fallback=h(String(p.name||"?").slice(0,2).toUpperCase());
+  const avatar=image
+    ?`<span class="rf-player-avatar-frame"><img class="player-list-image${imageClass}" src="${h(image)}" alt="" loading="lazy" decoding="async"/></span>`
+    :`<span class="rf-player-avatar-frame rf-avatar-fallback" aria-hidden="true">${fallback}</span>`;
+  const smallLogo=logo&&logo!==image?`<img class="rf-player-team-mark" src="${h(logo)}" alt="" loading="lazy" decoding="async"/>`:"";
+  return `<div class="player-row rf-directory-player">
+    <button type="button" class="player-open-btn" data-open-player="${h(pid)}" aria-label="Open ${h(p.name)} profile">
+      ${avatar}
+      <span class="player-info">
+        <span class="rf-player-name-line"><strong>${h(p.name)}</strong><span class="rf-player-role-chip">${h(role)}</span></span>
+        <small class="rf-player-team-line">${smallLogo}${h(team)}</small>
+      </span>
     </button>
-    ${add ? '<div class="player-fantasy-state"><span class="player-status-label">Available</span><button class="add-btn" aria-label="Add player">ADD</button></div>' : ""}
+    ${add?'<div class="player-fantasy-state"><span class="player-status-label">Available</span><button type="button" class="add-btn" aria-label="Add player">ADD</button></div>':""}
   </div>`;
 }
 
@@ -1131,10 +1142,19 @@ function rosterRow(p){
   const visualClass=playerVisualIsTeamLogo(p)?" team-logo":" player-photo";
   const locked=!!p.lineupLock;
   const lockBadge=locked?'<span class="lineup-lock-badge" title="This player is locked for the current fantasy period">🔒 LOCKED</span>':"";
-  return `<div class="roster-slot ${locked?"lineup-locked":""}">
+  const image=visual?`<img class="roster-player-visual${visualClass}" src="${h(visual)}" alt="" loading="lazy" decoding="async"/>`
+    :`<span class="rf-roster-fallback" aria-hidden="true">${h(String(p.name||"?").slice(0,2).toUpperCase())}</span>`;
+  const teamLogo=p?.teamLogo||p?.team_logo||"";
+  const mark=teamLogo&&teamLogo!==visual?`<img class="rf-roster-team-mark" src="${h(teamLogo)}" alt="" loading="lazy" decoding="async"/>`:"";
+  return `<div class="roster-slot rf-roster-player ${locked?"lineup-locked":""}">
     <span class="slot-label">${h(slot)}</span>
-    ${visual?`<img class="roster-player-visual${visualClass}" src="${h(visual)}" alt="" loading="lazy" />`:""}
-    <div class="player-info"><strong>${h(p.name)}</strong><small>${h(p.team)} · ${h(slot)}${p.opp?" · "+h(p.opp):""}</small>${lockBadge}</div>
+    <span class="rf-roster-avatar">${image}</span>
+    <div class="player-info">
+      <strong>${h(p.name)}</strong>
+      <small>${mark}${h(p.team||p.team_name||"Pro team")}</small>
+      ${p.opp?`<span class="rf-roster-opponent">${h(p.opp)}</span>`:""}
+      ${lockBadge}
+    </div>
   </div>`;
 }
 
@@ -1583,6 +1603,75 @@ function render(view="home",options={}){
         :'<div class="rf-news-empty"><strong>No upcoming matches available</strong><p>Check the full schedule for tournament dates and updates.</p></div>';
     };
     renderUpcoming(proSchedule);
+    const hydrateHomeLeague=async()=>{
+  const hub=document.querySelector("#rfHomeLeagueHub");
+  const activeHomeLeagueId=getActiveLeagueId();
+  if(!hub||!activeHomeLeagueId||!cloudReady())return;
+  const b=backend();
+  try{
+    const [user,leagues]=await Promise.all([b.currentUser(),b.listLeagues()]);
+    if(currentView!=="home"||!user)return;
+    const league=(leagues||[]).find(x=>String(x.id)===String(activeHomeLeagueId));
+    if(!league)return;
+    hub.hidden=false;
+    hub.closest(".rf-home")?.classList.add("has-league");
+    const title=hub.querySelector("#rfHomeLeagueTitle");
+    const description=hub.querySelector("#rfHomeLeagueDescription");
+    const status=hub.querySelector("#rfHomeLeagueStatus");
+    const preview=hub.querySelector("#rfHomeMatchupPreview");
+    title.textContent=league.name||"Your fantasy league";
+    const isCompleted=league.status==="completed";
+    status.textContent=isCompleted?"SEASON COMPLETE":String(league.status||"Active").replace(/_/g," ").toUpperCase();
+    description.textContent=isCompleted?"Review the season results and final standings.":"Your next fantasy matchup, roster and standings in one place.";
+    preview.innerHTML='<div class="rf-home-duel-placeholder">Loading your fantasy round…</div>';
+    try{
+      const [rounds,members,bots]=await Promise.all([
+        b.listFantasyRounds(activeHomeLeagueId),
+        b.listLeagueMembers(activeHomeLeagueId),
+        b.listLeagueBots(activeHomeLeagueId)
+      ]);
+      if(currentView!=="home"||getActiveLeagueId()!==activeHomeLeagueId)return;
+      const round=(rounds||[]).find(x=>x.status==="live")
+        ||(rounds||[]).find(x=>x.status==="upcoming")
+        ||(rounds||[]).at(-1);
+      if(!round){
+        preview.innerHTML='<div class="rf-home-duel-placeholder"><strong>Waiting for the first fantasy round</strong><small>Your league matchup will appear after an eligible schedule is published.</small></div>';
+        return;
+      }
+      const matchups=await b.listLeagueMatchups(activeHomeLeagueId,round.round_number);
+      if(currentView!=="home"||getActiveLeagueId()!==activeHomeLeagueId)return;
+      const matchup=(matchups||[]).find(x=>
+        String(x.home_manager_id||"")===String(user.id)||
+        String(x.away_manager_id||"")===String(user.id));
+      if(!matchup){
+        preview.innerHTML='<div class="rf-home-duel-placeholder"><strong>No head-to-head pairing this round</strong><small>Open Matchup for current round details.</small></div>';
+        return;
+      }
+      const home=String(matchup.home_manager_id||"")===String(user.id);
+      const opponentId=home?matchup.away_manager_id:matchup.home_manager_id;
+      const opponentType=home?matchup.away_manager_type:matchup.home_manager_type;
+      const managerName=(id,type)=>{
+        if(type==="bot")return (bots||[]).find(x=>String(x.id)===String(id))?.team_name||"Bot Manager";
+        return (members||[]).find(m=>String(m.user_id)===String(id))?.team_name||"Fantasy manager";
+      };
+      const mine=managerName(user.id,"human");
+      const opponent=opponentId?managerName(opponentId,opponentType):"BYE";
+      const score=home?matchup.home_score:matchup.away_score;
+      const opponentScore=home?matchup.away_score:matchup.home_score;
+      const scoreText=value=>value===null||value===undefined?"—":formatFantasyPoints(value);
+      const roundState=String(round.status||"upcoming").toUpperCase();
+      preview.innerHTML=`<div class="rf-home-duel-label"><span>${h(round.label||"Fantasy Round "+round.round_number)}</span><span>${h(roundState)}</span></div>
+        <div class="rf-home-duel-scores">
+          <div><small>YOU</small><strong>${h(mine)}</strong><b>${h(scoreText(score))}</b></div>
+          <span class="rf-home-duel-vs">VS</span>
+          <div><small>${opponentId?"OPPONENT":"BYE"}</small><strong>${h(opponent)}</strong><b>${opponentId?h(scoreText(opponentScore)):"—"}</b></div>
+        </div>`;
+    }catch{
+      preview.innerHTML='<div class="rf-home-duel-placeholder"><strong>Matchup details temporarily unavailable</strong><small>Your league is ready. Open Matchup to try again.</small></div>';
+    }
+  }catch{}
+};
+    void hydrateHomeLeague();
     const heroTitle=document.querySelector("#rfHeroTitle");
     const upcomingCompetition=proSchedule.map(localScheduleRow).find(row=>row.day!=="past"&&row.competition);
     if(heroTitle&&upcomingCompetition){
@@ -2506,17 +2595,23 @@ function render(view="home",options={}){
       return `${stat("kills")}/${stat("deaths")}/${stat("assists")} · ${Math.round(stat("cs"))} CS`;
     };
     const pairedPlayerCell=(item,side)=>{
-      if(!item)return `<div class="real-matchup-player ${side} empty"><strong>—</strong><small>No starter</small><span>0.00 FP</span></div>`;
-      const {player,score,state,locked}=item;
-      return `<div class="real-matchup-player ${side}">
-        <div class="real-matchup-player-name">
-          <strong>${h(player.name||item.roster.player_id)}</strong>
-          <span class="real-matchup-state ${state==="LIVE"?"live":state==="DATA DELAYED"?"delayed":""}">${locked?"🔒 ":""}${h(state)}</span>
-        </div>
-        <small>${h(player.team||"")}${score?.games?" · "+h(compactPlayerStats(score)):""}</small>
-        <span>${formatFantasyPoints(score?.total||0)} FP</span>
-      </div>`;
-    };
+  if(!item)return `<div class="real-matchup-player ${side} empty"><div class="rf-matchup-person"><span class="rf-matchup-portrait rf-matchup-portrait-empty" aria-hidden="true">—</span><div class="rf-matchup-identity"><strong>Open slot</strong><small>No starter</small></div></div><span class="rf-matchup-player-points">— FP</span></div>`;
+  const {player,score,state,locked}=item;
+  const picture=playerVisual(player);
+  const isLogo=playerVisualIsTeamLogo(player);
+  const portrait=picture?`<img src="${h(picture)}" class="${isLogo?"team-logo":"player-photo"}" alt="" loading="lazy" decoding="async" />`:h(String(player.name||"?").slice(0,2).toUpperCase());
+  const teamLogo=player?.teamLogo||player?.team_logo||"";
+  return `<div class="real-matchup-player ${side}">
+    <div class="rf-matchup-person">
+      <span class="rf-matchup-portrait ${picture?"":"no-photo"}" aria-hidden="true">${portrait}</span>
+      <div class="rf-matchup-identity"><strong>${h(player.name||item.roster.player_id)}</strong>
+        <small>${teamLogo&&teamLogo!==picture?`<img src="${h(teamLogo)}" alt="" loading="lazy" />`:""}${h(player.team||"Pro team")}</small>
+      </div>
+    </div>
+    <div class="rf-matchup-point-line"><strong class="rf-matchup-player-points">${formatFantasyPoints(score?.total||0)} <small>FP</small></strong><span class="real-matchup-state ${state==="LIVE"?"live":state==="DATA DELAYED"?"delayed":""}">${locked?"🔒 ":""}${h(state)}</span></div>
+    ${score?.games?`<small class="rf-matchup-kda">${h(compactPlayerStats(score))}</small>`:""}
+  </div>`;
+};
     const buildScoringEvents=(leagueId,roundNumber,leftLineup,rightLineup)=>{
       const cacheKey=String(leagueId)+":"+String(roundNumber);
       const current=new Map();
@@ -2812,24 +2907,23 @@ function render(view="home",options={}){
                   :"UPCOMING";
           const events=buildScoringEvents(leagueId,round.round_number,myLineup,opponentLineup);
 
-          board.innerHTML=`<div class="matchup-scoreboard real-matchup-scoreboard">
-              <div class="mine"><small>YOU</small><strong>${h(myName)}</strong><span>${formatFantasyPoints(myTotal)} FP</span></div>
-              <div class="matchup-versus"><span>${h(myResult)}</span><strong>VS</strong></div>
-              <div><small>OPPONENT</small><strong>${h(opponentName)}</strong><span>${formatFantasyPoints(opponentTotal)} FP</span></div>
-            </div>
-            <div class="real-matchup-board">
-              <div class="real-matchup-header">
-                <div><small>YOUR LINEUP</small><strong>${h(myName)}</strong></div>
-                <span>POSITION</span>
-                <div><small>OPPONENT</small><strong>${h(opponentName)}</strong></div>
-              </div>
-              ${matchupSlots.map(slot=>`<article class="real-matchup-row">
-                ${pairedPlayerCell(mySlots.get(slot),"mine")}
-                <div class="real-matchup-role">${h(slot)}</div>
-                ${pairedPlayerCell(opponentSlots.get(slot),"opponent")}
-              </article>`).join("")}
-            </div>
-            ${renderScoringFeed(events)}`;
+          board.innerHTML=`<div class="rf-matchup-hero-summary">
+    <div class="rf-matchup-hero-head"><span class="rf-matchup-kicker">HEAD TO HEAD · ${h(round.label||"FANTASY ROUND")}</span><span class="rf-matchup-result-pill ${myResult.startsWith("FINAL")?"final":""}">${h(myResult)}</span></div>
+    <div class="matchup-scoreboard real-matchup-scoreboard rf-matchup-hero-score ${myTotal>opponentTotal?"leading":myTotal<opponentTotal?"trailing":"tied"}">
+      <div class="mine"><small>YOUR FANTASY TEAM</small><strong>${h(myName)}</strong><span>${formatFantasyPoints(myTotal)} <small>FP</small></span></div>
+      <div class="matchup-versus"><span>${myResult.startsWith("FINAL")?"FINAL SCORE":"FANTASY POINTS"}</span><strong>VS</strong></div>
+      <div><small>OPPONENT</small><strong>${h(opponentName)}</strong><span>${formatFantasyPoints(opponentTotal)} <small>FP</small></span></div>
+    </div>
+    <div class="rf-matchup-hero-foot"><span>5 role matchups</span><span>Scores follow verified pro performances</span></div>
+  </div>
+  <div class="rf-matchup-roster-heading"><div><small>LINEUP COMPARISON</small><strong>Position by position</strong></div><span>5 starters per team</span></div>
+  <div class="real-matchup-board rf-premium-matchup-board">
+    <div class="real-matchup-header"><div><small>YOUR LINEUP</small><strong>${h(myName)}</strong></div><span>POSITION</span><div><small>OPPONENT</small><strong>${h(opponentName)}</strong></div></div>
+    ${matchupSlots.map(slot=>`<article class="real-matchup-row">
+      ${pairedPlayerCell(mySlots.get(slot),"mine")}<div class="real-matchup-role">${h(slot)}</div>${pairedPlayerCell(opponentSlots.get(slot),"opponent")}
+    </article>`).join("")}
+  </div>
+  ${renderScoringFeed(events)}`;
         }catch(err){
           board.innerHTML='<div class="empty-state"><strong>Could not load matchup</strong><small>'+h(err.message||"Try again later.")+'</small></div>';
         }

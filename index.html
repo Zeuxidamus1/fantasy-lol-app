@@ -377,6 +377,19 @@
 
   <template id="home-template">
     <section class="rf-home">
+      <section id="rfHomeLeagueHub" class="rf-home-league-hub" aria-label="Your fantasy league" hidden>
+        <div class="rf-home-league-top"><span class="rf-kicker">YOUR FANTASY LEAGUE</span><span id="rfHomeLeagueStatus" class="rf-home-league-pill">ACTIVE LEAGUE</span></div>
+        <div class="rf-home-league-heading">
+          <div><h2 id="rfHomeLeagueTitle">Your league</h2><p id="rfHomeLeagueDescription">Review your fantasy matchup and roster.</p></div>
+          <button type="button" class="rf-home-league-action" data-jump="matchup">View Matchup <span aria-hidden="true">→</span></button>
+        </div>
+        <div id="rfHomeMatchupPreview" class="rf-home-duel" aria-live="polite"></div>
+        <div class="rf-home-league-links">
+          <button type="button" data-jump="team">My Team</button>
+          <button type="button" data-jump="standings">Standings</button>
+          <button type="button" data-jump="schedule">Pro Schedule</button>
+        </div>
+      </section>
       <section class="rf-hero" aria-label="Esports tournaments">
         <div class="rf-hero-copy"><span class="rf-kicker">✦ PROFESSIONAL ESPORTS</span>
           <h2 id="rfHeroTitle">The Rift Awaits</h2>
@@ -394,8 +407,8 @@
       <section class="rf-home-section">
         <header class="rf-section-heading"><h3><span aria-hidden="true">ϟ</span> Quick Actions</h3></header>
         <div class="rf-quick-grid">
-          <button type="button" class="rf-quick rf-quick-create" data-jump="league"><span class="rf-action-icon">♧</span><span><strong>Create a League</strong><small>Start your fantasy league</small></span></button>
-          <button type="button" class="rf-quick rf-quick-join" data-jump="league"><span class="rf-action-icon">＋</span><span><strong>Join a League</strong><small>Connect with other managers</small></span></button>
+          <button type="button" class="rf-quick rf-quick-create" data-jump="create-league"><span class="rf-action-icon">♧</span><span><strong>Create a League</strong><small>Start your fantasy league</small></span></button>
+          <button type="button" class="rf-quick rf-quick-join" data-jump="join-league"><span class="rf-action-icon">＋</span><span><strong>Join a League</strong><small>Connect with other managers</small></span></button>
           <button type="button" class="rf-quick rf-quick-bracket" data-jump="schedule"><span class="rf-action-icon">♜</span><span><strong>View Bracket</strong><small>Follow tournament playoffs</small></span></button>
         </div>
       </section>
@@ -554,7 +567,7 @@
         </div>
       </section>
 
-      <section class="card" id="matchupMainCard">
+      <section class="card rf-matchup-main-card" id="matchupMainCard">
         <div id="matchupScoreList" class="fantasy-matchup-board">
           <div class="empty-state"><strong>Loading matchup…</strong><small>Syncing fantasy round, opponent, lineups, and scoring.</small></div>
         </div>
@@ -728,8 +741,9 @@
   </template>
 
   <template id="players-template">
-    <section class="stack">
+    <section class="stack rf-players-screen">
       <div class="section-title"><div><div class="eyebrow">PRO PLAYER DIRECTORY</div><h2>Players</h2></div></div>
+      <p class="rf-players-intro">Explore pro talent by role, compare organizations, and manage eligible fantasy players.</p>
       <label class="search"><span>⌕</span><input id="playerSearch" aria-label="Search players, teams or roles" placeholder="Search players, teams or roles" /></label>
       <div class="filter-row">
         <button class="chip active" data-role="ALL">All</button>
