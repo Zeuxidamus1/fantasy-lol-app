@@ -377,6 +377,23 @@
 
   <template id="home-template">
     <section class="rf-home">
+      <section class="rf-home-fantasy" id="homeFantasyDashboard" hidden aria-label="Your fantasy league">
+        <div class="rf-home-fantasy-top">
+          <div><span class="rf-home-eyebrow">YOUR FANTASY LEAGUE</span><h2 id="homeFantasyLeagueName">Your League</h2><small id="homeFantasyRoundLabel">Your next matchup</small></div>
+          <span id="homeFantasyStatus" class="rf-home-state">SEASON</span>
+        </div>
+        <div class="rf-home-fantasy-match">
+          <div class="rf-home-competitor"><small>YOUR TEAM</small><strong id="homeFantasyMyName">—</strong><span id="homeFantasyMyScore">—</span></div>
+          <div class="rf-home-vs">VS</div>
+          <div class="rf-home-competitor"><small>OPPONENT</small><strong id="homeFantasyOpponentName">—</strong><span id="homeFantasyOpponentScore">—</span></div>
+        </div>
+        <p id="homeFantasyMessage" class="rf-home-fantasy-message">Your league details are loading.</p>
+        <div class="rf-home-fantasy-links">
+          <button type="button" data-jump="matchup" class="rf-home-fantasy-primary">View Matchup <span aria-hidden="true">→</span></button>
+          <button type="button" data-jump="team" class="rf-home-fantasy-secondary">My Team</button>
+          <button type="button" data-jump="standings" class="rf-home-fantasy-secondary">Standings</button>
+        </div>
+      </section>
       <section class="rf-hero" aria-label="Esports tournaments">
         <div class="rf-hero-copy"><span class="rf-kicker">✦ PROFESSIONAL ESPORTS</span>
           <h2 id="rfHeroTitle">The Rift Awaits</h2>
@@ -394,8 +411,8 @@
       <section class="rf-home-section">
         <header class="rf-section-heading"><h3><span aria-hidden="true">ϟ</span> Quick Actions</h3></header>
         <div class="rf-quick-grid">
-          <button type="button" class="rf-quick rf-quick-create" data-jump="league"><span class="rf-action-icon">♧</span><span><strong>Create a League</strong><small>Start your fantasy league</small></span></button>
-          <button type="button" class="rf-quick rf-quick-join" data-jump="league"><span class="rf-action-icon">＋</span><span><strong>Join a League</strong><small>Connect with other managers</small></span></button>
+          <button type="button" class="rf-quick rf-quick-create" data-jump="create-league"><span class="rf-action-icon">♧</span><span><strong>Create a League</strong><small>Start your fantasy league</small></span></button>
+          <button type="button" class="rf-quick rf-quick-join" data-jump="join-league"><span class="rf-action-icon">＋</span><span><strong>Join a League</strong><small>Connect with other managers</small></span></button>
           <button type="button" class="rf-quick rf-quick-bracket" data-jump="schedule"><span class="rf-action-icon">♜</span><span><strong>View Bracket</strong><small>Follow tournament playoffs</small></span></button>
         </div>
       </section>
