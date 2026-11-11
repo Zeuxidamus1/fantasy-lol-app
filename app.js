@@ -1561,6 +1561,81 @@ function render(view="home",options={}){
     document.querySelector("#signOutBtn").onclick=async()=>{await b?.signOut?.();showToast("Signed out");render("login",{replace:true});};
   }
   if(view==="home"){
+    // Personalize the dashboard only when the signed-in manager has an actual league.
+    // All figures below come from existing league/round/matchup records.
+    const fantasyCard=document.querySelector("#homeFantasyDashboard");
+    if(fantasyCard&&cloudReady()&&getActiveLeagueId()){
+      (async()=>{
+        try{
+          const b=backend(),leagueId=getActiveLeagueId();
+          const [user,leagues,rounds]=await Promise.all([
+            b.currentUser(),b.listLeagues(),b.listFantasyRounds(leagueId)
+          ]);
+          if(currentView!=="home"||!user)return;
+          const league=leagues.find(l=>String(l.id)===String(leagueId));
+          if(!league)return;
+          const members=await b.listLeagueMembers(leagueId);
+          if(currentView!=="home")return;
+          const member=members.find(m=>String(m.user_id)===String(user.id));
+          if(!member)return;
+          fantasyCard.hidden=false;
+          const title=document.querySelector("#homeFantasyLeagueName");
+          const subtitle=document.querySelector("#homeFantasyRoundLabel");
+          const status=document.querySelector("#homeFantasyStatus");
+          const mine=document.querySelector("#homeFantasyMyName");
+          const opponent=document.querySelector("#homeFantasyOpponentName");
+          const myPoints=document.querySelector("#homeFantasyMyScore");
+          const opponentPoints=document.querySelector("#homeFantasyOpponentScore");
+          const message=document.querySelector("#homeFantasyMessage");
+          title.textContent=league.name||"My Fantasy League";
+          mine.textContent=member.team_name||"My Team";
+          const round=rounds.find(r=>r.status==="live")||rounds.find(r=>r.status==="upcoming")||rounds.at(-1);
+          status.textContent=league.status==="completed"?"COMPLETE":round?.status==="live"?"LIVE":league.status==="drafting"?"DRAFTING":"LEAGUE";
+          subtitle.textContent=round?(round.label||"Fantasy Round "+round.round_number):"Your league is getting ready";
+          if(!round){
+            opponent.textContent="Not paired yet";
+            message.textContent="Your league is ready to manage. Fantasy matchups appear once the schedule is published.";
+            return;
+          }
+          const matchups=await b.listLeagueMatchups(leagueId,round.round_number);
+          if(currentView!=="home")return;
+          const pairing=matchups.find(m=>String(m.home_manager_id||"")===String(user.id)||String(m.away_manager_id||"")===String(user.id));
+          if(!pairing){
+            opponent.textContent="Not paired yet";
+            message.textContent="No head-to-head opponent has been assigned for this scoring period.";
+            return;
+          }
+          const isHome=String(pairing.home_manager_id||"")===String(user.id);
+          const otherId=isHome?pairing.away_manager_id:pairing.home_manager_id;
+          const otherType=isHome?pairing.away_manager_type:pairing.home_manager_type;
+          if(!otherId){
+            opponent.textContent="BYE";
+            message.textContent="You have a fantasy bye this round. Your team is not eliminated.";
+            return;
+          }
+          const humanOpponent=members.find(m=>String(m.user_id)===String(otherId));
+          let otherName=humanOpponent?.team_name||"Opponent";
+          if(!humanOpponent&&otherType==="bot"){
+            const bots=await b.listLeagueBots(leagueId);
+            otherName=bots.find(m=>String(m.id)===String(otherId))?.team_name||"Bot Manager";
+          }
+          if(currentView!=="home")return;
+          opponent.textContent=otherName;
+          const myScore=isHome?pairing.home_score:pairing.away_score;
+          const otherScore=isHome?pairing.away_score:pairing.home_score;
+          // Upcoming scores are provisional and should never be presented as final results.
+          const scored=pairing.result==="live"||pairing.finalized_at||["home_win","away_win","tie"].includes(pairing.result);
+          myPoints.textContent=scored&&myScore!=null?formatFantasyPoints(myScore)+" FP":"—";
+          opponentPoints.textContent=scored&&otherScore!=null?formatFantasyPoints(otherScore)+" FP":"—";
+          message.textContent=pairing.finalized_at?"Final fantasy result. Review the round for player contributions.":
+            pairing.result==="live"?"Live fantasy scoring may change as verified game statistics arrive.":
+            "Upcoming head-to-head matchup. Scores appear when eligible professional matches begin.";
+        }catch{
+          // The esports news home remains fully functional if online league services fail.
+          fantasyCard.hidden=true;
+        }
+      })();
+    }
     const upcomingList=document.querySelector("#homeUpcomingMatches");
     const renderUpcoming=sourceRows=>{
       const rows=(sourceRows||[]).map(localScheduleRow).sort((a,b)=>{
