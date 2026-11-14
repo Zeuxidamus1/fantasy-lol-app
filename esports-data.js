@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-11-14T14:58:57.706Z",
+  "updatedAt": "2026-11-14T19:41:58.706Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "115660588583171786",
-      "eventId": "",
-      "competition": "worlds",
-      "competitionType": "international",
-      "startTime": "2026-10-15T18:00:00Z",
-      "league": "Worlds",
-      "leagueCode": "worlds",
-      "stage": "Play-Ins",
-      "aId": "111692118851466302",
-      "a": "Karmine Corp",
-      "aCode": "KC",
-      "bId": "98767991877340524",
-      "b": "Cloud9 Kia",
-      "bCode": "C9",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "115660588583040710",
       "eventId": "",
@@ -960,7 +941,7 @@ window.ESPORTS_DATA = {
       "bId": "99566404853854212",
       "b": "BILIBILI GAMING",
       "bCode": "BLG",
-      "status": "UNSTARTED",
+      "status": "INPROGRESS",
       "strategy": "bestOf",
       "count": 5
     }
