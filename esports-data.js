@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-11-14T19:41:58.706Z",
+  "updatedAt": "2026-11-14T23:23:08.157Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "115660588583040710",
-      "eventId": "",
-      "competition": "worlds",
-      "competitionType": "international",
-      "startTime": "2026-10-15T23:00:00Z",
-      "league": "Worlds",
-      "leagueCode": "worlds",
-      "stage": "Play-Ins",
-      "aId": "107251245690956393",
-      "a": "MVK Esports",
-      "aCode": "MVK",
-      "bId": "100205576309502431",
-      "b": "FURIA",
-      "bCode": "FUR",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "115660588583171790",
       "eventId": "",
