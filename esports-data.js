@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-11-15T17:13:45.519Z",
+  "updatedAt": "2026-11-15T21:51:28.349Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "115660588583171790",
-      "eventId": "",
-      "competition": "worlds",
-      "competitionType": "international",
-      "startTime": "2026-10-16T18:00:00Z",
-      "league": "Worlds",
-      "leagueCode": "worlds",
-      "stage": "Play-Ins",
-      "aId": "111692118851466302",
-      "a": "Karmine Corp",
-      "aCode": "KC",
-      "bId": "107251245690956393",
-      "b": "MVK Esports",
-      "bCode": "MVK",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "115660588583171794",
       "eventId": "",
