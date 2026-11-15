@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-11-14T23:23:08.157Z",
+  "updatedAt": "2026-11-15T02:55:07.085Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -922,7 +922,7 @@ window.ESPORTS_DATA = {
       "bId": "99566404853854212",
       "b": "BILIBILI GAMING",
       "bCode": "BLG",
-      "status": "INPROGRESS",
+      "status": "COMPLETED",
       "strategy": "bestOf",
       "count": 5
     }
