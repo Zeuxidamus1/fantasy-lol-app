@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-11-15T21:51:28.349Z",
+  "updatedAt": "2026-11-16T01:26:13.218Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -90,25 +90,6 @@ window.ESPORTS_DATA = {
     }
   ],
   "schedule": [
-    {
-      "matchId": "115660588583171794",
-      "eventId": "",
-      "competition": "worlds",
-      "competitionType": "international",
-      "startTime": "2026-10-16T23:00:00Z",
-      "league": "Worlds",
-      "leagueCode": "worlds",
-      "stage": "Play-Ins",
-      "aId": "100205576309502431",
-      "a": "FURIA",
-      "aCode": "FUR",
-      "bId": "98767991877340524",
-      "b": "Cloud9 Kia",
-      "bCode": "C9",
-      "status": "COMPLETED",
-      "strategy": "bestOf",
-      "count": 5
-    },
     {
       "matchId": "115660588583171798",
       "eventId": "",
