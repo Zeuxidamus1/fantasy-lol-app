@@ -1,5 +1,5 @@
 window.ESPORTS_DATA = {
-  "updatedAt": "2026-11-20T18:42:24.247Z",
+  "updatedAt": "2026-11-21T00:19:05.854Z",
   "sourceLabel": "LoL Esports",
   "dataMode": "live-refresh",
   "autoUpdated": true,
@@ -3505,8 +3505,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lpl",
       "competitions": [
         "lpl",
@@ -4667,8 +4667,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": false,
-      "rosterStatus": "reserve",
+      "draftable": true,
+      "rosterStatus": "starter",
       "league": "lpl",
       "competitions": [
         "lpl"
@@ -5694,8 +5694,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lpl",
       "competitions": [
         "lpl"
@@ -8524,8 +8524,8 @@ window.ESPORTS_DATA = {
       "projection": 20,
       "verified": true,
       "active": true,
-      "draftable": true,
-      "rosterStatus": "starter",
+      "draftable": false,
+      "rosterStatus": "reserve",
       "league": "lpl",
       "competitions": [
         "lpl",
